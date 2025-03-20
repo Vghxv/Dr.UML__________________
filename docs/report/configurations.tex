@@ -1,6 +1,9 @@
 \usepackage[english]{babel}
 \usepackage{CJKutf8}
-\title{\textbf{\textsf{Quiddity}}}
+\title{\textbf{\textsf{Dr. UML}}}
+
+% time table
+\usepackage{longtable}
 
 % math
 \usepackage{amsmath, amssymb}
@@ -8,6 +11,12 @@
 % references
 \usepackage[style=apa, backend=biber]{biblatex}
 \addbibresource{bibliography.bib}
+
+% SVG images
+\usepackage{svg}
+\usepackage{amsmath}
+\usepackage[inkscapelatex=false]{svg}
+
 
 % fonts
 \usepackage{helvet}
@@ -75,6 +84,15 @@
     {\expandafter\endcomment}%
 }
 
+
+\usepackage{changepage}
+% \usepackage{lipsum} % just for the example
+
+\newenvironment{subs}
+  {\adjustwidth{3em}{0pt}}
+  {\endadjustwidth}
+
+
 % Define a new environment for explanations
 \newcommand{\explanation}[1]{%
   \ifthenelse{\boolean{showexplanations}}%
@@ -100,7 +118,7 @@
                 CSIE IV 黃冠鈞 110590028\\
                 CSIE IV 張庭瑋 110590035\\
                 CSIE IV 吳宥駒 110590066\\
-                Homework \#1
+                Homework \#2
                 }
         \vfill 
     \end{titlepage}
