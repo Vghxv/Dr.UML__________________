@@ -1,14 +1,9 @@
-// organization[
-// label="Organization | { url | string } | {id | int} "
-// ]
-// repository -- user[label=stargazers taillabel=0 headlabel=N]
-
 graph GitHub {
   graph [
-  label = "Dr. UML"
+    label = "Dr. UML"
     rankdir = "TB"
   ]
-
+  
   node [
     shape = record
   ]
@@ -132,6 +127,7 @@ graph GitHub {
     headlabel = "*"
     taillabel = "1"
   ]
+
   Attribute -- TextStyle[
     label = "described by"
     headlabel = "1"
@@ -139,38 +135,3 @@ graph GitHub {
   ]
 
 }
-
-
-/*
-User
-UMLProject
-UMLDiagram
-Gadget
-Submodule
-Session
-Chatroom
-Message
-
-Association	Multiplicity	Attribute
-User manages UMLProject	1 to *	A user oversees multiple projects.✅
-UMLProject contains UMLDiagram	1 to *	A project includes several diagrams.
-UMLDiagram consists of Gadget	1 to *	A diagram is built from Gadgets.
-Submodule includes Gadget	1 to *	A submodule groups reusable Gadgets.
-User participates in Session	* to *	Users collaborate in sessions (with roles).
-Session edits UMLProject	1 to 1	A session targets one project.
-Session has Chatroom	1 to 1	Each session has one chatroom.
-Chatroom contains Message	1 to *	A chatroom stores multiple messages.
-User sends Message	1 to *	A user can send many messages.
-
-
-Class	Attributes
-User	userId: String, username: String
-UMLProject	projectId: String, name: String, createdDate: DateTime, lastModifiedDate: DateTime, owner: User
-UMLDiagram	diagramId: String, name: String, type: String
-Gadget	GadgetId: String, type: String, name: String, position: Point
-Submodule	submoduleId: String, name: String, Attribute: String, createdDate: DateTime
-Session	sessionId: String, project: UMLProject, host: User, startTime: DateTime, endTime: DateTime, status: String
-Chatroom	chatroomId: String, session: Session
-Message	messageId: String, sender: User, content: String, timestamp: DateTime
-
-
