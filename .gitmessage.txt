@@ -1,0 +1,12 @@
+# Commit Message Template
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+#
+# type: feat, fix, docs, style, refactor, perf, test, chore
+# scope: 影響的模組或功能 (例如 inventory, combat, npc)
+# subject: 簡短描述 (50 字內, 以動詞開頭)
+# body: 進一步描述修改內容、解決的問題或影響 (可選)
+# footer: BREAKING CHANGE 或 Fixes #issue_number (可選)
