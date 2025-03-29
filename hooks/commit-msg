@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+INPUT_FILE=$1
+COMMIT_MSG=$(cat "$INPUT_FILE")
+
+# 允許的 commit message 格式 (正則表達式)
+ALLOW_PATTERN="^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .{1,50}$"
+MERGE_PATTERN="^Merge branch '.*'$"
+
+# 若 commit message 為空，則拒絕提交
+if [ -z "$COMMIT_MSG" ]; then
+  echo "❌ Error: Commit message cannot be empty."
+  exit 1
+fi
+
+# 允許 Merge commit
+if [[ "$COMMIT_MSG" =~ $MERGE_PATTERN ]]; then
+  echo "✅ Merge commit detected, skipping validation."
+  exit 0
+fi
+
+# 檢查 commit message 是否符合規範
+if [[ "$COMMIT_MSG" =~ $ALLOW_PATTERN ]]; then
+  echo "✅ Commit message format is valid."
+  exit 0
+else
+  echo "❌ Error: Commit message format is invalid."
+  echo "Expected format: <type>(<scope>): <subject>"
+  echo "Example: feat(inventory): add new item sorting feature"
+  exit 1
+fi
