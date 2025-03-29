@@ -1,4 +1,4 @@
-graph GitHub {
+graph DrUML{
   graph [
     label = "Dr. UML"
     rankdir = "TB"
