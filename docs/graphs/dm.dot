@@ -1,0 +1,137 @@
+graph DrUML{
+  graph [
+    label = "Dr. UML"
+    rankdir = "TB"
+  ]
+  
+  node [
+    shape = record
+  ]
+
+
+  User[
+    label="{User | id: String | name: String}"
+  ]
+  UMLProject[
+    label="{UMLProject | id : String | name: String| lastEdit: DateTime}"
+  ]
+  UMLDiagram[
+    label="{UMLDiagram | filename: String | type: UMLType | backgroundColor: Color | lastEdit: DateTime}"
+  ]
+  Gadget[
+    label="{Gadget | id: String | type: GadgetType | color: Color | position: Point}"
+  ]
+  Association [
+    label="{Association | id: String | type: AssType | color: Color | position: Point}"
+  ]
+  Submodule[
+    label="{Submodule | id: String | name: String | Attribute: String | lastEdit: DateTime}"
+  ]
+  Session[
+    label="{Session | id: String | host: User | startTime: DateTime | status: String}"
+  ]
+  Chatroom[
+    label="{Chatroom}"
+  ]
+  Message[
+    label="{Message | id: String | sender: User | content: String | timestamp: DateTime}"
+  ]
+  Attribute [ 
+    label="{Attribute | id: String | content: String | position: Point }"
+  ]
+  TextStyle [
+    label="{TextStyle | font: filename | fontSize: int | isBold: Bool | isItalic: Bool | isUnderline: Bool}"
+  ]
+
+
+  User -- UMLProject[
+    label = "manages"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  UMLProject -- UMLDiagram[
+    label = "manages"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  UMLDiagram -- Gadget[
+    label = "consists of"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  Submodule -- Gadget[
+    label = "consists of"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  Gadget -- Attribute[
+    label = "contains"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  Association -- Attribute[
+    label = "contains"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  Gadget -- Association[
+    label = "Asscotiates"
+    headlabel = "*"
+    taillabel = "1..2"
+  ]
+
+  UMLDiagram -- Submodule[
+    label = "consists of"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  User -- Session [
+    label = "hosts"
+    headlabel = "1"
+    taillabel = "1"
+  ]
+
+  User -- Session [
+    label = "joins"
+    headlabel = "1"
+    taillabel = "*"
+  ]
+
+  Session -- UMLProject[
+    label = "connects"
+    headlabel = "1"
+    taillabel = "1"
+  ]
+
+  Session -- Chatroom[
+    label = "contains"
+    headlabel = "1"
+    taillabel = "1"
+  ]
+
+  Chatroom -- Message[
+    label = "contains"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  User -- Message[
+    label = "sends"
+    headlabel = "*"
+    taillabel = "1"
+  ]
+
+  Attribute -- TextStyle[
+    label = "described by"
+    headlabel = "1"
+    taillabel = "1"
+  ]
+
+}
