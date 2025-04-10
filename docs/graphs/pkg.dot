@@ -1,1 +1,49 @@
-// hw4
+digraph diagram {
+    compound = true;
+    ranksep = 1
+    node [shape = record]
+
+    subgraph cluster_all {
+    label = "Dr. UML"
+
+    subgraph cluster_presentation {
+    label = "User Interface"
+
+    node [shape = tab]
+    "GUI Application"
+
+    }
+
+    subgraph cluster_business {
+    shape = tab
+    label = "Domain Layer"
+    node [shape = tab]
+    "UML Project"
+    "UML Diagram"
+
+    subgraph cluster_colab {
+    label = "Colabration"
+    node [shape = tab]
+    "Session"
+    subgraph cluster_chatroom {
+    label = "Chatroom"
+    node [shape = tab]
+    "Message"
+    }
+    }
+    }
+    "GUI Application" -> "UML Diagram" [lhead = cluster_business]
+
+    //    "Presentation Logic" -> "UML Diagram" [lhead = cluster_business]
+
+    subgraph cluster_tech {
+    shape = tab
+    label = "Technical Service"
+    node [shape = tab]
+    "Logging"
+    "File"
+    }
+    //    "UML Project" -> ""
+    }
+
+}
