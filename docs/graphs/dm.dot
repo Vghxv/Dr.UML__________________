@@ -17,6 +17,7 @@ graph DrUML {
     
     User -- UMLProject [label = "manages"; headlabel = "*"; taillabel = "1";];
     UMLProject -- UMLDiagram [label = "manages"; headlabel = "*"; taillabel = "1";];
+    UMLProject -- Submodule [label = "imports"; headlabel = "*"; taillabel = "1";];
     UMLDiagram -- Gadget [label = "consists of"; headlabel = "*"; taillabel = "1";];
     Submodule -- Gadget [label = "consists of"; headlabel = "*"; taillabel = "1";];
     Gadget -- Attribute [label = "contains"; headlabel = "*"; taillabel = "1";];
