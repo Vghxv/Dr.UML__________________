@@ -1,0 +1,13 @@
+Create a UML Diagram instance
+
+@startuml
+
+    ":UMLProject" -> "activeDiagrams\n:UMLDiagram": createDiagram(diagramName)
+    note right ":UMLProject": createDiagram() creates a new diagram under the project.
+
+    "activeDiagrams\n:UMLDiagram" -> "activeDiagrams\n:UMLDiagram": setActiveComponents(null)
+    note right
+        The array activeComponents consists of all selected Components.
+    end note
+
+@endtuml
