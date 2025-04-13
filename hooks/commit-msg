@@ -4,7 +4,7 @@ INPUT_FILE=$1
 COMMIT_MSG=$(cat "$INPUT_FILE")
 
 # 允許的 commit message 格式 (正則表達式)
-ALLOW_PATTERN="^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .{1,50}$"
+ALLOW_PATTERN="^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .{1,75}$"
 MERGE_PATTERN="^Merge branch '.*'$"
 
 # 若 commit message 為空，則拒絕提交
