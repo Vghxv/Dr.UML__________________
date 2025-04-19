@@ -1,13 +1,111 @@
-Create a UML Diagram instance
-
 @startuml
+hide circle
+hide method
+'hide attribute
 
-    ":UMLProject" -> "activeDiagrams\n:UMLDiagram": createDiagram(diagramName)
-    note right ":UMLProject": createDiagram() creates a new diagram under the project.
+    object User {
+        id
+        name
+    }
 
-    "activeDiagrams\n:UMLDiagram" -> "activeDiagrams\n:UMLDiagram": setActiveComponents(null)
-    note right
-        The array activeComponents consists of all selected Components.
-    end note
+    object UMLProject {
+        id
+        name
+        lastEdit
+    }
+
+    object UMLDiagram {
+        filename
+        type
+        backgoundColor
+        lastEdit
+    }
+
+    object Gadget {
+        id
+        type
+        color
+        position
+        zIndex
+    }
+
+    object Association {
+        id
+        type
+        color
+        position
+        zIndex
+    }
+
+    object Submodule {
+        id
+        name
+        Attribute
+        lastEdit
+    }
+
+    object Session {
+        id
+        host
+        startTime
+        status
+    }
+
+    object Chatroom {
+
+    }
+
+    object Message {
+        id
+        sender
+        content
+        timestamp
+    }
+
+    object Attribute {
+        id
+        content
+        position
+    }
+
+    object TextStyle {
+        font
+        fontsize
+        isBold
+        isItalic
+        hasUnderline
+    }
+
+    object Timer {
+        whenToTimeout
+    }
+
+    object Verifier {
+        type
+        status
+    }
+
+
+    User "1" -- "*" UMLProject : manages
+    UMLProject "1" -- "*" UMLDiagram : manages
+    UMLDiagram "1" -- "*" Gadget : consists of
+    Submodule "1" -- "*" Gadget : consists of
+    Gadget "1" -- "*" Attribute : contains
+    Association  "1" -- "*" Attribute : contains
+    Gadget "1...2" -- "*" Association : Asscotiates
+    UMLProject  "1" -- "*" Submodule : knows
+    User "1" -- "1" Session : hosts
+    User  "*" -- "1" Session : joins
+    Session "1" -- "1" UMLProject : connects to
+    Session "1" -- "1" Chatroom : contains
+    Chatroom "1" -- "*" Message : contains
+    User "1" -- "*" Message : sends
+    TextStyle "1" -- "1" Attribute : describes
+    UMLProject "1" -- "1" Timer : inqures
+    Session "1" -- "1" Timer : inqures
+    Message "1" -- "1" Timer : inqures
+    Verifier "1" -- "1" UMLDiagram : checks
+
+
 
 @endtuml

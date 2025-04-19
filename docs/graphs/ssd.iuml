@@ -1,0 +1,407 @@
+@startuml
+autonumber
+group#gold #white openProject
+    autoactivate on
+    participant ":UI"
+    participant ":UMLProject"
+    
+    ":UI" -> ":UMLProject": openProject()
+
+    ":UMLProject" -> ":UMLProject": getAvailableDiagrams()
+    note right of ":UMLProject": getAvailableDiagrams() returns a list of all diagrams in the project.
+    return diagrams
+
+
+    ":UMLProject" -> ":UMLProject": getLastOpenedDiagrams()
+    note right of ":UMLProject": getLastOpenedDiagrams() returns a list of all diagrams that were opened last time
+    return lastOpenedDiagrams
+
+    loop#gold #white diagramName in lastOpenedDiagrams
+        ":UMLProject" --> ":UMLDiagram" ** : diagram = createDiagram(diagramName)
+        note right of ":UMLProject": createDiagram(path) creates a new instance of the diagram and load the diagram info at path
+        participant "activeDiagrams\n:[]UMLDiagram"
+        ":UMLProject" -> "activeDiagrams\n:[]UMLDiagram": add(diagram)
+        return
+    end
+    return lastOpenedDiagrams, diagrams
+    
+end
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white selectDiagram
+    ":UI" -> ":UMLProject": selectDiagram(diagramName)
+    opt#gold #white diagramName not in activeDiagrams
+        ":UMLProject" --> ":UMLDiagram" ** : diagram = createDiagram(diagramName)"
+        participant "activeDiagrams\n:[]UMLDiagram"
+        ":UMLProject" -> "activeDiagrams\n:[]UMLDiagram": add(diagram)
+        return
+    end
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram" : setcurrentDiagram(diagramName)
+    return 
+    return
+end selectDiagram
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white addGadgetToDiagram
+    ":UI" -> ":UMLProject": addGadget(gadgetType, position)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": addGadget(gadgetType, position)
+    
+    "currentDiagram\n:*UMLDiagram" -> ":Components"  : addGadget(gadgetType, position)
+    note over ":Components": add either a gadget or an association to the diagram
+    ":Components"  --> "gadget:Gadget" **  : newGadget = create(gadgetType, position)
+    ":Components" -> "components:\n:[]Component": add(gadget)
+    return
+    return
+    return
+    return
+end addGadgetToDiagram
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white addAssociationToDiagram
+    ":UI" -> ":UMLProject": addAssociation(AssociationType)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": addAssociation(AssociationType)
+    "currentDiagram\n:*UMLDiagram" -> ":Components": addAssociation(AssociationType)
+    participant ":Components"
+    note over ":Components": add either a gadget or an association to the diagram
+    ":Components" --> ":Association" **: newAss = create(AssociationType, parents)
+    ":Components" -> "compoents:\n:[]Component": add(newAss)
+    note over ":Association": parents are from selected components\ncreate an association between two parents
+    return
+    return
+    return
+    return
+end addAssociationToDiagram
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white selectComponent
+    ":UI" -> ":UMLProject": selectComponent(mousePos)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": selectComponent(mousePos)
+    "currentDiagram\n:*UMLDiagram" -> ":Components": selectComponent(mousePos)
+    loop#gold #white component cover mousePos
+        ":Components" -> "SelectedComponents\n:[](*Component)": add(&component)
+        note over "SelectedComponents\n:[](*Component)": add component into list of selected components pointer
+        return
+    end loop
+    return
+    return
+    return
+end selectComponent
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white unselectComponent
+    ":UI" -> ":UMLProject": unselectComponent(mousePos)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": unselectComponent(mousePos)
+    "currentDiagram\n:*UMLDiagram" -> ":Components": unselectComponent(mousePos)
+    loop#gold #white component cover mousePos
+        ":Components" -> "SelectedComponents\n:[](*Component)": remove(&component)
+        return
+    end loop
+    return
+    return
+    return
+end unselectComponent
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white unselectAllComponents
+    ":UI" -> ":UMLProject": unselectAllComponents()
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": unselectAllComponents()
+    "currentDiagram\n:*UMLDiagram" -> ":Components": unselectAllComponents()
+    ":Components" -> "SelectedComponents\n:[](*Component)": clear()
+    return
+    return
+    return
+    return
+end unselectAll
+@enduml
+
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white copyComponents
+    ":UI" -> ":UMLProject": CopyComponents()
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": ExportSubmodule("clipboard")
+    "currentDiagram\n:*UMLDiagram" -> ":Components": ExportSubmodule("clipboard")
+    ":Components" -> ":Components": exportCompoents = getExportComponents()
+    ":Components" -> ":Submodule":  <<static>>\nExportSubmodule("clipboard", exportCompoents)
+    return
+    return
+    return
+    return
+    return
+    note over "currentDiagram\n:*UMLDiagram": clipboard is a special submodule containing the components user copied
+end copyComponents
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white pasteComponents
+    ":UI" -> ":UMLProject": PasteComponents(position)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": ImportSubmodule("clipboard", position)
+    "currentDiagram\n:*UMLDiagram" -> ":Components": ImportSubmodule("clipboard", position)
+    ":Components" -> ":Submodule":  <<static>>\nimportCompents = ImportSubmodule("clipboard")
+    return
+    loop#gold #white component in importComponents
+        ":Components" -> "compoents:\n:[]Component": add(component)
+        return
+    end
+    return
+    return
+    return
+end pasteComponents
+@enduml
+
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white importSubmoudle
+    ":UI" -> ":UMLProject": importSubmoudle(submoduleName, position)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": ImportSubmodule(submoduleName, position)
+    "currentDiagram\n:*UMLDiagram" -> ":Components": ImportSubmodule(submoduleName, position)
+    ":Components" -> ":Submodule":  <<static>>\nimportCompents = ImportSubmodule(submoduleName)
+    return
+    loop#gold #white component in importComponents
+        ":Components" -> "compoents:\n:[]Component": add(component)
+        return
+    end
+    return
+    return
+    return
+end importSubmoudle
+@enduml
+
+
+@startuml
+autonumber
+group#gold #white editAttributeContent
+    ":UI" -> ":Databinder": editProperity(name, value)
+    ":Databinder" ->  ":Databinder" : theRightFunc(name, value)
+    ":Databinder" -> ":Databinder": NotifySubscribers()
+end editAttributeContent
+@enduml
+
+
+' @startuml
+' autonumber
+' autoactivate on
+' group#gold #white editAttributePosition
+'     ":UI" -> ":UMLProject": editAttributePosition(newValue)
+'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editAttributePosition(newValue)
+'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editAttributePosition(newValue)
+
+'     "Databinder" -> ":UI" : OnChange(event)
+' end editAttributePosition
+' @enduml
+
+
+' @startuml
+' autonumber
+' group#gold #white editTextStyle
+'     ":UI" -> ":UMLProject": editStyle(newValue)
+'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editStyle(newValue)
+'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editStyle(newValue)
+'     "Databinder" -> ":UI" : OnChange(event)
+' end editTextStyle
+' @enduml
+
+
+' @startuml
+' autonumber
+' group#gold #white editComponentColor
+'     ":UI" -> ":UMLProject": editComponentColor(newValue)
+'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editComponentColor(newValue)
+'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editComponentColor(newValue)
+'     "Databinder" -> ":UI" : OnChange(event)
+' end editComponentColor
+' @enduml
+
+
+' @startuml
+' autonumber
+' group#gold #white editComponentZIndex
+'     ":UI" -> ":UMLProject": editComponentZIndex(newValue)
+'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editComponentZIndex(newValue)
+'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editComponentZIndex(newValue)
+'     "Databinder" -> ":UI" : OnChange(event)
+' end editComponentZIndex
+' @enduml
+
+
+@startuml
+autonumber
+group#gold #white PasteComponent
+    ":UI" -> ":UMLProject": pasteComponent()
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": pasteComponent()
+    "currentDiagram\n:*UMLDiagram" -> ":Components": pasteComponent()
+    ":Components" -> ":Gadget": create(gadgetType, position)
+end PasteComponent
+@enduml
+
+
+@startuml
+autonumber
+group#gold #white autoScale
+    ":Component" -> ":Component": updateScale()
+end autoScale
+@enduml
+
+
+@startuml 
+/'undo'/
+autoactivate on
+group#gold #white undo
+    ":UI" -> ":UMLProject" : undo()
+    ":UMLProject" -> "currentDiagram:UMLDiagram" : undo()
+    note right 
+    UMLDiagram::undo() {
+        if (undoDeque.size() > 0) {
+            auto& step = undoDeque.top();
+            this->doCommand(step, reverse=true);
+            undoDeque.pop();
+            redoDeque.push(step);
+        }
+    }
+    end note
+    return
+    return
+end undo
+
+@enduml
+
+@startuml 
+/'redo'/
+autoactivate on
+group#gold #white redo
+    ":UI" -> ":UMLProject" : redo()
+    ":UMLProject" -> "currentDiagram:UMLDiagram" : redo()
+    note right 
+    UMLDiagram::undo() {
+        if (redoDeque.size() > 0) {
+            auto& step = redoDeque.top();
+            this->doCommand(step, reverse=false);
+            redoDeque.pop();
+            undoDeque.push(step);
+        }
+    }
+    end note
+    return
+    return
+end undo
+@enduml
+
+@startuml
+autonumber
+autoactivate on
+group#gold #white editAssociationTextFieldst
+    ":UI" -> ":UMLProject": selectComponent(mousePos, action)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": selectComponent(mousePos)
+    "currentDiagram\n:*UMLDiagram" -> ":Components": selectComponent(mousePos)
+    return
+    return
+    return
+
+    ":UI" -> ":UMLProject" : editAssociation(action)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram" : editAssociation(action)
+
+
+    alt action = AssociationAction::AddTextField
+        "currentDiagram\n:*UMLDiagram" -> ":Components": addTextField(componentId, fieldType)
+        return
+
+    else action = AssciationAction::RemoveTextField
+        autonumber 9
+        "currentDiagram\n:*UMLDiagram" -> ":Components": removeTextField(componentId, fieldId)
+        return
+
+    else action = AssciationAction::Move TextField
+        autonumber 9
+        "currentDiagram\n:*UMLDiagram" -> ":Components": moveTextField(componentId, fieldId, newIndex)
+        return
+    end alt
+    return
+    return
+
+end editAssociationTextFields
+@enduml
+
+@startuml
+autonumber
+group#gold #white autoAdjustAssociationPathsWhenMultipleExist
+    ":UI" -> ":UMLProject": addAssociation(AssociationType)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": addAssociation(AssociationType)
+    create ":Components"
+    "currentDiagram\n:*UMLDiagram" -> ":Components": addAssociation(AssociationType)
+    create ":Association"
+    ":Components" -> ":Association": create(AssociationType, parents)
+    ":Components" -> ":Components": autoAdjustAssociationPaths()
+end autoAdjustAssociationPathsWhenMultipleExist
+@enduml
+
+
+@startuml
+autonumber
+group#gold @white deleteComponent
+    ":UI" -> ":UMLProject": deleteComponent()
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": deleteComponent()
+    "currentDiagram\n:*UMLDiagram" -> ":Components": deleteComponent()
+    ":Components" -> ":Components": findAssociationsLinkedTo()
+    loop#gold #white association in linkedAssociations
+        ":Components" -> ":Association": delete()
+    end
+    ":Components" -> ":Components": deleteGadgets()
+end deleteComponent
+@enduml
+
+
+' ✅*a revert when system fail.
+' ✅*b edit text
+' ✅*c select gadgets
+' ❌need help❕–*d When User drags Gadget with multiple Associations, System will automatically arrange them
+' ✅*e copy and paste Components (also include affected Gadgets)
+' ✅*f undo redo
+' ❌1.a Gadget cannot move to invalid location
+' ✅1.b import Submodule from Project.
+' ✅2.a Different types of Gadgets will have distinct Fields available for editing.
+' ✅– 2.b automatically scale
+' ❌– 2.c edit color of a Gadget
+' ❌– 2.d move the Gadget
+'✅3.b deleting Gadget also remove its ass
+' will be shown in class diagram❕3.c Self-Associations are allowed.
+' ❌4.a User may change the type of Association.
+' ✅4.b User may add, remove, and move text Fields in Association.
+' ✅4.d When multiple Associations are created between two Gadgets, System will automatically distinguish the different paths to prevent overlap.
+' ❌4.e User can modify the path of an Association
+
+' note for class diagram
+' show component (interface)
+' show self association
+
+' TODO: add update properties functions
