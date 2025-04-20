@@ -57,11 +57,11 @@ end selectDiagram
 autonumber
 autoactivate on
 group#gold #white addGadgetToDiagram
-   ":UI" -> ":UMLProject": addGadget(gadgetType, point)
+   ":UI" -> ":UMLProject": addGadget(type, point)
     note right of ":UI" #red: by Controller
-        ":UMLProject" -> "currentDiagram\n:*UMLDiagram"  : addGadget(gadgetType, point)
-           "currentDiagram\n:*UMLDiagram" -> ":Components"  : addGadget(gadgetType, point)
-                ":Components"  --> "gadget:Gadget" **  : createGadget(gadgetType, point)
+        ":UMLProject" -> "currentDiagram\n:*UMLDiagram"  : addGadget(type, point)
+           "currentDiagram\n:*UMLDiagram" -> ":Components"  : addGadget(type, point)
+                ":Components"  --> "gadget:Gadget" **  : createGadget(type, point)
                 note right of ":Components" #red: by Creator
                 ":Components" -> ":Components": components = append(components, gadget)
                 note right of ":Components": append is a built-in function
@@ -77,24 +77,61 @@ end addGadgetToDiagram
 autonumber
 autoactivate on
 group#gold #white addAssociationToDiagram
-    ":UI" -> ":UMLProject": addAssociation(type, point)
-    note right of ":UI" #red: by Controller
-    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": addAssociation(type, point)
-    "currentDiagram\n:*UMLDiagram" -> ":Components"  : addAssociation(type, point)
-    ":Components"  --> "ass:Association" ** : createAssociation(type, point)
-    /'createAssociation'/
-    note right of ":Components" #red: by Creator
-    ":Components" -> ":Components" : adjustAssociationPath(*association)
-    note right of ":Components": adjust the pathing of newly created association to prevent overlapping
+":UI" -> ":UMLProject": startAddAssociation(point)
+note right of ":UI" #red: by Controller
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": startAddAssociation(point)
+        "currentDiagram\n:*UMLDiagram" -> "currentDiagram\n:*UMLDiagram": startPoint = point
+        return
     return
-    ":Components" -> ":Components": components = append(components, ass)
-    note right of ":Components": append is a built-in function
+return
+...
+":UI" -> ":UMLProject": endAddAssociation(type, point)
+    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": endAddAssociation(type, point)
+        "currentDiagram\n:*UMLDiagram" -> ":Components": addAssociation(type, startPoint, point)
+            ":Components" -> ":Components": parents = [findGadget(startPoint), findGadget(point)]
+            return
+            
+            opt#gold #white both parents are not null
+                ":Components" --> "ass:Association" ** : createAssociation(type, parents)
+                note right of ":Components" #red: by Creator
+                
+                ":Components" -> ":Components" : adjustAssociationPath(*association)
+                note right of ":Components": adjust the pathing of newly created association to prevent overlapping
+                return 
+
+                ":Components" -> ":Components": components = append(components, ass)
+                note right of ":Components": append is a built-in function
+                return
+            end
+        return
     return
-    return
-    return
-    return
-end assAssoiationToDiagram
+return
+end addAssociationToDiagram
 @enduml
+
+' ORIGINAL ADD ASS
+' @startuml
+' autonumber
+' autoactivate on
+' group#gold #white addAssociationToDiagram
+'     ":UI" -> ":UMLProject": addAssociation(type, point)
+'     note right of ":UI" #red: by Controller
+'     ":UMLProject" -> "currentDiagram\n:*UMLDiagram": addAssociation(type, point)
+'     "currentDiagram\n:*UMLDiagram" -> ":Components"  : addAssociation(type, point)
+'     ":Components"  --> "ass:Association" ** : createAssociation(type, point)
+'     /'createAssociation'/
+'     note right of ":Components" #red: by Creator
+'     ":Components" -> ":Components" : adjustAssociationPath(*association)
+'     note right of ":Components": adjust the pathing of newly created association to prevent overlapping
+'     return
+'     ":Components" -> ":Components": components = append(components, ass)
+'     note right of ":Components": append is a built-in function
+'     return
+'     return
+'     return
+'     return
+' end assAssoiationToDiagram
+' @enduml
 
 
 @startuml
@@ -239,51 +276,6 @@ autonumber
 autoactivate on
 group#gold #white updateProperty
     ":UI" -> ":propertyManager": updateProperty(name, value)
-autonumber
-autoactivate on
-group#gold #white moveComponent
-
-":UI" -> ":UMLProject" : startDragging(point)
-note right of ":UI" #red: by Controller
-":UMLProject" -> "currentDiagram:*UMLDiagram" : startDragging(point)
-"currentDiagram:*UMLDiagram" -> ":Components" : isSelectedComponentsEmpty()
-return
-opt !isSelectedEmpty
-"currentDiagram:*UMLDiagram" -> "currentDiagram:*UMLDiagram" : setStartPoint(point)
-return
-return
-return
-end opt
-return
-return
-return
-...
-":UI" ->":UMLProject" : stopMovingComponent(point)
-note right of ":UI" #red: by Controller
-":UMLProject" -> "currentDiagram:*UMLDiagram" : stopDragging(point)
-"currentDiagram:*UMLDiagram" -> ":Components" : isSelectedComponentsEmpty()
-return
-opt !isSelectedEmpty
-"currentDiagram:*UMLDiagram" ->"currentDiagram:*UMLDiagram" : delta = getDelta(point)
-return
-"currentDiagram:*UMLDiagram" -> "currentDiagram:*UMLDiagram" : clearStartPoint()
-return
-"currentDiagram:*UMLDiagram" -> ":Components" : moveSelectedComponent(delta)
-loop#gold component in Components::selectedComponents
-    ":Components" -> "component:Component" : moveDelta(delta)
-    note over ":Components" , "component:Component"
-        For a gadget, This function simply moves its position by
-         (deltaX, deltaY), while an associate one also reroutes
-         with some cool(or lame) algorithm.
-    end note
-    return
-end loop
-return
-return
-end opt
-return
-end moveComponent
-@enduml
     ":propertyManager" -> ":propertyManager" : update(name, value)
     return
     return
@@ -357,7 +349,6 @@ group#gold #white deleteComponent
         ":Components" -> ":Components": delete(component)
         return
     end
-
     return
     return
     return
@@ -372,39 +363,52 @@ group#gold #white moveComponent
 
 ":UI" -> ":UMLProject" : startDragging(point)
 note right of ":UI" #red: by Controller
-":UMLProject" -> "currentDiagram:*ULDiagram" : startDragging(point)
-"currentDiagram:*ULDiagram" -> ":Components" : isSelectedComponentsEmpty()
-return
-opt !isSelectedEmpty
-"currentDiagram:*ULDiagram" -> "currentDiagram:*ULDiagram" : setStartPoint(point)
-return
-return
-end opt
+    ":UMLProject" -> "currentDiagram:*UMLDiagram" : startDragging(point)
+        "currentDiagram:*UMLDiagram" -> "currentDiagram:*UMLDiagram" : moveStartPoint = point
+        return
+        ' "currentDiagram:*UMLDiagram" -> ":Components" : isSelectedComponentsEmpty()
+        ' return
+        ' opt !isSelectedEmpty
+        '     "currentDiagram:*UMLDiagram" -> "currentDiagram:*UMLDiagram" : moveStartPoint = point
+        '     return
+        ' end opt
+    return
 return
 ...
+
 ":UI" ->":UMLProject" : stopDragging(point)
 note right of ":UI" #red: by Controller
-":UMLProject" -> "currentDiagram:*ULDiagram" : stopDragging(point)
-"currentDiagram:*ULDiagram" -> ":Components" : isSelectedComponentsEmpty()
-return
-opt !isSelectedEmpty
-"currentDiagram:*ULDiagram" ->"currentDiagram:*ULDiagram" : delta = getDelta(point)
-return
-"currentDiagram:*ULDiagram" -> "currentDiagram:*ULDiagram" : clearStartPoint()
-return
-"currentDiagram:*ULDiagram" -> ":Components" : moveSelectedComponent(delta)
-loop#gold component in Components::selectedComponents
-    ":Components" -> "component:Component" : moveDelta(delta)
-    note over ":Components" , "component:Component"
-        For a gadget, This function simply moves its position by
-         (deltaX, deltaY), while an associate one also reroutes
-         with some cool(or lame) algorithm.
-    end note
+    ":UMLProject" -> "currentDiagram:*UMLDiagram" : stopDragging(point)
+        "currentDiagram:*UMLDiagram" -> ":Components" : moveSelectedComponents(point - moveStartPoint)
+            loop#gold component in selectedComponents
+                opt#gold #white component is a gadget
+                    ":Components" -> "component:Component" : moveDelta(delta)
+                    note over ":Components" , "component:Component"
+                    (04/21/2025 01:07) 
+                    For a gadget, move it by delta.
+                    For an association, it will automatically reroute if either of parents is moved.
+                    (By subscribing to the events of its connected gadgets)
+                    end note
+                    return
+                end
+            end loop
+        return
+        "currentDiagram:*UMLDiagram" -> "currentDiagram:*UMLDiagram": moveStartPoint = 0
+        return
+        ' opt at least one component selected
+        '     "currentDiagram:*UMLDiagram" -> ":Components" : moveSelectedComponents(point - moveStartPoint)
+        '         loop#gold component in Components::selectedComponents
+        '             ":Components" -> "component:Component" : moveDelta(delta)
+        '             note over ":Components" , "component:Component"
+        '             For a gadget, This function simply moves its position by
+        '             (deltaX, deltaY), while an associate one also reroutes
+        '             with some cool(or lame) algorithm.
+        '             end note
+        '             return
+        '         end loop
+        '     return
+        ' end opt
     return
-end loop
-return
-return
-end opt
 return
 end moveComponent
 @enduml

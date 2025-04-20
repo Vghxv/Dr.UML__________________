@@ -33,7 +33,8 @@ class UMLProject{
     +selectDiagram(diagramName: String): void
     +createDiagram(diagramName: String): void
     +addGadget(type: gadgetType, point: Point): void
-    +addAssociation(type: associationType, point: Point): void
+    +startAddAssociation(point: Point): void
+    +endAddAssociation(type: associationType, point: Point): void
     +selectComponent(point: Point): void
 }
 
@@ -42,8 +43,11 @@ class UMLDiagram{
     -type: String
     -backgroundColor: Color
     -lastModified: Date
+    -startPoint: Point
     +addGadget(type: gadgetType, point: Point): void
-    +addAssociation(type: associationType, point: Point): void
+    +startAddAssociation(point: Point): void
+    +endAddAssociation(type: associationType, point: Point): void
+
     +selectComponent(point: Point): void
 }
 
@@ -55,9 +59,12 @@ Interface Componenet {
 class Components {
     #components: List<Component>
     #selectedComponents: List<*Component>
-    ++moveSelectedComponent(delta: Point): void
-    +createGadget(type: gadgetType, point: Point): void
-    +createAssociation(type: associationType, point: Point): void
+    +moveSelectedComponent(delta: Point): void
+    +addGadget(gadgetType, point): void
+    +addAssociation(type: associationType, startPoint: Point, endPoint: Point): void
+    -createGadget(type: gadgetType, point: Point): void
+    -createAssociation(type: associationType, parents: Pair<*Gadget, *Gadget>): void
+    -findGadget(point: Point): *Gadget
     -adjustAssociationPath(association: *Association): void
 }
 
@@ -69,17 +76,19 @@ class Gadget{
     #scale: double
     
 }
+' TODO: add constructor?
 
 class Association{
     #type: String
     #point: Point
     #textFields: List<TextField>
-    #parent: Pair<Gadget, Gadget>
+    #parent: Pair<*Gadget, *Gadget>
     +addTextField(fieldType: String): void
     +removeTextField(fieldId: String): void
     +moveTextField(fieldId: String, newIndex: int): void
     +getPoint(): Point
 }
+' TODO: add constructor?
 
 class Submodule{
     +{static} exportSubmodule(target: String, components: List<Component>): void
