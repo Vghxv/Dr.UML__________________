@@ -46,21 +46,28 @@ group#gold #white selectDiagram
 end selectDiagram
 @enduml
 
-
 @startuml
 autonumber
 autoactivate on
 group#gold #white addGadgetToDiagram
-    ":UI" -> ":UMLProject": addGadget(gadgetType, position)
-    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": addGadget(gadgetType, position)
-    
-    "currentDiagram\n:*UMLDiagram" -> ":Components"  : addGadget(gadgetType, position)
-    note over ":Components": add either a gadget or an association to the diagram
-    ":Components"  --> "gadget:Gadget" **  : newGadget = create(gadgetType, position)
-    ":Components" -> "components:\n:[]Component": add(gadget)
-    return
-    return
-    return
+   ":UI" -> ":UMLProject": addGadget(gadgetType, position)
+    ":UMLProject" --> "command:AddGadgetCommand" ** : create(type, position)
+        ":UMLProject" -> ":UMLProject": setCommand(command)
+        note over ":UMLProject"
+            UMLProject::command is mutex-protected.
+        end note
+        return
+        ":UMLProject" -> "currentDiagram\n:*UMLDiagram" : runCommand(command)
+            "currentDiagram\n:*UMLDiagram" -> "undoDeque\n:[]Deque" : push(command)
+            return
+            "currentDiagram\n:*UMLDiagram" -> ":Components"  : addGadget(command.type, command.position)
+            ":Components"  --> "gadget:Gadget" **  : create(gadgetType, position)
+            ":Components" -> "components:\n:[]Component": add(gadget)
+                return
+            return
+        ":UMLProject" -> ":UMLProject" : clearCommand()
+        return
+        return
     return
 end addGadgetToDiagram
 @enduml
@@ -70,17 +77,22 @@ end addGadgetToDiagram
 autonumber
 autoactivate on
 group#gold #white addAssociationToDiagram
-    ":UI" -> ":UMLProject": addAssociation(AssociationType)
-    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": addAssociation(AssociationType)
-    "currentDiagram\n:*UMLDiagram" -> ":Components": addAssociation(AssociationType)
-    participant ":Components"
-    note over ":Components": add either a gadget or an association to the diagram
-    ":Components" --> ":Association" **: newAss = create(AssociationType, parents)
-    ":Components" -> "compoents:\n:[]Component": add(newAss)
-    note over ":Association": parents are from selected components\ncreate an association between two parents
-    return
-    return
-    return
+   ":UI" -> ":UMLProject": addAssociation(assType, position)
+    ":UMLProject" --> "command:AddAssociationCommand" ** : create(type, position)
+        ":UMLProject" -> ":UMLProject": setCommand(command)
+        end note
+        return
+        ":UMLProject" -> "currentDiagram\n:*UMLDiagram" : runCommand(command)
+            "currentDiagram\n:*UMLDiagram" -> "undoDeque\n:[]Deque" : push(command)
+            return
+            "currentDiagram\n:*UMLDiagram" -> ":Components"  : addAssociation(command.assType, command.position)
+            ":Components"  --> "ass:Association" **  : create(assType, position)
+            ":Components" -> "components:\n:[]Component": add(ass)
+                return
+            return
+        ":UMLProject" -> ":UMLProject" : clearCommand()
+        return
+        return
     return
 end addAssociationToDiagram
 @enduml
@@ -96,8 +108,20 @@ group#gold #white selectComponent
     loop#gold #white component cover mousePos
         ":Components" -> "SelectedComponents\n:[](*Component)": add(&component)
         note over "SelectedComponents\n:[](*Component)": add component into list of selected components pointer
-        return
     end loop
+    return
+    
+    opt#gold #white only select one component
+        ":Components" -> "SelectedComponent\n:Component": setupProperty()
+        "SelectedComponent\n:Component" -> ":PropertyManager": setupProperty(this)
+        return
+        return
+        note over "SelectedComponent\n:Component": register the property to property manager
+    else
+        ":Components" -> ":PropertyManager": clearProperty()
+        return
+    end
+
     return
     return
     return
@@ -116,7 +140,9 @@ group#gold #white unselectComponent
         ":Components" -> "SelectedComponents\n:[](*Component)": remove(&component)
         return
     end loop
-    return
+
+    ref over ":Components" , ":PropertyManager" : updateProperty (same logic as selectComponent)
+
     return
     return
 end unselectComponent
@@ -147,7 +173,8 @@ group#gold #white copyComponents
     ":UI" -> ":UMLProject": CopyComponents()
     ":UMLProject" -> "currentDiagram\n:*UMLDiagram": ExportSubmodule("clipboard")
     "currentDiagram\n:*UMLDiagram" -> ":Components": ExportSubmodule("clipboard")
-    ":Components" -> ":Components": exportCompoents = getExportComponents()
+    ":Components" -> ":Components": exportCompoents = getGroupComponents()
+    note over ":Components": getGroupComponents() return gadgets and associations.\nAnd for every association, its parents are also included.
     ":Components" -> ":Submodule":  <<static>>\nExportSubmodule("clipboard", exportCompoents)
     return
     return
@@ -201,75 +228,22 @@ end importSubmoudle
 
 @startuml
 autonumber
-group#gold #white editAttributeContent
-    ":UI" -> ":Databinder": editProperity(name, value)
-    ":Databinder" ->  ":Databinder" : theRightFunc(name, value)
-    ":Databinder" -> ":Databinder": NotifySubscribers()
-end editAttributeContent
-@enduml
-
-
-' @startuml
-' autonumber
-' autoactivate on
-' group#gold #white editAttributePosition
-'     ":UI" -> ":UMLProject": editAttributePosition(newValue)
-'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editAttributePosition(newValue)
-'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editAttributePosition(newValue)
-
-'     "Databinder" -> ":UI" : OnChange(event)
-' end editAttributePosition
-' @enduml
-
-
-' @startuml
-' autonumber
-' group#gold #white editTextStyle
-'     ":UI" -> ":UMLProject": editStyle(newValue)
-'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editStyle(newValue)
-'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editStyle(newValue)
-'     "Databinder" -> ":UI" : OnChange(event)
-' end editTextStyle
-' @enduml
-
-
-' @startuml
-' autonumber
-' group#gold #white editComponentColor
-'     ":UI" -> ":UMLProject": editComponentColor(newValue)
-'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editComponentColor(newValue)
-'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editComponentColor(newValue)
-'     "Databinder" -> ":UI" : OnChange(event)
-' end editComponentColor
-' @enduml
-
-
-' @startuml
-' autonumber
-' group#gold #white editComponentZIndex
-'     ":UI" -> ":UMLProject": editComponentZIndex(newValue)
-'     ":UMLProject" -> ":currentDiagram\n:*UMLDiagram": editComponentZIndex(newValue)
-'     ":currentDiagram\n:*UMLDiagram" -> ":Components": editComponentZIndex(newValue)
-'     "Databinder" -> ":UI" : OnChange(event)
-' end editComponentZIndex
-' @enduml
-
-
-@startuml
-autonumber
-group#gold #white PasteComponent
-    ":UI" -> ":UMLProject": pasteComponent()
-    ":UMLProject" -> "currentDiagram\n:*UMLDiagram": pasteComponent()
-    "currentDiagram\n:*UMLDiagram" -> ":Components": pasteComponent()
-    ":Components" -> ":Gadget": create(gadgetType, position)
-end PasteComponent
+autoactivate on
+group#gold #white editProperty
+    ":UI" -> ":propertyManager": editProperty(name, value)
+    ":propertyManager" -> ":propertyManager" : update(name, value)
+    return
+    return
+end editProperty
 @enduml
 
 
 @startuml
 autonumber
+autoactivate on
 group#gold #white autoScale
     ":Component" -> ":Component": updateScale()
+    return
 end autoScale
 @enduml
 
@@ -283,17 +257,17 @@ group#gold #white undo
     note right 
     UMLDiagram::undo() {
         if (undoDeque.size() > 0) {
-            auto& step = undoDeque.top();
-            this->doCommand(step, reverse=true);
+            auto& command = undoDeque.top();
+            // void UMLDiagram::doCommand(ICommand* command, bool reverse = false)
+            this->doCommand(command, true);
             undoDeque.pop();
-            redoDeque.push(step);
+            redoDeque.push(command);
         }
     }
     end note
     return
     return
 end undo
-
 @enduml
 
 @startuml 
@@ -305,10 +279,10 @@ group#gold #white redo
     note right 
     UMLDiagram::undo() {
         if (redoDeque.size() > 0) {
-            auto& step = redoDeque.top();
-            this->doCommand(step, reverse=false);
+            auto& command = redoDeque.top();
+            this->doCommand(command);
             redoDeque.pop();
-            undoDeque.push(step);
+            undoDeque.push(command);
         }
     }
     end note
@@ -368,15 +342,22 @@ end autoAdjustAssociationPathsWhenMultipleExist
 
 @startuml
 autonumber
-group#gold @white deleteComponent
+autoactivate on
+group#gold #white deleteComponent
     ":UI" -> ":UMLProject": deleteComponent()
     ":UMLProject" -> "currentDiagram\n:*UMLDiagram": deleteComponent()
     "currentDiagram\n:*UMLDiagram" -> ":Components": deleteComponent()
-    ":Components" -> ":Components": findAssociationsLinkedTo()
-    loop#gold #white association in linkedAssociations
-        ":Components" -> ":Association": delete()
+
+    ":Components" -> ":Components": removeComponents = getGroupComponents()
+    return
+    loop#gold #white component in removeComponents
+        ":Components" -> ":Components": delete(component)
+        return
     end
-    ":Components" -> ":Components": deleteGadgets()
+
+    return
+    return
+    return
 end deleteComponent
 @enduml
 
@@ -387,15 +368,15 @@ end deleteComponent
 ' ❌need help❕–*d When User drags Gadget with multiple Associations, System will automatically arrange them
 ' ✅*e copy and paste Components (also include affected Gadgets)
 ' ✅*f undo redo
-' ❌1.a Gadget cannot move to invalid location
+' ✅1.a Gadget cannot move to invalid location
 ' ✅1.b import Submodule from Project.
 ' ✅2.a Different types of Gadgets will have distinct Fields available for editing.
 ' ✅– 2.b automatically scale
-' ❌– 2.c edit color of a Gadget
-' ❌– 2.d move the Gadget
-'✅3.b deleting Gadget also remove its ass
+' (4/20 9:45)✅– 2.c edit color of a Gadget
+' (4/20 9:45)✅– 2.d move the Gadget
+' ✅3.b deleting Gadget also remove its ass
 ' will be shown in class diagram❕3.c Self-Associations are allowed.
-' ❌4.a User may change the type of Association.
+' ✅4.a User may change the type of Association.
 ' ✅4.b User may add, remove, and move text Fields in Association.
 ' ✅4.d When multiple Associations are created between two Gadgets, System will automatically distinguish the different paths to prevent overlap.
 ' ❌4.e User can modify the path of an Association

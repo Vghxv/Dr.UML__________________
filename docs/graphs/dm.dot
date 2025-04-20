@@ -1,3 +1,5 @@
+// DEPRECATED, use iuml
+
 graph DrUML{
   graph [
     label = "Dr. UML"
