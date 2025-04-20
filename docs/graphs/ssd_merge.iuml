@@ -1,71 +1,18 @@
 @startuml
 autonumber
 
-group#gold #white openProject
-    participant ":UI"
-    participant ":UMLProject"
-
-    ":UI" -> ":UMLProject": openProject()
-    activate ":UMLProject" #A00000
-
-    ":UMLProject" -> ":UMLProject": diagrams = getAvailableDiagrams()
-    note right of ":UMLProject": getAvailableDiagrams() returns a list of all diagrams in the project
-
-    ":UMLProject" -> ":UMLProject": lastOpenedDiagrams = getLastOpenedDiagrams()
-    note right of ":UMLProject": getLastOpenedDiagrams() returns a list of all diagrams that were opened last time
-
-    loop#gold #white diagramName in lastOpenedDiagrams
-        create "activeDiagrams\n:UMLDiagram"
-        ":UMLProject" -> "activeDiagrams\n:UMLDiagram": createDiagram(diagramName)
-        note right of ":UMLProject": createDiagram(path) creates a new instance of the diagram and load the diagram info at path
-    end
-
-    ":UMLProject" -> ":UI": lastOpenedDiagrams, diagrams
-end
-
-
-
+@startuml
+autonumber
+    ":UI" -> ":UMLProject": openProject(pojectName)
 par#gold #white UC01-EditUML
-
-    group#gold #white selectDiagram
-        ":UI" -> ":UMLProject": selectDiagram(diagramName)
-        opt#gold #white diagramName not in activeDiagrams
-            ":UMLProject" -> "activeDiagrams\n:UMLDiagram": createDiagram(diagramName)
-        end
-        create "CurrentDiagram\n:*UMLDiagram"
-        ":UMLProject" -> "CurrentDiagram\n:*UMLDiagram" : setCurrentDiagram(diagramName)
-    end :wselectDiagram
-
-    group#gold #white addGadgetToDiagram
-        ":UI" -> ":UMLProject": addGadget(gadgetType, position)
-        ":UMLProject" -> "CurrentDiagram\n:*UMLDiagram": addGadget(gadgetType, position)
-        create ":Components"
-        "CurrentDiagram\n:*UMLDiagram" -> ":Components": addGadget(gadgetType, position)
-        note over "Components": add either a gadget or an association to the diagram
-        create ":Gadget"
-        ":Components" -> ":Gadget": create(gadgetType, position)
-        note over ":Gadget": create a gadget in the diagram
-    end addGadgetToDiagram
-
-    group#gold #white addAssociationToDiagram
-        ":UI" -> ":UMLProject": addAssociation(AssociationType, parents)
-        ":UMLProject" -> "CurrentDiagram\n:*UMLDiagram": addAssociation(AssociationType, parents)
-        create ":Components"
-        "CurrentDiagram\n:*UMLDiagram" -> ":Components": addAssociation(AssociationType, parents)
-        note over "Components": add either a gadget or an association to the diagram
-        create ":Association"
-        ":Components" -> ":Association": create(AssociationType, parents)
-        note over ":Association": create an association between two gadgets
-        
-    end addAssociationToDiagram
-
-    group#gold #white EditAttribute
-        ":UI" -> ":UMLProject": editAttribute(attributeName, newValue)
-    end EditAttribute
-
-' TODO copy paste
-' TODO drag component
-
+    ":UI" -> ":UMLProject": selectDiagram(diagramName)
+    ":UI" -> ":UMLProject": addGadget(gadgetType, point)
+    ":UI" -> ":UMLProject": selectComponent(point)
+    ":UI" -> ":UMLProject": addAssociation(AssociationType)
+    ":UI" -> ":UMLProject": startDragging(point)
+    ":UI" -> ":UMLProject": stopDragging(point)
+    ":UI" -> ":UMLProject": unselectAllComponents()
+    ":UI" -> ":UMLProject": selectComponent(point)
+    ":UI" -> ":UMLProject": editAttribute(attributeName, newValue)
 end UC01-EditUML
-
 @enduml

@@ -1,0 +1,281 @@
+' @startuml
+' abstract        abstract
+' abstract class  "abstract class"
+' annotation      annotation
+' circle          circle
+' ()              circle_short_form
+' class           class
+' class           class_stereo  <<stereotype>>
+' diamond         diamond
+' <>              diamond_short_form
+' entity          entity
+' enum            enum
+' exception       exception
+' interface       interface
+' metaclass       metaclass
+' protocol        protocol
+' stereotype      stereotype
+' struct          struct
+' @enduml
+
+@startuml
+
+struct IError {
+    + ErrorMessage : String
+}
+
+class UMLProject{
+    -id: String
+    -name: String
+    -lastModified: Date
+    +getAvailableDiagrams(): List<String>
+    +getLastOpenedDiagrams(): List<String>
+    +selectDiagram(diagramName: String): void
+    +createDiagram(diagramName: String): void
+    +addGadget(type: gadgetType, point: Point): void
+    +addAssociation(type: associationType, point: Point): void
+    +selectComponent(point: Point): void
+}
+
+class UMLDiagram{
+    -filename: String
+    -type: String
+    -backgroundColor: Color
+    -lastModified: Date
+    +addGadget(type: gadgetType, point: Point): void
+    +addAssociation(type: associationType, point: Point): void
+    +selectComponent(point: Point): void
+}
+
+Interface Componenet {
+    +setupProperty(): void
+}
+' TODO: getHitBox()
+
+class Components {
+    #components: List<Component>
+    #selectedComponents: List<*Component>
+    ++moveSelectedComponent(delta: Point): void
+    +createGadget(type: gadgetType, point: Point): void
+    +createAssociation(type: associationType, point: Point): void
+    -adjustAssociationPath(association: *Association): void
+}
+
+
+class Gadget{
+    #type: String
+    #point: Point
+    #attributes: List<Attribute>
+    #scale: double
+    
+}
+
+class Association{
+    #type: String
+    #point: Point
+    #textFields: List<TextField>
+    #parent: Pair<Gadget, Gadget>
+    +addTextField(fieldType: String): void
+    +removeTextField(fieldId: String): void
+    +moveTextField(fieldId: String, newIndex: int): void
+    +getPoint(): Point
+}
+
+class Submodule{
+    +{static} exportSubmodule(target: String, components: List<Component>): void
+    +{static} importSubmodule(source: String): List<Component>
+}
+
+class PropertyManager{
+    #properties: Map<String, Object>
+    +editProperty(name: String, value: Object): void
+    +setupProperty(component: Component): void
+    +clearProperty(): void
+    +update(name: String, value: Object): void
+}
+
+
+enum sessionStatus{
+    alone
+    hosting
+    joined
+}
+
+
+
+struct ConnectionError {}
+struct SendError {}
+struct MemoryFullError {}
+
+ConnectionError <|-- IError
+SendError <|-- IError
+MemoryFullError <|-- IError
+
+enum SessionStatus{
+    hosting
+    joined
+    closing /' for shutting down Session::HandleJoin() '/
+}
+
+struct SockAddrIn {
+    + Ipv4Addr : UInt32
+    + Port : Int
+}
+
+class Session {
+    - host : SockAddrIn
+    - startTime : DateTime
+    - status : SessionStatus
+    - clientList : User[]
+    - chatroom : *Chatroom
+    - TimeToTimeout : Int /' Maybe a constexpr '/
+
+    /' Host Methods '/
+    + Host() : SockAddrIn, IError
+    + Shutdown() : IError
+
+    /' Client Methods '/
+    + Join(SockAddrIn connectionInfo) : SockAddrIn, IError /' SockInfo for chatroom '/
+    + Disconnect() : IError
+
+    - HandleJoin() : IError
+}
+Session -> SessionStatus
+Session --> SockAddrIn
+Session --> IError
+Session -> User
+
+
+class Chatroom {
+    - host : SockAddrIn /'Different port to session's'/
+    - messages: Message[]
+
+    + SetHost(sockaddr_in host): IError
+    + AddMessage(Message message): IError /'May make messages fill up mem, which throws MemoryFullError '/
+
+
+    + LoadMessages() : Message[], IError
+    + Send(Message messages) : IError
+
+    + Reconnect() : IError
+    + Disconnect() : IError
+}
+Chatroom --> SockAddrIn
+Chatroom --* Session
+Chatroom --> IError
+
+class Message {
+    - content : String
+    - time : DateTime
+
+    + Message(String content)
+
+    + GetContent() : String, IError
+    + GetTime(): DateTime, IError
+}
+Message <-- Chatroom
+Message --> IError
+
+
+
+
+class Attribute{
+
+}
+
+class TextStyle
+
+class Timer {
+    #startTime: Date
+    #duration: long
+    #isRunning: bool
+    +start(): void
+    +stop(): void
+    +reset(): void
+    +getElapsedTime(): long
+}
+
+class Verifier {
+    #rules: List<String>
+    +verifyDiagram(diagram: UMLDiagram): bool
+    +addRule(rule: String): void
+    +removeRule(rule: String): void
+}
+
+Interface ICommand{
+    execute()
+    unexecute()
+}
+
+class commandManager{
+    #undoEnabled: bool
+    #redoEnabled: bool
+    #undoDeque Deque<ICommand>
+    #redoDeque Deque<ICommand>
+    +executeCommand(command: ICommand): void
+    +undo(): void
+    +redo(): void
+}
+
+class addCommand {
+    #components: List<Component>
+    +execute(): void
+    +unexecute(): void
+}
+
+class editCommand{
+    #component:Component
+    #attribute:Attribute
+    #oldValue:Attribute
+    #newValue:Attribute
+    +execute(): void
+    +unexecute(): void
+}
+
+class deleteCommand{
+    #components: List<Component>
+    +execute(): void
+    +unexecute(): void
+}
+
+class pasteCommand{
+    #components: List<Component>
+    +execute(): void
+    +unexecute(): void
+}
+
+Gadget <|.. Componenet
+
+Association <|.. Componenet
+
+addCommand <|.. ICommand
+
+editCommand <|.. ICommand
+
+deleteCommand <|.. ICommand
+
+pasteCommand <|.. ICommand
+
+
+UMLProject *-- UMLDiagram
+
+UMLDiagram *-- Components
+
+Components *-- Componenet
+
+@enduml
+
+
+
+
+
+
+
+
+
+
+@startuml
+Class11 <|.. class12
+
+@enduml
+
