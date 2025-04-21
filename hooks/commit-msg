@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 INPUT_FILE=$1
 COMMIT_MSG=$(cat "$INPUT_FILE")
 

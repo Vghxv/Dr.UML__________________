@@ -1,124 +1,11 @@
-' @startuml
-' abstract        abstract
-' abstract class  "abstract class"
-' annotation      annotation
-' circle          circle
-' ()              circle_short_form
-' class           class
-' class           class_stereo  <<stereotype>>
-' diamond         diamond
-' <>              diamond_short_form
-' entity          entity
-' enum            enum
-' exception       exception
-' interface       interface
-' metaclass       metaclass
-' protocol        protocol
-' stereotype      stereotype
-' struct          struct
-' @enduml
+@startuml UML
 
-@startuml
-
-struct IError {
-    + ErrorMessage : String
+/' This is a bit comparing enum '/
+enum TextStyle {
+    Bold = 0b001
+    Italic = 0b010
+    Underline = 0b100
 }
-
-class UMLProject{
-    -id: String
-    -name: String
-    -lastModified: Date
-    +getAvailableDiagrams(): List<String>
-    +getLastOpenedDiagrams(): List<String>
-    +selectDiagram(diagramName: String): void
-    +createDiagram(diagramName: String): void
-    +addGadget(type: gadgetType, point: Point): void
-    +startAddAssociation(point: Point): void
-    +endAddAssociation(type: associationType, point: Point): void
-    +selectComponent(point: Point): void
-}
-
-class UMLDiagram{
-    -filename: String
-    -type: String
-    -backgroundColor: Color
-    -lastModified: Date
-    -startPoint: Point
-    +addGadget(type: gadgetType, point: Point): void
-    +startAddAssociation(point: Point): void
-    +endAddAssociation(type: associationType, point: Point): void
-
-    +selectComponent(point: Point): void
-}
-
-Interface Componenet {
-    +setupProperty(): void
-}
-' TODO: getHitBox()
-
-class Components {
-    #components: List<Component>
-    #selectedComponents: List<*Component>
-    +moveSelectedComponent(delta: Point): void
-    +addGadget(gadgetType, point): void
-    +addAssociation(type: associationType, startPoint: Point, endPoint: Point): void
-    -createGadget(type: gadgetType, point: Point): void
-    -createAssociation(type: associationType, parents: Pair<*Gadget, *Gadget>): void
-    -findGadget(point: Point): *Gadget
-    -adjustAssociationPath(association: *Association): void
-}
-
-
-class Gadget{
-    #type: String
-    #point: Point
-    #attributes: List<Attribute>
-    #scale: double
-    
-}
-' TODO: add constructor?
-
-class Association{
-    #type: String
-    #point: Point
-    #textFields: List<TextField>
-    #parent: Pair<*Gadget, *Gadget>
-    +addTextField(fieldType: String): void
-    +removeTextField(fieldId: String): void
-    +moveTextField(fieldId: String, newIndex: int): void
-    +getPoint(): Point
-}
-' TODO: add constructor?
-
-class Submodule{
-    +{static} exportSubmodule(target: String, components: List<Component>): void
-    +{static} importSubmodule(source: String): List<Component>
-}
-
-class PropertyManager{
-    #properties: Map<String, Object>
-    +editProperty(name: String, value: Object): void
-    +setupProperty(component: Component): void
-    +clearProperty(): void
-    +update(name: String, value: Object): void
-}
-
-
-enum sessionStatus{
-    alone
-    hosting
-    joined
-}
-
-
-
-struct ConnectionError {}
-struct SendError {}
-struct MemoryFullError {}
-
-ConnectionError <|-- IError
-SendError <|-- IError
-MemoryFullError <|-- IError
 
 enum SessionStatus{
     hosting
@@ -126,52 +13,240 @@ enum SessionStatus{
     closing /' for shutting down Session::HandleJoin() '/
 }
 
+enum GadgetType {
+    Class
+    Rect
+    Circle
+    Note
+}
+
+enum AssociationType {
+    Extension
+    Implementation
+    Composition
+    Dependency
+}
+
+enum DiagramType {
+    ClassDiagram
+}
+
 struct SockAddrIn {
     + Ipv4Addr : UInt32
     + Port : Int
+}
+
+
+
+
+class UMLProject{
+    - id: String
+    - name: String
+    - lastModified: Date
+    + GetAvailableDiagrams(): List<String>
+    + GetLastOpenedDiagrams(): List<String>
+    + SelectDiagram(diagramName: String): DUError
+    + CreateDiagram(diagramName: String): DUError
+    + AddGadget(type: gadgetType, point: Point): DUError
+    + StartAddAssociation(point: Point): DUError
+    + DeleteComponent(): DUError
+    + EndAddAssociation(type: associationType, point: Point): DUError
+    + SelectComponent(point: Point): DUError
+    + UnselectComponent(point: Point): DUError
+    + CopyComponents(): DUError
+    + PasteComponents(point: Point): DUError
+    + ImportSubmodule(source: String, point: Point): DUError
+    + Undo(): DUError
+    + Redo(): DUError
+    + StartDragging(point: Point): DUError
+    + StopDragging(point: Point): DUError
+    + DrawAll(graphic: Graphics): DUError
+}
+
+class UMLDiagram{
+    - filename: String
+    - type: DiagramType
+    - backgroundColor: Color
+    - lastModified: Date
+    - startPoint: Point
+
+    + AddGadget(type: gadgetType, point: Point): DUError
+    + StartAddAssociation(point: Point): DUError
+    + EndAddAssociation(type: associationType, point: Point): DUError
+    + DeleteComponent(): DUError
+    + SelectComponent(point: Point): DUError
+    + UnselectComponent(point: Point): DUError
+    + UnselectAllComponents(): DUError
+    + ExportSubmodule(target: String): DUError
+    + ImportSubmodule(source: String, point: Point): DUError
+    + Undo(): DUError
+    + Redo(): DUError
+    + StartDragging(point: Point): DUError
+    + StopDragging(point: Point): DUError
+    + DrawAll(graphics: Graphics): DUError
+}
+
+
+
+
+Interface Component {
+    + SetupProperty(): DUError
+    + CreatePropertyTree(): tree, DUError
+    + Copy() : Component, DUError
+    + Draw(graphic: IGraphic): DUError
+
+}
+' TODO: getHitBox()
+
+class Components {
+    - components: List<Component>
+    - selectedComponents: List<*Component>
+
+    + AddGadget(type: gadgetType, point: Point): DUError
+    + AddAssociation(type: associationType, startPoint: Point, endPoint: Point): DUError
+    + DeleteComponent(): DUError
+    + SelectComponent(point: Point): DUError
+    + UnselectComponent(point: Point): DUError
+    + MoveSelectedComponent(delta: Point): DUError
+    + ExportSubmodule(target: String): DUError
+    + GetGroupComponents(): List<*Component>
+    + DrawAll(graphic: Graphics): DUError
+
+    - createGadget(type: gadgetType, point: Point): DUError
+    - createAssociation(type: associationType, parents: Pair<*Gadget, *Gadget>): DUError
+    - clone(List<*Component> components): DUError
+    - findGadget(point: Point): *Gadget
+    - adjustAssociationPath(association: *Association): DUError
+    - setupProperty(component: *Component): DUError
+
+}
+
+
+class Gadget{
+    - type: GadgetType
+    - point: Point
+    - layer: int
+    - attributes: List<Attribute>
+
+    + GetPoint(): Point, DUError
+    + GetType(): GadgetType, DUError
+    + GetLayer(): int, DUError
+
+    + SetPoint(point: Point): DUError
+    + SetType(type: GadgetType): DUError
+    + SetLayer(layer: int): DUError
+
+    + MoveDelta(delta: Point): DUError
+    + ArrangeAttribute(index: int, newIndex: int): DUError
+    + AddAttribute(content: string): DUError
+    + RemoveAttribute(index: int): DUError
+    + Draw(graphics: Graphics): DUError
+
+}
+' TODO: add constructor?
+
+class Association{
+    - type: AssociationType
+    - layer: int
+    - attributes: List<Attribute>
+    - parents: Pair<*Gadget, *Gadget>
+
+    - GetType(): AssociationType, DUError
+    - GetLayer(): int, DUError
+    - GetParents(): Pair<*Gadget, *Gadget>, DUError
+
+    - SetType(type: AssociationType): DUError
+    - SetLayer(layer: int): DUError
+    - SetParents(parents: Pair<*Gadget, *Gadget>): DUError
+
+    + MoveAttribute(index: int, ratio: Float): DUError
+    + AddAttribute(content: string): DUError
+    + RemoveAttribute(index: int): DUError
+    + Draw(graphics: Graphics, RouteMap[<*Gadget, *Gadget>]<int, int>): DUError
+}
+' TODO: add constructor?
+
+
+class Attribute{
+    - content: String
+    - size : int
+    - style: TextStyle
+
+    + GetContent(): String, DUError
+    + GetSize(): int, DUError
+    + GetStyle(): TextStyle, DUError
+    + IsBold(): Bool, DUError
+    + IsItalic(): Bool, DUError
+    + IsUnderline(): Bool, DUError
+
+    + SetContent(content: String): DUError
+    + SetSize(size: int): int, DUError
+    + SetStyle(style: TextStyle): DUError
+    + SetBold(value: Bool): DUError
+    + SetItalic(value: Bool): DUError
+    + SetUnderline(value: Bool): DUError
+
+    + Copy(): Attribute, DUError
+}
+
+class AssAttribute {
+    - ratio : Float
+
+    + AssAttribute(ratio: Float):DUError
+
+    + GetRatio(): Float, DUError
+    + SetRatio(ratio: Float): DUError
+}
+
+
+class Submodule{
+    +{static} ExportSubmodule(target: String, components: List<Component>): DUError
+    +{static} ImportSubmodule(source: String): List<Component>, DUError
+}
+
+class PropertyManager{
+    - properties: Map<String, Object>
+    + EditProperty(name: String, value: Object): DUError
+    + SetupProperty(component: Component): DUError
+    + ClearProperty(): DUError
+    + UpdateProperty(name: String, value: Object): DUError
 }
 
 class Session {
     - host : SockAddrIn
     - startTime : DateTime
     - status : SessionStatus
-    - clientList : User[]
+    - clientList : SockAddrIn[]
     - chatroom : *Chatroom
-    - TimeToTimeout : Int /' Maybe a constexpr '/
+    - timeToTimeout : Int /' Maybe a constexpr '/
 
     /' Host Methods '/
-    + Host() : SockAddrIn, IError
-    + Shutdown() : IError
+    + Host() : SockAddrIn, DUError
+    + Shutdown() : DUError
 
     /' Client Methods '/
-    + Join(SockAddrIn connectionInfo) : SockAddrIn, IError /' SockInfo for chatroom '/
-    + Disconnect() : IError
+    + Join(SockAddrIn connectionInfo) : SockAddrIn, DUError /' SockInfo for chatroom '/
+    + Disconnect() : DUError
 
-    - HandleJoin() : IError
+    - handleJoin() : DUError
 }
-Session -> SessionStatus
-Session --> SockAddrIn
-Session --> IError
-Session -> User
 
 
 class Chatroom {
     - host : SockAddrIn /'Different port to session's'/
     - messages: Message[]
 
-    + SetHost(sockaddr_in host): IError
-    + AddMessage(Message message): IError /'May make messages fill up mem, which throws MemoryFullError '/
+    + SetHost(sockaddr_in host): DUError
+    + AddMessage(Message message): DUError /'May make messages fill up mem, which throws MemoryFullError '/
 
 
-    + LoadMessages() : Message[], IError
-    + Send(Message messages) : IError
+    + LoadMessages() : Message[], DUError
+    + Send(Message messages) : DUError
 
-    + Reconnect() : IError
-    + Disconnect() : IError
+    + Reconnect() : DUError
+    + Disconnect() : DUError
 }
-Chatroom --> SockAddrIn
-Chatroom --* Session
-Chatroom --> IError
+
 
 class Message {
     - content : String
@@ -179,112 +254,165 @@ class Message {
 
     + Message(String content)
 
-    + GetContent() : String, IError
-    + GetTime(): DateTime, IError
+    + GetContent() : String, DUError
+    + GetTime(): DateTime, DUError
 }
-Message <-- Chatroom
-Message --> IError
-
-
-
-
-class Attribute{
-
-}
-
-class TextStyle
 
 class Timer {
-    #startTime: Date
-    #duration: long
-    #isRunning: bool
-    +start(): void
-    +stop(): void
-    +reset(): void
-    +getElapsedTime(): long
+    - startTime: Date
+    - duration: long
+    - isRunning: Bool
+    + Start(): DUError
+    + Stop(): DUError
+    + Reset(): DUError
+    + GetElapsedTime(): long
 }
 
 class Verifier {
-    #rules: List<String>
-    +verifyDiagram(diagram: UMLDiagram): bool
-    +addRule(rule: String): void
-    +removeRule(rule: String): void
+    - rules: List<String>
+    + VerifyDiagram(diagram: UMLDiagram): Bool
+    + AddRule(rule: String): DUError
+    + RemoveRule(rule: String): DUError
 }
 
 Interface ICommand{
-    execute()
-    unexecute()
+    execute(): DUError
+    unexecute(): DUError
 }
 
 class commandManager{
-    #undoEnabled: bool
-    #redoEnabled: bool
-    #undoDeque Deque<ICommand>
-    #redoDeque Deque<ICommand>
-    +executeCommand(command: ICommand): void
-    +undo(): void
-    +redo(): void
+    - undoEnabled: Bool
+    - redoEnabled: Bool
+    - undoDeque Deque<ICommand>
+    - redoDeque Deque<ICommand>
+
+    + GetUndoEnabled() : Bool, DUError /' retrun !undoDeque.empty() '/
+    + GetRedoEnabled() : Bool, DUError /' return !redoDeque.empty() '/
+
+    + ExecuteCommand(command: ICommand): DUError
+    + Undo(): DUError
+    + Redo(): DUError
 }
 
 class addCommand {
-    #components: List<Component>
-    +execute(): void
-    +unexecute(): void
+    - components: List<Component>
+    + Execute(): DUError
+    + Unexecute(): DUError
 }
 
 class editCommand{
-    #component:Component
-    #attribute:Attribute
-    #oldValue:Attribute
-    #newValue:Attribute
-    +execute(): void
-    +unexecute(): void
+    - component:Component
+    - attribute:Attribute
+    - oldValue:Attribute
+    - newValue:Attribute
+    + Execute(): DUError
+    + Unexecute(): DUError
 }
 
 class deleteCommand{
-    #components: List<Component>
-    +execute(): void
-    +unexecute(): void
+    - components: List<Component>
+    + Execute(): DUError
+    + Unexecute(): DUError
 }
 
 class pasteCommand{
-    #components: List<Component>
-    +execute(): void
-    +unexecute(): void
+    - components: List<Component>
+    + Execute(): DUError
+    + Unexecute(): DUError
 }
 
-Gadget <|.. Componenet
+' interface
 
-Association <|.. Componenet
 
-addCommand <|.. ICommand
+Gadget <|-- Component
+Association <|-- Component
 
-editCommand <|.. ICommand
+AssAttribute <|--Attribute
 
-deleteCommand <|.. ICommand
+addCommand <|-- ICommand
+editCommand <|-- ICommand
+deleteCommand <|-- ICommand
+pasteCommand <|-- ICommand
 
-pasteCommand <|.. ICommand
+
+' General
+
+
+
+Session -> SessionStatus
+Session --> SockAddrIn
+Session *-- Timer
+
+Chatroom --> SockAddrIn
+Chatroom --* Session
+Chatroom --> Timer
+Chatroom *-- Message
 
 
 UMLProject *-- UMLDiagram
+UMLProject *-- Timer
+UMLProject *-- Session
+UMLProject --> ICommand
 
+UMLDiagram --> DiagramType
 UMLDiagram *-- Components
+UMLDiagram --> Timer
+UMLDiagram *-- Verifier
+UMLDiagram *-- commandManager
+UMLDiagram --> ICommand
 
-Components *-- Componenet
+Components *-- Component
+Components --> Submodule
+
+Component --> PropertyManager
+
+Gadget --> GadgetType
+Gadget --> Attribute
+
+Association --> AssociationType
+Association --> AssAttribute
+
+Attribute --> TextStyle
+
+Verifier --> DiagramType
+
+
 
 @enduml
 
+@startuml DoctorErrorDiagram
+class DUError {
+    - errorMessage : String
+
+    + DUError(string errorMsg) DUError
+
+    + GetMessage(): String, DUError
+}
+
+class ConnectionError {}
+class SendError {}
+class MemoryFullError {}
+class FileIOError {}
 
 
 
-
-
-
-
-
-
-@startuml
-Class11 <|.. class12
+ConnectionError <|-- DUError
+SendError <|-- DUError
+MemoryFullError <|-- DUError
+FileIOError <|-- DUError
+Session --> DUError
+Chatroom --> DUError
+Message --> DUError
+UMLProject --> DUError
+UMLDiagram --> DUError
+Components --> DUError
+Gadget --> DUError
+Association --> DUError
+Attribute --> DUError
+Verifier --> DUError
+commandManager --> DUError
+ICommand --> DUError
+Submodule --> DUError
+PropertyManager --> DUError
 
 @enduml
-
