@@ -273,7 +273,6 @@ group#gold #white undo
         UMLDiagram::undo() {
             if (undoDeque.size() > 0) {
                 auto& command = undoDeque.top();
-                // void UMLDiagram::doCommand(ICommand* command, bool reverse = false)
                 this->doCommand(command, true);
                 undoDeque.pop();
                 redoDeque.push(command);
