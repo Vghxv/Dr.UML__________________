@@ -1,0 +1,144 @@
+@startuml
+hide circle
+hide method
+hide attribute
+hide link
+
+
+    object User {
+        id
+        name
+    }
+
+    object UMLProject {
+        id
+        name
+        lastEdit
+    }
+
+    object UMLDiagram {
+        filename
+        type
+        backgoundColor
+        lastEdit
+    }
+    note right
+        Each UMLDiagram is a diagram.
+    end note
+
+    object Gadget {
+        id
+        type
+        color
+        position
+        zIndex
+    }
+
+    object Association {
+        id
+        type
+        color
+        position
+        zIndex
+    }
+
+    object Submodule {
+        id
+        name
+        Attribute
+        lastEdit
+    }
+
+    object Session {
+        id
+        host
+        startTime
+        status
+    }
+
+    object Chatroom {
+
+    }
+
+    object Message {
+        id
+        sender
+        content
+        timestamp
+    }
+
+    object Attribute {
+        id
+        content
+        position
+    }
+
+    object TextStyle {
+        font
+        fontsize
+        isBold
+        isItalic
+        hasUnderline
+    }
+
+    object Timer {
+        whenToTimeout
+    }
+
+
+    object Verifier {
+        type
+        status
+    }
+
+
+    User "1" -- "*" UMLProject : manages
+    UMLProject "1" -- "*" UMLDiagram : manages
+    note right on link
+        A UMLroject can has multi UMLDiagrams.
+        Just like .sln to .vcproj.
+    end note
+
+    UMLDiagram "1" -- "*" Gadget : consists of
+    Submodule "1" -- "*" Gadget : consists of
+    Submodule "1" -- "*" Association : consists of
+    Gadget "1" -- "*" Attribute : contains
+    Association  "1" -- "*" Attribute : contains
+    Gadget "1...2" -- "*" Association : Asscotiates
+    note right on link
+        A Gadget : Association = 1 : 1 occurs when an
+        Association connects back to the same Gadget.
+    end note
+    UMLProject  "1" -- "*" Submodule : knows
+    note bottom on link
+        This enables UMLProject import Submodules
+         to UMLDiagrams under the project.
+    end note
+
+    User "1" -- "1" Session : hosts
+    User  "*" -- "1" Session : joins
+    Session "1" -- "1" UMLProject : connects to
+    note right on link
+        A Session binds a Projet
+    end note
+    Session "1" -- "1" Chatroom : contains
+    Chatroom "1" -- "*" Message : contains
+    User "1" -- "*" Message : sends
+    TextStyle "1" -- "1" Attribute : describes
+    UMLProject "1" -- "1" Timer : inqures
+    note bottom on link
+        For auto-save.
+    end note
+    Session "1" -- "1" Timer : inqures
+    note bottom on link
+            For conneection timeout.
+    end note
+    Message "1" -- "1" Timer : inqures
+    note bottom on link
+            For message-sending timeout.
+    end note
+    Verifier "1" -- "1" UMLDiagram : checks
+
+
+
+@endtuml

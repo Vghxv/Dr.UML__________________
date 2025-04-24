@@ -1,9 +1,11 @@
+// DEPRECATED, use iuml
+
 graph DrUML{
   graph [
     label = "Dr. UML"
     rankdir = "TB"
   ]
-  
+
   node [
     shape = record
   ]
@@ -36,13 +38,12 @@ graph DrUML{
   Message[
     label="{Message | id: String | sender: User | content: String | timestamp: DateTime}"
   ]
-  Attribute [ 
+  Attribute [
     label="{Attribute | id: String | content: String | position: Point }"
   ]
   TextStyle [
     label="{TextStyle | font: filename | fontSize: int | isBold: Bool | isItalic: Bool | isUnderline: Bool}"
   ]
-
 
   User -- UMLProject[
     label = "manages"

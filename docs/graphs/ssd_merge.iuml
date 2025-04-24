@@ -1,0 +1,18 @@
+@startuml
+autonumber
+
+@startuml
+autonumber
+    ":UI" -> ":UMLProject": openProject(pojectName)
+par#gold #white UC01-EditUML
+    ":UI" -> ":UMLProject": selectDiagram(diagramName)
+    ":UI" -> ":UMLProject": addGadget(gadgetType, point)
+    ":UI" -> ":UMLProject": selectComponent(point)
+    ":UI" -> ":UMLProject": addAssociation(AssociationType)
+    ":UI" -> ":UMLProject": startDragging(point)
+    ":UI" -> ":UMLProject": stopDragging(point)
+    ":UI" -> ":UMLProject": unselectAllComponents()
+    ":UI" -> ":UMLProject": selectComponent(point)
+    ":UI" -> ":UMLProject": editAttribute(attributeName, newValue)
+end UC01-EditUML
+@enduml

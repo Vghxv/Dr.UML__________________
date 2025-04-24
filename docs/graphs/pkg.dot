@@ -1,1 +1,70 @@
-// hw4
+digraph diagram {
+    //  newrank = true;
+    compound = true;
+    ranksep = 1;
+
+    node [shape = record;];
+
+
+    subgraph cluster_presentation {
+        label = "User Interface";
+        rank = "min";
+
+        node [shape = tab;];
+        "GUI Application";
+    }
+
+
+
+    subgraph cluster_business {
+        label = "Domain Layer\n";
+        rank = same;
+        node [shape = tab;];
+        "UML Project";
+
+        subgraph cluster_colab {
+            rank = "same";
+            label = "Collaboration";
+            node [shape = tab;];
+            "Session";
+            "Chatroom";
+            node [shape = tab;];
+            "Session" -> "Chatroom" [style = dashed;];
+        }
+        "UML Project" -> "Session" [style = dashed; ltail = cluster_colab;];
+
+        subgraph cluster_canvas {
+            shape = tab;
+            label = "Diagram";
+            rank = same
+            rankdir = "RL"
+            node [shape = tab;];
+            "UML Diagram";
+            "Submodule";
+            "Component";
+            subgraph cluster_component {
+                shape = tab;
+                label = "Component";
+                node [shape = tab;];
+            }
+        }
+        "UML Project" -> "UML Diagram" [style = dashed];
+        "UML Diagram" -> "Component" [style = dashed];
+        "Submodule" -> "Component" [style = dashed;];
+        "UML Diagram" -> "Submodule" [style = dashed;];
+    }
+
+    "GUI Application" -> "UML Project" [style = dashed;];
+
+    subgraph cluster_tech {
+        shape = tab;
+        label = "Technical Service";
+        rank = same;
+        node [shape = tab;];
+        "Logging";
+    }
+
+    "GUI Application" -> "Logging" [style = dashed; lhead = cluster_tech;];
+    "Session" -> "Logging" [style = dashed; lhead = cluster_tech;];
+    "UML Project" -> "Logging" [style = dashed; lhead = cluster_tech;];
+}
