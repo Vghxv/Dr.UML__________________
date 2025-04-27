@@ -62,7 +62,7 @@ const ChatRoom: React.FC = () => {
         }}
       >
         {messages.map((message) => (
-          <ChatMessage key={message.id} user={message.user} text={message.text} />
+          <ChatMessage key={message.id} user={message.user} text={message.text}/>
         ))}
       </div>
 

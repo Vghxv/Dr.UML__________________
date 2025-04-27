@@ -18,6 +18,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ user, text }) => {
     >
       <strong style={{ color: '#333' }}>{user}:</strong>{' '}
       <span style={{ color: '#555' }}>{text}</span> {/* Subtle text color */}
+      <div style={{ fontSize: '0.8em', color: '#999', marginTop: '5px' }}>
+        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </div>
     </div>
   );
 };
