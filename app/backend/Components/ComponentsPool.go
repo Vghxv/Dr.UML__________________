@@ -4,15 +4,15 @@ import (
 	"Dr.uml/backend/Component"
 )
 
-type componentPool struct {
+type componentsPool struct {
 	list []*Component.Component
 }
 
-func (cp *componentPool) insert(c *Component.Component) {
+func (cp *componentsPool) insert(c *Component.Component) {
 	cp.list = append(cp.list, c)
 }
 
-func (cp *componentPool) remove(c *Component.Component) {
+func (cp *componentsPool) remove(c *Component.Component) {
 	for i, comp := range cp.list {
 		if comp == c {
 			cp.list = append(cp.list[:i], cp.list[i+1:]...)
@@ -21,7 +21,6 @@ func (cp *componentPool) remove(c *Component.Component) {
 	}
 }
 
-func (cp *componentPool) Len() int {
+func (cp *componentsPool) Len() int {
 	return len(cp.list)
 }
-
