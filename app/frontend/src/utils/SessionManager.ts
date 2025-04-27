@@ -1,33 +1,33 @@
 class SessionManager {
-  private static instance: SessionManager;
-  private sessionData: Record<string, any>;
+    private static instance: SessionManager;
+    private sessionData: Record<string, any>;
 
-  private constructor() {
-    this.sessionData = {};
-  }
-
-  static getInstance(): SessionManager {
-    if (!SessionManager.instance) {
-      SessionManager.instance = new SessionManager();
+    private constructor() {
+        this.sessionData = {};
     }
-    return SessionManager.instance;
-  }
 
-  setItem(key: string, value: any): void {
-    this.sessionData[key] = value;
-  }
+    static getInstance(): SessionManager {
+        if (!SessionManager.instance) {
+            SessionManager.instance = new SessionManager();
+        }
+        return SessionManager.instance;
+    }
 
-  getItem<T>(key: string): T | null {
-    return this.sessionData[key] ?? null;
-  }
+    setItem(key: string, value: any): void {
+        this.sessionData[key] = value;
+    }
 
-  removeItem(key: string): void {
-    delete this.sessionData[key];
-  }
+    getItem<T>(key: string): T | null {
+        return this.sessionData[key] ?? null;
+    }
 
-  clear(): void {
-    this.sessionData = {};
-  }
+    removeItem(key: string): void {
+        delete this.sessionData[key];
+    }
+
+    clear(): void {
+        this.sessionData = {};
+    }
 }
 
 export default SessionManager;

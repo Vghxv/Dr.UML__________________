@@ -1,3 +1,3 @@
 export const ItemTypes = {
-  SHAPE: 'shape',
+    SHAPE: 'shape',
 };
