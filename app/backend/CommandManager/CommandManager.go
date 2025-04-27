@@ -1,4 +1,4 @@
 package CommandManager
 
-type Component struct {
+type CommandManager struct {
 }
