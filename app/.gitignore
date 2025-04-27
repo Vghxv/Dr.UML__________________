@@ -1,0 +1,11 @@
+# Ignore build artifacts and dependencies
+build/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore Wails frontend build artifacts
+frontend/dist/
+frontend/wailsjs/
+
+*.md5
