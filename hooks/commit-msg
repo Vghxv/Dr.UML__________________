@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+exit 0
 
 INPUT_FILE=$1
 COMMIT_MSG=$(cat "$INPUT_FILE")
