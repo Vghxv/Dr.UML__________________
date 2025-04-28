@@ -42,10 +42,10 @@ func (att *Attribute) GetStyle() (TextStyle, Utils.DUError) {
 	return att.style, nil
 }
 
-// SetStyle sets the style attribute for the text. Returns an error if the style is not between 0 and 7.
+// SetStyle sets the style attribute for the text. Returns an error if the style contains unsupported flags.
 func (att *Attribute) SetStyle(style TextStyle) Utils.DUError {
-	if style < 0 || style > 7 {
-		return Utils.NewInvalidArgumentError("style should be between 0 and 7")
+	if style & ^SupportedTextStyleFlags != 0 {
+		return Utils.NewInvalidArgumentError("style contains unsupported flags")
 	}
 	att.style = style
 	return nil
