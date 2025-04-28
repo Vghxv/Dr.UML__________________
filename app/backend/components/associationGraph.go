@@ -11,7 +11,7 @@ type AssociationGraph interface {
 	FindEnd(en *component.Gadget) ([]*component.Association, duerror.DUError)
 	FindEither(g *component.Gadget) ([]*component.Association, duerror.DUError)
 	
-	Update(a *component.Association, oldSt *component.Gadget, oldEn *component.Gadget, newSt *component.Gadget, newEn *component.Gadget) duerror.DUError
+	Update(a *component.Association, oldSt *component.Gadget, oldEn *component.Gadget) duerror.DUError
 	Insert(a *component.Association) duerror.DUError
 	Remove(a *component.Association) duerror.DUError
 	RemoveGadget(g *component.Gadget) ([]*component.Association, duerror.DUError)
