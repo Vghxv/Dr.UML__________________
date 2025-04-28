@@ -1,5 +1,4 @@
 import React, {useEffect, useRef} from 'react';
-import {useDrop} from 'react-dnd';
 import {ItemTypes} from '../types';
 import {dia, shapes} from '@joint/core';
 
