@@ -30,7 +30,10 @@ const App: React.FC = () => {
                 >
                     Dr.UML
                 </h1>
-                <Canvas graph={new dia.Graph()} />
+                {/*
+                    Memoize the graph instance to avoid recreating it on every render.
+                */}
+                <Canvas graph={graph} />
             </div>
         </DndProvider>
     );
