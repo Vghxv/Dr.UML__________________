@@ -15,14 +15,14 @@ func (p Point) MagnitudeInt() int {
 	return int(p.Magnitude())
 }
 
-func Equal(p1, p2 Point) bool {
+func EqualPoints(p1, p2 Point) bool {
 	return p1.X == p2.X && p1.Y == p2.Y
 }
 
-func Add(p1, p2 Point) Point {
+func AddPoints(p1, p2 Point) Point {
 	return Point{X: p1.X + p2.X, Y: p1.Y + p2.Y}
 }
 
-func Sub(p1, p2 Point) Point {
+func SubPoints(p1, p2 Point) Point {
 	return Point{X: p1.X - p2.X, Y: p1.Y - p2.Y}
 }
