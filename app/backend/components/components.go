@@ -3,11 +3,11 @@ package components
 import (
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/utils"
-	"Dr.uml/backend/utils/duerror"
+	"Dr.uml/backend/utils/duerror/duerror"
 )
 
 type Components struct {
-	compoentsContainer ComponentsContainer
+	compoentsContainer componentsContainer
 	selectedComponents map[component.Component]bool
 }
 

@@ -3,10 +3,10 @@ package components
 import (
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/utils"
-	"Dr.uml/backend/utils/duerror"
+	"Dr.uml/backend/utils/duerror/duerror"
 )
 
-type ComponentsContainer interface {
+type componentsContainer interface {
 	Insert(c component.Component) duerror.DUError
 	Remove(c component.Component) duerror.DUError
 	Search(p utils.Point) (component.Component, duerror.DUError)

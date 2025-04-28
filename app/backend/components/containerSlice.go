@@ -3,7 +3,7 @@ package components
 import (
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/utils"
-	"Dr.uml/backend/utils/duerror"
+	"Dr.uml/backend/utils/duerror/duerror"
 )
 
 // implement ComponentsContainer using slice
@@ -11,7 +11,7 @@ type containerSlice struct {
 	list []component.Component
 }
 
-func NewContainerSlice() ComponentsContainer{
+func NewContainerSlice() componentsContainer{
 	return &containerSlice{list: make([]component.Component, 0)}
 }
 

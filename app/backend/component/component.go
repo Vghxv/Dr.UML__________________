@@ -2,7 +2,7 @@ package component
 
 import (
 	"Dr.uml/backend/utils"
-	"Dr.uml/backend/utils/duerror"
+	"Dr.uml/backend/utils/duerror/duerror"
 )
 
 type Component interface {
