@@ -5,7 +5,10 @@ import './App.css';
 import { dia, shapes } from '@joint/core';
 import Canvas from './components/Canvas';
 
+const graph = new dia.Graph();
 const App: React.FC = () => {
+    // Create a new JointJS graph instance
+
     return (
         <DndProvider backend={HTML5Backend}>
             <div
