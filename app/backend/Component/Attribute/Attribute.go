@@ -32,38 +32,38 @@ func (att *Attribute) SetStyle(style TextStyle) {
 
 func (att *Attribute) SetBold(value bool) {
 	if value {
-		att.style |= bold // Set the bold bit
+		att.style |= Bold // Set the bold bit
 	} else {
-		att.style &^= bold // Clear the bold bit
+		att.style &^= Bold // Clear the bold bit
 	}
 }
 
 func (att *Attribute) SetItalic(value bool) {
 	if value {
-		att.style |= italic // Set the italic bit
+		att.style |= Italic // Set the italic bit
 	} else {
-		att.style &^= italic // Clear the italic bit
+		att.style &^= Italic // Clear the italic bit
 	}
 }
 
 func (att *Attribute) SetUnderline(value bool) {
 	if value {
-		att.style |= underline // Set the underline bit
+		att.style |= Underline // Set the underline bit
 	} else {
-		att.style &^= underline // Clear the underline bit
+		att.style &^= Underline // Clear the underline bit
 	}
 }
 
 func (att *Attribute) IsBold() bool {
-	return att.style&bold != 0
+	return att.style&Bold != 0
 }
 
 func (att *Attribute) IsItalic() bool {
-	return att.style&italic != 0
+	return att.style&Italic != 0
 }
 
 func (att *Attribute) IsUnderline() bool {
-	return att.style&underline != 0
+	return att.style&Underline != 0
 }
 
 func (att *Attribute) Copy() *Attribute {
