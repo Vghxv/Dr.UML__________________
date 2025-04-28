@@ -17,15 +17,15 @@ func NewAssociation(parents [2]*Gadget) *Association {
 	}
 }
 
-func (a *Association) GetParentStart() (*Gadget, duerror.DuError) {
+func (a *Association) GetParentStart() (*Gadget, duerror.DUError) {
 	return a.parents[0], nil
 }
 
-func (a *Association) GetParentEnd() (*Gadget, duerror.DuError) {
+func (a *Association) GetParentEnd() (*Gadget, duerror.DUError) {
 	return a.parents[1], nil
 }
 
-func (a *Association) SetParentStart(gadget *Gadget) duerror.DuError {
+func (a *Association) SetParentStart(gadget *Gadget) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
@@ -33,7 +33,7 @@ func (a *Association) SetParentStart(gadget *Gadget) duerror.DuError {
 	return nil
 }
 
-func (a *Association) SetParentEnd(gadget *Gadget) duerror.DuError {
+func (a *Association) SetParentEnd(gadget *Gadget) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}

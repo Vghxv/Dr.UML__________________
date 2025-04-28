@@ -16,7 +16,8 @@ func (p Point) Magnitude() (float64, duerror.DUError) {
 }
 
 func (p Point) MagnitudeInt() (int, duerror.DUError) {
-	return int(p.Magnitude()), nil
+	mag, _ := p.Magnitude()
+	return int(mag), nil
 }
 
 func EqualPoints(p1, p2 Point) bool {
