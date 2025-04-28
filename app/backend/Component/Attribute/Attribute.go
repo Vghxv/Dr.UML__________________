@@ -44,7 +44,7 @@ func (att *Attribute) GetStyle() (TextStyle, Utils.DUError) {
 
 // SetStyle sets the style attribute for the text. Returns an error if the style contains unsupported flags.
 func (att *Attribute) SetStyle(style TextStyle) Utils.DUError {
-	if style & ^SupportedTextStyleFlags != 0 {
+	if style & ^supportedTextStyleFlags != 0 {
 		return Utils.NewInvalidArgumentError("style contains unsupported flags")
 	}
 	att.style = style
