@@ -1,4 +1,4 @@
-package Utils
+package duerror
 
 type InvalidArgumentError struct {
 	msg string

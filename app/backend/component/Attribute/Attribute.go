@@ -1,7 +1,5 @@
 package Attribute
 
-import "Dr.uml/backend/Utils"
-
 // Attribute represents a configurable textual element with content, size, and style properties expressed as TextStyle.
 type Attribute struct {
 	content string
