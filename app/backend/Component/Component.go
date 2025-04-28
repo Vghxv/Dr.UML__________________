@@ -6,5 +6,4 @@ type Component interface {
 	SetupProperty() Utils.DUError
 	CreatePropertyTree() (PropertyTree, Utils.DUError)
 	Copy() (Component, Utils.DUError)
-	Draw( /*TODO Figure out the para*/ ) Utils.DUError
 }
