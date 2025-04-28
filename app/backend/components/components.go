@@ -11,6 +11,13 @@ type Components struct {
 	selectedComponents map[component.Component]bool
 }
 
+func NewComponents() *Components {
+	return &Components{
+		compoentsContainer: NewContainerMap(),
+		selectedComponents: make(map[component.Component]bool),
+	}
+}
+
 func (cs *Components) SelectComponent(point utils.Point) duerror.DUError {
 	comp, err := cs.compoentsContainer.Search(point)
 	if err != nil {
