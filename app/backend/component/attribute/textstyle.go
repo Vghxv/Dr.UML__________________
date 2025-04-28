@@ -1,6 +1,6 @@
-package Attribute
+package attribute
 
-type TextStyle int
+type Textstyle int
 
 const (
 	Bold                    = 1 << iota // 0x1

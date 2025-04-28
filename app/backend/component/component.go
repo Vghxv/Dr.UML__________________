@@ -1,7 +1,9 @@
-package Component
+package component
+
+import "Dr.uml/backend/utils/duerror"
 
 type Component interface {
-	SetupProperty() Utils.DUError
-	CreatePropertyTree() (PropertyTree, Utils.DUError)
-	Copy() (Component, Utils.DUError)
+	SetupProperty() duerror.DUError
+	CreatePropertyTree() (PropertyTree, duerror.DUError)
+	Copy() (Component, duerror.DUError)
 }

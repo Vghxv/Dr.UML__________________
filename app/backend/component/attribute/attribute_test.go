@@ -1,4 +1,4 @@
-package Attribute
+package attribute
 
 import (
 	"testing"
@@ -134,7 +134,7 @@ func TestAttribute_GetStyle(t *testing.T) {
 	tests := []struct {
 		name      string
 		attribute Attribute
-		expected  TextStyle
+		expected  Textstyle
 		hasError  bool
 	}{
 		{
@@ -161,9 +161,9 @@ func TestAttribute_GetStyle(t *testing.T) {
 func TestAttribute_SetStyle(t *testing.T) {
 	tests := []struct {
 		name     string
-		setValue TextStyle
+		setValue Textstyle
 		hasError bool
-		expected TextStyle
+		expected Textstyle
 	}{
 		{
 			name:     "valid style",
@@ -196,9 +196,9 @@ func TestAttribute_SetStyle(t *testing.T) {
 func TestAttribute_SetBold(t *testing.T) {
 	tests := []struct {
 		name      string
-		initStyle TextStyle
+		initStyle Textstyle
 		setValue  bool
-		expected  TextStyle
+		expected  Textstyle
 	}{
 		{
 			name:      "enable bold",
@@ -232,9 +232,9 @@ func TestAttribute_SetBold(t *testing.T) {
 func TestAttribute_SetItalic(t *testing.T) {
 	tests := []struct {
 		name      string
-		initStyle TextStyle
+		initStyle Textstyle
 		setValue  bool
-		expected  TextStyle
+		expected  Textstyle
 	}{
 		{
 			name:      "enable italic",
@@ -267,9 +267,9 @@ func TestAttribute_SetItalic(t *testing.T) {
 func TestAttribute_SetUnderline(t *testing.T) {
 	tests := []struct {
 		name      string
-		initStyle TextStyle
+		initStyle Textstyle
 		setValue  bool
-		expected  TextStyle
+		expected  Textstyle
 	}{
 		{
 			name:      "enable underline",
