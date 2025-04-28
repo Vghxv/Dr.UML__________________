@@ -3,7 +3,7 @@ package components
 import (
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/utils"
-	"Dr.uml/backend/utils/duerror/duerror"
+	"Dr.uml/backend/utils/duerror"
 )
 
 type Components struct {
