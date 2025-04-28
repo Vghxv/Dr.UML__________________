@@ -1,11 +1,20 @@
 package component
 
 import (
-	"Dr.UML/app/backend/duerror"
+	"Dr.uml/backend/utils/duerror"
 )
 
 type Association struct {
 	parents [2]*Gadget
+}
+
+func NewAssociation(parents [2]*Gadget) *Association {
+	if parents[0] == nil || parents[1] == nil {
+		return nil
+	}
+	return &Association {
+		parents: [2]*Gadget{parents[0], parents[1]},
+	}
 }
 
 func (a *Association) GetParentStart() (*Gadget, duerror.DuError) {
