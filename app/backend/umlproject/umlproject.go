@@ -97,7 +97,10 @@ func (p *UMLProject) AddNewDiagram(
 	name string,
 ) duerror.DUError {
 	id := uuid.New()
-	diagram := umldiagram.NewUMLDiagram(name, diagramType)
+	diagram, err := umldiagram.NewUMLDiagram(name, diagramType)
+	if err != nil {
+		return err
+	}
 	p.diagrams[id] = diagram
 	p.currentDiagram = diagram
 	p.openedDiagrams[id] = diagram
