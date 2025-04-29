@@ -1,3 +1,5 @@
 package utils
 
-type Color string
+type Color struct {
+	R, G, B uint8
+}
