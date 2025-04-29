@@ -2,6 +2,7 @@ package components
 
 import (
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -9,6 +10,7 @@ import (
 type Components struct {
 	compoentsContainer componentsContainer
 	selectedComponents map[component.Component]bool
+	drawData drawdata.Components
 }
 
 func NewComponents() *Components {
@@ -46,5 +48,13 @@ func (cs *Components) UnselectAllComponents() duerror.DUError {
 	for comp := range cs.selectedComponents {
 		delete(cs.selectedComponents, comp)
 	}
+	return nil
+}
+
+func (cs *Components) GetDrawData() (any, duerror.DUError) {
+	return cs.drawData, nil
+}
+
+func (cs *Components) updateDrawData() duerror.DUError {
 	return nil
 }

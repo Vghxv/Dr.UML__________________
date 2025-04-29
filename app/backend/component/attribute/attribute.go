@@ -1,6 +1,7 @@
 package attribute
 
 import (
+	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -11,7 +12,7 @@ type Attribute struct {
 	size    int
 	style   Textstyle
 	fontFile string
-	drawData utils.DrawDataAttribute
+	drawData drawdata.Attribute
 	updateParentDraw func() duerror.DUError
 }
 
@@ -125,7 +126,7 @@ func (att *Attribute) updateDrawData() duerror.DUError {
 	if err != nil {
 		return err
 	}
-	att.drawData = utils.DrawDataAttribute{
+	att.drawData = drawdata.Attribute{
 		Content: att.content,
 		Height: height,
 		Width: width,
