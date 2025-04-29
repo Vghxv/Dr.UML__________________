@@ -39,8 +39,8 @@ func TestNewUMLProject(t *testing.T) {
 
 func TestOpenProject(t *testing.T) {
 	project := NewUMLProject("TestProject")
-	diagram1 := umldiagram.NewUMLDiagram("Diagram1", "class")
-	diagram2 := umldiagram.NewUMLDiagram("Diagram2", "sequence")
+	diagram1 := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
+	diagram2 := umldiagram.NewUMLDiagram("Diagram2", umldiagram.ClassDiagram)
 
 	project.diagrams[diagram1.GetId()] = diagram1
 	project.diagrams[diagram2.GetId()] = diagram2
@@ -168,7 +168,7 @@ func TestAddGadget(t *testing.T) {
 
 func TestAddNewDiagram(t *testing.T) {
 	project := NewUMLProject("TestProject")
-	diagramType := "class"
+	diagramType := umldiagram.ClassDiagram
 	name := "NewDiagram"
 
 	err := project.AddNewDiagram(diagramType, name)

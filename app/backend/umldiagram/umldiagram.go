@@ -6,22 +6,28 @@ import (
 	"github.com/google/uuid"
 )
 
+type DiagramType string
+
+const (
+	ClassDiagram DiagramType = "ClassDiagram"
+)
+
 // Diagram represents a UML diagram
 type UMLDiagram struct {
 	id          uuid.UUID
 	name        string
-	diagramType string // e.g., "Class", "UseCase", "Sequence"
+	diagramType DiagramType // e.g., "Class", "UseCase", "Sequence"
 	lastOpened  time.Time
 	// Add other relevant diagram properties here
 }
 
 // NewUMLDiagram creates a new UMLDiagram instance
-func NewUMLDiagram(name, diagramType string) *UMLDiagram {
+func NewUMLDiagram(name string, dt DiagramType) *UMLDiagram {
 	id := uuid.New()
 	return &UMLDiagram{
 		id:          id,
 		name:        name,
-		diagramType: diagramType,
+		diagramType: dt,
 		lastOpened:  time.Now(),
 	}
 }

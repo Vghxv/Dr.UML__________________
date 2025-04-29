@@ -101,7 +101,7 @@ func (p *UMLProject) AddGadget(
 
 // Add diagram
 func (p *UMLProject) AddNewDiagram(
-	diagramType string,
+	diagramType umldiagram.DiagramType,
 	name string,
 ) duerror.DUError {
 	id := uuid.New()
