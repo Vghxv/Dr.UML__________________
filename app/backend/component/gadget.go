@@ -70,16 +70,16 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 		height += drawdata.LineWidth
 	}
 	width := maxAttWidth + drawdata.Margin*2 + drawdata.LineWidth*2
-	g.drawData = drawdata.Gadget{
-		GadgetType: int(g.gadgetType),
-		X: g.point.X,
-		Y: g.point.Y,
-		Layer: g.layer,
-		Height: height,
-		Width: width,
-		Color: g.color,
-		Attributes: atts,
-	}
+	
+	g.drawData.GadgetType = int(g.gadgetType)
+	g.drawData.X = g.point.X
+	g.drawData.Y = g.point.Y
+	g.drawData.Layer = g.layer
+	g.drawData.Height = height
+	g.drawData.Width = width
+	g.drawData.Color = g.color
+	g.drawData.Attributes = atts
+	
 	if g.updateParentDraw == nil {
 		return nil
 	}

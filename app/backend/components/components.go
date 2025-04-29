@@ -17,6 +17,10 @@ func NewComponents() *Components {
 	return &Components{
 		compoentsContainer: NewContainerMap(),
 		selectedComponents: make(map[component.Component]bool),
+		drawData: drawdata.Components{
+			Margin: drawdata.Margin,
+			LineWidth: drawdata.LineWidth,
+		},
 	}
 }
 
@@ -67,11 +71,7 @@ func (cs *Components) updateDrawData() duerror.DUError {
 		}
 		arr = append(arr, cDrawData)
 	}
-	cs.drawData = drawdata.Components{
-		Margin: drawdata.Margin,
-		LineWidth: drawdata.LineWidth,
-		Components: arr,
-	}
+	cs.drawData.Components = arr
 	// TODO: should notify parent
 	return nil
 }

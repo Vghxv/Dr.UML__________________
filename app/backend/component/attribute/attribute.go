@@ -126,14 +126,14 @@ func (att *Attribute) updateDrawData() duerror.DUError {
 	if err != nil {
 		return err
 	}
-	att.drawData = drawdata.Attribute{
-		Content: att.content,
-		Height: height,
-		Width: width,
-		FontSize: att.size,
-		FontStyle: int(att.style),
-		FontFile: att.fontFile,
-	}
+
+	att.drawData.Content = att.content
+	att.drawData.Height = height
+	att.drawData.Width = width
+	att.drawData.FontSize = att.size
+	att.drawData.FontStyle = int(att.style)
+	att.drawData.FontFile = att.fontFile
+
 	if att.updateParentDraw == nil {
 		return nil
 	}
