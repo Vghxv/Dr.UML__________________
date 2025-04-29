@@ -21,6 +21,15 @@ func Test_GetTextSize(t *testing.T) {
 			expectedWidth:  81,
 			hasError: false,
 		},
+		{
+			name:	 "size invalid",
+			str:	 "Hello, World!",
+			size:	 0,
+			fontFile: "../../app/assets/Inkfree.ttf",
+			expectedHeight: 0,
+			expectedWidth:  0,
+			hasError: true,
+		},
 	}
 
 	for _, tt := range tests {

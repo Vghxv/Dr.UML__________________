@@ -24,11 +24,13 @@ func loadFont(file string) (*opentype.Font, duerror.DUError) {
 func GetTextSize(str string, size int, fontFile string) (int, int, duerror.DUError) {
 	fontFile = "../../assets/Inkfree.ttf" // TODO: remove
 	dpi := 100
+	if size <= 0 {
+		return 0, 0, duerror.NewInvalidArgumentError("size must be greater than 0")
+	}
 	fnt, err := loadFont(fontFile)
 	if err != nil {
 		return 0, 0, err
 	}
-
 	face, err := opentype.NewFace(fnt, &opentype.FaceOptions{
 		Size:    float64(size),
 		DPI:     float64(dpi),
