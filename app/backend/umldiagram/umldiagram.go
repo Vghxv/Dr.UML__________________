@@ -63,8 +63,16 @@ func (ud *UMLDiagram) GetName() string {
 }
 
 func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
-	/* TODO */
-	return nil, nil
+	if !utils.IsValidFilePath(path) {
+		return nil, duerror.NewInvalidArgumentError("Invalid diagram name")
+	}
+	return &UMLDiagram{
+		id:           uuid.New(),
+		name:         path,
+		diagramType:  ClassDiagram,
+		lastModified: time.Now(),
+		startPoint:   utils.Point{X: 0, Y: 0},
+	}, nil
 }
 
 func (ud *UMLDiagram) AddGadget(gadgetType string) error {

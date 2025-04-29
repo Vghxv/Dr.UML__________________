@@ -2,6 +2,7 @@ package umlproject
 
 import (
 	"testing"
+	"time"
 
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils/duerror"
@@ -179,9 +180,11 @@ func TestAddGadget(t *testing.T) {
 	}
 
 	project.diagrams[diagram.GetId()] = diagram
+	project.currentDiagram = diagram
 
 	gadgetType := "class"
 	previousModified := project.lastModified
+	time.Sleep(1) // Ensure lastModified is different
 	err = project.AddGadget(gadgetType, diagram.GetId())
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
@@ -207,7 +210,7 @@ func TestAddNewDiagram(t *testing.T) {
 	diagramType := umldiagram.ClassDiagram
 	name := "NewDiagram"
 	previousModified := project.lastModified
-
+	time.Sleep(1) // Ensure lastModified is different
 	err := project.AddNewDiagram(umldiagram.DiagramType(diagramType), name)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
@@ -254,14 +257,47 @@ func TestCreateDiagram(t *testing.T) {
 		t.Errorf("Expected no error from stub, got %v", err)
 	}
 
-	// Since NewUMLDiagramWithPath returns nil, nil, createDiagram adds nothing
-	if len(project.diagrams) != 0 {
-		t.Errorf("Expected 0 diagrams, got %d", len(project.diagrams))
+	// Check if diagram was added to project
+	if len(project.diagrams) != 1 {
+		t.Errorf("Expected 1 diagram, got %d", len(project.diagrams))
 	}
-	if len(project.openedDiagrams) != 0 {
-		t.Errorf("Expected 0 opened diagrams, got %d", len(project.openedDiagrams))
+
+	// Check if diagram was opened
+	if len(project.openedDiagrams) != 1 {
+		t.Errorf("Expected 1 opened diagram, got %d", len(project.openedDiagrams))
 	}
-	if project.currentDiagram != nil {
-		t.Error("Expected currentDiagram to be nil")
+
+	// Check if current diagram was set
+	if project.currentDiagram == nil {
+		t.Error("Expected currentDiagram to be set")
+	}
+
+	// Check if lastModified was updated
+	if project.lastModified.IsZero() {
+		t.Error("Expected lastModified to be updated")
+	}
+}
+
+func TestInvalidPathDiagram(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	// Test invalid paths
+	invalidPaths := []string{
+		"test/path/diagram<>",
+		"test/path/diagram*",
+		"test/path/diagram?",
+		"test/path/diagram|",
+		"test/path/diagram\"",
+		"test/path/diagram:",
+	}
+
+	for _, path := range invalidPaths {
+		err := project.createDiagram(path)
+		if err == nil {
+			t.Errorf("Expected error for invalid path %s, got nil", path)
+		}
+		if err.Error() != duerror.NewInvalidArgumentError("Invalid diagram name").Error() {
+			t.Errorf("Expected 'Invalid diagram name' error for path %s, got %s", path, err.Error())
+		}
 	}
 }
