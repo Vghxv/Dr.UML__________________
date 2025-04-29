@@ -17,10 +17,10 @@ func TestIsValidFilePath(t *testing.T) {
 		{"ValidWindowsPath", `C:\valid\windows\path`, !(runtime.GOOS == "windows")},
 
 		// Windows specific cases
-		{"InvalidWindowsPathCharacters", `C:\invalid\windows|path`, false},
+		{"InvalidWindowsPathCharacters", `C:\invalid\windows|path`, !(runtime.GOOS == "windows")},
 		{"WindowsReservedCON", `C:\CON`, runtime.GOOS != "windows"},
 		{"WindowsReservedCOM1", `COM1.txt`, runtime.GOOS != "windows"},
-		{"WindowsExceeds255Characters", "C:\\" + string(make([]byte, 256)), false},
+		{"WindowsExceeds255Characters", "C:\\" + string(make([]byte, 256)), !(runtime.GOOS == "windows")},
 
 		// Unix specific cases
 		{"UnixContainsNullChar", "/valid/unix/path\x00", runtime.GOOS == "windows"},
