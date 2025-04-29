@@ -16,14 +16,6 @@ func TestNewUMLProject(t *testing.T) {
 		t.Errorf("Expected project name %s, got %s", name, project.GetName())
 	}
 
-	if project.GetId() == uuid.Nil {
-		t.Error("Expected non-empty project ID")
-	}
-
-	if _, err := uuid.Parse(project.GetId().String()); err != nil {
-		t.Errorf("Expected valid UUID for project ID, got %s", project.GetId())
-	}
-
 	if project.lastModified.IsZero() {
 		t.Error("Expected non-zero lastModified time")
 	}
@@ -39,8 +31,8 @@ func TestNewUMLProject(t *testing.T) {
 
 func TestOpenProject(t *testing.T) {
 	project := NewUMLProject("TestProject")
-	diagram1 := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
-	diagram2 := umldiagram.NewUMLDiagram("Diagram2", umldiagram.ClassDiagram)
+	diagram1 := umldiagram.NewUMLDiagram("Diagram1", umldiagram.NewDiagramType("ClassDiagram"))
+	diagram2 := umldiagram.NewUMLDiagram("Diagram2", umldiagram.NewDiagramType("SequenceDiagram"))
 
 	project.diagrams[diagram1.GetId()] = diagram1
 	project.diagrams[diagram2.GetId()] = diagram2
@@ -168,7 +160,7 @@ func TestAddGadget(t *testing.T) {
 
 func TestAddNewDiagram(t *testing.T) {
 	project := NewUMLProject("TestProject")
-	diagramType := umldiagram.ClassDiagram
+	diagramType := umldiagram.NewDiagramType("ClassDiagram")
 	name := "NewDiagram"
 
 	err := project.AddNewDiagram(diagramType, name)

@@ -10,7 +10,6 @@ import (
 )
 
 type UMLProject struct {
-	id             uuid.UUID
 	name           string
 	lastModified   time.Time
 	currentDiagram *umldiagram.UMLDiagram               // The currently selected diagram
@@ -21,10 +20,7 @@ type UMLProject struct {
 // NewUMLProject creates a new UMLProject instance
 func NewUMLProject(name string) *UMLProject {
 
-	id := uuid.New()
-
 	return &UMLProject{
-		id:             id,
 		name:           name,
 		lastModified:   time.Now(),
 		diagrams:       make(map[uuid.UUID]*umldiagram.UMLDiagram),
@@ -35,11 +31,6 @@ func NewUMLProject(name string) *UMLProject {
 // GetName returns the name of the UMLProject
 func (p *UMLProject) GetName() string {
 	return p.name
-}
-
-// GetId returns the ID of the UMLProject
-func (p *UMLProject) GetId() uuid.UUID {
-	return p.id
 }
 
 // OpenProject opens the project and returns a list of opened diagrams and all available diagrams
