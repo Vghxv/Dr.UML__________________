@@ -9,10 +9,8 @@ import (
 type GadgetType string
 
 const (
-	Class  GadgetType = "Class"
-	Rect   GadgetType = "Rect"
-	Circle GadgetType = "Circle"
-	Note   GadgetType = "Note"
+	Class GadgetType = "Class"
+	Note  GadgetType = "Note"
 )
 
 type Gadget struct {
