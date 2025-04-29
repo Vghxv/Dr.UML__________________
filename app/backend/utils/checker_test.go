@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -14,22 +14,23 @@ func TestIsValidFilePath(t *testing.T) {
 		// Common cases
 		{"EmptyPath", "", false},
 		{"ValidUnixPath", "/valid/unix/path", true},
-		{"ValidWindowsPath", `C:\valid\windows\path`, !(runtime.GOOS == "windows")},
+		{"ValidWindowsPath", `C:\valid\windows\path`, true},
 
 		// Windows specific cases
-		{"InvalidWindowsPathCharacters", `C:\invalid\windows|path`, !(runtime.GOOS == "windows")},
-		{"WindowsReservedCON", `C:\CON`, runtime.GOOS != "windows"},
-		{"WindowsReservedCOM1", `COM1.txt`, runtime.GOOS != "windows"},
-		{"WindowsExceeds255Characters", "C:\\" + string(make([]byte, 256)), !(runtime.GOOS == "windows")},
+		{"InvalidWindowsPathCharacters", `C:\invalid\windows|path`, false},
+		{"WindowsReservedCON", `C:\CON`, false},
+		{"WindowsReservedCOM1", `COM1.txt`, false},
+		{"WindowsExceeds255Characters", "C:\\" + string(make([]byte, 256)), false},
 
 		// Unix specific cases
-		{"UnixContainsNullChar", "/valid/unix/path\x00", runtime.GOOS == "windows"},
+		{"UnixContainsNullChar", "/valid/unix/path\x00", false},
 		{"UnixExceeds255Characters", "/" + string(make([]byte, 256)), false},
 
 		// Cross-platform edge cases
 		{"RelativePath", "./relative/path", true},
 		{"AbsolutePath", "/absolute/path", true},
 		{"ValidPathWithDots", "/valid/../path", true},
+		{"LongPath", strings.Repeat("a/", 128) + "file.txt", false},
 	}
 
 	for _, tt := range tests {
