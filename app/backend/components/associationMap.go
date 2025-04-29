@@ -9,7 +9,7 @@ import (
 
 // implement AssociationGraph interface
 type associationMap struct {
-	assMap map[*component.Gadget](map[*component.Gadget]([]*component.Association))
+	assMap map[*component.Gadget](map[*component.Gadget][]*component.Association)
 }
 
 func NewAssociationMap() AssociationGraph {
@@ -112,7 +112,7 @@ func (am *associationMap) Insert(a *component.Association) duerror.DUError {
 	start, _ := a.GetParentStart()
 	end, _ := a.GetParentEnd()
 	if _, ok := am.assMap[start]; !ok {
-		am.assMap[start] = make(map[*component.Gadget]([]*component.Association))
+		am.assMap[start] = make(map[*component.Gadget][]*component.Association)
 	}
 	if _, ok := am.assMap[start][end]; !ok {
 		am.assMap[start][end] = []*component.Association{a}
