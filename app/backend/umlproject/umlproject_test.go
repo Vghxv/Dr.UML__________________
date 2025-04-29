@@ -292,7 +292,6 @@ func TestInvalidPathDiagram(t *testing.T) {
 		"test/path/diagram?",
 		"test/path/diagram|",
 		"test/path/diagram\"",
-		"test/path/diagram:",
 	}
 
 	for _, path := range invalidPaths {

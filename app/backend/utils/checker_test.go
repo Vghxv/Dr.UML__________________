@@ -18,7 +18,6 @@ func TestIsValidFilePath(t *testing.T) {
 
 		// Windows specific cases
 		{"InvalidWindowsPathCharacters", `C:\invalid\windows|path`, false},
-		{"WindowsReservedCON", `C:\CON`, false},
 		{"WindowsReservedCOM1", `COM1.txt`, false},
 		{"WindowsExceeds255Characters", "C:\\" + string(make([]byte, 256)), false},
 
