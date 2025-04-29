@@ -8,13 +8,13 @@ type Association struct {
 	parents [2]*Gadget
 }
 
-func NewAssociation(parents [2]*Gadget) *Association {
+func NewAssociation(parents [2]*Gadget) (*Association, duerror.DUError) {
 	if parents[0] == nil || parents[1] == nil {
-		return nil
+		return nil, duerror.NewInvalidArgumentError("parents are nil")
 	}
 	return &Association {
 		parents: [2]*Gadget{parents[0], parents[1]},
-	}
+	}, nil
 }
 
 func (a *Association) GetParentStart() (*Gadget, duerror.DUError) {
