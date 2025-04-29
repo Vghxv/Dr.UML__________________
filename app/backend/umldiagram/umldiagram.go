@@ -17,7 +17,7 @@ const (
 	supportedType   = ClassDiagram | UseCaseDiagram | SequenceDiagram
 )
 
-func check(input DiagramType) bool {
+func isValidDiagramType(input DiagramType) bool {
 	return input&supportedType == input && input != 0
 }
 
@@ -41,7 +41,7 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		return nil, duerror.NewInvalidArgumentError("Invalid diagram name")
 	}
 
-	if !check(dt) {
+	if !isValidDiagramType(dt) {
 		return nil, duerror.NewInvalidArgumentError("Invalid diagram type")
 	}
 
