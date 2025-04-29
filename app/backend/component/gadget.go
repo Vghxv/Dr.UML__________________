@@ -18,7 +18,7 @@ type Gadget struct {
 	gadgetType string
 	point utils.Point
 	layer int
-	attributes [][]attribute.Attribute
+	attributes [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
 	color int
 	drawData drawdata.Gadget
 	updateParentDraw func() duerror.DUError
