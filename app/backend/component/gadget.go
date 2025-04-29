@@ -7,6 +7,13 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
+type GadgetType string
+
+const (
+	Class GadgetType = "Class"
+	Note  GadgetType = "Note"
+)
+
 type Gadget struct {
 	gadgetType string
 	point utils.Point
