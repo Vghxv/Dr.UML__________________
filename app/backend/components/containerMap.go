@@ -1,6 +1,9 @@
 package components
 
 import (
+	"maps"
+	"slices"
+
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
@@ -55,6 +58,10 @@ func (cp *containerMap) Search(p utils.Point) (component.Component, duerror.DUEr
 		}
 	}
 	return candidate, nil
+}
+
+func (cp *containerMap) GetAll() []component.Component {
+	return slices.Collect(maps.Keys(cp.compMap))
 }
 
 func (cp *containerMap) Len() (int, duerror.DUError) {

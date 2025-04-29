@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -79,7 +80,7 @@ func (p *UMLProject) SelectDiagram(diagramID uuid.UUID) duerror.DUError {
 
 // AddGadget
 func (p *UMLProject) AddGadget(
-	gadgetType string,
+	gadgetType component.GadgetType,
 	diagramID uuid.UUID,
 ) duerror.DUError {
 	if diagram, ok := p.diagrams[diagramID]; ok {

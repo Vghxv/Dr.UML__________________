@@ -1,12 +1,19 @@
 package attribute
 
-import "Dr.uml/backend/utils/duerror"
+import (
+	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/utils"
+	"Dr.uml/backend/utils/duerror"
+)
 
 // Attribute represents a configurable textual element with content, size, and style properties expressed as Textstyle.
 type Attribute struct {
 	content string
 	size    int
 	style   Textstyle
+	fontFile string
+	drawData drawdata.Attribute
+	updateParentDraw func() duerror.DUError
 }
 
 // GetContent retrieves the content of the Attribute as a string along with an error if applicable.
@@ -103,4 +110,32 @@ func (att *Attribute) Copy() (*Attribute, duerror.DUError) {
 		size:    att.size,
 		style:   att.style,
 	}, nil
+}
+
+func (att *Attribute) GetDrawData() (drawdata.Attribute, duerror.DUError) {
+	return att.drawData, nil
+}
+
+func (att *Attribute) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	att.updateParentDraw = update
+	return nil
+}
+
+func (att *Attribute) updateDrawData() duerror.DUError {
+	height, width, err := utils.GetTextSize(att.content, att.size, att.fontFile)
+	if err != nil {
+		return err
+	}
+
+	att.drawData.Content = att.content
+	att.drawData.Height = height
+	att.drawData.Width = width
+	att.drawData.FontSize = att.size
+	att.drawData.FontStyle = int(att.style)
+	att.drawData.FontFile = att.fontFile
+
+	if att.updateParentDraw == nil {
+		return nil
+	}
+	return att.updateParentDraw()
 }
