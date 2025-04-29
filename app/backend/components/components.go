@@ -56,5 +56,22 @@ func (cs *Components) GetDrawData() (any, duerror.DUError) {
 }
 
 func (cs *Components) updateDrawData() duerror.DUError {
+	arr := make([]drawdata.Component, 0, len(cs.selectedComponents))
+	for _, c := range cs.compoentsContainer.GetAll() {
+		cDrawData, err := c.GetDrawData()
+		if err != nil {
+			return err
+		}
+		if cDrawData == nil {
+			continue
+		}
+		arr = append(arr, cDrawData)
+	}
+	cs.drawData = drawdata.Components{
+		Margin: drawdata.Margin,
+		LineWidth: drawdata.LineWidth,
+		Components: arr,
+	}
+	// TODO: should notify parent
 	return nil
 }

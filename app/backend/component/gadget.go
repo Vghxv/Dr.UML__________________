@@ -11,7 +11,8 @@ type Gadget struct {
 	gadgetType string
 	point utils.Point
 	layer int
-	attributes []attribute.Attribute
+	attributes [][]attribute.Attribute
+	color int
 	drawData drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
@@ -43,10 +44,34 @@ func (g *Gadget) GetDrawData() (any, duerror.DUError) {
 }
 
 func (g *Gadget) updateDrawData() duerror.DUError {
+	height := drawdata.LineWidth + drawdata.Margin
+	maxAttWidth := 0
+	atts := make([][]drawdata.Attribute, len(g.attributes))
+	for i, attsRow := range g.attributes {
+		atts[i] = make([]drawdata.Attribute, 0, len(attsRow))
+		for _, att := range attsRow {
+			attDrawData, err := att.GetDrawData()
+			if err != nil {
+				return err
+			}
+			atts[i] = append(atts[i], attDrawData)
+			if attDrawData.Width > maxAttWidth {
+				maxAttWidth = attDrawData.Width
+			}
+			height += attDrawData.Height + drawdata.Margin
+		}
+		height += drawdata.LineWidth
+	}
+	width := maxAttWidth + drawdata.Margin*2 + drawdata.LineWidth*2
 	g.drawData = drawdata.Gadget{
 		GadgetType: g.gadgetType,
 		X: g.point.X,
 		Y: g.point.Y,
+		Layer: g.layer,
+		Height: height,
+		Width: width,
+		Color: g.color,
+		Attributes: atts,
 	}
 	if g.updateParentDraw == nil {
 		return nil

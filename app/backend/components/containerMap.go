@@ -57,6 +57,14 @@ func (cp *containerMap) Search(p utils.Point) (component.Component, duerror.DUEr
 	return candidate, nil
 }
 
+func (cp *containerMap) GetAll() []component.Component {
+	all := make([]component.Component, 0, len(cp.compMap))
+	for c := range cp.compMap {
+		all = append(all, c)
+	}
+	return all
+}
+
 func (cp *containerMap) Len() (int, duerror.DUError) {
 	return len(cp.compMap), nil
 }

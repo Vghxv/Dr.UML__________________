@@ -9,40 +9,57 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-const dpi = 72
-var fnt *opentype.Font
-var fontFile string
-
-func loadFont(file string) duerror.DUError {
-	if fontFile == file {
-		return nil
-	}
-	fontBytes, err := os.ReadFile("CourierPrime-Regular.ttf")
+func loadFont(file string) (*opentype.Font, duerror.DUError) {
+	fontBytes, err := os.ReadFile(file)
 	if err != nil {
-		return duerror.NewFileIOError(err.Error())
+		return nil, duerror.NewFileIOError(err.Error())
 	}
-	newFnt, err := opentype.Parse(fontBytes)
+	fnt, err := opentype.Parse(fontBytes)
 	if err != nil {
-		return duerror.NewFileIOError(err.Error())
+		return nil, duerror.NewFileIOError(err.Error())
 	}
-	fnt = newFnt
-	fontFile = file
-	return nil
+	return fnt, nil
 }
 
 func GetTextSize(str string, size int, fontFile string) (int, int, duerror.DUError) {
-	err := loadFont(fontFile)
+	fontFile = "../../assets/Inkfree.ttf" // TODO: remove
+	dpi := 100
+	fnt, err := loadFont(fontFile)
 	if err != nil {
 		return 0, 0, err
 	}
+
 	face, err := opentype.NewFace(fnt, &opentype.FaceOptions{
 		Size:    float64(size),
-		DPI:     dpi,
+		DPI:     float64(dpi),
 		Hinting: font.HintingFull,
 	})
 	if err != nil {
 		return 0, 0, duerror.NewFileIOError(err.Error())
 	}
+	defer face.Close()
+	
+	// Draw the string to an image
+	// imgWidth := 400
+	// imgHeight := 100
+	// img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+	// d := &font.Drawer{
+	// 	Dst:  img,
+	// 	Src:  image.NewUniform(color.Black),
+	// 	Face: face,
+	// 	Dot:  fixed.P(10, 50),
+	// }
+	// d.DrawString(str)
+
+	// outFile, err := os.Create("output.png")
+	// if err != nil {
+	// 	log.Fatalf("failed to create output file: %v", err)
+	// }
+	// defer outFile.Close()
+	// if err := png.Encode(outFile, img); err != nil {
+	// 	log.Fatalf("failed to encode image: %v", err)
+	// }
+
 	var width fixed.Int26_6
 	for _, r := range str {
 		advance, ok := face.GlyphAdvance(r)
@@ -53,6 +70,5 @@ func GetTextSize(str string, size int, fontFile string) (int, int, duerror.DUErr
 	}
 	metrics := face.Metrics()
 	height := metrics.Ascent + metrics.Descent
-	face.Close()
 	return height.Round(), width.Round(), nil
 }

@@ -112,7 +112,7 @@ func (att *Attribute) Copy() (*Attribute, duerror.DUError) {
 	}, nil
 }
 
-func (att *Attribute) GetDrawData() (any, duerror.DUError) {
+func (att *Attribute) GetDrawData() (drawdata.Attribute, duerror.DUError) {
 	return att.drawData, nil
 }
 
