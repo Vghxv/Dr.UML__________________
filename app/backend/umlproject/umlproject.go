@@ -33,20 +33,21 @@ func (p *UMLProject) GetName() string {
 	return p.name
 }
 
-// OpenProject opens the project and returns a list of opened diagrams and all available diagrams
-func (p *UMLProject) OpenProject() ([]*umldiagram.UMLDiagram, []string) {
+// GetLastModified returns the last modified time of the UMLProject
+func (p *UMLProject) OpenProject() ([]*umldiagram.UMLDiagram, []string, []uuid.UUID) {
 	openedDiagrams := make([]*umldiagram.UMLDiagram, 0, len(p.openedDiagrams))
-	diagramList := make([]string, 0, len(p.diagrams))
-
+	uuidList := make([]uuid.UUID, 0, len(p.openedDiagrams))
 	for _, diagram := range p.openedDiagrams {
 		openedDiagrams = append(openedDiagrams, diagram)
+		uuidList = append(uuidList, diagram.GetId())
 	}
 
+	diagramList := make([]string, 0, len(p.diagrams))
 	for _, diagram := range p.diagrams {
 		diagramList = append(diagramList, diagram.GetName())
 	}
 
-	return openedDiagrams, diagramList
+	return openedDiagrams, diagramList, uuidList
 }
 
 // GetAvailableDiagrams returns a list of the names of all available diagrams in the project

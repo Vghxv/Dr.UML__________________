@@ -38,7 +38,7 @@ func TestOpenProject(t *testing.T) {
 	project.diagrams[diagram2.GetId()] = diagram2
 	project.openedDiagrams[diagram1.GetId()] = diagram1
 
-	opened, allDiagrams := project.OpenProject()
+	opened, allDiagrams, uuidList := project.OpenProject()
 
 	if len(opened) != 1 {
 		t.Errorf("Expected 1 opened diagram, got %d", len(opened))
@@ -50,6 +50,14 @@ func TestOpenProject(t *testing.T) {
 
 	if len(allDiagrams) != 2 {
 		t.Errorf("Expected 2 diagrams in total, got %d", len(allDiagrams))
+	}
+
+	if len(uuidList) != 1 {
+		t.Errorf("Expected 1 UUID in the list, got %d", len(uuidList))
+	}
+
+	if uuidList[0] != diagram1.GetId() {
+		t.Errorf("Expected UUID to match diagram1's ID")
 	}
 }
 
