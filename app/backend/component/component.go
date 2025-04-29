@@ -13,6 +13,7 @@ type Component interface {
 	GetLayer() (int, duerror.DUError)
 	SetLayer(layer int) duerror.DUError
 	GetDrawData() (any, duerror.DUError)
+	RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError
 
 	updateDrawData() duerror.DUError
 }

@@ -1,14 +1,18 @@
 package component
 
 import (
+	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
 
 type Gadget struct {
+	gadgetType string
 	point utils.Point
 	layer int
-	drawData any
+	attributes []attribute.Attribute
+	drawData utils.DrawDataGadget
+	updateParentDraw func() duerror.DUError
 }
 
 
@@ -38,6 +42,19 @@ func (g *Gadget) GetDrawData() (any, duerror.DUError) {
 }
 
 func (g *Gadget) updateDrawData() duerror.DUError {
+	g.drawData = utils.DrawDataGadget{
+		GadgetType: g.gadgetType,
+		X: g.point.X,
+		Y: g.point.Y,
+	}
+	if g.updateParentDraw == nil {
+		return nil
+	}
+	return g.updateParentDraw()
+}
+
+func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	g.updateParentDraw = update
 	return nil
 }
 
