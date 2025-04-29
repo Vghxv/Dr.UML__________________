@@ -18,7 +18,7 @@ const (
 )
 
 func check(input DiagramType) bool {
-	return input&supportedType != 0
+	return input&supportedType == input && input != 0
 }
 
 // Diagram represents a UML diagram
