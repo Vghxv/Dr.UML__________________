@@ -24,14 +24,12 @@ func isValidDiagramType(input DiagramType) bool {
 
 // Diagram represents a UML diagram
 type UMLDiagram struct {
-	id           uuid.UUID
-	name         string
-	diagramType  DiagramType // e.g., "Class", "UseCase", "Sequence"
-	lastModified time.Time
-	startPoint   utils.Point // for dragging and linking ass
-	/* TODO */
-	// add background color
-
+	id              uuid.UUID
+	name            string
+	diagramType     DiagramType // e.g., "Class", "UseCase", "Sequence"
+	lastModified    time.Time
+	startPoint      utils.Point // for dragging and linking ass
+	backgroundColor utils.Color
 }
 
 // NewUMLDiagram creates a new UMLDiagram instance
@@ -47,11 +45,12 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 	}
 
 	return &UMLDiagram{
-		id:           id,
-		name:         name,
-		diagramType:  dt,
-		lastModified: time.Now(),
-		startPoint:   utils.Point{X: 0, Y: 0},
+		id:              id,
+		name:            name,
+		diagramType:     dt,
+		lastModified:    time.Now(),
+		startPoint:      utils.Point{X: 0, Y: 0},
+		backgroundColor: utils.Color{R: 255, G: 255, B: 255}, // Default white background
 	}, nil
 }
 
