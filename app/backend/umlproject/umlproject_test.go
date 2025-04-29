@@ -1,10 +1,12 @@
 package umlproject
 
 import (
-	"github.com/pkg/errors"
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
+
+	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils/duerror"
 	"github.com/google/uuid"
@@ -183,7 +185,7 @@ func TestAddGadget(t *testing.T) {
 	project.diagrams[diagram.GetId()] = diagram
 	project.currentDiagram = diagram
 
-	gadgetType := "class"
+	gadgetType := component.Class
 	previousModified := project.lastModified
 	time.Sleep(1) // Ensure lastModified is different
 	err = project.AddGadget(gadgetType, diagram.GetId())

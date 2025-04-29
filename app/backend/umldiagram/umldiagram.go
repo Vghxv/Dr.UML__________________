@@ -3,6 +3,7 @@ package umldiagram
 import (
 	"time"
 
+	"Dr.uml/backend/component"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 	"github.com/google/uuid"
@@ -75,7 +76,7 @@ func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
 	}, nil
 }
 
-func (ud *UMLDiagram) AddGadget(gadgetType string) error {
+func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType) error {
 	// Add a gadget to the diagram
 	/* TODO */
 	return nil

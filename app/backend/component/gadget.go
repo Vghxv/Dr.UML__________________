@@ -7,15 +7,15 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
-type GadgetType string
+type GadgetType int
 
 const (
-	Class GadgetType = "Class"
-	Note  GadgetType = "Note"
+	Class GadgetType = 1 << iota // 0x01
+	supportedType = Class
 )
 
 type Gadget struct {
-	gadgetType string
+	gadgetType GadgetType
 	point utils.Point
 	layer int
 	attributes [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
@@ -71,7 +71,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	}
 	width := maxAttWidth + drawdata.Margin*2 + drawdata.LineWidth*2
 	g.drawData = drawdata.Gadget{
-		GadgetType: g.gadgetType,
+		GadgetType: int(g.gadgetType),
 		X: g.point.X,
 		Y: g.point.Y,
 		Layer: g.layer,

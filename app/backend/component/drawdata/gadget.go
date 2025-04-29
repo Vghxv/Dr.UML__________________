@@ -1,7 +1,7 @@
 package drawdata
 
 type Gadget struct {
-	GadgetType string        `json:"gadgetType"`
+	GadgetType int           `json:"gadgetType"`
 	X          int           `json:"x"`
 	Y          int           `json:"y"`
 	Layer      int           `json:"layer"`
