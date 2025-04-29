@@ -18,7 +18,7 @@ type Gadget struct {
 	GadgetType GadgetType
 
 	layer     int
-	attribute []attribute.Attribute
+	attributes []attribute.Attribute
 }
 
 func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
