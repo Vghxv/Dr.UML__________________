@@ -46,6 +46,6 @@ func (ud *UMLDiagram) GetName() string {
 
 func (ud *UMLDiagram) AddGadget(gadgetType string) error {
 	// Add a gadget to the diagram
-	// This is a placeholder implementation
+/* TODO */
 	return nil
 }
