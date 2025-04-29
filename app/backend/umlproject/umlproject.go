@@ -68,7 +68,7 @@ func (p *UMLProject) GetLastOpenedDiagrams() []string {
 	return openedDiagramList
 }
 
-// GetDiagram returns a diagram by its ID
+// SelectDiagram sets the current diagram to the one with the given ID
 func (p *UMLProject) SelectDiagram(diagramID uuid.UUID) duerror.DUError {
 	if diagram, ok := p.diagrams[diagramID]; ok {
 		p.currentDiagram = diagram
