@@ -12,33 +12,46 @@ import (
 func TestNewUMLDiagram(t *testing.T) {
 	tests := []struct {
 		name        string
+		inputName   string
 		diagramType DiagramType
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name:        "ValidClassDiagram",
+			inputName:   "test1.uml",
 			diagramType: ClassDiagram,
 			expectError: false,
 		},
 		{
 			name:        "ValidUseCaseDiagram",
+			inputName:   "test2.uml",
 			diagramType: UseCaseDiagram,
 			expectError: false,
 		},
 		{
 			name:        "ValidSequenceDiagram",
+			inputName:   "test3.uml",
 			diagramType: SequenceDiagram,
 			expectError: false,
 		},
 		{
 			name:        "InvalidDiagramType",
-			diagramType: DiagramType(8), // Unsupported type
+			inputName:   "test4.uml",
+			diagramType: DiagramType(8),
+			expectError: true,
+			errorMsg:    "Invalid diagram type",
+		},
+		{
+			name:        "InvalidDiagramType2",
+			inputName:   "test5.uml",
+			diagramType: DiagramType(8787),
 			expectError: true,
 			errorMsg:    "Invalid diagram type",
 		},
 		{
 			name:        "InvalidName",
+			inputName:   "",
 			diagramType: ClassDiagram,
 			expectError: true,
 			errorMsg:    "Invalid diagram name",
@@ -47,20 +60,7 @@ func TestNewUMLDiagram(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Mock utils.IsValidFilePath for invalid name test
-			if tt.name == "InvalidName" {
-				// Assuming IsValidFilePath returns true for invalid paths in this context
-				// We don't have the actual implementation, so we're testing the error case
-				diagram, err := NewUMLDiagram("invalid/path", tt.diagramType)
-				if tt.expectError {
-					assert.Error(t, err)
-					assert.Equal(t, tt.errorMsg, err.Error())
-					assert.Nil(t, diagram)
-				}
-				return
-			}
-
-			diagram, err := NewUMLDiagram(tt.name, tt.diagramType)
+			diagram, err := NewUMLDiagram(tt.inputName, tt.diagramType)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -70,7 +70,7 @@ func TestNewUMLDiagram(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, diagram)
 				assert.NotEqual(t, uuid.Nil, diagram.GetId())
-				assert.Equal(t, tt.name, diagram.GetName())
+				assert.Equal(t, tt.inputName, diagram.GetName())
 				assert.Equal(t, tt.diagramType, diagram.diagramType)
 				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
@@ -127,12 +127,46 @@ func TestUMLDiagramGetters(t *testing.T) {
 
 	assert.NotEqual(t, uuid.Nil, diagram.GetId())
 	assert.Equal(t, "TestDiagram", diagram.GetName())
+
+	err = diagram.AddGadget("test")
+	assert.NoError(t, err)
 }
 
-// TODO: Add test for NewUMLDiagramWithPath when implemented
 func TestNewUMLDiagramWithPath(t *testing.T) {
-	t.Skip("NewUMLDiagramWithPath not implemented yet")
-	// diagram, err := NewUMLDiagramWithPath("some/path")
-	// assert.Error(t, err)
-	// assert.Nil(t, diagram)
+	tests := []struct {
+		name        string
+		path        string
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "ValidPath",
+			path:        "test.uml",
+			expectError: false,
+		},
+		{
+			name:        "InvalidPath",
+			path:        "",
+			expectError: true,
+			errorMsg:    "Invalid diagram name",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diagram, err := NewUMLDiagramWithPath(tt.path)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, diagram)
+				assert.Equal(t, tt.errorMsg, err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, diagram)
+				assert.Equal(t, tt.path, diagram.GetName())
+				assert.Equal(t, DiagramType(ClassDiagram), diagram.diagramType)
+				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
+			}
+		})
+	}
 }

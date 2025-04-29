@@ -1,6 +1,7 @@
 package umlproject
 
 import (
+	"github.com/pkg/errors"
 	"testing"
 	"time"
 
@@ -242,6 +243,9 @@ func TestAddNewDiagram(t *testing.T) {
 		t.Error("Expected error for invalid diagram type")
 	}
 	if err.Error() != duerror.NewInvalidArgumentError("Invalid diagram type").Error() {
+		if errors.Is(err, duerror.NewInvalidArgumentError("Invalid diagram type")) {
+			t.Errorf("Expected 'Invalid diagram type' error, got %s", err.Error())
+		}
 		t.Errorf("Expected 'Invalid diagram type' error, got %s", err.Error())
 	}
 }
