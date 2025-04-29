@@ -1,13 +1,26 @@
 package component
 
 import (
+	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
 
+type GadgetType string
+
+const (
+	Class  GadgetType = "Class"
+	Rect   GadgetType = "Rect"
+	Circle GadgetType = "Circle"
+	Note   GadgetType = "Note"
+)
+
 type Gadget struct {
-	point utils.Point
-	layer int
+	point      utils.Point
+	GadgetType GadgetType
+
+	layer     int
+	attribute []attribute.Attribute
 }
 
 func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
