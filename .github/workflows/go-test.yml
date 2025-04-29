@@ -23,7 +23,7 @@ jobs:
       working-directory: ./app
       run: |
         mkdir -p frontend/dist
-        touch frontend/dist/gitkeep
+        touch frontend/dist/.gitkeep
 
     - name: Run Tests and Generate Coverage
       working-directory: ./app
