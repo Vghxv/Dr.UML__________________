@@ -33,7 +33,7 @@ func NewUMLDiagram(name string, dt DiagramType) *UMLDiagram {
 }
 
 func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
-	// read from disk
+    /* TODO */
 	return nil, nil
 }
 
