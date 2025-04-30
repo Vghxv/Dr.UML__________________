@@ -14,12 +14,15 @@ const (
 	supportedType            = Class
 )
 
+// a default gadget color (grey)
+const defaultGadgetColor = "#0x808080"
+
 type Gadget struct {
 	gadgetType       GadgetType
 	point            utils.Point
 	layer            int
 	attributes       [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
-	color            int
+	color            utils.Color
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
@@ -76,7 +79,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Layer = g.layer
 	g.drawData.Height = height
 	g.drawData.Width = width
-	g.drawData.Color = g.color
+	g.drawData.Color = defaultGadgetColor
 	g.drawData.Attributes = atts
 
 	if g.updateParentDraw == nil {
@@ -111,6 +114,6 @@ func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUErr
 		gadgetType: gadgetType,
 		point:      point,
 		layer:      0,
-		color:      0,
+		color:      utils.Color{R: 0, G: 0, B: 0}, // Default black color
 	}, nil
 }
