@@ -73,6 +73,9 @@ func TestNewUMLDiagram(t *testing.T) {
 				assert.Equal(t, tt.diagramType, diagram.diagramType)
 				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
+				// New assertions
+				assert.Equal(t, utils.Color{R: 255, G: 255, B: 255}, diagram.backgroundColor)
+				assert.NotNil(t, diagram.components)
 			}
 		})
 	}
@@ -126,8 +129,9 @@ func TestUMLDiagramGetters(t *testing.T) {
 
 	assert.Equal(t, "TestDiagram", diagram.GetName())
 
-	err = diagram.AddGadget(component.Class)
+	comp, err := diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20})
 	assert.NoError(t, err)
+	assert.NotNil(t, comp)
 }
 
 func TestNewUMLDiagramWithPath(t *testing.T) {

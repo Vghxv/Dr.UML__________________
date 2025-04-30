@@ -4,7 +4,9 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/umldiagram"
+	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
 
@@ -78,15 +80,19 @@ func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 // AddGadget
 func (p *UMLProject) AddGadget(
 	gadgetType component.GadgetType,
-	diagramName string,
-) duerror.DUError {
-	if diagram, ok := p.diagrams[diagramName]; ok {
-		// Add the gadget to the diagram
-		diagram.AddGadget(gadgetType)
-		p.lastModified = time.Now()
-		return nil
+	point utils.Point,
+) (drawdata.Gadget, duerror.DUError) {
+
+	dd, err := p.currentDiagram.AddGadget(gadgetType, point)
+	if err != nil {
+		return drawdata.Gadget{}, err
 	}
-	return duerror.NewInvalidArgumentError("Diagram not found")
+	p.lastModified = time.Now()
+	if dd.GadgetType != 1 {
+		p.activeDiagrams[p.currentDiagram.GetName()] = p.currentDiagram
+	}
+	return dd, nil
+
 }
 
 // Add diagram
@@ -94,10 +100,17 @@ func (p *UMLProject) AddNewDiagram(
 	diagramType umldiagram.DiagramType,
 	name string,
 ) duerror.DUError {
+	for _, diagram := range p.diagrams {
+		if diagram.GetName() == name {
+			return duerror.NewInvalidArgumentError("Diagram name already exists")
+		}
+	}
+
 	diagram, err := umldiagram.NewUMLDiagram(name, diagramType)
 	if err != nil {
 		return err
 	}
+
 	p.diagrams[name] = diagram
 	p.currentDiagram = diagram
 	p.openedDiagrams[name] = diagram

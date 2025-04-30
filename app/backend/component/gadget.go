@@ -10,20 +10,19 @@ import (
 type GadgetType int
 
 const (
-	Class GadgetType = 1 << iota // 0x01
-	supportedType = Class
+	Class         GadgetType = 1 << iota // 0x01
+	supportedType            = Class
 )
 
 type Gadget struct {
-	gadgetType GadgetType
-	point utils.Point
-	layer int
-	attributes [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
-	color int
-	drawData drawdata.Gadget
+	gadgetType       GadgetType
+	point            utils.Point
+	layer            int
+	attributes       [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
+	color            int
+	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
-
 
 /*
 component interface
@@ -46,7 +45,7 @@ func (g *Gadget) SetLayer(layer int) duerror.DUError {
 	return nil
 }
 
-func (g *Gadget) GetDrawData() (any, duerror.DUError) {
+func (g *Gadget) GetDrawData() (drawdata.Component, duerror.DUError) {
 	return g.drawData, nil
 }
 
@@ -70,7 +69,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 		height += drawdata.LineWidth
 	}
 	width := maxAttWidth + drawdata.Margin*2 + drawdata.LineWidth*2
-	
+
 	g.drawData.GadgetType = int(g.gadgetType)
 	g.drawData.X = g.point.X
 	g.drawData.Y = g.point.Y
@@ -79,7 +78,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Width = width
 	g.drawData.Color = g.color
 	g.drawData.Attributes = atts
-	
+
 	if g.updateParentDraw == nil {
 		return nil
 	}
@@ -91,7 +90,6 @@ func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror
 	return nil
 }
 
-
 /*
 gadget func
 */
@@ -100,4 +98,19 @@ func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
 	//TODO: calculate the Bottom-Right point (maybe store it?)
 	size := 5
 	return g.point, utils.AddPoints(g.point, utils.Point{X: size, Y: size}), nil
+}
+
+func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
+	if gadgetType&supportedType == 0 {
+		return nil, duerror.NewInvalidArgumentError("gadget type is not supported")
+	}
+	if gadgetType == 0 {
+		return nil, duerror.NewInvalidArgumentError("gadget type is 0")
+	}
+	return &Gadget{
+		gadgetType: gadgetType,
+		point:      point,
+		layer:      0,
+		color:      0,
+	}, nil
 }

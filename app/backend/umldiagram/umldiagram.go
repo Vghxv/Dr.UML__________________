@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/components"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -28,6 +30,7 @@ type UMLDiagram struct {
 	lastModified    time.Time
 	startPoint      utils.Point // for dragging and linking ass
 	backgroundColor utils.Color
+	components      *components.Components
 }
 
 // NewUMLDiagram creates a new UMLDiagram instance
@@ -47,6 +50,7 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		lastModified:    time.Now(),
 		startPoint:      utils.Point{X: 0, Y: 0},
 		backgroundColor: utils.Color{R: 255, G: 255, B: 255}, // Default white background
+		components:      components.NewComponents(),
 	}, nil
 }
 
@@ -70,7 +74,23 @@ func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
 	}, nil
 }
 
-func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType) error {
+func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point) (drawdata.Gadget, duerror.DUError) {
 
-	return nil
+	comp, err := ud.components.AddGadget(gadgetType, point)
+	if err != nil {
+		return drawdata.Gadget{}, err
+	}
+
+	dd, err := comp.GetDrawData()
+	if err != nil {
+		return drawdata.Gadget{}, err
+	}
+
+	gadgetdd, ok := dd.(drawdata.Gadget)
+	if !ok {
+		return drawdata.Gadget{}, duerror.NewInvalidArgumentError("Invalid gadget type")
+	}
+
+	return gadgetdd, nil
+
 }

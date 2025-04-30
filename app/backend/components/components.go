@@ -10,7 +10,7 @@ import (
 type Components struct {
 	compoentsContainer componentsContainer
 	selectedComponents map[component.Component]bool
-	drawData drawdata.Components
+	drawData           drawdata.Components
 }
 
 func NewComponents() *Components {
@@ -18,7 +18,7 @@ func NewComponents() *Components {
 		compoentsContainer: NewContainerMap(),
 		selectedComponents: make(map[component.Component]bool),
 		drawData: drawdata.Components{
-			Margin: drawdata.Margin,
+			Margin:    drawdata.Margin,
 			LineWidth: drawdata.LineWidth,
 		},
 	}
@@ -74,4 +74,20 @@ func (cs *Components) updateDrawData() duerror.DUError {
 	cs.drawData.Components = arr
 	// TODO: should notify parent
 	return nil
+}
+
+func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Point) (component.Component, duerror.DUError) {
+	gadget, err := component.NewGadget(gadgetType, point)
+	if err != nil {
+		return nil, err
+	}
+	err = cs.compoentsContainer.Insert(gadget)
+	if err != nil {
+		return nil, err
+	}
+	err = cs.updateDrawData()
+	if err != nil {
+		return nil, err
+	}
+	return gadget, nil
 }

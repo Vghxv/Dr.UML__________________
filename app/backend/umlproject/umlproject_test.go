@@ -8,6 +8,7 @@ import (
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
+	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
 
@@ -199,21 +200,19 @@ func TestAddGadget(t *testing.T) {
 	gadgetType := component.Class
 	previousModified := project.lastModified
 	time.Sleep(time.Millisecond)
-	err = project.AddGadget(gadgetType, diagram.GetName())
+	project.SelectDiagram(diagram.GetName())
+
+	// TODO: assert GadgetType in drawdata
+	_, err = project.AddGadget(gadgetType, utils.Point{X: 10, Y: 20})
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
+	// if dd.GadgetType != int(gadgetType) {
+	// 	t.Errorf("Expected gadget type %d, got %d", gadgetType, dd.GadgetType)
+	// }
 
 	if !project.lastModified.After(previousModified) {
 		t.Error("Expected lastModified to be updated")
-	}
-
-	err = project.AddGadget(gadgetType, "45InvalidDiagram")
-	if err == nil {
-		t.Error("Expected error for invalid diagram Name")
-	}
-	if err.Error() != duerror.NewInvalidArgumentError("Diagram not found").Error() {
-		t.Errorf("Expected 'Diagram not found' error, got %s", err.Error())
 	}
 }
 
@@ -314,5 +313,76 @@ func TestInvalidPathDiagram(t *testing.T) {
 		if err.Error() != duerror.NewInvalidArgumentError("Invalid diagram name").Error() {
 			t.Errorf("Expected 'Invalid diagram name' error for path %s, got %s", path, err.Error())
 		}
+	}
+}
+
+func TestSelectDiagram_DiagramNotFound(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	err := project.SelectDiagram("NonexistentDiagram")
+	if err == nil {
+		t.Error("Expected error when selecting non-existent diagram")
+	}
+	if err.Error() != duerror.NewInvalidArgumentError("Diagram not found").Error() {
+		t.Errorf("Expected 'Diagram not found' error, got %s", err.Error())
+	}
+}
+
+func TestAddNewDiagram_DuplicateName(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	// Add first diagram
+	name := "NewDiagram"
+	err := project.AddNewDiagram(umldiagram.ClassDiagram, name)
+	if err != nil {
+		t.Errorf("Expected no error on first diagram, got %v", err)
+	}
+
+	// Try to add second diagram with same name
+	err = project.AddNewDiagram(umldiagram.ClassDiagram, name)
+	if err == nil {
+		t.Error("Expected error when adding diagram with duplicate name")
+	}
+	if err.Error() != duerror.NewInvalidArgumentError("Diagram name already exists").Error() {
+		t.Errorf("Expected 'Diagram name already exists' error, got %s", err.Error())
+	}
+}
+
+func TestCreateDiagram_EmptyPath(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	err := project.createDiagram("")
+	if err == nil {
+		t.Error("Expected error when creating diagram with empty path")
+	}
+	if err.Error() != duerror.NewInvalidArgumentError("Invalid diagram name").Error() {
+		t.Errorf("Expected 'Invalid diagram name' error, got %s", err.Error())
+	}
+}
+
+func TestOpenProject_NoOpenedDiagrams(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	diagram, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
+	if err != nil {
+		t.Fatalf("Failed to create diagram: %v", err)
+	}
+
+	project.diagrams[diagram.GetName()] = diagram
+	// Don't add to openedDiagrams
+
+	activeDiagrams, availableDiagrams, err := project.OpenProject()
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if len(activeDiagrams) != 0 {
+		t.Errorf("Expected 0 active diagrams, got %d", len(activeDiagrams))
+	}
+	if len(availableDiagrams) != 1 {
+		t.Errorf("Expected 1 available diagram, got %d", len(availableDiagrams))
+	}
+	if len(project.activeDiagrams) != 0 {
+		t.Errorf("Expected 0 active diagrams in map, got %d", len(project.activeDiagrams))
 	}
 }
