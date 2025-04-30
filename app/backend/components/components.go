@@ -11,6 +11,7 @@ type Components struct {
 	componentsContainer componentsContainer
 	selectedComponents  map[component.Component]bool
 	drawData            drawdata.Components
+	updateParentDraw    func() duerror.DUError
 }
 
 func NewComponents() *Components {
@@ -61,6 +62,7 @@ func (cs *Components) GetDrawData() (drawdata.Components, duerror.DUError) {
 
 func (cs *Components) updateDrawData() duerror.DUError {
 	gs := make([]drawdata.Gadget, 0, len(cs.selectedComponents))
+	// TODO
 	// as := make([]drawdata.Association, 0, len(cs.selectedComponents))
 	for _, c := range cs.componentsContainer.GetAll() {
 		cDrawData, err := c.GetDrawData()
@@ -74,17 +76,23 @@ func (cs *Components) updateDrawData() duerror.DUError {
 		case *component.Gadget:
 			gs = append(gs, cDrawData.(drawdata.Gadget))
 		case *component.Association:
-			continue //TODO
+			continue
 		}
 	}
 	cs.drawData.Gadgets = gs
 	// cs.drawData.Associations = as
-	// TODO: should notify parent
-	return nil
+	if cs.updateParentDraw == nil {
+		return nil
+	}
+	return cs.updateParentDraw()
 }
 
 func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
 	gadget, err := component.NewGadget(gadgetType, point)
+	if err != nil {
+		return err
+	}
+	err = gadget.RegisterUpdateParentDraw(cs.updateDrawData)
 	if err != nil {
 		return err
 	}
@@ -96,5 +104,10 @@ func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (cs *Components) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	cs.updateParentDraw = update
 	return nil
 }

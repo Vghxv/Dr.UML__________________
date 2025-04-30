@@ -107,12 +107,6 @@ func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
 	return nil
 }
 
-func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
-	//TODO: calculate the Bottom-Right point (maybe store it?)
-	size := 5
-	return g.point, utils.AddPoints(g.point, utils.Point{X: size, Y: size}), nil
-}
-
 func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
 	if gadgetType&supportedGadgetType == 0 {
 		return nil, duerror.NewInvalidArgumentError("gadget type is not supported")

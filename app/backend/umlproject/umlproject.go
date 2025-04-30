@@ -17,6 +17,7 @@ type UMLProject struct {
 	diagrams       map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
 	openedDiagrams map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
 	activeDiagrams map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
+	// notifyDrawUpdate func() duerror.DUError TODO
 }
 
 // NewUMLProject creates a new UMLProject instance
@@ -96,6 +97,7 @@ func (p *UMLProject) AddNewDiagram(
 	if err != nil {
 		return err
 	}
+	// diagram.RegisterNotifyDrawUpdate() TODO
 
 	p.diagrams[name] = diagram
 	p.currentDiagram = diagram
