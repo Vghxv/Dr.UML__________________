@@ -50,7 +50,7 @@ func (cp *containerMap) Search(p utils.Point) (component.Component, duerror.DUEr
 			return nil, err
 		}
 		cLayer, err := c.GetLayer()
-		if  err != nil {
+		if err != nil {
 			return nil, err
 		}
 		if cLayer > candidateLayer {
