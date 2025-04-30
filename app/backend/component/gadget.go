@@ -114,10 +114,15 @@ func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUErr
 	if gadgetType == 0 {
 		return nil, duerror.NewInvalidArgumentError("gadget type is 0")
 	}
-	return &Gadget{
+	g := Gadget{
 		gadgetType: gadgetType,
 		point:      point,
 		layer:      0,
 		color:      utils.FromHex(drawdata.DefaultGadgetColor),
-	}, nil
+	}
+	err := g.updateDrawData()
+	if err != nil {
+		return nil, err
+	}
+	return &g, nil
 }
