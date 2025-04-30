@@ -8,8 +8,8 @@ import (
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
+	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
-	"github.com/google/uuid"
 )
 
 func TestNewUMLProject(t *testing.T) {
@@ -46,30 +46,51 @@ func TestOpenProject(t *testing.T) {
 		t.Fatalf("Failed to create diagram2: %v", err)
 	}
 
-	project.diagrams[diagram1.GetId()] = diagram1
-	project.diagrams[diagram2.GetId()] = diagram2
-	project.openedDiagrams[diagram1.GetId()] = diagram1
+	project.diagrams[diagram1.GetName()] = diagram1
+	project.diagrams[diagram2.GetName()] = diagram2
+	project.openedDiagrams[diagram1.GetName()] = diagram1
 
-	opened, allDiagrams, uuidList := project.OpenProject()
+	activeDiagrams, availableDiagrams, duErr := project.OpenProject()
 
-	if len(opened) != 1 {
-		t.Errorf("Expected 1 opened diagram, got %d", len(opened))
+	// Check no error was returned
+	if duErr != nil {
+		t.Errorf("Expected no error, got %v", duErr)
 	}
 
-	if len(opened) > 0 && opened[0].GetName() != "Diagram1" {
-		t.Errorf("Expected opened diagram name Diagram1, got %s", opened[0].GetName())
+	// activeDiagrams should be 1 since we opened one diagram
+	// and added it to openedDiagrams
+	// Check if activeDiagrams is not nil
+	if activeDiagrams == nil {
+		t.Error("Expected activeDiagrams to be not nil")
+	}
+	// Check if activeDiagrams has 1 diagram
+	if len(activeDiagrams) != 1 {
+		t.Errorf("Expected 1 active diagrams, got %d", len(activeDiagrams))
 	}
 
-	if len(allDiagrams) != 2 {
-		t.Errorf("Expected 2 diagrams in total, got %d", len(allDiagrams))
+	// Check available diagrams (diagram names)
+	if len(availableDiagrams) != 2 {
+		t.Errorf("Expected 2 available diagrams, got %d", len(availableDiagrams))
 	}
 
-	if len(uuidList) != 1 {
-		t.Errorf("Expected 1 UUID in the list, got %d", len(uuidList))
+	// Check diagram names in availableDiagrams
+	expectedNames := []string{"Diagram1", "Diagram2"}
+	for _, name := range expectedNames {
+		found := false
+		for _, d := range availableDiagrams {
+			if d == name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Expected diagram name %s not found in availableDiagrams", name)
+		}
 	}
 
-	if len(uuidList) > 0 && uuidList[0] != diagram1.GetId() {
-		t.Errorf("Expected UUID to match diagram1's ID")
+	// Verify activeDiagrams map was not populated
+	if len(project.activeDiagrams) != 0 {
+		t.Errorf("Expected 0 active diagram in map, got %d", len(project.activeDiagrams))
 	}
 }
 
@@ -85,8 +106,8 @@ func TestGetAvailableDiagrams(t *testing.T) {
 		t.Fatalf("Failed to create diagram2: %v", err)
 	}
 
-	project.diagrams[diagram1.GetId()] = diagram1
-	project.diagrams[diagram2.GetId()] = diagram2
+	project.diagrams[diagram1.GetName()] = diagram1
+	project.diagrams[diagram2.GetName()] = diagram2
 
 	diagrams := project.GetAvailableDiagrams()
 
@@ -121,8 +142,8 @@ func TestGetLastOpenedDiagrams(t *testing.T) {
 		t.Fatalf("Failed to create diagram2: %v", err)
 	}
 
-	project.openedDiagrams[diagram1.GetId()] = diagram1
-	project.openedDiagrams[diagram2.GetId()] = diagram2
+	project.openedDiagrams[diagram1.GetName()] = diagram1
+	project.openedDiagrams[diagram2.GetName()] = diagram2
 
 	opened := project.GetLastOpenedDiagrams()
 
@@ -153,24 +174,15 @@ func TestSelectDiagram(t *testing.T) {
 		t.Fatalf("Failed to create diagram: %v", err)
 	}
 
-	project.diagrams[diagram.GetId()] = diagram
+	project.diagrams[diagram.GetName()] = diagram
 
-	err = project.SelectDiagram(diagram.GetId())
+	err = project.SelectDiagram(diagram.GetName())
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
 	if project.currentDiagram != diagram {
 		t.Error("Expected currentDiagram to be set to selected diagram")
-	}
-
-	invalidID := uuid.New()
-	err = project.SelectDiagram(invalidID)
-	if err == nil {
-		t.Error("Expected error for invalid diagram ID")
-	}
-	if err.Error() != duerror.NewInvalidArgumentError("Diagram not found").Error() {
-		t.Errorf("Expected 'Diagram not found' error, got %s", err.Error())
 	}
 }
 
@@ -182,28 +194,21 @@ func TestAddGadget(t *testing.T) {
 		t.Fatalf("Failed to create diagram: %v", err)
 	}
 
-	project.diagrams[diagram.GetId()] = diagram
+	project.diagrams[diagram.GetName()] = diagram
 	project.currentDiagram = diagram
 
 	gadgetType := component.Class
 	previousModified := project.lastModified
-	time.Sleep(1) // Ensure lastModified is different
-	err = project.AddGadget(gadgetType, diagram.GetId())
+	time.Sleep(time.Millisecond)
+	project.SelectDiagram(diagram.GetName())
+
+	err = project.AddGadget(gadgetType, utils.Point{X: 10, Y: 20})
+
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
-
 	if !project.lastModified.After(previousModified) {
 		t.Error("Expected lastModified to be updated")
-	}
-
-	invalidID := uuid.New()
-	err = project.AddGadget(gadgetType, invalidID)
-	if err == nil {
-		t.Error("Expected error for invalid diagram ID")
-	}
-	if err.Error() != duerror.NewInvalidArgumentError("Diagram not found").Error() {
-		t.Errorf("Expected 'Diagram not found' error, got %s", err.Error())
 	}
 }
 
@@ -213,7 +218,7 @@ func TestAddNewDiagram(t *testing.T) {
 	diagramType := umldiagram.ClassDiagram
 	name := "NewDiagram"
 	previousModified := project.lastModified
-	time.Sleep(1) // Ensure lastModified is different
+	time.Sleep(time.Millisecond)
 	err := project.AddNewDiagram(umldiagram.DiagramType(diagramType), name)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
@@ -304,5 +309,76 @@ func TestInvalidPathDiagram(t *testing.T) {
 		if err.Error() != duerror.NewInvalidArgumentError("Invalid diagram name").Error() {
 			t.Errorf("Expected 'Invalid diagram name' error for path %s, got %s", path, err.Error())
 		}
+	}
+}
+
+func TestSelectDiagram_DiagramNotFound(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	err := project.SelectDiagram("NonexistentDiagram")
+	if err == nil {
+		t.Error("Expected error when selecting non-existent diagram")
+	}
+	if err.Error() != duerror.NewInvalidArgumentError("Diagram not found").Error() {
+		t.Errorf("Expected 'Diagram not found' error, got %s", err.Error())
+	}
+}
+
+func TestAddNewDiagram_DuplicateName(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	// Add first diagram
+	name := "NewDiagram"
+	err := project.AddNewDiagram(umldiagram.ClassDiagram, name)
+	if err != nil {
+		t.Errorf("Expected no error on first diagram, got %v", err)
+	}
+
+	// Try to add second diagram with same name
+	err = project.AddNewDiagram(umldiagram.ClassDiagram, name)
+	if err == nil {
+		t.Error("Expected error when adding diagram with duplicate name")
+	}
+	if err.Error() != duerror.NewInvalidArgumentError("Diagram name already exists").Error() {
+		t.Errorf("Expected 'Diagram name already exists' error, got %s", err.Error())
+	}
+}
+
+func TestCreateDiagram_EmptyPath(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	err := project.createDiagram("")
+	if err == nil {
+		t.Error("Expected error when creating diagram with empty path")
+	}
+	if err.Error() != duerror.NewInvalidArgumentError("Invalid diagram name").Error() {
+		t.Errorf("Expected 'Invalid diagram name' error, got %s", err.Error())
+	}
+}
+
+func TestOpenProject_NoOpenedDiagrams(t *testing.T) {
+	project := NewUMLProject("TestProject")
+
+	diagram, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
+	if err != nil {
+		t.Fatalf("Failed to create diagram: %v", err)
+	}
+
+	project.diagrams[diagram.GetName()] = diagram
+	// Don't add to openedDiagrams
+
+	activeDiagrams, availableDiagrams, err := project.OpenProject()
+
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if len(activeDiagrams) != 0 {
+		t.Errorf("Expected 0 active diagrams, got %d", len(activeDiagrams))
+	}
+	if len(availableDiagrams) != 1 {
+		t.Errorf("Expected 1 available diagram, got %d", len(availableDiagrams))
+	}
+	if len(project.activeDiagrams) != 0 {
+		t.Errorf("Expected 0 active diagrams in map, got %d", len(project.activeDiagrams))
 	}
 }

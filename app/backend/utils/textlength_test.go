@@ -4,31 +4,31 @@ import "testing"
 
 func Test_GetTextSize(t *testing.T) {
 	tests := []struct {
-		name     string
-		str      string
-		size     int
-		fontFile string
+		name           string
+		str            string
+		size           int
+		fontFile       string
 		expectedHeight int
 		expectedWidth  int
-		hasError  bool
+		hasError       bool
 	}{
 		{
-			name:	 "correct",
-			str:	 "Hello, World!",
-			size:	 12,
-			fontFile: "../../app/assets/Inkfree.ttf",
+			name:           "correct",
+			str:            "Hello, World!",
+			size:           12,
+			fontFile:       "../../app/assets/Inkfree.ttf",
 			expectedHeight: 22,
 			expectedWidth:  81,
-			hasError: false,
+			hasError:       false,
 		},
 		{
-			name:	 "size invalid",
-			str:	 "Hello, World!",
-			size:	 0,
-			fontFile: "../../app/assets/Inkfree.ttf",
+			name:           "size invalid",
+			str:            "Hello, World!",
+			size:           0,
+			fontFile:       "../../app/assets/Inkfree.ttf",
 			expectedHeight: 0,
 			expectedWidth:  0,
-			hasError: true,
+			hasError:       true,
 		},
 	}
 

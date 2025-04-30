@@ -2,7 +2,7 @@ package component
 
 import (
 	"Dr.uml/backend/component/attribute"
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -19,7 +19,7 @@ type Gadget struct {
 	point            utils.Point
 	layer            int
 	attributes       [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
-	color            int
+	color            utils.Color
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
@@ -29,10 +29,8 @@ component interface
 */
 
 func (g *Gadget) Cover(p utils.Point) (bool, duerror.DUError) {
-	tl, br, err := g.getBounds()
-	if err != nil {
-		return false, err
-	}
+	tl := g.point                                                                          // top-left
+	br := utils.AddPoints(g.point, utils.Point{X: g.drawData.Width, Y: g.drawData.Height}) // bottom-right
 	return p.X >= tl.X && p.X <= br.X && p.Y >= tl.Y && p.Y <= br.Y, nil
 }
 
@@ -76,7 +74,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Layer = g.layer
 	g.drawData.Height = height
 	g.drawData.Width = width
-	g.drawData.Color = g.color
+	g.drawData.Color = g.color.ToHex()
 	g.drawData.Attributes = atts
 
 	if g.updateParentDraw == nil {
@@ -90,9 +88,45 @@ func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror
 	return nil
 }
 
+
 /*
 gadget func
 */
+
+// point getter
+func (g *Gadget) GetPoint() utils.Point {
+	return g.point
+}
+
+// point setter
+func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
+	g.point = point
+	err := g.updateDrawData()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
+	if gadgetType&supportedGadgetType == 0 {
+		return nil, duerror.NewInvalidArgumentError("gadget type is not supported")
+	}
+	if gadgetType == 0 {
+		return nil, duerror.NewInvalidArgumentError("gadget type is 0")
+	}
+	g := Gadget{
+		gadgetType: gadgetType,
+		point:      point,
+		layer:      0,
+		color:      utils.FromHex(drawdata.DefaultGadgetColor),
+	}
+	err := g.updateDrawData()
+	if err != nil {
+		return nil, err
+	}
+	return &g, nil
+}
 
 func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
 	// TODO: calculate the Bottom-Right point (maybe store it?)

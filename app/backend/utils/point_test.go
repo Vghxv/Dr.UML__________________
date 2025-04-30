@@ -19,17 +19,17 @@ func TestPoint_Magnitude(t *testing.T) {
 		},
 	}
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            result, err := tt.point.Magnitude()
-            if (err != nil) != tt.hasError {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := tt.point.Magnitude()
+			if (err != nil) != tt.hasError {
 				t.Errorf("unexpected error: %v", err)
 			}
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
 		})
-    }
+	}
 }
 
 func TestPoint_MagnitudeInt(t *testing.T) {
@@ -47,41 +47,40 @@ func TestPoint_MagnitudeInt(t *testing.T) {
 		},
 	}
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            result, err := tt.point.MagnitudeInt()
-            if (err != nil) != tt.hasError {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := tt.point.MagnitudeInt()
+			if (err != nil) != tt.hasError {
 				t.Errorf("unexpected error: %v", err)
 			}
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
 		})
-    }
+	}
 }
-
 
 func createTwoPoints(x1, y1, x2, y2 int) [2]Point {
 	return [2]Point{
-		{X: x1, Y:y1},
-		{X: x2, Y:y2},
+		{X: x1, Y: y1},
+		{X: x2, Y: y2},
 	}
 }
 
 func Test_EqualPoints(t *testing.T) {
 	tests := []struct {
-		name string
-		args [2]Point
+		name     string
+		args     [2]Point
 		expected bool
 	}{
 		{
-			name: "true",
-			args: createTwoPoints(0, 1, 0, 1),
+			name:     "true",
+			args:     createTwoPoints(0, 1, 0, 1),
 			expected: true,
 		},
 		{
-			name: "false",
-			args: createTwoPoints(0, 1, 2, 3),
+			name:     "false",
+			args:     createTwoPoints(0, 1, 2, 3),
 			expected: false,
 		},
 	}
@@ -97,20 +96,20 @@ func Test_EqualPoints(t *testing.T) {
 
 func Test_AddPoints(t *testing.T) {
 	tests := []struct {
-		name string
-		args [2]Point
+		name     string
+		args     [2]Point
 		expected Point
 	}{
 		{
-			name: "true",
-			args: createTwoPoints(0, 1, 0, 1),
-			expected: Point{X:0, Y:2},
+			name:     "true",
+			args:     createTwoPoints(0, 1, 0, 1),
+			expected: Point{X: 0, Y: 2},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := AddPoints(tt.args[0], tt.args[1])
-			if !EqualPoints(result, tt.expected){
+			if !EqualPoints(result, tt.expected) {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
 		})
@@ -119,20 +118,20 @@ func Test_AddPoints(t *testing.T) {
 
 func Test_SubPoints(t *testing.T) {
 	tests := []struct {
-		name string
-		args [2]Point
+		name     string
+		args     [2]Point
 		expected Point
 	}{
 		{
-			name: "true",
-			args: createTwoPoints(0, 1, 2, 3),
-			expected: Point{X:-2, Y:-2},
+			name:     "true",
+			args:     createTwoPoints(0, 1, 2, 3),
+			expected: Point{X: -2, Y: -2},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := SubPoints(tt.args[0], tt.args[1])
-			if !EqualPoints(result, tt.expected){
+			if !EqualPoints(result, tt.expected) {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
 		})

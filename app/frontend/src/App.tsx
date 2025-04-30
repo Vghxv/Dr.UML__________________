@@ -1,13 +1,26 @@
-import React from 'react';
-import {DndProvider} from 'react-dnd';
-import {HTML5Backend} from 'react-dnd-html5-backend';
+import React, { useState, useEffect } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import './App.css';
-import { dia, shapes } from '@joint/core';
+import { dia } from '@joint/core';
 import Canvas from './components/Canvas';
+import Gadget from './components/Gadget';
+import Association from './components/Association';
 
-const graph = new dia.Graph();
 const App: React.FC = () => {
-    // Create a new JointJS graph instance
+    const [graph] = useState(new dia.Graph()); // Create a new JointJS graph instance
+
+    const handleDrop = (gadget: dia.Element) => {
+        if (gadget instanceof dia.Element) {
+            graph.addCell(gadget); // Add the gadget to the graph
+        } else {
+            console.error('Invalid gadget type. Must be an instance of dia.Element.');
+        }
+    };
+
+    const handleCreateAssociation = (association: dia.Link) => {
+        graph.addCell(association); // Add the association to the graph
+    };
 
     return (
         <DndProvider backend={HTML5Backend}>
@@ -15,27 +28,49 @@ const App: React.FC = () => {
                 className="App"
                 style={{
                     display: 'flex',
-                    flexDirection: 'column', // Stack header and canvas vertically
+                    flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    height: '100vh', // Full viewport height
-                    backgroundColor: '#121212', // Dark background
-                    padding: '20px' // Padding around the content
+                    height: '100vh',
+                    backgroundColor: '#121212',
+                    padding: '20px',
                 }}
             >
                 <h1
                     style={{
-                        color: '#ffffff', // White text
-                        marginBottom: '20px', // Space below the header
-                        fontFamily: 'Arial, sans-serif', // Clean font
-                        fontSize: '2rem' // Large font size
+                        color: '#ffffff',
+                        marginBottom: '20px',
+                        fontFamily: 'Arial, sans-serif',
+                        fontSize: '2rem',
                     }}
                 >
                     Dr.UML
                 </h1>
-                {/*
-                    Memoize the graph instance to avoid recreating it on every render.
-                */}
+                <h1>Gadget Palette</h1>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                    <Gadget
+                        point={{ x: 200, y: 200 }}
+                        type="Class"
+                        layer={1}
+                        name="Class Gadget"
+                        onDrop={handleDrop}
+                    />
+                </div>
+
+                <h1>Association Tool</h1>
+                <Association
+                    source={{ x: 100, y: 100 }}
+                    target={{ x: 300, y: 300 }}
+                    layer={1}
+                    style={{ stroke: '#FF5733', strokeWidth: 3 }}
+                    marker={{
+                        type: 'path',
+                        d: 'M 10 -5 0 0 10 5 Z',
+                        fill: '#FF5733',
+                    }}
+                    onCreate={handleCreateAssociation}
+                />
+
                 <Canvas graph={graph} />
             </div>
         </DndProvider>

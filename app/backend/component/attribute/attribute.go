@@ -1,7 +1,7 @@
 package attribute
 
 import (
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
