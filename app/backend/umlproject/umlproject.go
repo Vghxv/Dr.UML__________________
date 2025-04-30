@@ -87,10 +87,8 @@ func (p *UMLProject) AddNewDiagram(
 	diagramType umldiagram.DiagramType,
 	name string,
 ) duerror.DUError {
-	for _, diagram := range p.diagrams {
-		if diagram.GetName() == name {
-			return duerror.NewInvalidArgumentError("Diagram name already exists")
-		}
+	if _, exists := p.diagrams[name]; exists {
+		return duerror.NewInvalidArgumentError("Diagram name already exists")
 	}
 
 	diagram, err := umldiagram.NewUMLDiagram(name, diagramType)
