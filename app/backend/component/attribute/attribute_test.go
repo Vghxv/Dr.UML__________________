@@ -58,6 +58,7 @@ func TestAttribute_SetContent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var att Attribute
+			att.SetSize(69)
 			err := att.SetContent(tt.setValue)
 			if (err != nil) != tt.hasError {
 				t.Errorf("unexpected error: %v", err)
@@ -196,6 +197,7 @@ func TestAttribute_SetStyle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var att Attribute
+			att.SetSize(69)
 			err := att.SetStyle(tt.setValue)
 			if (err != nil) != tt.hasError {
 				t.Errorf("unexpected error: %v", err)
@@ -231,6 +233,7 @@ func TestAttribute_SetBold(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			att := Attribute{style: tt.initStyle}
+			att.SetSize(69)
 			err := att.SetBold(tt.setValue)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
@@ -267,6 +270,7 @@ func TestAttribute_SetItalic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			att := Attribute{style: tt.initStyle}
+			att.SetSize(69)
 			err := att.SetItalic(tt.setValue)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
@@ -302,6 +306,7 @@ func TestAttribute_SetUnderline(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			att := Attribute{style: tt.initStyle}
+			att.SetSize(69)
 			err := att.SetUnderline(tt.setValue)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
@@ -645,7 +650,7 @@ func TestAttribute_updateDrawData(t *testing.T) {
 		updateCalled  bool
 	}{
 		{
-			name: "update draw data with valid attribute",
+			name: "update draw data with invalid font file",
 			attribute: &Attribute{
 				content:  "test content",
 				size:     12,
@@ -656,28 +661,37 @@ func TestAttribute_updateDrawData(t *testing.T) {
 					return nil
 				},
 			},
+			expectedError: true,
+			updateCalled:  false,
+		}, {
+			name: "update draw data with valid attribute",
+			attribute: &Attribute{
+				content:  "test content",
+				size:     12,
+				style:    Bold | Italic,
+				drawData: drawdata.Attribute{},
+				updateParentDraw: func() duerror.DUError {
+					return nil
+				},
+			},
 			expectedError: false,
 			updateCalled:  true,
-		},
-		{
+		}, {
 			name:          "nil attribute",
 			attribute:     nil,
 			expectedError: true,
 			updateCalled:  false,
-		},
-		{
+		}, {
 			name: "no update parent draw function",
 			attribute: &Attribute{
 				content:  "test content",
 				size:     12,
 				style:    Bold,
-				fontFile: "test.ttf",
 				drawData: drawdata.Attribute{},
 			},
 			expectedError: false,
 			updateCalled:  false,
-		},
-		{
+		}, {
 			name: "negative size",
 			attribute: &Attribute{
 				content:  "test content",
@@ -694,7 +708,7 @@ func TestAttribute_updateDrawData(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var updateCalled bool
-			if tt.attribute != nil && tt.updateCalled {
+			if tt.attribute != nil {
 				tt.attribute.updateParentDraw = func() duerror.DUError {
 					updateCalled = true
 					return nil
