@@ -7,6 +7,6 @@ type Gadget struct {
 	Layer      int           `json:"layer"`
 	Height     int           `json:"height"`
 	Width      int           `json:"width"`
-	Color      string        `json:"color"`
+	Color      int           `json:"color"`
 	Attributes [][]Attribute `json:"attributes"`
 }

@@ -15,7 +15,7 @@ const (
 )
 
 // a default gadget color (grey)
-const defaultGadgetColor = "#0x808080"
+const defaultGadgetColor = 0x808080
 
 type Gadget struct {
 	gadgetType       GadgetType
