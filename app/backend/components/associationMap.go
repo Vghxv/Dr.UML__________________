@@ -19,7 +19,7 @@ func NewAssociationMap() AssociationGraph {
 }
 
 func (am *associationMap) FindStartEnd(st *component.Gadget, en *component.Gadget) ([]*component.Association, duerror.DUError) {
-	if st==nil || en==nil {
+	if st == nil || en == nil {
 		return nil, duerror.NewInvalidArgumentError("start or end gadget is nil")
 	}
 	if _, ok := am.assMap[st]; !ok {
@@ -29,7 +29,7 @@ func (am *associationMap) FindStartEnd(st *component.Gadget, en *component.Gadge
 }
 
 func (am *associationMap) FindStart(st *component.Gadget) ([]*component.Association, duerror.DUError) {
-	if st==nil {
+	if st == nil {
 		return nil, duerror.NewInvalidArgumentError("start gadget is nil")
 	}
 	if _, ok := am.assMap[st]; !ok {
@@ -43,7 +43,7 @@ func (am *associationMap) FindStart(st *component.Gadget) ([]*component.Associat
 }
 
 func (am *associationMap) FindEnd(en *component.Gadget) ([]*component.Association, duerror.DUError) {
-	if en==nil {
+	if en == nil {
 		return nil, duerror.NewInvalidArgumentError("end gadget is nil")
 	}
 	as := make([]*component.Association, 0)
@@ -57,7 +57,7 @@ func (am *associationMap) FindEnd(en *component.Gadget) ([]*component.Associatio
 }
 
 func (am *associationMap) FindEither(g *component.Gadget) ([]*component.Association, duerror.DUError) {
-	if g==nil {
+	if g == nil {
 		return nil, duerror.NewInvalidArgumentError("gadget is nil")
 	}
 	asStart, err := am.FindStart(g)
@@ -116,7 +116,7 @@ func (am *associationMap) Insert(a *component.Association) duerror.DUError {
 	}
 	if _, ok := am.assMap[start][end]; !ok {
 		am.assMap[start][end] = []*component.Association{a}
-	}else {
+	} else {
 		am.assMap[start][end] = append(am.assMap[start][end], a)
 	}
 	return nil
