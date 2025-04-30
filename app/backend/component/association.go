@@ -23,29 +23,7 @@ type Association struct {
 	parents    [2]*Gadget
 }
 
-func (a *Association) GetLayer() (int, duerror.DUError) {
-	return a.layer, nil
-}
-
-func (a *Association) SetLayer(layer int) duerror.DUError {
-	a.layer = layer
-	return nil
-}
-
-func (a *Association) GetDrawData() (any, duerror.DUError) {
-	return nil, nil
-}
-
-func (g *Association) updateDrawData() duerror.DUError {
-	return nil
-}
-
-/*
-associaiton func
-*/
-func (a *Association) Cover(p utils.Point) (bool, duerror.DUError) {
-	return false, nil
-}
+// Constructor
 func NewAssociation(parents [2]*Gadget, assType AssociationType) (*Association, duerror.DUError) {
 	if assType&supportedAssociationType != assType || assType == 0 {
 		return nil, duerror.NewInvalidArgumentError("unsupported association type")
@@ -58,32 +36,11 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType) (*Association, 
 	}, nil
 }
 
-// MoveAttribute returns an Invalid argument error if the index is out of range or if the ratio is not between 0 and 1
-func (a *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
-	if index < 0 || index >= len(a.attributes) {
-		return duerror.NewInvalidArgumentError("index out of range")
-	}
-	return a.attributes[index].SetRatio(ratio)
-}
-
+// Getters
 func (a *Association) GetAssType() AssociationType {
 	return a.assType
 }
 
-func (a *Association) SetAssType(assType AssociationType) {
-	a.assType = assType
-}
-
-// AddAttribute adds an attribute to the association. Returns an error if the attribute is nil.
-func (a *Association) AddAttribute(attribute *attribute.AssAttribute) duerror.DUError {
-	if attribute == nil {
-		return duerror.NewInvalidArgumentError("attribute is nil")
-	}
-	a.attributes = append(a.attributes, attribute)
-	return nil
-}
-
-// GetAttributes returns the attributes of the association. Returns an error if no attributes are found.
 func (a *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUError) {
 	if len(a.attributes) == 0 {
 		return nil, duerror.NewInvalidArgumentError("no attributes found")
@@ -91,20 +48,38 @@ func (a *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUErro
 	return a.attributes, nil
 }
 
-func (a *Association) RemoveAttribute(index int) duerror.DUError {
-	if index < 0 || index >= len(a.attributes) {
-		return duerror.NewInvalidArgumentError("index out of range")
-	}
-	a.attributes = append(a.attributes[:index], a.attributes[index+1:]...)
-	return nil
+func (a *Association) GetDrawData() (any, duerror.DUError) {
+	return nil, nil
+}
+
+func (a *Association) GetLayer() (int, duerror.DUError) {
+	return a.layer, nil
+}
+
+func (a *Association) GetParentEnd() *Gadget {
+	return a.parents[1]
 }
 
 func (a *Association) GetParentStart() *Gadget {
 	return a.parents[0]
 }
 
-func (a *Association) GetParentEnd() *Gadget {
-	return a.parents[1]
+// Setters
+func (a *Association) SetAssType(assType AssociationType) {
+	a.assType = assType
+}
+
+func (a *Association) SetLayer(layer int) duerror.DUError {
+	a.layer = layer
+	return nil
+}
+
+func (a *Association) SetParentEnd(gadget *Gadget) duerror.DUError {
+	if gadget == nil {
+		return duerror.NewInvalidArgumentError("gadget is nil")
+	}
+	a.parents[1] = gadget
+	return nil
 }
 
 func (a *Association) SetParentStart(gadget *Gadget) duerror.DUError {
@@ -115,10 +90,34 @@ func (a *Association) SetParentStart(gadget *Gadget) duerror.DUError {
 	return nil
 }
 
-func (a *Association) SetParentEnd(gadget *Gadget) duerror.DUError {
-	if gadget == nil {
-		return duerror.NewInvalidArgumentError("gadget is nil")
+// Other methods
+func (a *Association) AddAttribute(attribute *attribute.AssAttribute) duerror.DUError {
+	if attribute == nil {
+		return duerror.NewInvalidArgumentError("attribute is nil")
 	}
-	a.parents[1] = gadget
+	a.attributes = append(a.attributes, attribute)
+	return nil
+}
+
+func (a *Association) Cover(p utils.Point) (bool, duerror.DUError) {
+	return false, nil
+}
+
+func (a *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
+	if index < 0 || index >= len(a.attributes) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
+	return a.attributes[index].SetRatio(ratio)
+}
+
+func (a *Association) RemoveAttribute(index int) duerror.DUError {
+	if index < 0 || index >= len(a.attributes) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
+	a.attributes = append(a.attributes[:index], a.attributes[index+1:]...)
+	return nil
+}
+
+func (a *Association) updateDrawData() duerror.DUError {
 	return nil
 }
