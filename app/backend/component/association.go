@@ -9,11 +9,11 @@ import (
 type AssociationType int
 
 const (
-	Extension      = 1 << iota // 0x01
-	Implementation = 1 << iota // 0x02
-	Composition    = 1 << iota // 0x04
-	Dependency     = 1 << iota // 0x08
-	supportedType  = Extension | Implementation | Composition | Dependency
+	Extension                = 1 << iota // 0x01
+	Implementation           = 1 << iota // 0x02
+	Composition              = 1 << iota // 0x04
+	Dependency               = 1 << iota // 0x08
+	supportedAssociationType = Extension | Implementation | Composition | Dependency
 )
 
 type Association struct {
@@ -40,7 +40,6 @@ func (g *Association) updateDrawData() duerror.DUError {
 	return nil
 }
 
-
 /*
 associaiton func
 */
@@ -48,7 +47,7 @@ func (a *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 	return false, nil
 }
 func NewAssociation(parents [2]*Gadget, assType AssociationType) (*Association, duerror.DUError) {
-	if assType&supportedType != assType || assType == 0 {
+	if assType&supportedAssociationType != assType || assType == 0 {
 		return nil, duerror.NewInvalidArgumentError("unsupported association type")
 	}
 	if parents[0] == nil || parents[1] == nil {
@@ -73,14 +72,6 @@ func (a *Association) GetAssType() AssociationType {
 
 func (a *Association) SetAssType(assType AssociationType) {
 	a.assType = assType
-}
-
-func (a *Association) GetLayer() int {
-	return a.layer
-}
-
-func (a *Association) SetLayer(layer int) {
-	a.layer = layer
 }
 
 // AddAttribute adds an attribute to the association. Returns an error if the attribute is nil.
