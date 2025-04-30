@@ -2,7 +2,7 @@ package component
 
 import (
 	"Dr.uml/backend/component/attribute"
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -29,10 +29,8 @@ component interface
 */
 
 func (g *Gadget) Cover(p utils.Point) (bool, duerror.DUError) {
-	tl, br, err := g.getBounds()
-	if err != nil {
-		return false, err
-	}
+	tl := g.point                                                                          // top-left
+	br := utils.AddPoints(g.point, utils.Point{X: g.drawData.Width, Y: g.drawData.Height}) // bottom-right
 	return p.X >= tl.X && p.X <= br.X && p.Y >= tl.Y && p.Y <= br.Y, nil
 }
 
@@ -45,7 +43,7 @@ func (g *Gadget) SetLayer(layer int) duerror.DUError {
 	return nil
 }
 
-func (g *Gadget) GetDrawData() (drawdata.Component, duerror.DUError) {
+func (g *Gadget) GetDrawData() (any, duerror.DUError) {
 	return g.drawData, nil
 }
 
@@ -109,12 +107,6 @@ func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
 	return nil
 }
 
-func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
-	//TODO: calculate the Bottom-Right point (maybe store it?)
-	size := 5
-	return g.point, utils.AddPoints(g.point, utils.Point{X: size, Y: size}), nil
-}
-
 func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
 	if gadgetType&supportedGadgetType == 0 {
 		return nil, duerror.NewInvalidArgumentError("gadget type is not supported")
@@ -122,10 +114,15 @@ func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUErr
 	if gadgetType == 0 {
 		return nil, duerror.NewInvalidArgumentError("gadget type is 0")
 	}
-	return &Gadget{
+	g := Gadget{
 		gadgetType: gadgetType,
 		point:      point,
 		layer:      0,
 		color:      utils.FromHex(drawdata.DefaultGadgetColor),
-	}, nil
+	}
+	err := g.updateDrawData()
+	if err != nil {
+		return nil, err
+	}
+	return &g, nil
 }

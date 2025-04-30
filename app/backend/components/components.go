@@ -2,7 +2,7 @@ package components
 
 import (
 	"Dr.uml/backend/component"
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -11,6 +11,7 @@ type Components struct {
 	componentsContainer componentsContainer
 	selectedComponents  map[component.Component]bool
 	drawData            drawdata.Components
+	updateParentDraw    func() duerror.DUError
 }
 
 func NewComponents() *Components {
@@ -55,12 +56,14 @@ func (cs *Components) UnselectAllComponents() duerror.DUError {
 	return nil
 }
 
-func (cs *Components) GetDrawData() (any, duerror.DUError) {
+func (cs *Components) GetDrawData() (drawdata.Components, duerror.DUError) {
 	return cs.drawData, nil
 }
 
 func (cs *Components) updateDrawData() duerror.DUError {
-	arr := make([]drawdata.Component, 0, len(cs.selectedComponents))
+	gs := make([]drawdata.Gadget, 0, len(cs.selectedComponents))
+	// TODO
+	// as := make([]drawdata.Association, 0, len(cs.selectedComponents))
 	for _, c := range cs.componentsContainer.GetAll() {
 		cDrawData, err := c.GetDrawData()
 		if err != nil {
@@ -69,15 +72,27 @@ func (cs *Components) updateDrawData() duerror.DUError {
 		if cDrawData == nil {
 			continue
 		}
-		arr = append(arr, cDrawData)
+		switch c.(type) {
+		case *component.Gadget:
+			gs = append(gs, cDrawData.(drawdata.Gadget))
+		case *component.Association:
+			continue
+		}
 	}
-	cs.drawData.Components = arr
-	// TODO: should notify parent
-	return nil
+	cs.drawData.Gadgets = gs
+	// cs.drawData.Associations = as
+	if cs.updateParentDraw == nil {
+		return nil
+	}
+	return cs.updateParentDraw()
 }
 
 func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
 	gadget, err := component.NewGadget(gadgetType, point)
+	if err != nil {
+		return err
+	}
+	err = gadget.RegisterUpdateParentDraw(cs.updateDrawData)
 	if err != nil {
 		return err
 	}
@@ -89,5 +104,10 @@ func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (cs *Components) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	cs.updateParentDraw = update
 	return nil
 }

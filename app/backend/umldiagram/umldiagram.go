@@ -5,6 +5,7 @@ import (
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/components"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -24,12 +25,14 @@ func isValidDiagramType(input DiagramType) bool {
 
 // Diagram represents a UML diagram
 type UMLDiagram struct {
-	name            string
-	diagramType     DiagramType // e.g., "Class", "UseCase", "Sequence"
-	lastModified    time.Time
-	startPoint      utils.Point // for dragging and linking ass
-	backgroundColor utils.Color
-	components      *components.Components
+	name             string
+	diagramType      DiagramType // e.g., "Class", "UseCase", "Sequence"
+	lastModified     time.Time
+	startPoint       utils.Point // for dragging and linking ass
+	backgroundColor  utils.Color
+	components       *components.Components
+	drawData         drawdata.Diagram
+	notifyDrawUpdate func() duerror.DUError
 }
 
 // NewUMLDiagram creates a new UMLDiagram instance
@@ -48,8 +51,9 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		diagramType:     dt,
 		lastModified:    time.Now(),
 		startPoint:      utils.Point{X: 0, Y: 0},
-		backgroundColor: utils.Color{R: 255, G: 255, B: 255}, // Default white background
+		backgroundColor: utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
 		components:      components.NewComponents(),
+		drawData:        drawdata.Diagram{Color: drawdata.DefaultDiagramColor},
 	}, nil
 }
 
@@ -81,4 +85,27 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	}
 	return nil
 
+}
+
+func (ud *UMLDiagram) GetDrawData() (drawdata.Diagram, duerror.DUError) {
+	return ud.drawData, nil
+}
+
+func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) duerror.DUError {
+	ud.notifyDrawUpdate = update
+	return nil
+
+}
+
+func (ud *UMLDiagram) updateDrawData() duerror.DUError {
+	csdd, err := ud.components.GetDrawData()
+	if err != nil {
+		return err
+	}
+	if ud.notifyDrawUpdate == nil {
+		return nil
+	}
+	ud.drawData.Color = ud.backgroundColor.ToHex()
+	ud.drawData.Components = csdd
+	return ud.notifyDrawUpdate()
 }

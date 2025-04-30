@@ -1,18 +1,18 @@
 package attribute
 
 import (
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
 
 // Attribute represents a configurable textual element with content, size, and style properties expressed as Textstyle.
 type Attribute struct {
-	content string
-	size    int
-	style   Textstyle
-	fontFile string
-	drawData drawdata.Attribute
+	content          string
+	size             int
+	style            Textstyle
+	fontFile         string
+	drawData         drawdata.Attribute
 	updateParentDraw func() duerror.DUError
 }
 

@@ -202,7 +202,6 @@ func TestAddGadget(t *testing.T) {
 	time.Sleep(time.Millisecond)
 	project.SelectDiagram(diagram.GetName())
 
-	// TODO: assert GadgetType in drawdata
 	err = project.AddGadget(gadgetType, utils.Point{X: 10, Y: 20})
 
 	if err != nil {

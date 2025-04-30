@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
@@ -16,6 +17,7 @@ type UMLProject struct {
 	diagrams       map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
 	openedDiagrams map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
 	activeDiagrams map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
+	// notifyDrawUpdate func() duerror.DUError TODO
 }
 
 // NewUMLProject creates a new UMLProject instance
@@ -95,6 +97,7 @@ func (p *UMLProject) AddNewDiagram(
 	if err != nil {
 		return err
 	}
+	// diagram.RegisterNotifyDrawUpdate() TODO
 
 	p.diagrams[name] = diagram
 	p.currentDiagram = diagram
@@ -115,4 +118,15 @@ func (p *UMLProject) createDiagram(path string) duerror.DUError {
 	p.openedDiagrams[diagram.GetName()] = diagram
 	p.lastModified = time.Now()
 	return nil
+}
+
+func (p *UMLProject) DrawDigram() drawdata.Diagram {
+	if p.currentDiagram == nil {
+		return drawdata.Diagram{}
+	}
+	data, err := p.currentDiagram.GetDrawData()
+	if err != nil {
+		return drawdata.Diagram{}
+	}
+	return data
 }

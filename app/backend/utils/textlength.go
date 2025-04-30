@@ -40,7 +40,7 @@ func GetTextSize(str string, size int, fontFile string) (int, int, duerror.DUErr
 		return 0, 0, duerror.NewFileIOError(err.Error())
 	}
 	defer face.Close()
-	
+
 	// Draw the string to an image
 	// imgWidth := 400
 	// imgHeight := 100
