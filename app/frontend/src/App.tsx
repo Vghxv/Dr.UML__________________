@@ -6,9 +6,11 @@ import { dia } from '@joint/core';
 import Canvas from './components/Canvas';
 import Gadget from './components/Gadget';
 import Association from './components/Association';
+import { useParseBackendGadget } from './hooks/useParseBackendGadget';
 
 const App: React.FC = () => {
     const [graph] = useState(new dia.Graph()); // Create a new JointJS graph instance
+    const parseBackendGadget = useParseBackendGadget();
 
     const handleDrop = (gadget: dia.Element) => {
         if (gadget instanceof dia.Element) {
@@ -21,6 +23,28 @@ const App: React.FC = () => {
     const handleCreateAssociation = (association: dia.Link) => {
         graph.addCell(association); // Add the association to the graph
     };
+
+    useEffect(() => {
+        // Example backend JSON string
+        const backendJson = `{
+            "gadgetType": "Class",
+            "x": 100,
+            "y": 100,
+            "layer": 1,
+            "height": 120,
+            "width": 200,
+            "color": 16777215,
+            "attributes": [
+                [{"content": "id: Int", "height": 20, "width": 100, "fontSize": 12, "fontStyle": 0, "fontFile": ""}],
+                [{"content": "+getId(): Int", "height": 20, "width": 100, "fontSize": 12, "fontStyle": 0, "fontFile": ""}]
+            ]
+        }`;
+
+        const gadget = parseBackendGadget(backendJson);
+        if (gadget) {
+            graph.addCell(gadget); // Add the parsed gadget to the graph
+        }
+    }, [graph, parseBackendGadget]);
 
     return (
         <DndProvider backend={HTML5Backend}>
