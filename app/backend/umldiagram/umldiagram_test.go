@@ -129,9 +129,8 @@ func TestUMLDiagramGetters(t *testing.T) {
 
 	assert.Equal(t, "TestDiagram", diagram.GetName())
 
-	comp, err := diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20})
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20})
 	assert.NoError(t, err)
-	assert.NotNil(t, comp)
 }
 
 func TestNewUMLDiagramWithPath(t *testing.T) {

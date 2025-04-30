@@ -76,18 +76,18 @@ func (cs *Components) updateDrawData() duerror.DUError {
 	return nil
 }
 
-func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Point) (component.Component, duerror.DUError) {
+func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
 	gadget, err := component.NewGadget(gadgetType, point)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = cs.compoentsContainer.Insert(gadget)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = cs.updateDrawData()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return gadget, nil
+	return nil
 }

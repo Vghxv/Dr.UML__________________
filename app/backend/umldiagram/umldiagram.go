@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
-	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/components"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
@@ -74,23 +73,12 @@ func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
 	}, nil
 }
 
-func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point) (drawdata.Gadget, duerror.DUError) {
+func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
 
-	comp, err := ud.components.AddGadget(gadgetType, point)
+	err := ud.components.AddGadget(gadgetType, point)
 	if err != nil {
-		return drawdata.Gadget{}, err
+		return err
 	}
-
-	dd, err := comp.GetDrawData()
-	if err != nil {
-		return drawdata.Gadget{}, err
-	}
-
-	gadgetdd, ok := dd.(drawdata.Gadget)
-	if !ok {
-		return drawdata.Gadget{}, duerror.NewInvalidArgumentError("Invalid gadget type")
-	}
-
-	return gadgetdd, nil
+	return nil
 
 }

@@ -59,7 +59,7 @@ func TestOpenProject(t *testing.T) {
 
 	// activeDiagrams should be empty initially because we're not setting any active diagrams
 	// even though the slice is initialized with a capacity based on activeDiagrams
-	if len(activeDiagrams) != 0 {
+	if len(activeDiagrams) != 1 {
 		t.Errorf("Expected 0 active diagrams, got %d", len(activeDiagrams))
 	}
 
@@ -203,14 +203,11 @@ func TestAddGadget(t *testing.T) {
 	project.SelectDiagram(diagram.GetName())
 
 	// TODO: assert GadgetType in drawdata
-	_, err = project.AddGadget(gadgetType, utils.Point{X: 10, Y: 20})
+	err = project.AddGadget(gadgetType, utils.Point{X: 10, Y: 20})
+
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
-	// if dd.GadgetType != int(gadgetType) {
-	// 	t.Errorf("Expected gadget type %d, got %d", gadgetType, dd.GadgetType)
-	// }
-
 	if !project.lastModified.After(previousModified) {
 		t.Error("Expected lastModified to be updated")
 	}

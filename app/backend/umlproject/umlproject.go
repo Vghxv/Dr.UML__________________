@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
-	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
@@ -45,6 +44,7 @@ func (p *UMLProject) OpenProject() ([]*umldiagram.UMLDiagram, []string, duerror.
 			return nil, nil, duerror.NewInvalidArgumentError("Failed to create diagram")
 		}
 		p.activeDiagrams[d.GetName()] = d
+		activeDiagrams = append(activeDiagrams, d)
 	}
 
 	return activeDiagrams, p.GetAvailableDiagrams(), nil
@@ -81,17 +81,14 @@ func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 func (p *UMLProject) AddGadget(
 	gadgetType component.GadgetType,
 	point utils.Point,
-) (drawdata.Gadget, duerror.DUError) {
+) duerror.DUError {
 
-	dd, err := p.currentDiagram.AddGadget(gadgetType, point)
+	err := p.currentDiagram.AddGadget(gadgetType, point)
 	if err != nil {
-		return drawdata.Gadget{}, err
+		return err
 	}
 	p.lastModified = time.Now()
-	if dd.GadgetType != 1 {
-		p.activeDiagrams[p.currentDiagram.GetName()] = p.currentDiagram
-	}
-	return dd, nil
+	return nil
 
 }
 
