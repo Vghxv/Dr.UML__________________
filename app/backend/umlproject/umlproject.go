@@ -124,7 +124,7 @@ func (p *UMLProject) createDiagram(path string) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) Draw() drawdata.Diagram {
+func (p *UMLProject) DrawDigram() drawdata.Diagram {
 	if p.currentDiagram == nil {
 		return drawdata.Diagram{}
 	}

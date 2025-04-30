@@ -32,7 +32,8 @@ type UMLDiagram struct {
 	startPoint   utils.Point // for dragging and linking ass
 	/* TODO */
 	// add background color
-	drawData drawdata.Diagram
+	drawData         drawdata.Diagram
+	notifyDrawUpdate func() duerror.DUError
 }
 
 // NewUMLDiagram creates a new UMLDiagram instance
@@ -88,7 +89,15 @@ func (ud *UMLDiagram) GetDrawData() (drawdata.Diagram, duerror.DUError) {
 	return ud.drawData, nil
 }
 
+func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) duerror.DUError {
+	ud.notifyDrawUpdate = update
+	return nil
+}
+
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	// ud.drawData.Components = ud.components.getDrawData() // TODO
-	return nil
+	if ud.notifyDrawUpdate == nil {
+		return nil
+	}
+	return ud.notifyDrawUpdate()
 }
