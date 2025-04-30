@@ -7,18 +7,20 @@ interface AssociationProps {
     source: { x: number; y: number };
     target: { x: number; y: number };
     layer: number;
+    style?: dia.Link.Attributes['line']; // Optional line style
+    marker?: dia.Link.Attributes['line']['targetMarker']; // Optional marker style
     onCreate: (link: dia.Link) => void;
 }
 
-const Association: React.FC<AssociationProps> = ({ source, target, layer, onCreate }) => {
+const Association: React.FC<AssociationProps> = ({ source, target, layer, style, marker, onCreate }) => {
     const handleCreateAssociation = useCallback(() => {
-        const link = createAssociation({ source, target, layer });
+        const link = createAssociation({ source, target, layer, style, marker });
         if (onCreate && link) {
             onCreate(link);
         } else {
             console.error('Failed to create association or onCreate is not defined.');
         }
-    }, [source, target, layer, onCreate]);
+    }, [source, target, layer, style, marker, onCreate]);
 
     return (
         <button

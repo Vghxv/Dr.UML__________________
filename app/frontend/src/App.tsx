@@ -6,6 +6,7 @@ import './App.css';
 import { dia } from '@joint/core';
 import Canvas from './components/Canvas';
 import Gadget from './components/Gadget';
+import Association from './components/Association';
 
 const App: React.FC = () => {
     const [graph] = useState(new dia.Graph()); // Create a new JointJS graph instance
@@ -70,7 +71,21 @@ const App: React.FC = () => {
                         onDrop={handleDrop}
                     />
                 </div>
-                
+
+                <h1>Association Tool</h1>
+                <Association
+                    source={{ x: 100, y: 100 }}
+                    target={{ x: 300, y: 300 }}
+                    layer={1}
+                    style={{ stroke: '#FF5733', strokeWidth: 3 }}
+                    marker={{
+                        type: 'path',
+                        d: 'M 10 -5 0 0 10 5 Z',
+                        fill: '#FF5733',
+                    }}
+                    onCreate={handleCreateAssociation}
+                />
+
                 <Canvas graph={graph} />
             </div>
         </DndProvider>
