@@ -99,6 +99,12 @@ func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) du
 
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	// ud.drawData.Components = ud.components.getDrawData() // TODO
+	ud.drawData.Color = ud.backgroundColor.ToHex()
+	csdd, err := ud.components.GetDrawData()
+	if err != nil {
+		return err
+	}
+	ud.drawData.Components = csdd
 	if ud.notifyDrawUpdate == nil {
 		return nil
 	}

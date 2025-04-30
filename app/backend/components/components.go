@@ -55,7 +55,7 @@ func (cs *Components) UnselectAllComponents() duerror.DUError {
 	return nil
 }
 
-func (cs *Components) GetDrawData() (any, duerror.DUError) {
+func (cs *Components) GetDrawData() (drawdata.Components, duerror.DUError) {
 	return cs.drawData, nil
 }
 
