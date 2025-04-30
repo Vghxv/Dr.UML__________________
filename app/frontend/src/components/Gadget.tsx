@@ -34,10 +34,10 @@ const Gadget: React.FC<GadgetProps> = ({
             name,
         });
 
-        if (onDrop && gadget) {
+        if (gadget) {
             onDrop(gadget); // Ensure the onDrop function is called with the created gadget
         } else {
-            console.error('Failed to create gadget or onDrop is not defined.');
+            console.error('Failed to create gadget.');
         }
     }, [point, type, layer, size, color, outlineColor, name, onDrop]);
 
