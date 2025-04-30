@@ -68,20 +68,18 @@ func (this *Association) GetParentStart() *Gadget {
 }
 
 // Setters
-func (this *Association) SetAssType(assType AssociationType) {
+func (this *Association) SetAssType(assType AssociationType) duerror.DUError {
+	if assType&supportedAssociationType != assType || assType == 0 {
+		return duerror.NewInvalidArgumentError("unsupported association type")
+	}
 	this.assType = assType
+	this.drawdata.AssType = int(assType)
+	return nil
 }
 
 func (this *Association) SetLayer(layer int) duerror.DUError {
 	this.layer = layer
-	return nil
-}
-
-func (this *Association) SetParentEnd(gadget *Gadget) duerror.DUError {
-	if gadget == nil {
-		return duerror.NewInvalidArgumentError("gadget is nil")
-	}
-	this.parents[1] = gadget
+	this.drawdata.Layer = layer
 	return nil
 }
 
@@ -90,6 +88,18 @@ func (this *Association) SetParentStart(gadget *Gadget) duerror.DUError {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
 	this.parents[0] = gadget
+	this.drawdata.StartX = gadget.GetPoint().X
+	this.drawdata.StartY = gadget.GetPoint().Y
+	return nil
+}
+
+func (this *Association) SetParentEnd(gadget *Gadget) duerror.DUError {
+	if gadget == nil {
+		return duerror.NewInvalidArgumentError("gadget is nil")
+	}
+	this.parents[1] = gadget
+	this.drawdata.EndX = gadget.GetPoint().X
+	this.drawdata.EndY = gadget.GetPoint().Y
 	return nil
 }
 
@@ -99,6 +109,10 @@ func (this *Association) AddAttribute(attribute *attribute.AssAttribute) duerror
 		return duerror.NewInvalidArgumentError("attribute is nil")
 	}
 	this.attributes = append(this.attributes, attribute)
+	// cuz this is the heaviest part
+	if err := this.updateDrawData(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -118,6 +132,9 @@ func (this *Association) RemoveAttribute(index int) duerror.DUError {
 		return duerror.NewInvalidArgumentError("index out of range")
 	}
 	this.attributes = append(this.attributes[:index], this.attributes[index+1:]...)
+	if err := this.updateDrawData(); err != nil {
+		return err
+	}
 	return nil
 }
 

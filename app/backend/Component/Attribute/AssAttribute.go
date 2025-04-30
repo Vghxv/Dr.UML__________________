@@ -57,7 +57,10 @@ func (att *AssAttribute) SetStyle(style Textstyle) duerror.DUError {
 }
 
 func (att *AssAttribute) SetFontFile(fontFile string) duerror.DUError {
-	att.fontFile = fontFile
+	if err := att.Attribute.SetFontFile(fontFile); err != nil {
+		return err
+	}
+
 	att.assDD.FontFile = fontFile
 	return nil
 }
