@@ -34,9 +34,11 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType) (*Association, 
 	if parents[0] == nil || parents[1] == nil {
 		return nil, duerror.NewInvalidArgumentError("parents are nil")
 	}
-	return &Association{
+	a := &Association{
 		parents: [2]*Gadget{parents[0], parents[1]},
-	}, nil
+	}
+	a.updateDrawData()
+	return a, nil
 }
 
 // Getters
@@ -74,33 +76,47 @@ func (this *Association) SetAssType(assType AssociationType) duerror.DUError {
 	}
 	this.assType = assType
 	this.drawdata.AssType = int(assType)
-	return nil
+	if this.updateParentDraw == nil {
+		return nil
+	}
+	return this.updateParentDraw()
 }
 
 func (this *Association) SetLayer(layer int) duerror.DUError {
 	this.layer = layer
 	this.drawdata.Layer = layer
-	return nil
+	if this.updateParentDraw == nil {
+		return nil
+	}
+	return this.updateParentDraw()
 }
 
 func (this *Association) SetParentStart(gadget *Gadget) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
+	// TODO: cal the real point
 	this.parents[0] = gadget
 	this.drawdata.StartX = gadget.GetPoint().X
 	this.drawdata.StartY = gadget.GetPoint().Y
-	return nil
+	if this.updateParentDraw == nil {
+		return nil
+	}
+	return this.updateParentDraw()
 }
 
 func (this *Association) SetParentEnd(gadget *Gadget) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
+	// TODO: cal the real point
 	this.parents[1] = gadget
 	this.drawdata.EndX = gadget.GetPoint().X
 	this.drawdata.EndY = gadget.GetPoint().Y
-	return nil
+	if this.updateParentDraw == nil {
+		return nil
+	}
+	return this.updateParentDraw()
 }
 
 // Other methods
@@ -108,12 +124,10 @@ func (this *Association) AddAttribute(attribute *attribute.AssAttribute) duerror
 	if attribute == nil {
 		return duerror.NewInvalidArgumentError("attribute is nil")
 	}
+	attribute.RegisterUpdateParentDraw(this.updateDrawData)
 	this.attributes = append(this.attributes, attribute)
 	// cuz this is the heaviest part
-	if err := this.updateDrawData(); err != nil {
-		return err
-	}
-	return nil
+	return this.updateDrawData()
 }
 
 func (this *Association) Cover(p utils.Point) (bool, duerror.DUError) {
@@ -133,10 +147,7 @@ func (this *Association) RemoveAttribute(index int) duerror.DUError {
 		return duerror.NewInvalidArgumentError("index out of range")
 	}
 	this.attributes = append(this.attributes[:index], this.attributes[index+1:]...)
-	if err := this.updateDrawData(); err != nil {
-		return err
-	}
-	return nil
+	return this.updateDrawData()
 }
 
 func (this *Association) updateDrawData() duerror.DUError {
@@ -157,7 +168,6 @@ func (this *Association) updateDrawData() duerror.DUError {
 		if att == nil {
 			return duerror.NewInvalidArgumentError("attribute is nil")
 		}
-		att.UpdateDrawData()
 		this.drawdata.Attributes[i] = att.GetAssDD()
 	}
 	if this.updateParentDraw == nil {
@@ -167,6 +177,9 @@ func (this *Association) updateDrawData() duerror.DUError {
 }
 
 func (this *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	if update == nil {
+		return duerror.NewInvalidArgumentError("update function is nil")
+	}
 	this.updateParentDraw = update
 	return nil
 }
