@@ -40,6 +40,7 @@ func (g *Gadget) GetLayer() (int, duerror.DUError) {
 
 func (g *Gadget) SetLayer(layer int) duerror.DUError {
 	g.layer = layer
+	g.drawData.Layer = layer
 	return nil
 }
 
@@ -88,7 +89,6 @@ func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror
 	return nil
 }
 
-
 /*
 gadget func
 */
@@ -101,10 +101,8 @@ func (g *Gadget) GetPoint() utils.Point {
 // point setter
 func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
 	g.point = point
-	err := g.updateDrawData()
-	if err != nil {
-		return err
-	}
+	g.drawData.X = point.X
+	g.drawData.Y = point.Y
 	return nil
 }
 
