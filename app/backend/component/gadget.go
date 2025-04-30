@@ -14,6 +14,14 @@ const (
 	supportedGadgetType            = Class
 )
 
+var gadgetDefaultAtts = map[GadgetType]([][]string){
+	Class: [][]string{
+		{"Name"},
+		{"Attributes"},
+		{"Methods"},
+	},
+}
+
 type Gadget struct {
 	gadgetType       GadgetType
 	point            utils.Point
@@ -22,6 +30,34 @@ type Gadget struct {
 	color            utils.Color
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
+}
+
+func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
+	if gadgetType&supportedGadgetType == 0 {
+		return nil, duerror.NewInvalidArgumentError("gadget type is not supported")
+	}
+	g := Gadget{
+		gadgetType: gadgetType,
+		point:      point,
+		layer:      0,
+		color:      utils.FromHex(drawdata.DefaultGadgetColor),
+	}
+
+	g.attributes = make([][]attribute.Attribute, len(gadgetDefaultAtts[gadgetType]))
+	for i, contents := range gadgetDefaultAtts[gadgetType] {
+		g.attributes[i] = make([]attribute.Attribute, 0, len(contents))
+		for _, content := range contents {
+			if err := g.AddAttribute(content, i); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	err := g.updateDrawData()
+	if err != nil {
+		return nil, err
+	}
+	return &g, nil
 }
 
 /*
@@ -112,22 +148,18 @@ func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
 	return g.updateParentDraw()
 }
 
-func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
-	if gadgetType&supportedGadgetType == 0 {
-		return nil, duerror.NewInvalidArgumentError("gadget type is not supported")
+func (g *Gadget) AddAttribute(content string, section int) duerror.DUError {
+	if section < 0 || section >= len(g.attributes) {
+		return duerror.NewInvalidArgumentError("section out of range")
 	}
-	if gadgetType == 0 {
-		return nil, duerror.NewInvalidArgumentError("gadget type is 0")
-	}
-	g := Gadget{
-		gadgetType: gadgetType,
-		point:      point,
-		layer:      0,
-		color:      utils.FromHex(drawdata.DefaultGadgetColor),
-	}
-	err := g.updateDrawData()
+	att, err := attribute.NewAttribute(content)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &g, nil
+	err = att.RegisterUpdateParentDraw(g.updateDrawData)
+	if err != nil {
+		return err
+	}
+	g.attributes[section] = append(g.attributes[section], *att)
+	return g.updateDrawData()
 }
