@@ -120,7 +120,10 @@ func (this *Association) RemoveAttribute(index int) duerror.DUError {
 	return nil
 }
 
-func (this *Association) updateDrawData() {
+func (this *Association) UpdateDrawData() duerror.DUError {
+	if this == nil || this.parents[0] == nil || this.parents[1] == nil {
+		return duerror.NewInvalidArgumentError("association or parents are nil")
+	}
 	start := this.parents[0].point /*TODO: Change the direct-getting to getter after Gadget.point has one*/
 	end := this.parents[1].point   /*TODO: Change the direct-getting to getter after Gadget.point has one*/
 
@@ -130,9 +133,14 @@ func (this *Association) updateDrawData() {
 	this.drawdata.EndY = end.Y
 	this.drawdata.AssType = int(this.assType)
 	this.drawdata.Attributes = make([]drawdata.AssAttribute, len(this.attributes))
+
 	for i, att := range this.attributes {
+		if att == nil {
+			return duerror.NewInvalidArgumentError("attribute is nil")
+		}
 		att.UpdateDrawData()
 		this.drawdata.Attributes[i] = att.GetAssDD()
 	}
+	return nil
 
 }
