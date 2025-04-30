@@ -1,7 +1,6 @@
 package component
 
 import (
-	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -13,7 +12,7 @@ type Component interface {
 	Cover(p utils.Point) (bool, duerror.DUError)
 	GetLayer() (int, duerror.DUError)
 	SetLayer(layer int) duerror.DUError
-	GetDrawData() (drawdata.Component, duerror.DUError)
+	GetDrawData() (any, duerror.DUError)
 	RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError
 
 	updateDrawData() duerror.DUError

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -121,4 +122,15 @@ func (p *UMLProject) createDiagram(path string) duerror.DUError {
 	p.openedDiagrams[diagram.GetId()] = diagram
 	p.lastModified = time.Now()
 	return nil
+}
+
+func (p *UMLProject) Draw() drawdata.Diagram {
+	if p.currentDiagram == nil {
+		return drawdata.Diagram{}
+	}
+	data, err := p.currentDiagram.GetDrawData()
+	if err != nil {
+		return drawdata.Diagram{}
+	}
+	return data
 }

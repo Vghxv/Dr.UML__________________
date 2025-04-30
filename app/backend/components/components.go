@@ -2,7 +2,7 @@ package components
 
 import (
 	"Dr.uml/backend/component"
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -10,7 +10,7 @@ import (
 type Components struct {
 	compoentsContainer componentsContainer
 	selectedComponents map[component.Component]bool
-	drawData drawdata.Components
+	drawData           drawdata.Components
 }
 
 func NewComponents() *Components {
@@ -18,7 +18,7 @@ func NewComponents() *Components {
 		compoentsContainer: NewContainerMap(),
 		selectedComponents: make(map[component.Component]bool),
 		drawData: drawdata.Components{
-			Margin: drawdata.Margin,
+			Margin:    drawdata.Margin,
 			LineWidth: drawdata.LineWidth,
 		},
 	}
@@ -60,7 +60,8 @@ func (cs *Components) GetDrawData() (any, duerror.DUError) {
 }
 
 func (cs *Components) updateDrawData() duerror.DUError {
-	arr := make([]drawdata.Component, 0, len(cs.selectedComponents))
+	gs := make([]drawdata.Gadget, 0, len(cs.selectedComponents))
+	// as := make([]drawdata.Association, 0, len(cs.selectedComponents))
 	for _, c := range cs.compoentsContainer.GetAll() {
 		cDrawData, err := c.GetDrawData()
 		if err != nil {
@@ -69,9 +70,15 @@ func (cs *Components) updateDrawData() duerror.DUError {
 		if cDrawData == nil {
 			continue
 		}
-		arr = append(arr, cDrawData)
+		switch c.(type) {
+		case *component.Gadget:
+			gs = append(gs, cDrawData.(drawdata.Gadget))
+		case *component.Association:
+			continue //TODO
+		}
 	}
-	cs.drawData.Components = arr
+	cs.drawData.Gadgets = gs
+	// cs.drawData.Associations = as
 	// TODO: should notify parent
 	return nil
 }

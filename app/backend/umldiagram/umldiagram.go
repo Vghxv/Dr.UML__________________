@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 	"github.com/google/uuid"
@@ -31,7 +32,7 @@ type UMLDiagram struct {
 	startPoint   utils.Point // for dragging and linking ass
 	/* TODO */
 	// add background color
-
+	drawData drawdata.Diagram
 }
 
 // NewUMLDiagram creates a new UMLDiagram instance
@@ -52,6 +53,7 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		diagramType:  dt,
 		lastModified: time.Now(),
 		startPoint:   utils.Point{X: 0, Y: 0},
+		drawData:     drawdata.Diagram{Color: 0}, // TODO
 	}, nil
 }
 
@@ -79,5 +81,14 @@ func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
 func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType) error {
 	// Add a gadget to the diagram
 	/* TODO */
+	return nil
+}
+
+func (ud *UMLDiagram) GetDrawData() (drawdata.Diagram, duerror.DUError) {
+	return ud.drawData, nil
+}
+
+func (ud *UMLDiagram) updateDrawData() duerror.DUError {
+	// ud.drawData.Components = ud.components.getDrawData() // TODO
 	return nil
 }

@@ -7,9 +7,8 @@ import (
 
 type Association struct {
 	parents [2]*Gadget
-	layer int
+	layer   int
 }
-
 
 /*
 component interface
@@ -36,6 +35,9 @@ func (g *Association) updateDrawData() duerror.DUError {
 	return nil
 }
 
+func (g *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	return nil
+}
 
 /*
 associaiton func
@@ -45,7 +47,7 @@ func NewAssociation(parents [2]*Gadget) (*Association, duerror.DUError) {
 	if parents[0] == nil || parents[1] == nil {
 		return nil, duerror.NewInvalidArgumentError("parents are nil")
 	}
-	return &Association {
+	return &Association{
 		parents: [2]*Gadget{parents[0], parents[1]},
 	}, nil
 }

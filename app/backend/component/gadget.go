@@ -2,7 +2,7 @@ package component
 
 import (
 	"Dr.uml/backend/component/attribute"
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -10,27 +10,26 @@ import (
 type GadgetType int
 
 const (
-	Class GadgetType = 1 << iota // 0x01
-	supportedType = Class
+	Class         GadgetType = 1 << iota // 0x01
+	supportedType            = Class
 )
 
 type Gadget struct {
-	gadgetType GadgetType
-	point utils.Point
-	layer int
-	attributes [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
-	color int
-	drawData drawdata.Gadget
+	gadgetType       GadgetType
+	point            utils.Point
+	layer            int
+	attributes       [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
+	color            int
+	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
-
 
 /*
 component interface
 */
 
 func (g *Gadget) Cover(p utils.Point) (bool, duerror.DUError) {
-	tl := g.point // top-left
+	tl := g.point                                                                          // top-left
 	br := utils.AddPoints(g.point, utils.Point{X: g.drawData.Width, Y: g.drawData.Height}) // bottom-right
 	return p.X >= tl.X && p.X <= br.X && p.Y >= tl.Y && p.Y <= br.Y, nil
 }
@@ -68,7 +67,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 		height += drawdata.LineWidth
 	}
 	width := maxAttWidth + drawdata.Margin*2 + drawdata.LineWidth*2
-	
+
 	g.drawData.GadgetType = int(g.gadgetType)
 	g.drawData.X = g.point.X
 	g.drawData.Y = g.point.Y
@@ -77,7 +76,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Width = width
 	g.drawData.Color = g.color
 	g.drawData.Attributes = atts
-	
+
 	if g.updateParentDraw == nil {
 		return nil
 	}
@@ -88,7 +87,6 @@ func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror
 	g.updateParentDraw = update
 	return nil
 }
-
 
 /*
 gadget func
