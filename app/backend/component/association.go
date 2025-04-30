@@ -6,8 +6,9 @@ import (
 )
 
 type Association struct {
-	parents [2]*Gadget
-	layer   int
+	parents          [2]*Gadget
+	layer            int
+	updateParentDraw func() duerror.DUError
 }
 
 /*
@@ -31,15 +32,15 @@ func (a *Association) GetDrawData() (any, duerror.DUError) {
 	return nil, nil
 }
 
-func (g *Association) updateDrawData() duerror.DUError {
+func (a *Association) updateDrawData() duerror.DUError {
 	return nil
 }
 
-func (g *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+func (a *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
 	if update == nil {
 		return duerror.NewInvalidArgumentError("update function is nil")
 	}
-	g.updateParentDraw = update
+	a.updateParentDraw = update
 	return nil
 }
 
