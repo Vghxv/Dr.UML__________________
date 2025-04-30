@@ -11,12 +11,13 @@ import (
 )
 
 type UMLProject struct {
-	name           string
-	lastModified   time.Time
-	currentDiagram *umldiagram.UMLDiagram            // The currently selected diagram
-	diagrams       map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
-	openedDiagrams map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
-	activeDiagrams map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
+	name             string
+	lastModified     time.Time
+	currentDiagram   *umldiagram.UMLDiagram            // The currently selected diagram
+	diagrams         map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
+	openedDiagrams   map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
+	activeDiagrams   map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
+	notifyDrawUpdate func(string) duerror.DUError
 	// notifyDrawUpdate func() duerror.DUError TODO
 }
 
@@ -105,7 +106,7 @@ func (p *UMLProject) AddNewDiagram(
 	if err != nil {
 		return err
 	}
-	// diagram.RegisterNotifyDrawUpdate() TODO
+	diagram.RegisterNotifyDrawUpdate(p.InvalidateCanvas)
 
 	p.diagrams[name] = diagram
 	p.currentDiagram = diagram
@@ -128,6 +129,31 @@ func (p *UMLProject) createDiagram(path string) duerror.DUError {
 	return nil
 }
 
+func (p *UMLProject) InvalidateCanvas() duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	p.notifyDrawUpdate(p.currentDiagram.GetName())
+	return nil
+}
+
+func (p *UMLProject) RegisterNotifyDrawUpdate(update func(string) duerror.DUError) duerror.DUError {
+	p.notifyDrawUpdate = update
+	return nil
+
+}
+
+// GetUserData returns a struct with user information
+func (a *UMLProject) GetUserData() map[string]interface{} {
+	return map[string]interface{}{
+		"id":       1,
+		"username": "wailsuser",
+		"email":    "user@example.com",
+		"roles":    []string{"admin", "user"},
+		"active":   true,
+	}
+}
+
 func (p *UMLProject) DrawDigram() drawdata.Diagram {
 	if p.currentDiagram == nil {
 		return drawdata.Diagram{}
@@ -137,4 +163,11 @@ func (p *UMLProject) DrawDigram() drawdata.Diagram {
 		return drawdata.Diagram{}
 	}
 	return data
+}
+
+func (p *UMLProject) GetCurrentDiagram() *umldiagram.UMLDiagram {
+	if p.currentDiagram == nil {
+		return nil
+	}
+	return p.currentDiagram
 }

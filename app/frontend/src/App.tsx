@@ -7,6 +7,34 @@ import Canvas from './components/Canvas';
 import Gadget from './components/Gadget';
 import Association from './components/Association';
 import { useParseBackendGadget } from './hooks/useParseBackendGadget';
+import {ProcessWithCallback} from "../wailsjs/go/main/App";
+
+import { EventsOn, EventsOff } from '../wailsjs/runtime';
+
+interface WindowWithGo extends Window {
+    go: {
+        main: {
+            App: {
+                GetUserData(): Promise<{
+                    id: number;
+                    username: string;
+                    email: string;
+                    roles: string[];
+                    active: boolean;
+                }>;
+                Debug(): Promise<
+                {
+                    name: string;
+                    number: number;
+                }>
+                GetCurrentDiagramName(): Promise<string>;
+                AddGadget(gadget: any): Promise<void>;
+            };
+        };
+    };
+  }
+
+declare var window: WindowWithGo;
 
 const App: React.FC = () => {
     const [graph] = useState(new dia.Graph()); // Create a new JointJS graph instance
@@ -46,8 +74,53 @@ const App: React.FC = () => {
         }
     }, [graph, parseBackendGadget]);
 
+    const [diagramName, setDiagramName] = useState<any>(null);
+    const [callbackResult, setCallbackResult] = useState("Callback result will appear here");
+
+    const handleGetDiagramName = async () => {
+        try {
+            const name = await window.go.main.App.GetCurrentDiagramName();
+            setDiagramName(name);
+            console.log('diagram name:', name);
+        } catch (error) {
+          console.error('Error calling Go function:', error);
+        }
+      };
+      const callbackID = "callback-" + Math.random().toString(36).substr(2, 9);
+
+      useEffect(() => {
+        // Register the event listener
+        EventsOn(callbackID, (result) => {
+            setCallbackResult(`Callback received with result: ${result}`);
+        });
+
+        // Clean up the event listener when the component unmounts
+        return () => {
+            EventsOff(callbackID);
+        };
+    }, [callbackID]);
+    function processCallback() {
+        // Call the Go function with the number and callback ID
+        ProcessWithCallback(callbackID);
+    }
+    // Create a new JointJS graph instance
+    // const [userData, setUserData] = useState<any>(null);
+
+    // const handleGetUserData = async () => {
+    //     try {
+    //       const data = await window.go.main.App.GetUserData();
+    //       setUserData(data);
+    //     } catch (error) {
+    //       console.error('Error calling Go function:', error);
+    //     }
+    //   };
     return (
         <DndProvider backend={HTML5Backend}>
+            <div className="section">
+                <h1>Dr.UML</h1>
+                <button onClick={processCallback}>testing</button>
+                <button className="btn" onClick={handleGetDiagramName}>Process with Callback</button>{diagramName}
+            </div>
             <div
                 className="App"
                 style={{

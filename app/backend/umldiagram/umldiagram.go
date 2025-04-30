@@ -46,7 +46,7 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		return nil, duerror.NewInvalidArgumentError("Invalid diagram type")
 	}
 
-	return &UMLDiagram{
+	dg := UMLDiagram{
 		name:            name,
 		diagramType:     dt,
 		lastModified:    time.Now(),
@@ -54,7 +54,9 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		backgroundColor: utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
 		components:      components.NewComponents(),
 		drawData:        drawdata.Diagram{Color: drawdata.DefaultDiagramColor},
-	}, nil
+	}
+	dg.components.RegisterUpdateParentDraw(dg.updateDrawData)
+	return &dg, nil
 }
 
 func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {
