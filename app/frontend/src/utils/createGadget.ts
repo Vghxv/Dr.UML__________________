@@ -1,8 +1,8 @@
-import { shapes, dia } from '@joint/core';  // 引入 JointJS 库
+import { shapes, dia } from '@joint/core';
 
 export interface GadgetOptions {
     point: { x: number; y: number };
-    type: 'Class' | 'Rect' | 'Circle';  // 允許的 gadget 類型
+    type: 'Class';  // 允許的 gadget 類型
     layer: number;  // 元件的層級
     size?: { width: number; height: number };  // 預設大小
     color?: string;  // 背景顏色
@@ -18,7 +18,6 @@ const UMLClass = dia.Element.define('uml.Class', {
             height: '30%',
             fill: '#2ECC71',
             stroke: '#000000',
-            strokeWidth: 2,
         },
         headerLabel: {
             ref: 'header',
@@ -109,45 +108,6 @@ export function createGadget({
                     attributesLabel: { text: 'id: Int\nname: String' },
                     methodsLabel: { text: '+getId(): Int\n+getName(): String' },
                 },
-            });
-        }
-        case 'Rect': {
-            // 創建矩形類型的 gadget
-            return new shapes.standard.Rectangle({
-                position: point,
-                size,
-                attrs: {
-                    body: {
-                        fill: color,
-                        stroke: outlineColor,
-                        strokeWidth: 2,
-                    },
-                    label: {
-                        text: name,
-                        fill: '#000000',
-                    },
-                },
-                z: layer,  // 設定元件的層級
-            });
-        }
-        case 'Circle': {
-            // 創建圓形類型的 gadget，根據 size 計算出最小的寬度和高度以保持圓形
-            const minSize = Math.min(size.width, size.height);
-            return new shapes.standard.Circle({
-                position: point,
-                size: { width: minSize, height: minSize },  // 確保圓形的寬高相等
-                attrs: {
-                    body: {
-                        fill: color,
-                        stroke: outlineColor,
-                        strokeWidth: 2,
-                    },
-                    label: {
-                        text: name,
-                        fill: '#000000',
-                    },
-                },
-                z: layer,  // 設定元件的層級
             });
         }
         default:

@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import './App.css';
@@ -54,20 +53,6 @@ const App: React.FC = () => {
                         type="Class"
                         layer={1}
                         name="Class Gadget"
-                        onDrop={handleDrop}
-                    />
-                    <Gadget
-                        point={{ x: 0, y: 0 }}
-                        type="Rect"
-                        layer={1}
-                        name="Rectangle Gadget"
-                        onDrop={handleDrop}
-                    />
-                    <Gadget
-                        point={{ x: 0, y: 0 }}
-                        type="Circle"
-                        layer={1}
-                        name="Circle Gadget"
                         onDrop={handleDrop}
                     />
                 </div>

@@ -4,7 +4,7 @@ import { dia } from '@joint/core';
 
 interface GadgetProps {
     point: { x: number; y: number };
-    type: 'Class' | 'Rect' | 'Circle';
+    type: 'Class';
     layer: number;
     size?: { width: number; height: number };
     color?: string;
@@ -49,7 +49,7 @@ const Gadget: React.FC<GadgetProps> = ({
                 height: size.height,
                 backgroundColor: color,
                 border: `2px solid ${outlineColor}`,
-                borderRadius: type === 'Circle' ? '50%' : '8px',
+                borderRadius:  '8px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
