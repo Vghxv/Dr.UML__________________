@@ -24,8 +24,7 @@ func (att *Attribute) GetContent() (string, duerror.DUError) {
 // SetContent updates the content field of the Attribute instance if the provided content is not empty.
 func (att *Attribute) SetContent(content string) duerror.DUError {
 	att.content = content
-	att.drawData.Content = content
-	return nil
+	return att.updateDrawData()
 }
 
 // GetSize returns the size of the attribute and an error if the size is negative.
@@ -42,8 +41,7 @@ func (att *Attribute) SetSize(size int) duerror.DUError {
 		return duerror.NewInvalidArgumentError("size cannot be negative")
 	}
 	att.size = size
-	att.drawData.FontSize = size
-	return nil
+	return att.updateDrawData()
 }
 
 // GetStyle returns the Textstyle of the Attribute and a possible DUError. It retrieves the current style applied.
@@ -57,8 +55,7 @@ func (att *Attribute) SetStyle(style Textstyle) duerror.DUError {
 		return duerror.NewInvalidArgumentError("style contains unsupported flags")
 	}
 	att.style = style
-	att.drawData.FontStyle = int(style)
-	return nil
+	return att.updateDrawData()
 }
 
 // SetBold sets or clears the bold style for the attribute based on the provided boolean value. Returns an error if any occurs.
@@ -68,8 +65,7 @@ func (att *Attribute) SetBold(value bool) duerror.DUError {
 	} else {
 		att.style &^= Bold // Clear the bold bit
 	}
-	att.drawData.FontStyle = int(att.style)
-	return nil
+	return att.updateDrawData()
 }
 
 // SetItalic sets or unsets the italic style for the Attribute based on the value provided. Returns duerror.DUError if any error occurs.
@@ -79,8 +75,7 @@ func (att *Attribute) SetItalic(value bool) duerror.DUError {
 	} else {
 		att.style &^= Italic // Clear the italic bit
 	}
-	att.drawData.FontStyle = int(att.style)
-	return nil
+	return att.updateDrawData()
 }
 
 // SetUnderline modifies the underline property of the Attribute by setting or clearing the underline bit in its style field.
@@ -90,8 +85,7 @@ func (att *Attribute) SetUnderline(value bool) duerror.DUError {
 	} else {
 		att.style &^= Underline // Clear the underline bit
 	}
-	att.drawData.FontStyle = int(att.style)
-	return nil
+	return att.updateDrawData()
 }
 
 // SetFontFile sets the font file path for the Attribute and updates the drawData accordingly.
@@ -101,8 +95,7 @@ func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
 		return duerror.NewInvalidArgumentError("invalid font file path")
 	}
 	att.fontFile = fontFile
-	att.drawData.FontFile = fontFile
-	return nil
+	return att.updateDrawData()
 }
 
 // IsBold checks if the bold style is applied to the attribute and returns a boolean along with an error if any occurs.
