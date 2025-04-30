@@ -65,7 +65,7 @@ func TestOpenProject(t *testing.T) {
 	}
 	// Check if activeDiagrams has 1 diagram
 	if len(activeDiagrams) != 1 {
-		t.Errorf("Expected 0 active diagrams, got %d", len(activeDiagrams))
+		t.Errorf("Expected 1 active diagrams, got %d", len(activeDiagrams))
 	}
 
 	// Check available diagrams (diagram names)
