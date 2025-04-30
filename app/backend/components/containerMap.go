@@ -19,6 +19,9 @@ func NewContainerMap() componentsContainer {
 }
 
 func (cp *containerMap) Insert(c component.Component) duerror.DUError {
+	if c == nil {
+		return duerror.NewInvalidArgumentError("component is nil")
+	}
 	cp.compMap[c] = true
 	return nil
 }

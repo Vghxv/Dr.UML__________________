@@ -9,12 +9,12 @@ import (
 
 // implement AssociationGraph interface
 type associationMap struct {
-	assMap map[*component.Gadget](map[*component.Gadget][]*component.Association)
+	assMap map[*component.Gadget]map[*component.Gadget][]*component.Association
 }
 
 func NewAssociationMap() AssociationGraph {
 	return &associationMap{
-		assMap: make(map[*component.Gadget](map[*component.Gadget]([]*component.Association))),
+		assMap: make(map[*component.Gadget]map[*component.Gadget][]*component.Association),
 	}
 }
 
@@ -84,9 +84,16 @@ func (am *associationMap) FindEither(g *component.Gadget) ([]*component.Associat
 	return asResult, nil
 }
 
-func (am *associationMap) Update(a *component.Association, oldSt *component.Gadget, oldEn *component.Gadget) duerror.DUError {
+func validateAssociation(a *component.Association) duerror.DUError {
 	if a == nil {
 		return duerror.NewInvalidArgumentError("association is nil")
+	}
+	return nil
+}
+
+func (am *associationMap) Update(a *component.Association, oldSt *component.Gadget, oldEn *component.Gadget) duerror.DUError {
+	if err := validateAssociation(a); err != nil {
+		return err
 	}
 	if oldSt == nil || oldEn == nil {
 		return duerror.NewInvalidArgumentError("old start or end gadget is nil")
@@ -106,11 +113,11 @@ func (am *associationMap) Update(a *component.Association, oldSt *component.Gadg
 }
 
 func (am *associationMap) Insert(a *component.Association) duerror.DUError {
-	if a == nil {
-		return duerror.NewInvalidArgumentError("association is nil")
+	if err := validateAssociation(a); err != nil {
+		return err
 	}
-	start, _ := a.GetParentStart()
-	end, _ := a.GetParentEnd()
+	start := a.GetParentStart()
+	end := a.GetParentEnd()
 	if _, ok := am.assMap[start]; !ok {
 		am.assMap[start] = make(map[*component.Gadget][]*component.Association)
 	}
@@ -123,11 +130,11 @@ func (am *associationMap) Insert(a *component.Association) duerror.DUError {
 }
 
 func (am *associationMap) Remove(a *component.Association) duerror.DUError {
-	if a == nil {
-		return duerror.NewInvalidArgumentError("association is nil")
+	if err := validateAssociation(a); err != nil {
+		return err
 	}
-	start, _ := a.GetParentStart()
-	end, _ := a.GetParentEnd()
+	start := a.GetParentStart()
+	end := a.GetParentEnd()
 	if _, ok := am.assMap[start]; !ok {
 		return nil
 	}
