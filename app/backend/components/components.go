@@ -8,24 +8,24 @@ import (
 )
 
 type Components struct {
-	compoentsContainer componentsContainer
-	selectedComponents map[component.Component]bool
-	drawData drawdata.Components
+	componentsContainer componentsContainer
+	selectedComponents  map[component.Component]bool
+	drawData            drawdata.Components
 }
 
 func NewComponents() *Components {
 	return &Components{
-		compoentsContainer: NewContainerMap(),
-		selectedComponents: make(map[component.Component]bool),
+		componentsContainer: NewContainerMap(),
+		selectedComponents:  make(map[component.Component]bool),
 		drawData: drawdata.Components{
-			Margin: drawdata.Margin,
+			Margin:    drawdata.Margin,
 			LineWidth: drawdata.LineWidth,
 		},
 	}
 }
 
 func (cs *Components) SelectComponent(point utils.Point) duerror.DUError {
-	comp, err := cs.compoentsContainer.Search(point)
+	comp, err := cs.componentsContainer.Search(point)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func (cs *Components) SelectComponent(point utils.Point) duerror.DUError {
 }
 
 func (cs *Components) UnselectComponent(point utils.Point) duerror.DUError {
-	comp, err := cs.compoentsContainer.Search(point)
+	comp, err := cs.componentsContainer.Search(point)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (cs *Components) GetDrawData() (any, duerror.DUError) {
 
 func (cs *Components) updateDrawData() duerror.DUError {
 	arr := make([]drawdata.Component, 0, len(cs.selectedComponents))
-	for _, c := range cs.compoentsContainer.GetAll() {
+	for _, c := range cs.componentsContainer.GetAll() {
 		cDrawData, err := c.GetDrawData()
 		if err != nil {
 			return err
@@ -73,5 +73,21 @@ func (cs *Components) updateDrawData() duerror.DUError {
 	}
 	cs.drawData.Components = arr
 	// TODO: should notify parent
+	return nil
+}
+
+func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
+	gadget, err := component.NewGadget(gadgetType, point)
+	if err != nil {
+		return err
+	}
+	err = cs.componentsContainer.Insert(gadget)
+	if err != nil {
+		return err
+	}
+	err = cs.updateDrawData()
+	if err != nil {
+		return err
+	}
 	return nil
 }

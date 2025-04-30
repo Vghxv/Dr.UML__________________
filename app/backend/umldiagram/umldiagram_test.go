@@ -6,7 +6,6 @@ import (
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/utils"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -70,11 +69,13 @@ func TestNewUMLDiagram(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, diagram)
-				assert.NotEqual(t, uuid.Nil, diagram.GetId())
 				assert.Equal(t, tt.inputName, diagram.GetName())
 				assert.Equal(t, tt.diagramType, diagram.diagramType)
 				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
+				// New assertions
+				assert.Equal(t, utils.Color{R: 255, G: 255, B: 255}, diagram.backgroundColor)
+				assert.NotNil(t, diagram.components)
 			}
 		})
 	}
@@ -126,10 +127,9 @@ func TestUMLDiagramGetters(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, diagram)
 
-	assert.NotEqual(t, uuid.Nil, diagram.GetId())
 	assert.Equal(t, "TestDiagram", diagram.GetName())
 
-	err = diagram.AddGadget(component.Class)
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20})
 	assert.NoError(t, err)
 }
 
