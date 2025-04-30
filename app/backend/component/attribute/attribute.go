@@ -24,6 +24,7 @@ func (att *Attribute) GetContent() (string, duerror.DUError) {
 // SetContent updates the content field of the Attribute instance if the provided content is not empty.
 func (att *Attribute) SetContent(content string) duerror.DUError {
 	att.content = content
+	att.drawData.Content = content
 	return nil
 }
 
@@ -41,6 +42,7 @@ func (att *Attribute) SetSize(size int) duerror.DUError {
 		return duerror.NewInvalidArgumentError("size cannot be negative")
 	}
 	att.size = size
+	att.drawData.FontSize = size
 	return nil
 }
 
@@ -55,6 +57,7 @@ func (att *Attribute) SetStyle(style Textstyle) duerror.DUError {
 		return duerror.NewInvalidArgumentError("style contains unsupported flags")
 	}
 	att.style = style
+	att.drawData.FontStyle = int(style)
 	return nil
 }
 
@@ -65,6 +68,7 @@ func (att *Attribute) SetBold(value bool) duerror.DUError {
 	} else {
 		att.style &^= Bold // Clear the bold bit
 	}
+	att.drawData.FontStyle = int(att.style)
 	return nil
 }
 
@@ -75,6 +79,7 @@ func (att *Attribute) SetItalic(value bool) duerror.DUError {
 	} else {
 		att.style &^= Italic // Clear the italic bit
 	}
+	att.drawData.FontStyle = int(att.style)
 	return nil
 }
 
@@ -85,6 +90,18 @@ func (att *Attribute) SetUnderline(value bool) duerror.DUError {
 	} else {
 		att.style &^= Underline // Clear the underline bit
 	}
+	att.drawData.FontStyle = int(att.style)
+	return nil
+}
+
+// SetFontFile sets the font file path for the Attribute and updates the drawData accordingly.
+// Returns an error if the file path is invalid.
+func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
+	if !utils.IsValidFilePath(fontFile) {
+		return duerror.NewInvalidArgumentError("invalid font file path")
+	}
+	att.fontFile = fontFile
+	att.drawData.FontFile = fontFile
 	return nil
 }
 
