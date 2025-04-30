@@ -1,6 +1,7 @@
 package attribute
 
 import (
+	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/utils/duerror"
 )
 
@@ -8,6 +9,7 @@ import (
 type AssAttribute struct {
 	Attribute
 	ratio float64
+	assDD drawdata.AssAttribute // not `drawData`
 }
 
 // NewAssAttribute creates a new AssAttribute instance with the specified ratio
@@ -26,6 +28,10 @@ func (att *AssAttribute) GetRatio() (float64, duerror.DUError) {
 	return att.ratio, nil
 }
 
+func (att *AssAttribute) GetAssDD() drawdata.AssAttribute {
+	return att.assDD
+}
+
 // SetRatio returns an error if the ratio is not between 0 and 1
 // It returns an error if the ratio is not between 0 and 1
 func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
@@ -33,4 +39,12 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
 	return nil
+}
+
+func (att *AssAttribute) UpdateDrawData() {
+	att.assDD.Content = att.content
+	att.assDD.FontSize = att.size
+	att.assDD.FontStyle = int(att.style)
+	att.assDD.FontFile = att.fontFile
+	att.assDD.Ratio = att.ratio
 }

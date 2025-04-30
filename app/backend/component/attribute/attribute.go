@@ -8,11 +8,11 @@ import (
 
 // Attribute represents a configurable textual element with content, size, and style properties expressed as Textstyle.
 type Attribute struct {
-	content string
-	size    int
-	style   Textstyle
-	fontFile string
-	drawData drawdata.Attribute
+	content          string
+	size             int
+	style            Textstyle
+	fontFile         string
+	drawData         drawdata.Attribute
 	updateParentDraw func() duerror.DUError
 }
 
@@ -122,9 +122,45 @@ func (att *Attribute) RegisterUpdateParentDraw(update func() duerror.DUError) du
 }
 
 func (att *Attribute) updateDrawData() duerror.DUError {
+	if att == nil {
+		return duerror.NewInvalidArgumentError("attribute is nil")
+	}
+
 	height, width, err := utils.GetTextSize(att.content, att.size, att.fontFile)
 	if err != nil {
 		return err
+	}
+
+	// Validate inputs
+	if height < 0 || width < 0 {
+		return duerror.NewInvalidArgumentError("height and width must be non-negative")
+	}
+
+	att.drawData.Content = att.content
+	att.drawData.Height = height
+	att.drawData.Width = width
+	att.drawData.FontSize = att.size
+	att.drawData.FontStyle = int(att.style)
+	att.drawData.FontFile = att.fontFile
+
+	if att.updateParentDraw == nil {
+		return nil
+	}
+	return att.updateParentDraw()
+}
+
+// For testing
+func (att *Attribute) TestUpdateDrawData(height int, width int, err error) duerror.DUError {
+	if att == nil {
+		return duerror.NewInvalidArgumentError("attribute is nil")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if height < 0 || width < 0 {
+		return duerror.NewInvalidArgumentError("height and width must be non-negative")
 	}
 
 	att.drawData.Content = att.content

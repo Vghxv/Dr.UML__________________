@@ -2,6 +2,7 @@ package component
 
 import (
 	"Dr.uml/backend/component/attribute"
+	"Dr.uml/backend/component/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -21,6 +22,7 @@ type Association struct {
 	layer      int
 	attributes []*attribute.AssAttribute
 	parents    [2]*Gadget
+	drawdata   drawdata.Association
 }
 
 // Constructor
@@ -119,5 +121,18 @@ func (this *Association) RemoveAttribute(index int) duerror.DUError {
 }
 
 func (this *Association) updateDrawData() {
-	/*TODO*/
+	start := this.parents[0].point /*TODO: Change the direct-getting to getter after Gadget.point has one*/
+	end := this.parents[1].point   /*TODO: Change the direct-getting to getter after Gadget.point has one*/
+
+	this.drawdata.StartX = start.X
+	this.drawdata.StartY = start.Y
+	this.drawdata.EndX = end.X
+	this.drawdata.EndY = end.Y
+	this.drawdata.AssType = int(this.assType)
+	this.drawdata.Attributes = make([]drawdata.AssAttribute, len(this.attributes))
+	for i, att := range this.attributes {
+		att.UpdateDrawData()
+		this.drawdata.Attributes[i] = att.GetAssDD()
+	}
+
 }

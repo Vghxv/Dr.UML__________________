@@ -1,7 +1,7 @@
 package drawdata
 
 type Association struct {
-	AssType    string         `json:"assType"`
+	AssType    int            `json:"assType"`
 	Layer      int            `json:"layer"`
 	StartX     int            `json:"startX"`
 	StartY     int            `json:"startY"`
