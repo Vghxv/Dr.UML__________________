@@ -73,6 +73,7 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 	if ratio < 0 || ratio > 1 {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
+	att.ratio = ratio
 	att.UpdateDrawData()
 	return nil
 }
