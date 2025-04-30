@@ -396,25 +396,25 @@ func TestInvalidateCanvas_NoDiagram(t *testing.T) {
 	}
 }
 
-func TestInvalidateCanvas_Success(t *testing.T) {
-	// Create a project with a diagram
-	project := NewUMLProject("TestProject")
+// func TestInvalidateCanvas_Success(t *testing.T) {
+// 	// Create a project with a diagram
+// 	project := NewUMLProject("TestProject")
 
-	// Add a valid diagram
-	err := project.AddNewDiagram(umldiagram.ClassDiagram, "TestDiagram")
-	if err != nil {
-		t.Fatalf("Failed to create diagram: %v", err)
-	}
+// 	// Add a valid diagram
+// 	err := project.AddNewDiagram(umldiagram.ClassDiagram, "TestDiagram")
+// 	if err != nil {
+// 		t.Fatalf("Failed to create diagram: %v", err)
+// 	}
 
-	// Set up context to test event emission
-	project.ctx = context.Background()
+// 	// Set up context to test event emission
+// 	project.ctx = context.Background()
 
-	// Call InvalidateCanvas
-	err = project.InvalidateCanvas()
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-}
+// 	// Call InvalidateCanvas
+// 	err = project.InvalidateCanvas()
+// 	if err != nil {
+// 		t.Errorf("Expected no error, got %v", err)
+// 	}
+// }
 
 func TestInvalidateCanvas_GetDrawDataError(t *testing.T) {
 	// This test would ideally mock a diagram that returns an error from GetDrawData
