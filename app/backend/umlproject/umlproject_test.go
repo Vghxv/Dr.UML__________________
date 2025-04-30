@@ -57,8 +57,13 @@ func TestOpenProject(t *testing.T) {
 		t.Errorf("Expected no error, got %v", duErr)
 	}
 
-	// activeDiagrams should be empty initially because we're not setting any active diagrams
-	// even though the slice is initialized with a capacity based on activeDiagrams
+	// activeDiagrams should be 1 since we opened one diagram
+	// and added it to openedDiagrams
+	// Check if activeDiagrams is not nil
+	if activeDiagrams == nil {
+		t.Error("Expected activeDiagrams to be not nil")
+	}
+	// Check if activeDiagrams has 1 diagram
 	if len(activeDiagrams) != 1 {
 		t.Errorf("Expected 0 active diagrams, got %d", len(activeDiagrams))
 	}
