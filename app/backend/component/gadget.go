@@ -76,7 +76,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Layer = g.layer
 	g.drawData.Height = height
 	g.drawData.Width = width
-	g.drawData.Color = drawdata.DefaultGadgetColor
+	g.drawData.Color = utils.ToHex(g.color)
 	g.drawData.Attributes = atts
 
 	if g.updateParentDraw == nil {
