@@ -102,10 +102,12 @@ export function createGadget({
         case 'Class': {
             
             return new UMLClass({
-                size: { width: 200, height: 150 },
+                size: { width: size.width || 200, height: size.height || 150 },
+                position: point,
+                z: layer,
                 attrs: {
                     header: { fill: '#3498DB' },
-                    headerLabel: { text: 'MyClass' },
+                    headerLabel: { text: name || 'MyClass' },
                     attributesLabel: { text: 'id: Int\nname: String' },
                     methodsLabel: { text: '+getId(): Int\n+getName(): String' },
                 },
