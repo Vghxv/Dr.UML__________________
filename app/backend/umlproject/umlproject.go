@@ -84,6 +84,14 @@ func (p *UMLProject) AddGadget(
 
 }
 
+func (p *UMLProject) StartAddAssociation(point utils.Point) duerror.DUError {
+	return p.currentDiagram.StartAddAssociation(point)
+}
+
+func (p *UMLProject) EndAddAssociation(associationType component.AssociationType, point utils.Point) duerror.DUError {
+	return p.currentDiagram.EndAddAssociation(associationType, [2]utils.Point{point, point})
+}
+
 // Add diagram
 func (p *UMLProject) AddNewDiagram(
 	diagramType umldiagram.DiagramType,

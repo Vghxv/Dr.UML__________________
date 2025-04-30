@@ -111,3 +111,44 @@ func (cs *Components) RegisterUpdateParentDraw(update func() duerror.DUError) du
 	cs.updateParentDraw = update
 	return nil
 }
+
+func (cs *Components) AddAssociation(assType component.AssociationType, point [2]utils.Point) duerror.DUError {
+	if point[0].X < 0 || point[0].Y < 0 || point[1].X < 0 || point[1].Y < 0 {
+		return duerror.NewInvalidArgumentError("points coordinates must be non-negative")
+	}
+	var parents [2]*component.Gadget
+	candidate, err := cs.componentsContainer.Search(point[0])
+	// TODO: make container search only gadget
+	if err != nil {
+		return err
+	}
+	if candidate == nil {
+		return duerror.NewInvalidArgumentError("point 0 is not a gadget")
+	}
+	parents[0] = candidate.(*component.Gadget)
+	candidate, err = cs.componentsContainer.Search(point[1])
+	if err != nil {
+		return err
+	}
+	if candidate == nil {
+		return duerror.NewInvalidArgumentError("point 1 is not a gadget")
+	}
+	parents[1] = candidate.(*component.Gadget)
+
+	association, err := component.NewAssociation(parents, component.AssociationType(assType))
+	if err != nil {
+		return err
+	}
+
+	err = association.RegisterUpdateParentDraw(cs.updateDrawData)
+	if err != nil {
+		return err
+	}
+
+	err = cs.componentsContainer.Insert(association)
+	if err != nil {
+		return err
+	}
+
+	return cs.updateDrawData()
+}
