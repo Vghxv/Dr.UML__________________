@@ -148,30 +148,3 @@ func (att *Attribute) updateDrawData() duerror.DUError {
 	}
 	return att.updateParentDraw()
 }
-
-// For testing
-func (att *Attribute) TestUpdateDrawData(height int, width int, err error) duerror.DUError {
-	if att == nil {
-		return duerror.NewInvalidArgumentError("attribute is nil")
-	}
-
-	if err != nil {
-		return err
-	}
-
-	if height < 0 || width < 0 {
-		return duerror.NewInvalidArgumentError("height and width must be non-negative")
-	}
-
-	att.drawData.Content = att.content
-	att.drawData.Height = height
-	att.drawData.Width = width
-	att.drawData.FontSize = att.size
-	att.drawData.FontStyle = int(att.style)
-	att.drawData.FontFile = att.fontFile
-
-	if att.updateParentDraw == nil {
-		return nil
-	}
-	return att.updateParentDraw()
-}

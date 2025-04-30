@@ -571,6 +571,72 @@ func TestAttribute_RegisterUpdateParentDraw(t *testing.T) {
 	}
 }
 
+func TestAttribute_UpdateDrawData(t *testing.T) {
+	tests := []struct {
+		name          string
+		attribute     *Attribute
+		expectedError bool
+		updateCalled  bool
+	}{
+		{
+			name:          "nil attribute",
+			attribute:     nil,
+			expectedError: true,
+			updateCalled:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.attribute != nil {
+				updateCalled := false
+				if tt.updateCalled {
+					tt.attribute.updateParentDraw = func() duerror.DUError {
+						updateCalled = true
+						return nil
+					}
+				}
+
+				err := tt.attribute.updateDrawData()
+
+				if (err != nil) != tt.expectedError {
+					t.Errorf("unexpected error: %v", err)
+				}
+
+				if !tt.expectedError && tt.attribute != nil {
+					// Check if drawData was updated correctly
+					if tt.attribute.drawData.Content != tt.attribute.content {
+						t.Errorf("Content not updated correctly: expected %v, got %v",
+							tt.attribute.content, tt.attribute.drawData.Content)
+					}
+					if tt.attribute.drawData.FontSize != tt.attribute.size {
+						t.Errorf("FontSize not updated correctly: expected %v, got %v",
+							tt.attribute.size, tt.attribute.drawData.FontSize)
+					}
+					if tt.attribute.drawData.FontStyle != int(tt.attribute.style) {
+						t.Errorf("FontStyle not updated correctly: expected %v, got %v",
+							int(tt.attribute.style), tt.attribute.drawData.FontStyle)
+					}
+					if tt.attribute.drawData.FontFile != tt.attribute.fontFile {
+						t.Errorf("FontFile not updated correctly: expected %v, got %v",
+							tt.attribute.fontFile, tt.attribute.drawData.FontFile)
+					}
+
+					// Check if updateParentDraw was called if it exists
+					if tt.updateCalled && !updateCalled {
+						t.Errorf("updateParentDraw function was not called")
+					}
+				}
+			} else {
+				err := tt.attribute.updateDrawData()
+				if err == nil {
+					t.Errorf("expected error for nil attribute, got nil")
+				}
+			}
+		})
+	}
+}
+
 func TestAttribute_updateDrawData(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -611,170 +677,52 @@ func TestAttribute_updateDrawData(t *testing.T) {
 			expectedError: false,
 			updateCalled:  false,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Mock the utils.GetTextSize function by using TestUpdateDrawData
-			// which bypasses the actual text size calculation
-			if tt.attribute != nil {
-				updateCalled := false
-				if tt.updateCalled {
-					tt.attribute.updateParentDraw = func() duerror.DUError {
-						updateCalled = true
-						return nil
-					}
-				}
-
-				err := tt.attribute.TestUpdateDrawData(10, 20, nil)
-
-				if (err != nil) != tt.expectedError {
-					t.Errorf("unexpected error: %v", err)
-				}
-
-				if !tt.expectedError && tt.attribute != nil {
-					// Check if drawData was updated correctly
-					if tt.attribute.drawData.Content != tt.attribute.content {
-						t.Errorf("Content not updated correctly: expected %v, got %v",
-							tt.attribute.content, tt.attribute.drawData.Content)
-					}
-					if tt.attribute.drawData.Height != 10 {
-						t.Errorf("Height not updated correctly: expected %v, got %v",
-							10, tt.attribute.drawData.Height)
-					}
-					if tt.attribute.drawData.Width != 20 {
-						t.Errorf("Width not updated correctly: expected %v, got %v",
-							20, tt.attribute.drawData.Width)
-					}
-					if tt.attribute.drawData.FontSize != tt.attribute.size {
-						t.Errorf("FontSize not updated correctly: expected %v, got %v",
-							tt.attribute.size, tt.attribute.drawData.FontSize)
-					}
-					if tt.attribute.drawData.FontStyle != int(tt.attribute.style) {
-						t.Errorf("FontStyle not updated correctly: expected %v, got %v",
-							int(tt.attribute.style), tt.attribute.drawData.FontStyle)
-					}
-					if tt.attribute.drawData.FontFile != tt.attribute.fontFile {
-						t.Errorf("FontFile not updated correctly: expected %v, got %v",
-							tt.attribute.fontFile, tt.attribute.drawData.FontFile)
-					}
-
-					// Check if updateParentDraw was called if it exists
-					if tt.updateCalled && !updateCalled {
-						t.Errorf("updateParentDraw function was not called")
-					}
-				}
-			} else {
-				err := (&Attribute{}).TestUpdateDrawData(10, 20, nil)
-				if err == nil {
-					t.Errorf("expected error for nil attribute, got nil")
-				}
-			}
-		})
-	}
-}
-
-func TestAttribute_TestUpdateDrawData(t *testing.T) {
-	tests := []struct {
-		name          string
-		attribute     *Attribute
-		height        int
-		width         int
-		err           error
-		expectedError bool
-	}{
 		{
-			name: "valid update",
+			name: "negative size",
 			attribute: &Attribute{
 				content:  "test content",
-				size:     12,
+				size:     -5,
 				style:    Bold,
 				fontFile: "test.ttf",
+				drawData: drawdata.Attribute{},
 			},
-			height:        10,
-			width:         20,
-			err:           nil,
-			expectedError: false,
-		},
-		{
-			name:          "nil attribute",
-			attribute:     nil,
-			height:        10,
-			width:         20,
-			err:           nil,
 			expectedError: true,
-		},
-		{
-			name: "negative height",
-			attribute: &Attribute{
-				content: "test content",
-			},
-			height:        -5,
-			width:         20,
-			err:           nil,
-			expectedError: true,
-		},
-		{
-			name: "negative width",
-			attribute: &Attribute{
-				content: "test content",
-			},
-			height:        10,
-			width:         -5,
-			err:           nil,
-			expectedError: true,
-		},
-		{
-			name: "error from parameter",
-			attribute: &Attribute{
-				content: "test content",
-			},
-			height:        10,
-			width:         20,
-			err:           duerror.NewInvalidArgumentError("test error"),
-			expectedError: true,
+			updateCalled:  false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var err duerror.DUError
-			if tt.attribute != nil {
-				err = tt.attribute.TestUpdateDrawData(tt.height, tt.width, tt.err)
-			} else {
-				err = (&Attribute{}).TestUpdateDrawData(tt.height, tt.width, tt.err)
+			var updateCalled bool
+			if tt.attribute != nil && tt.updateCalled {
+				tt.attribute.updateParentDraw = func() duerror.DUError {
+					updateCalled = true
+					return nil
+				}
 			}
 
+			err := tt.attribute.updateDrawData()
 			if (err != nil) != tt.expectedError {
-				t.Errorf("unexpected error: %v", err)
+				t.Errorf("updateDrawData() error = %v, expectedError %v", err, tt.expectedError)
 			}
 
-			if !tt.expectedError && tt.attribute != nil {
-				// Check if drawData was updated correctly
+			if tt.attribute != nil && !tt.expectedError {
 				if tt.attribute.drawData.Content != tt.attribute.content {
-					t.Errorf("Content not updated correctly: expected %v, got %v",
-						tt.attribute.content, tt.attribute.drawData.Content)
-				}
-				if tt.attribute.drawData.Height != tt.height {
-					t.Errorf("Height not updated correctly: expected %v, got %v",
-						tt.height, tt.attribute.drawData.Height)
-				}
-				if tt.attribute.drawData.Width != tt.width {
-					t.Errorf("Width not updated correctly: expected %v, got %v",
-						tt.width, tt.attribute.drawData.Width)
+					t.Errorf("Content not updated correctly: expected %v, got %v", tt.attribute.content, tt.attribute.drawData.Content)
 				}
 				if tt.attribute.drawData.FontSize != tt.attribute.size {
-					t.Errorf("FontSize not updated correctly: expected %v, got %v",
-						tt.attribute.size, tt.attribute.drawData.FontSize)
+					t.Errorf("FontSize not updated correctly: expected %v, got %v", tt.attribute.size, tt.attribute.drawData.FontSize)
 				}
 				if tt.attribute.drawData.FontStyle != int(tt.attribute.style) {
-					t.Errorf("FontStyle not updated correctly: expected %v, got %v",
-						int(tt.attribute.style), tt.attribute.drawData.FontStyle)
+					t.Errorf("FontStyle not updated correctly: expected %v, got %v", int(tt.attribute.style), tt.attribute.drawData.FontStyle)
 				}
 				if tt.attribute.drawData.FontFile != tt.attribute.fontFile {
-					t.Errorf("FontFile not updated correctly: expected %v, got %v",
-						tt.attribute.fontFile, tt.attribute.drawData.FontFile)
+					t.Errorf("FontFile not updated correctly: expected %v, got %v", tt.attribute.fontFile, tt.attribute.drawData.FontFile)
 				}
+			}
+
+			if tt.updateCalled && !updateCalled {
+				t.Error("updateParentDraw was not called as expected")
 			}
 		})
 	}

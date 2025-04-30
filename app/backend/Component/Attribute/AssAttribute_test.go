@@ -75,6 +75,41 @@ func TestAssAttribute_SetRatio(t *testing.T) {
 	}
 }
 
+func TestAssAttribute_GetAssDD(t *testing.T) {
+	attr, _ := NewAssAttribute(0.5)
+	dd := attr.GetAssDD()
+	if dd != attr.assDD {
+		t.Errorf("GetAssDD() = %v, want %v", dd, attr.assDD)
+	}
+}
+
+func TestAssAttribute_UpdateDrawData(t *testing.T) {
+	attr, _ := NewAssAttribute(0.5)
+	attr.content = "test"
+	attr.size = 12
+	attr.style = Bold
+	attr.fontFile = "test.ttf"
+	attr.ratio = 0.7
+
+	attr.UpdateDrawData()
+
+	if attr.assDD.Content != attr.content {
+		t.Errorf("UpdateDrawData() content = %v, want %v", attr.assDD.Content, attr.content)
+	}
+	if attr.assDD.FontSize != attr.size {
+		t.Errorf("UpdateDrawData() size = %v, want %v", attr.assDD.FontSize, attr.size)
+	}
+	if attr.assDD.FontStyle != int(attr.style) {
+		t.Errorf("UpdateDrawData() style = %v, want %v", attr.assDD.FontStyle, int(attr.style))
+	}
+	if attr.assDD.FontFile != attr.fontFile {
+		t.Errorf("UpdateDrawData() fontFile = %v, want %v", attr.assDD.FontFile, attr.fontFile)
+	}
+	if attr.assDD.Ratio != attr.ratio {
+		t.Errorf("UpdateDrawData() ratio = %v, want %v", attr.assDD.Ratio, attr.ratio)
+	}
+}
+
 func TestNewAssAttribute(t *testing.T) {
 	tests := []struct {
 		name       string
