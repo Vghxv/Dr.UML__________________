@@ -14,6 +14,13 @@ const (
 	supportedGadgetType            = Class
 )
 
+var AllGadgetTypes = []struct {
+	Value  GadgetType
+	Number int
+}{
+	Class: {Class, 1},
+}
+
 type Gadget struct {
 	gadgetType       GadgetType
 	point            utils.Point

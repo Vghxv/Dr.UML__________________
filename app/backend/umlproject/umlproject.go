@@ -1,6 +1,8 @@
 package umlproject
 
 import (
+	"context"
+	"fmt"
 	"time"
 
 	"Dr.uml/backend/component"
@@ -8,9 +10,11 @@ import (
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type UMLProject struct {
+	ctx              context.Context
 	name             string
 	lastModified     time.Time
 	currentDiagram   *umldiagram.UMLDiagram            // The currently selected diagram
@@ -20,6 +24,20 @@ type UMLProject struct {
 	notifyDrawUpdate func(string) duerror.DUError
 	// notifyDrawUpdate func() duerror.DUError TODO
 }
+
+func (p *UMLProject) Startup(ctx context.Context) {
+	p.ctx = ctx
+	p.AddNewDiagram(umldiagram.ClassDiagram, "new class diagram")
+	p.SelectDiagram("new class diagram")
+}
+
+// func (p *UMLProject) ProcessWithCallback(callbackID string) {
+// 	// Simulate some processing
+// 	// result := number * 2
+
+// 	// Call the JavaScript callback function with the result
+// 	runtime.EventsEmit(p.ctx, callbackID, 654)
+// }
 
 // NewUMLProject creates a new UMLProject instance
 func NewUMLProject(name string) *UMLProject {
@@ -133,14 +151,15 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	p.notifyDrawUpdate(p.currentDiagram.GetName())
-	return nil
-}
+	// p.notifyDrawUpdate(p.currentDiagram.GetName())
+	dd, err := p.currentDiagram.GetDrawData()
+	if err != nil {
+		return err
+	}
+	fmt.Println("InvalidateCanvas", dd)
+	runtime.EventsEmit(p.ctx, "backend-event", dd)
 
-func (p *UMLProject) RegisterNotifyDrawUpdate(update func(string) duerror.DUError) duerror.DUError {
-	p.notifyDrawUpdate = update
 	return nil
-
 }
 
 // GetUserData returns a struct with user information
@@ -170,4 +189,18 @@ func (p *UMLProject) GetCurrentDiagram() *umldiagram.UMLDiagram {
 		return nil
 	}
 	return p.currentDiagram
+}
+
+func (p *UMLProject) GetCurrentDiagramName() string {
+	if p.currentDiagram == nil {
+		return ""
+	}
+	return p.currentDiagram.GetName()
+}
+
+func (p *UMLProject) ProcessWithCallback(callbackID string) duerror.DUError {
+	// Call the JavaScript callback function with the result
+
+	runtime.EventsEmit(p.ctx, callbackID, 123)
+	return nil
 }

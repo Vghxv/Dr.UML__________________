@@ -3,6 +3,8 @@ package main
 import (
 	"embed"
 
+	"Dr.uml/backend/umldiagram"
+	"Dr.uml/backend/umlproject"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -13,8 +15,8 @@ var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
-
+	// app := NewApp()
+	project := umlproject.NewUMLProject("NewProject")
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "Dr.uml",
@@ -24,9 +26,12 @@ func main() {
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
+		OnStartup:        project.Startup,
 		Bind: []interface{}{
-			app,
+			project,
+		},
+		EnumBind: []interface{}{
+			umldiagram.AllDiagramTypes,
 		},
 	})
 

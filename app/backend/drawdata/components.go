@@ -8,6 +8,6 @@ const (
 type Components struct {
 	Margin    int      `json:"margin"`
 	LineWidth int      `json:"lineWidth"`
-	Gadgets   []Gadget `json:"components"`
+	Gadgets   []Gadget `json:"gadgets"`
 	// Associations []Association `json:"associations"`
 }

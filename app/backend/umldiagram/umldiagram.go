@@ -10,6 +10,31 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
+// type Weekday string
+
+// const (
+//     Sunday    Weekday = "Sunday"
+//     Monday    Weekday = "Monday"
+//     Tuesday   Weekday = "Tuesday"
+//     Wednesday Weekday = "Wednesday"
+//     Thursday  Weekday = "Thursday"
+//     Friday    Weekday = "Friday"
+//     Saturday  Weekday = "Saturday"
+// )
+
+// var AllWeekdays = []struct {
+//     Value  Weekday
+//     TSName string
+// }{
+//     {Sunday, "SUNDAY"},
+//     {Monday, "MONDAY"},
+//     {Tuesday, "TUESDAY"},
+//     {Wednesday, "WEDNESDAY"},
+//     {Thursday, "THURSDAY"},
+//     {Friday, "FRIDAY"},
+//     {Saturday, "SATURDAY"},
+// }
+
 type DiagramType int
 
 const (
@@ -18,6 +43,15 @@ const (
 	SequenceDiagram = 1 << iota // 0x04
 	supportedType   = ClassDiagram | UseCaseDiagram | SequenceDiagram
 )
+
+var AllDiagramTypes = []struct {
+	Value  DiagramType
+	Number int
+}{
+	{ClassDiagram, 1},
+	{UseCaseDiagram, 2},
+	{SequenceDiagram, 4},
+}
 
 func isValidDiagramType(input DiagramType) bool {
 	return input&supportedType == input && input != 0

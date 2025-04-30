@@ -7,28 +7,16 @@ import Canvas from './components/Canvas';
 import Gadget from './components/Gadget';
 import Association from './components/Association';
 import { useParseBackendGadget } from './hooks/useParseBackendGadget';
-import {ProcessWithCallback} from "../wailsjs/go/main/App";
-
-import { EventsOn, EventsOff } from '../wailsjs/runtime';
+import {EventsOn, EventsOff} from "../wailsjs/runtime";
 
 interface WindowWithGo extends Window {
     go: {
-        main: {
-            App: {
-                GetUserData(): Promise<{
-                    id: number;
-                    username: string;
-                    email: string;
-                    roles: string[];
-                    active: boolean;
-                }>;
-                Debug(): Promise<
-                {
-                    name: string;
-                    number: number;
-                }>
+        umlproject: {
+            UMLProject: {
                 GetCurrentDiagramName(): Promise<string>;
-                AddGadget(gadget: any): Promise<void>;
+                AddNewDiagram(diagramType:number, name: string): Promise<void>;
+                SelectDiagram(name: string): Promise<void>;
+                AddGadget(gadgetType: number, point: { x: number; y: number }): Promise<void>;
             };
         };
     };
@@ -38,7 +26,10 @@ declare var window: WindowWithGo;
 
 const App: React.FC = () => {
     const [graph] = useState(new dia.Graph()); // Create a new JointJS graph instance
+    
     const parseBackendGadget = useParseBackendGadget();
+    const [error, setError] = useState<string | null>(null);
+
 
     const handleDrop = (gadget: dia.Element) => {
         if (gadget instanceof dia.Element) {
@@ -79,30 +70,63 @@ const App: React.FC = () => {
 
     const handleGetDiagramName = async () => {
         try {
-            const name = await window.go.main.App.GetCurrentDiagramName();
+            const name = await window.go.umlproject.UMLProject.GetCurrentDiagramName();
             setDiagramName(name);
             console.log('diagram name:', name);
         } catch (error) {
           console.error('Error calling Go function:', error);
         }
       };
-      const callbackID = "callback-" + Math.random().toString(36).substr(2, 9);
+    const handleAddGadget = async () => {
+        try {
+            await window.go.umlproject.UMLProject.AddGadget(1, { x: 100, y: 100 });
+            console.log('handleAddGadget');
+        }
+        catch (error) {
+            console.error('Error calling Go function:', error);
+        }
+    };
 
-      useEffect(() => {
+
+    // const handleAddGadget = async (gadgetType: number, x: number, y: number) => {
+    //     try {
+    //         // Call the Go AddGadget function with gadget type and coordinates
+    //         await window.go.umlproject.UMLProject.AddGadget(gadgetType, { x, y });
+    //         console.log(`Added gadget type ${gadgetType} at position (${x}, ${y})`);
+            
+    //         // After adding a gadget, you might want to refresh the diagram
+    //         // or update the UI in some way
+            
+    //     } catch (err) {
+    //         console.error("Error adding gadget:", err);
+    //         setError(err instanceof Error ? err.message : "Failed to add gadget");
+    //     }
+    // };
+
+
+    useEffect(() => {
         // Register the event listener
-        EventsOn(callbackID, (result) => {
-            setCallbackResult(`Callback received with result: ${result}`);
+        EventsOn("backend-event", (result) => {
+            setCallbackResult(result);
+            const components = result['components']['gadgets'];
+            const gadget = parseBackendGadget(components);
+            if(gadget){
+                graph.addCell(gadget);
+            }
         });
 
         // Clean up the event listener when the component unmounts
         return () => {
-            EventsOff(callbackID);
+            EventsOff("backend-event");
         };
-    }, [callbackID]);
-    function processCallback() {
-        // Call the Go function with the number and callback ID
-        ProcessWithCallback(callbackID);
-    }
+    }, ["backend-event"]);
+
+
+    // function processCallback() {
+    //     // Call the Go function with the number and callback ID
+    //     ProcessWithCallback(callbackID);
+    // }
+
     // Create a new JointJS graph instance
     // const [userData, setUserData] = useState<any>(null);
 
@@ -114,12 +138,29 @@ const App: React.FC = () => {
     //       console.error('Error calling Go function:', error);
     //     }
     //   };
+
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="section">
                 <h1>Dr.UML</h1>
-                <button onClick={processCallback}>testing</button>
-                <button className="btn" onClick={handleGetDiagramName}>Process with Callback</button>{diagramName}
+                <p>{callbackResult}</p>
+                <div style={{ marginBottom: '10px' }}>
+                    <button className="btn" onClick={handleGetDiagramName}>
+                    handleGetDiagramName
+                    </button>
+                    {<p>Diagram Name: {diagramName}</p>}
+                </div>
+                {/* <div style={{ marginBottom: '10px' }}>
+                    <button className="btn" onClick={processCallback}>
+                    processCallback
+                    </button>
+                </div> */}
+                <div style={{ marginBottom: '10px' }}>
+                    <button className="btn" onClick={handleAddGadget}>
+                    handleAddGadget
+                    </button>
+                </div>
+                
             </div>
             <div
                 className="App"
