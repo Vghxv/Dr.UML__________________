@@ -89,7 +89,7 @@ func TestAssAttribute_UpdateDrawData(t *testing.T) {
 	attr.size = 12
 	attr.style = Bold
 	attr.fontFile = "test.ttf"
-	attr.Ratio = 0.7
+	attr.ratio = 0.7
 
 	attr.UpdateDrawData()
 
@@ -105,8 +105,8 @@ func TestAssAttribute_UpdateDrawData(t *testing.T) {
 	if attr.assDD.FontFile != attr.fontFile {
 		t.Errorf("UpdateDrawData() fontFile = %v, want %v", attr.assDD.FontFile, attr.fontFile)
 	}
-	if attr.assDD.Ratio != attr.Ratio {
-		t.Errorf("UpdateDrawData() ratio = %v, want %v", attr.assDD.Ratio, attr.Ratio)
+	if attr.assDD.Ratio != attr.ratio {
+		t.Errorf("UpdateDrawData() ratio = %v, want %v", attr.assDD.Ratio, attr.ratio)
 	}
 }
 
@@ -142,8 +142,8 @@ func TestNewAssAttribute(t *testing.T) {
 				t.Errorf("NewAssAttribute() error = %v", err)
 				return
 			}
-			if attr.Ratio != tt.wantRatio {
-				t.Errorf("NewAssAttribute() = %v, want %v", attr.Ratio, tt.wantRatio)
+			if attr.ratio != tt.wantRatio {
+				t.Errorf("NewAssAttribute() = %v, want %v", attr.ratio, tt.wantRatio)
 			}
 		})
 	}

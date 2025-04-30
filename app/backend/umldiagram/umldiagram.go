@@ -57,6 +57,11 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 	}, nil
 }
 
+func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {
+	ud.startPoint = point
+	return nil
+}
+
 func (ud *UMLDiagram) GetName() string {
 	return ud.name
 }
@@ -86,7 +91,7 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 
 }
 
-func (ud *UMLDiagram) AddAssociation(assType component.AssociationType, point [2]utils.Point) duerror.DUError {
+func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, point [2]utils.Point) duerror.DUError {
 	err := ud.components.AddAssociation(assType, point)
 	if err != nil {
 		return err
