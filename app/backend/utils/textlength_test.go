@@ -1,6 +1,9 @@
 package utils
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func Test_GetTextSize(t *testing.T) {
 	tests := []struct {
@@ -16,7 +19,7 @@ func Test_GetTextSize(t *testing.T) {
 			name:           "correct",
 			str:            "Hello, World!",
 			size:           12,
-			fontFile:       "../../app/assets/Inkfree.ttf",
+			fontFile:       os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf",
 			expectedHeight: 22,
 			expectedWidth:  81,
 			hasError:       false,
@@ -25,7 +28,7 @@ func Test_GetTextSize(t *testing.T) {
 			name:           "size invalid",
 			str:            "Hello, World!",
 			size:           0,
-			fontFile:       "../../app/assets/Inkfree.ttf",
+			fontFile:       os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf",
 			expectedHeight: 0,
 			expectedWidth:  0,
 			hasError:       true,
