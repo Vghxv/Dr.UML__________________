@@ -284,7 +284,7 @@ func Test_Association_UpdateDrawData(t *testing.T) {
 				attr, _ := attribute.NewAssAttribute(0.2)
 				tt.ass.attributes = append(tt.ass.attributes, attr)
 			}
-			err := tt.ass.UpdateDrawData()
+			err := tt.ass.updateDrawData()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateDrawData() error = %v, wantErr %v", err, tt.wantErr)
 			}

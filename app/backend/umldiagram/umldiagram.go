@@ -78,13 +78,20 @@ func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
 }
 
 func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
-
 	err := ud.components.AddGadget(gadgetType, point)
 	if err != nil {
 		return err
 	}
 	return nil
 
+}
+
+func (ud *UMLDiagram) AddAssociation(assType component.AssociationType, point [2]utils.Point) duerror.DUError {
+	err := ud.components.AddAssociation(assType, point)
+	if err != nil {
+		return err
+	}
+	return ud.updateDrawData()
 }
 
 func (ud *UMLDiagram) GetDrawData() (drawdata.Diagram, duerror.DUError) {

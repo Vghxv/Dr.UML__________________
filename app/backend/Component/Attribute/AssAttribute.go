@@ -1,14 +1,14 @@
 package attribute
 
 import (
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils/duerror"
 )
 
 // AssAttribute represents an attribute specific to associations with a ratio property
 type AssAttribute struct {
 	Attribute
-	Ratio float64
+	ratio float64
 	assDD drawdata.AssAttribute // not `drawData`
 }
 
@@ -19,13 +19,13 @@ func NewAssAttribute(ratio float64) (*AssAttribute, duerror.DUError) {
 		return nil, duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
 	return &AssAttribute{
-		Ratio: ratio,
+		ratio: ratio,
 	}, nil
 }
 
 // GetRatio retrieves the ratio value of the AssAttribute
 func (att *AssAttribute) GetRatio() (float64, duerror.DUError) {
-	return att.Ratio, nil
+	return att.ratio, nil
 }
 
 func (att *AssAttribute) GetAssDD() drawdata.AssAttribute {
@@ -38,7 +38,7 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 	if ratio < 0 || ratio > 1 {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
-	att.Ratio = ratio
+	att.ratio = ratio
 	return nil
 }
 
@@ -47,5 +47,5 @@ func (att *AssAttribute) UpdateDrawData() {
 	att.assDD.FontSize = att.size
 	att.assDD.FontStyle = int(att.style)
 	att.assDD.FontFile = att.fontFile
-	att.assDD.Ratio = att.Ratio
+	att.assDD.Ratio = att.ratio
 }
