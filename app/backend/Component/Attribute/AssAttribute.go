@@ -11,6 +11,7 @@ type AssAttribute struct {
 }
 
 // NewAssAttribute creates a new AssAttribute instance with the specified ratio
+// It returns an error if the ratio is not between 0 and 1
 func NewAssAttribute(ratio float64) (*AssAttribute, duerror.DUError) {
 	if ratio < 0 || ratio > 1 {
 		return nil, duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
@@ -26,6 +27,7 @@ func (att *AssAttribute) GetRatio() (float64, duerror.DUError) {
 }
 
 // SetRatio returns an error if the ratio is not between 0 and 1
+// It returns an error if the ratio is not between 0 and 1
 func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 	if ratio < 0 || ratio > 1 {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")

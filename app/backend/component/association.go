@@ -48,7 +48,7 @@ func (a *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 	return false, nil
 }
 func NewAssociation(parents [2]*Gadget, assType AssociationType) (*Association, duerror.DUError) {
-	if assType&supportedType == 0  || assType == 0{
+	if assType&supportedType != assType || assType == 0 {
 		return nil, duerror.NewInvalidArgumentError("unsupported association type")
 	}
 	if parents[0] == nil || parents[1] == nil {
