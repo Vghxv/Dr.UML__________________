@@ -1,10 +1,6 @@
 package utils
 
 import (
-	"image"
-	"image/color"
-	"image/png"
-	"log"
 	"os"
 
 	"Dr.uml/backend/utils/duerror"
@@ -49,25 +45,25 @@ func GetTextSize(str string, size int, fontFile string) (int, int, duerror.DUErr
 	defer face.Close()
 
 	// Draw the string to an image
-	imgWidth := 400
-	imgHeight := 100
-	img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
-	d := &font.Drawer{
-		Dst:  img,
-		Src:  image.NewUniform(color.Black),
-		Face: face,
-		Dot:  fixed.P(10, 50),
-	}
-	d.DrawString(str)
+	/*	imgWidth := 400
+		imgHeight := 100
+		img := image.NewRGBA(image.Rect(0, 0, imgWidth, imgHeight))
+		d := &font.Drawer{
+			Dst:  img,
+			Src:  image.NewUniform(color.Black),
+			Face: face,
+			Dot:  fixed.P(10, 50),
+		}
+		d.DrawString(str)
 
-	outFile, err := os.Create("output.png")
-	if err != nil {
-		log.Fatalf("failed to create output file: %v", err)
-	}
-	defer outFile.Close()
-	if err := png.Encode(outFile, img); err != nil {
-		log.Fatalf("failed to encode image: %v", err)
-	}
+		outFile, err := os.Create("output.png")
+		if err != nil {
+			log.Fatalf("failed to create output file: %v", err)
+		}
+		defer outFile.Close()
+		if err := png.Encode(outFile, img); err != nil {
+			log.Fatalf("failed to encode image: %v", err)
+		}*/
 
 	var width fixed.Int26_6
 	for _, r := range str {
