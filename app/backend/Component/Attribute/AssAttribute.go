@@ -32,6 +32,36 @@ func (att *AssAttribute) GetAssDD() drawdata.AssAttribute {
 	return att.assDD
 }
 
+func (att *AssAttribute) SetContent(content string) duerror.DUError {
+	if err := att.Attribute.SetContent(content); err != nil {
+		return err
+	}
+	att.assDD.Content = content
+	return nil
+}
+
+func (att *AssAttribute) SetSize(size int) duerror.DUError {
+	if err := att.Attribute.SetSize(size); err != nil {
+		return err
+	}
+	att.assDD.FontSize = size
+	return nil
+}
+
+func (att *AssAttribute) SetStyle(style Textstyle) duerror.DUError {
+	if err := att.Attribute.SetStyle(style); err != nil {
+		return err
+	}
+	att.assDD.FontStyle = int(style)
+	return nil
+}
+
+func (att *AssAttribute) SetFontFile(fontFile string) duerror.DUError {
+	att.fontFile = fontFile
+	att.assDD.FontFile = fontFile
+	return nil
+}
+
 // SetRatio returns an error if the ratio is not between 0 and 1
 // It returns an error if the ratio is not between 0 and 1
 func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
@@ -39,6 +69,7 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
 	att.ratio = ratio
+	att.assDD.Ratio = ratio
 	return nil
 }
 
