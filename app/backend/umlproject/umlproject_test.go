@@ -88,14 +88,9 @@ func TestOpenProject(t *testing.T) {
 		}
 	}
 
-	// Verify activeDiagrams map was populated
-	if len(project.activeDiagrams) != 1 {
-		t.Errorf("Expected 1 active diagram in map, got %d", len(project.activeDiagrams))
-	}
-
-	// Check if the active diagram was created with the correct name
-	if _, exists := project.activeDiagrams["Diagram1"]; !exists {
-		t.Errorf("Expected 'Diagram1' to be in active diagrams map")
+	// Verify activeDiagrams map was not populated
+	if len(project.activeDiagrams) != 0 {
+		t.Errorf("Expected 0 active diagram in map, got %d", len(project.activeDiagrams))
 	}
 }
 

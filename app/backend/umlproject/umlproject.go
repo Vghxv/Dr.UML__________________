@@ -35,19 +35,9 @@ func (p *UMLProject) GetName() string {
 	return p.name
 }
 
-// GetLastModified returns the last modified time of the UMLProject
-func (p *UMLProject) OpenProject() ([]*umldiagram.UMLDiagram, []string, duerror.DUError) {
-	activeDiagrams := make([]*umldiagram.UMLDiagram, 0, len(p.activeDiagrams))
-	for _, diagram := range p.openedDiagrams {
-		d, err := umldiagram.NewUMLDiagram(diagram.GetName(), diagram.GetDiagramType())
-		if err != nil {
-			return nil, nil, duerror.NewInvalidArgumentError("Failed to create diagram")
-		}
-		p.activeDiagrams[d.GetName()] = d
-		activeDiagrams = append(activeDiagrams, d)
-	}
-
-	return activeDiagrams, p.GetAvailableDiagrams(), nil
+// OpenProject returns the active diagrams and available diagrams in the project
+func (p *UMLProject) OpenProject() ([]string, []string, duerror.DUError) {
+	return p.GetLastOpenedDiagrams(), p.GetAvailableDiagrams(), nil
 }
 
 // GetAvailableDiagrams returns a list of the names of all available diagrams in the project
