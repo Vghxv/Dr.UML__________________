@@ -2,7 +2,7 @@ package component
 
 import (
 	"Dr.uml/backend/component/attribute"
-	"Dr.uml/backend/component/drawdata"
+	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
@@ -18,11 +18,12 @@ const (
 )
 
 type Association struct {
-	assType    AssociationType
-	layer      int
-	attributes []*attribute.AssAttribute
-	parents    [2]*Gadget
-	drawdata   drawdata.Association
+	assType          AssociationType
+	layer            int
+	attributes       []*attribute.AssAttribute
+	parents          [2]*Gadget
+	drawdata         drawdata.Association
+	updateParentDraw func() duerror.DUError
 }
 
 // Constructor
@@ -120,12 +121,12 @@ func (this *Association) RemoveAttribute(index int) duerror.DUError {
 	return nil
 }
 
-func (this *Association) UpdateDrawData() duerror.DUError {
+func (this *Association) updateDrawData() duerror.DUError {
 	if this == nil || this.parents[0] == nil || this.parents[1] == nil {
 		return duerror.NewInvalidArgumentError("association or parents are nil")
 	}
-	start := this.parents[0].point /*TODO: Change the direct-getting to getter after Gadget.point has one*/
-	end := this.parents[1].point   /*TODO: Change the direct-getting to getter after Gadget.point has one*/
+	start := this.parents[0].GetPoint()
+	end := this.parents[1].GetPoint()
 
 	this.drawdata.StartX = start.X
 	this.drawdata.StartY = start.Y
@@ -141,6 +142,13 @@ func (this *Association) UpdateDrawData() duerror.DUError {
 		att.UpdateDrawData()
 		this.drawdata.Attributes[i] = att.GetAssDD()
 	}
-	return nil
+	if this.updateParentDraw == nil {
+		return nil
+	}
+	return this.updateParentDraw()
+}
 
+func (this *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	this.updateParentDraw = update
+	return nil
 }
