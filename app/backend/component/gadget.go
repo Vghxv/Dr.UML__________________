@@ -125,9 +125,3 @@ func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUErr
 	}
 	return &g, nil
 }
-
-func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
-	// TODO: calculate the Bottom-Right point (maybe store it?)
-	size := 5
-	return g.point, utils.AddPoints(g.point, utils.Point{X: size, Y: size}), nil
-}
