@@ -31,14 +31,6 @@ func (p *UMLProject) Startup(ctx context.Context) {
 	p.SelectDiagram("new class diagram")
 }
 
-// func (p *UMLProject) ProcessWithCallback(callbackID string) {
-// 	// Simulate some processing
-// 	// result := number * 2
-
-// 	// Call the JavaScript callback function with the result
-// 	runtime.EventsEmit(p.ctx, callbackID, 654)
-// }
-
 // NewUMLProject creates a new UMLProject instance
 func NewUMLProject(name string) *UMLProject {
 
@@ -198,9 +190,3 @@ func (p *UMLProject) GetCurrentDiagramName() string {
 	return p.currentDiagram.GetName()
 }
 
-func (p *UMLProject) ProcessWithCallback(callbackID string) duerror.DUError {
-	// Call the JavaScript callback function with the result
-
-	runtime.EventsEmit(p.ctx, callbackID, 123)
-	return nil
-}
