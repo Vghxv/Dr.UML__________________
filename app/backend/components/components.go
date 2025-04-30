@@ -118,6 +118,7 @@ func (cs *Components) AddAssociation(assType component.AssociationType, point [2
 	}
 	var parents [2]*component.Gadget
 	candidate, err := cs.componentsContainer.Search(point[0])
+	// TODO: make container search only gadget
 	if err != nil {
 		return err
 	}
