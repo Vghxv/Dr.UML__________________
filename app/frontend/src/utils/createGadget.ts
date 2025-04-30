@@ -14,8 +14,10 @@ const UMLClass = dia.Element.define('uml.Class', {
     size: { width: 200, height: 120 },
     attrs: {
         header: {
-            refWidth: '100%',
-            height: '30%',
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 30,
             fill: '#2ECC71',
             stroke: '#000000',
         },
@@ -30,12 +32,12 @@ const UMLClass = dia.Element.define('uml.Class', {
             fontWeight: 'bold',
         },
         attributes: {
-            refY: '30%',
-            refWidth: '100%',
-            height: '35%',
+            x: 0,
+            y: 30,  // 緊接在 header 底下
+            width: 200,
+            height: 45,
             fill: '#ECF0F1',
             stroke: '#000000',
-            strokeWidth: 1,
         },
         attributesLabel: {
             ref: 'attributes',
@@ -47,12 +49,12 @@ const UMLClass = dia.Element.define('uml.Class', {
             fill: '#333333',
         },
         methods: {
-            refY: '65%',
-            refWidth: '100%',
-            height: '35%',
+            x: 0,
+            y: 75,  // 緊接在 attributes 底下 (30 + 45)
+            width: 200,
+            height: 45,
             fill: '#ECF0F1',
             stroke: '#000000',
-            strokeWidth: 1,
         },
         methodsLabel: {
             ref: 'methods',
@@ -65,25 +67,14 @@ const UMLClass = dia.Element.define('uml.Class', {
         },
     }
 }, {
-    markup: [{
-        tagName: 'rect',
-        selector: 'header',
-    }, {
-        tagName: 'text',
-        selector: 'headerLabel',
-    }, {
-        tagName: 'rect',
-        selector: 'attributes',
-    }, {
-        tagName: 'text',
-        selector: 'attributesLabel',
-    }, {
-        tagName: 'rect',
-        selector: 'methods',
-    }, {
-        tagName: 'text',
-        selector: 'methodsLabel',
-    }]
+    markup: [
+        { tagName: 'rect', selector: 'header' },
+        { tagName: 'text', selector: 'headerLabel' },
+        { tagName: 'rect', selector: 'attributes' },
+        { tagName: 'text', selector: 'attributesLabel' },
+        { tagName: 'rect', selector: 'methods' },
+        { tagName: 'text', selector: 'methodsLabel' },
+    ]
 });
 
 

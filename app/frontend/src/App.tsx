@@ -49,7 +49,7 @@ const App: React.FC = () => {
                 <h1>Gadget Palette</h1>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
                     <Gadget
-                        point={{ x: 0, y: 0 }}
+                        point={{ x: 200, y: 200 }}
                         type="Class"
                         layer={1}
                         name="Class Gadget"
