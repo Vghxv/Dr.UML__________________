@@ -27,8 +27,8 @@ jobs:
 
       - name: Run Tests and Generate Coverage
         env:
-          APP_ROOT: ${{ GITHUB_ACTION_PATH }}/app
-        working-directory: ${{ GITHUB_ACTION_PATH }}/app
+          APP_ROOT: ${{ github.workspace }}/app
+        working-directory: ./app
         run: |
           go test -v -coverprofile=coverage.out ./...
 
