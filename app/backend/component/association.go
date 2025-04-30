@@ -36,6 +36,10 @@ func (g *Association) updateDrawData() duerror.DUError {
 }
 
 func (g *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	if update == nil {
+		return duerror.NewInvalidArgumentError("update function is nil")
+	}
+	g.updateParentDraw = update
 	return nil
 }
 
