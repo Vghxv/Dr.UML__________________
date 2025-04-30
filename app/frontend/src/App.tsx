@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import './App.css';
-import { dia } from '@joint/core';
+import { dia, shapes } from '@joint/core';
 import Canvas from './components/Canvas';
 import Gadget from './components/Gadget';
 import Association from './components/Association';
@@ -25,8 +25,8 @@ const App: React.FC = () => {
     };
 
     useEffect(() => {
-        // Example backend JSON string
-        const backendJson = `{
+        // Example backend JSON for a gadget
+        const backendGadgetJson = `{
             "gadgetType": "Class",
             "x": 100,
             "y": 100,
@@ -40,10 +40,55 @@ const App: React.FC = () => {
             ]
         }`;
 
-        const gadget = parseBackendGadget(backendJson);
+        const gadget = parseBackendGadget(backendGadgetJson);
         if (gadget) {
             graph.addCell(gadget); // Add the parsed gadget to the graph
         }
+
+        // Example backend JSON for an association
+        const backendAssociationJson = `{
+            "assType": "Association",
+            "layer": 1,
+            "startX": 100,
+            "startY": 100,
+            "endX": 300,
+            "endY": 300,
+            "attributes": [
+                {"content": "1..*", "fontSize": 12, "fontStyle": 0, "fontFile": "Arial", "ratio": 0.5}
+            ]
+        }`;
+
+        const association = JSON.parse(backendAssociationJson);
+        const link = new shapes.standard.Link({ // Use shapes.standard.Link for proper instantiation
+            source: { x: association.startX, y: association.startY },
+            target: { x: association.endX, y: association.endY },
+            attrs: {
+                line: {
+                    stroke: '#333333',
+                    strokeWidth: 2,
+                    targetMarker: {
+                        type: 'path',
+                        d: 'M 10 -5 0 0 10 5 Z',
+                        fill: '#333333',
+                    },
+                },
+            },
+            labels: association.attributes.map((attr: any) => ({
+                position: attr.ratio,
+                attrs: {
+                    text: {
+                        text: attr.content,
+                        fontSize: attr.fontSize,
+                        fontStyle: attr.fontStyle,
+                        fontFamily: attr.fontFile,
+                        fill: '#000000',
+                    },
+                },
+            })),
+            z: association.layer,
+        });
+
+        graph.addCell(link); // Add the parsed association to the graph
     }, [graph, parseBackendGadget]);
 
     return (
@@ -83,15 +128,17 @@ const App: React.FC = () => {
 
                 <h1>Association Tool</h1>
                 <Association
-                    source={{ x: 100, y: 100 }}
-                    target={{ x: 300, y: 300 }}
-                    layer={1}
-                    style={{ stroke: '#FF5733', strokeWidth: 3 }}
-                    marker={{
-                        type: 'path',
-                        d: 'M 10 -5 0 0 10 5 Z',
-                        fill: '#FF5733',
-                    }}
+                    backendJson={`{
+                        "assType": "Association",
+                        "layer": 1,
+                        "startX": 100,
+                        "startY": 100,
+                        "endX": 300,
+                        "endY": 300,
+                        "attributes": [
+                            {"content": "1..*", "fontSize": 12, "fontStyle": 0, "fontFile": "Arial", "ratio": 0.5}
+                        ]
+                    }`}
                     onCreate={handleCreateAssociation}
                 />
 
