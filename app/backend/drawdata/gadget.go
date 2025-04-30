@@ -10,3 +10,6 @@ type Gadget struct {
 	Color      int           `json:"color"`
 	Attributes [][]Attribute `json:"attributes"`
 }
+
+// a default gadget color (grey)
+const DefaultGadgetColor = 0x808080

@@ -10,8 +10,8 @@ import (
 type GadgetType int
 
 const (
-	Class         GadgetType = 1 << iota // 0x01
-	supportedType            = Class
+	Class               GadgetType = 1 << iota // 0x01
+	supportedGadgetType            = Class
 )
 
 type Gadget struct {
@@ -19,7 +19,7 @@ type Gadget struct {
 	point            utils.Point
 	layer            int
 	attributes       [][]attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
-	color            int
+	color            utils.Color
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
@@ -74,7 +74,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Layer = g.layer
 	g.drawData.Height = height
 	g.drawData.Width = width
-	g.drawData.Color = g.color
+	g.drawData.Color = g.color.ToHex()
 	g.drawData.Attributes = atts
 
 	if g.updateParentDraw == nil {
@@ -91,3 +91,39 @@ func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror
 /*
 gadget func
 */
+
+// point getter
+func (g *Gadget) GetPoint() utils.Point {
+	return g.point
+}
+
+// point setter
+func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
+	g.point = point
+	err := g.updateDrawData()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *Gadget) getBounds() (utils.Point, utils.Point, duerror.DUError) {
+	//TODO: calculate the Bottom-Right point (maybe store it?)
+	size := 5
+	return g.point, utils.AddPoints(g.point, utils.Point{X: size, Y: size}), nil
+}
+
+func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
+	if gadgetType&supportedGadgetType == 0 {
+		return nil, duerror.NewInvalidArgumentError("gadget type is not supported")
+	}
+	if gadgetType == 0 {
+		return nil, duerror.NewInvalidArgumentError("gadget type is 0")
+	}
+	return &Gadget{
+		gadgetType: gadgetType,
+		point:      point,
+		layer:      0,
+		color:      utils.FromHex(drawdata.DefaultGadgetColor),
+	}, nil
+}

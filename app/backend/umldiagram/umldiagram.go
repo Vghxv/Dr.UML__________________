@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/components"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
-	"github.com/google/uuid"
 )
 
 type DiagramType int
@@ -25,20 +25,18 @@ func isValidDiagramType(input DiagramType) bool {
 
 // Diagram represents a UML diagram
 type UMLDiagram struct {
-	id           uuid.UUID
-	name         string
-	diagramType  DiagramType // e.g., "Class", "UseCase", "Sequence"
-	lastModified time.Time
-	startPoint   utils.Point // for dragging and linking ass
-	/* TODO */
-	// add background color
+	name             string
+	diagramType      DiagramType // e.g., "Class", "UseCase", "Sequence"
+	lastModified     time.Time
+	startPoint       utils.Point // for dragging and linking ass
+	backgroundColor  utils.Color
+	components       *components.Components
 	drawData         drawdata.Diagram
 	notifyDrawUpdate func() duerror.DUError
 }
 
 // NewUMLDiagram creates a new UMLDiagram instance
 func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
-	id := uuid.New()
 
 	if !utils.IsValidFilePath(name) {
 		return nil, duerror.NewInvalidArgumentError("Invalid diagram name")
@@ -49,21 +47,22 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 	}
 
 	return &UMLDiagram{
-		id:           id,
-		name:         name,
-		diagramType:  dt,
-		lastModified: time.Now(),
-		startPoint:   utils.Point{X: 0, Y: 0},
-		drawData:     drawdata.Diagram{Color: 0}, // TODO
+		name:            name,
+		diagramType:     dt,
+		lastModified:    time.Now(),
+		startPoint:      utils.Point{X: 0, Y: 0},
+		backgroundColor: utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
+		components:      components.NewComponents(),
+		drawData:        drawdata.Diagram{Color: drawdata.DefaultDiagramColor},
 	}, nil
-}
-
-func (ud *UMLDiagram) GetId() uuid.UUID {
-	return ud.id
 }
 
 func (ud *UMLDiagram) GetName() string {
 	return ud.name
+}
+
+func (ud *UMLDiagram) GetDiagramType() DiagramType {
+	return ud.diagramType
 }
 
 func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
@@ -71,7 +70,6 @@ func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
 		return nil, duerror.NewInvalidArgumentError("Invalid diagram name")
 	}
 	return &UMLDiagram{
-		id:           uuid.New(),
 		name:         path,
 		diagramType:  ClassDiagram,
 		lastModified: time.Now(),
@@ -79,10 +77,14 @@ func NewUMLDiagramWithPath(path string) (*UMLDiagram, error) {
 	}, nil
 }
 
-func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType) error {
-	// Add a gadget to the diagram
-	/* TODO */
+func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
+
+	err := ud.components.AddGadget(gadgetType, point)
+	if err != nil {
+		return err
+	}
 	return nil
+
 }
 
 func (ud *UMLDiagram) GetDrawData() (drawdata.Diagram, duerror.DUError) {
@@ -92,6 +94,7 @@ func (ud *UMLDiagram) GetDrawData() (drawdata.Diagram, duerror.DUError) {
 func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) duerror.DUError {
 	ud.notifyDrawUpdate = update
 	return nil
+
 }
 
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
