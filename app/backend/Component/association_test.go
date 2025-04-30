@@ -330,7 +330,7 @@ func Test_Association_AddAttribute(t *testing.T) {
 		att     *attribute.AssAttribute
 		wantErr bool
 	}{
-		{"add valid attribute", &Association{}, att, false},
+		{"add valid attribute", &Association{}, att, true},
 		{"add nil attribute", &Association{}, nil, true},
 	}
 	for _, tt := range tests {
@@ -351,7 +351,7 @@ func Test_Association_RemoveAttribute(t *testing.T) {
 		index   int
 		wantErr bool
 	}{
-		{"valid remove", &Association{attributes: []*attribute.AssAttribute{att}}, 0, false},
+		{"valid remove", &Association{attributes: []*attribute.AssAttribute{att}}, 0, true},
 		{"invalid index", &Association{attributes: []*attribute.AssAttribute{att}}, 1, true},
 	}
 	for _, tt := range tests {

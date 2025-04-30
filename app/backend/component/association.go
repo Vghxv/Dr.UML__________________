@@ -117,6 +117,7 @@ func (this *Association) AddAttribute(attribute *attribute.AssAttribute) duerror
 }
 
 func (this *Association) Cover(p utils.Point) (bool, duerror.DUError) {
+	/*TODO*/
 	return false, nil
 }
 
