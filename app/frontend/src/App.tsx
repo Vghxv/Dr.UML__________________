@@ -6,7 +6,7 @@ import { dia } from "@joint/core";
 import Canvas from "./components/Canvas";
 import { parseBackendGadget } from "./utils/createGadget";
 import Association from "./components/Association";
-import TopMenu from "./components/TopMenu";
+import Gadget from "./components/Gadget";
 import { EventsOn, EventsOff, EventsOnce } from "../wailsjs/runtime";
 
 interface WindowWithGo extends Window {
@@ -29,15 +29,6 @@ declare var window: WindowWithGo;
 
 const App: React.FC = () => {
   const [graph] = useState(new dia.Graph()); // Create a new JointJS graph instance
-  const [error, setError] = useState<string | null>(null);
-
-  const handleDrop = (gadget: dia.Element) => {
-    if (gadget instanceof dia.Element) {
-      graph.addCell(gadget); // Add the gadget to the graph
-    } else {
-      console.error("Invalid gadget type. Must be an instance of dia.Element.");
-    }
-  };
 
   const handleCreateAssociation = (association: dia.Link) => {
     graph.addCell(association); // Add the association to the graph
@@ -81,7 +72,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Register the event listener
-    EventsOnce("backend-event", (result) => {
+    EventsOn("backend-event", (result) => {
       // setCallbackResult(result);
       const components = result["components"]["gadgets"];
       console.log("components", components);
@@ -113,17 +104,7 @@ const App: React.FC = () => {
           </button>
           {<p>Diagram Name: {diagramName}</p>}
         </div>
-        {/* <div style={{ marginBottom: '10px' }}>
-                    <button className="btn" onClick={processCallback}>
-                    processCallback
-                    </button>
-                </div> */}
-        <div style={{ marginBottom: "10px" }}>
-          <button className="btn" onClick={handleAddGadget}>
-            handleAddGadget
-          </button>
         </div>
-      </div>
       <div
         className="App"
         style={{
@@ -147,7 +128,15 @@ const App: React.FC = () => {
           Dr.UML
         </h1>
         <h1>Gadget Palette</h1>
-
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                    <Gadget
+                        point={{ x: 200, y: 200 }}
+                        type="Class"
+                        layer={1}
+                        name="Class Gadget"
+                        onDrop={handleAddGadget}
+                    />
+                </div>
         <h1>Association Tool</h1>
         <Association
           source={{ x: 100, y: 100 }}
