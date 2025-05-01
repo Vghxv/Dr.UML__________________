@@ -10,10 +10,13 @@ export interface GadgetOptions {
   name?: string; // Display name
   attributesText?: string;
   methodsText?: string;
+  fontFile?: string[]; // Font style
+  fontSize?: number[]; // Font size
 }
 
 class UMLClass extends shapes.standard.Rectangle {
 constructor(options: GadgetOptions) {
+    console.log("Creating UMLClass with options:", options);
     super({
         position: options.point,
         size: options.size || { width: 200, height: 120 },
@@ -35,6 +38,8 @@ constructor(options: GadgetOptions) {
                 text: options.name || "Class Name",
                 fill: "#FFFFFF",
                 fontWeight: "bold",
+                fontFamily: options.fontFile?.[0] || "normal",
+                fontSize: options.fontSize || 69,
             },
             attributes: {
                 x: 0,
@@ -52,6 +57,8 @@ constructor(options: GadgetOptions) {
                 yAlignment: "top",
                 text: options.attributesText || "Attributes",
                 fill: "#333333",
+                fontFamily: options.fontFile?.[1] || "normal",
+                fontSize: options.fontSize || 69,
             },
             methods: {
                 x: 0,
@@ -69,6 +76,8 @@ constructor(options: GadgetOptions) {
                 yAlignment: "top",
                 text: options.methodsText || "Methods",
                 fill: "#333333",
+                fontFamily: options.fontFile?.[2] || "normal", // Use custom font file if provided
+                fontSize: options.fontSize || 69, // Use custom font size if provided
             },
         },
         markup: [
@@ -121,8 +130,10 @@ export function parseBackendGadget(gadgetData: BackendGadget): dia.Element {
       layer: gadgetData.layer,
       size: { width: gadgetData.width, height: gadgetData.height },
       color: `#${gadgetData.color.toString(16).padStart(6, "0")}`,
-      name: gadgetData.attributes[0]?.[0]?.content || "Class Name",
-      attributesText: gadgetData.attributes[1]?.map(attr => attr.content).join("\n") || "",
-      methodsText: gadgetData.attributes[2]?.map(attr => attr.content).join("\n") || "",
+      name: gadgetData.attributes[0]?.[0]?.content || "Class Name", // Header
+      attributesText: gadgetData.attributes[1]?.map(attr => attr.content).join("\n") || "", // Attributes
+      methodsText: gadgetData.attributes[2]?.map(attr => attr.content).join("\n") || "", // Methods
+      fontFile: gadgetData.attributes.flatMap(row => row.map(attr => attr.fontFile)), // Extract fontFile as string[]
+      fontSize: gadgetData.attributes.flatMap(attr => attr.map(attr => attr.fontSize)),
     });
 }
