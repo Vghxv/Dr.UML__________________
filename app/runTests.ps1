@@ -1,3 +1,4 @@
 cd  C:\Users\USER\Desktop\Class\senior\second_semester\OOAD\Project\Dr.UML\app
+$env:APP_ROOT = "C:\Users\USER\Desktop\Class\senior\second_semester\OOAD\Project\Dr.UML\app"
 go test -v "-coverprofile=coverage.out" ./...
 go tool cover "-func=coverage.out"

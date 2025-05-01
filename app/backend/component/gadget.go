@@ -112,8 +112,8 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.X = g.point.X
 	g.drawData.Y = g.point.Y
 	g.drawData.Layer = g.layer
-	g.drawData.Height = height * 10
-	g.drawData.Width = width * 10
+	g.drawData.Height = height
+	g.drawData.Width = width
 	g.drawData.Color = g.color.ToHex()
 	g.drawData.Attributes = atts
 

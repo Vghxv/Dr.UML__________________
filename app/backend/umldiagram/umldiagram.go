@@ -123,6 +123,7 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err != nil {
 		return err
 	}
+	ud.updateDrawData()
 	return nil
 
 }

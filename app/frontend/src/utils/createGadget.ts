@@ -94,15 +94,6 @@ export function createGadget(type: string, config: GadgetOptions): dia.Element {
   }
 }
 
-export interface BackendAttribute {
-  content: string;
-  height: number;
-  width: number;
-  fontSize: number;
-  fontStyle: number;
-  fontFile: string;
-}
-
 export interface BackendGadget {
   gadgetType: string;
   x: number;
@@ -111,7 +102,14 @@ export interface BackendGadget {
   height: number;
   width: number;
   color: number;
-  attributes: string[][];
+    attributes: {
+        content: string;
+        height: number;
+        width: number;
+        fontSize: number;
+        fontStyle: number;
+        fontFile: string;
+    }[][];
 }
 
 // Parse backend gadget JSON and convert it to a dia.Element
@@ -123,8 +121,8 @@ export function parseBackendGadget(gadgetData: BackendGadget): dia.Element {
       layer: gadgetData.layer,
       size: { width: gadgetData.width, height: gadgetData.height },
       color: `#${gadgetData.color.toString(16).padStart(6, "0")}`,
-      name: "MyClass",
-      attributesText: gadgetData.attributes[0]?.join("\n") || "",
-      methodsText: gadgetData.attributes[1]?.join("\n") || "",
+      name: gadgetData.attributes[0]?.[0]?.content || "Class Name",
+      attributesText: gadgetData.attributes[1]?.map(attr => attr.content).join("\n") || "",
+      methodsText: gadgetData.attributes[2]?.map(attr => attr.content).join("\n") || "",
     });
 }
