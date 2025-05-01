@@ -1,6 +1,8 @@
 package attribute
 
 import (
+	"os"
+
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
@@ -14,6 +16,20 @@ type Attribute struct {
 	fontFile         string
 	drawData         drawdata.Attribute
 	updateParentDraw func() duerror.DUError
+}
+
+func NewAttribute(content string) (*Attribute, duerror.DUError) {
+	// TODO
+	att := &Attribute{
+		content:  content,
+		size:     drawdata.DefaultAttributeFontSize,
+		style:    drawdata.DefaultAttributeFontStyle,
+		fontFile: os.Getenv("APP_ROOT") + drawdata.DefaultAttributeFontFile,
+	}
+	if err := att.updateDrawData(); err != nil {
+		return nil, err
+	}
+	return att, nil
 }
 
 // GetContent retrieves the content of the Attribute as a string along with an error if applicable.
@@ -127,6 +143,9 @@ func (att *Attribute) GetDrawData() (drawdata.Attribute, duerror.DUError) {
 }
 
 func (att *Attribute) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	if update == nil {
+		return duerror.NewInvalidArgumentError("update function is nil")
+	}
 	att.updateParentDraw = update
 	return nil
 }
