@@ -72,7 +72,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Register the event listener
-    EventsOn("backend-event", (result) => {
+    EventsOnce("backend-event", (result) => {
       // setCallbackResult(result);
       const components = result["components"]["gadgets"];
       console.log("components", components);

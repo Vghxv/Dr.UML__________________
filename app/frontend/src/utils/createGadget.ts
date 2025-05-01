@@ -40,7 +40,7 @@ constructor(options: GadgetOptions) {
                 x: 0,
                 y: 30,
                 width: options.size?.width || 200,
-                height: (options.size?.height || 120) / 2 - 30,
+                height: (options.size?.height || 120) / 2,
                 fill: "#ECF0F1",
                 stroke: "#000000",
             },
@@ -55,7 +55,7 @@ constructor(options: GadgetOptions) {
             },
             methods: {
                 x: 0,
-                y: 30 + (options.size?.height || 120) / 2 - 30,
+                y: 60,
                 width: options.size?.width || 200,
                 height: (options.size?.height || 120) / 2,
                 fill: "#ECF0F1",
@@ -116,14 +116,15 @@ export interface BackendGadget {
 
 // Parse backend gadget JSON and convert it to a dia.Element
 export function parseBackendGadget(gadgetData: BackendGadget): dia.Element {
-  return createGadget("Class", {
-    point: { x: gadgetData.x, y: gadgetData.y },
-    type: "Class",
-    layer: gadgetData.layer,
-    size: { width: gadgetData.width, height: gadgetData.height },
-    color: `#${gadgetData.color.toString(16).padStart(6, "0")}`,
-    name: "MyClass",
-    attributesText: gadgetData.attributes[0]?.join("\n") || "",
-    methodsText: gadgetData.attributes[1]?.join("\n") || "",
-  });
+    console.log("Parsing backend gadget data:", gadgetData);
+    return createGadget("Class", {
+      point: { x: gadgetData.x, y: gadgetData.y },
+      type: "Class",
+      layer: gadgetData.layer,
+      size: { width: gadgetData.width, height: gadgetData.height },
+      color: `#${gadgetData.color.toString(16).padStart(6, "0")}`,
+      name: "MyClass",
+      attributesText: gadgetData.attributes[0]?.join("\n") || "",
+      methodsText: gadgetData.attributes[1]?.join("\n") || "",
+    });
 }
