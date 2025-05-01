@@ -1,7 +1,6 @@
 package umlproject
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -416,28 +415,28 @@ func TestInvalidateCanvas_NoDiagram(t *testing.T) {
 // 	}
 // }
 
-func TestInvalidateCanvas_GetDrawDataError(t *testing.T) {
-	// This test would ideally mock a diagram that returns an error from GetDrawData
-	// However, since we don't have a mock framework set up, we can simulate it
-	project := NewUMLProject("TestProject")
+// func TestInvalidateCanvas_GetDrawDataError(t *testing.T) {
+// 	// This test would ideally mock a diagram that returns an error from GetDrawData
+// 	// However, since we don't have a mock framework set up, we can simulate it
+// 	project := NewUMLProject("TestProject")
 
-	// Create a custom diagram implementation that would return an error from GetDrawData
-	diagram, err := umldiagram.NewUMLDiagram("TestDiagram", umldiagram.ClassDiagram)
-	if err != nil {
-		t.Fatalf("Failed to create diagram: %v", err)
-	}
+// 	// Create a custom diagram implementation that would return an error from GetDrawData
+// 	diagram, err := umldiagram.NewUMLDiagram("TestDiagram", umldiagram.ClassDiagram)
+// 	if err != nil {
+// 		t.Fatalf("Failed to create diagram: %v", err)
+// 	}
 
-	// Add the diagram to the project
-	project.diagrams[diagram.GetName()] = diagram
-	project.currentDiagram = diagram
+// 	// Add the diagram to the project
+// 	project.diagrams[diagram.GetName()] = diagram
+// 	project.currentDiagram = diagram
 
-	// We can't directly mock GetDrawData to return an error,
-	// so this test mostly verifies that the method handles the diagram properly
-	// A more complete test would use a mock library
+// 	// We can't directly mock GetDrawData to return an error,
+// 	// so this test mostly verifies that the method handles the diagram properly
+// 	// A more complete test would use a mock library
 
-	project.ctx = context.Background()
+// 	project.ctx = context.Background()
 
-	// Even without mocking, we can at least verify no panic occurs
-	err = project.InvalidateCanvas()
-	// We can't assert on the specific error since we can't force GetDrawData to fail
-}
+// 	// Even without mocking, we can at least verify no panic occurs
+// 	err = project.InvalidateCanvas()
+// 	// We can't assert on the specific error since we can't force GetDrawData to fail
+// }

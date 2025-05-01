@@ -96,7 +96,9 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 
 func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
 	g.updateParentDraw = update
-	update()
+	if err := update(); err != nil {
+		return err
+	}
 	return nil
 }
 

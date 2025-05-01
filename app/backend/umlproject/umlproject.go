@@ -2,7 +2,6 @@ package umlproject
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"Dr.uml/backend/component"
@@ -14,14 +13,13 @@ import (
 )
 
 type UMLProject struct {
-	ctx              context.Context
-	name             string
-	lastModified     time.Time
-	currentDiagram   *umldiagram.UMLDiagram            // The currently selected diagram
-	diagrams         map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
-	openedDiagrams   map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
-	activeDiagrams   map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
-	notifyDrawUpdate func(string) duerror.DUError
+	ctx            context.Context
+	name           string
+	lastModified   time.Time
+	currentDiagram *umldiagram.UMLDiagram            // The currently selected diagram
+	diagrams       map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
+	openedDiagrams map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
+	activeDiagrams map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
 	// notifyDrawUpdate func() duerror.DUError TODO
 }
 
@@ -148,7 +146,6 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 	if err != nil {
 		return err
 	}
-	fmt.Println("InvalidateCanvas", dd)
 	runtime.EventsEmit(p.ctx, "backend-event", dd)
 
 	return nil
@@ -189,4 +186,3 @@ func (p *UMLProject) GetCurrentDiagramName() string {
 	}
 	return p.currentDiagram.GetName()
 }
-
