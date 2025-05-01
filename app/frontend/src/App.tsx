@@ -3,10 +3,11 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "./App.css";
 import { dia } from "@joint/core";
-import Canvas from "./components/Canvas";
-import { parseBackendGadget } from "./utils/createGadget";
-import Association from "./components/Association";
 import Gadget from "./components/Gadget";
+import Association from "./components/Association";
+import Canvas from "./components/Canvas";
+import ChatRoom from "./components/ChatRoom";
+import { parseBackendGadget } from "./utils/createGadget";
 import { EventsOn, EventsOff, EventsOnce } from "../wailsjs/runtime";
 
 interface WindowWithGo extends Window {
@@ -46,6 +47,7 @@ const App: React.FC = () => {
       console.error("Error calling Go function:", error);
     }
   };
+
   const handleAddGadget = async () => {
     try {
       await window.go.umlproject.UMLProject.AddGadget(1, { x: 100, y: 100 });
@@ -55,24 +57,9 @@ const App: React.FC = () => {
     }
   };
 
-  // const handleAddGadget = async (gadgetType: number, x: number, y: number) => {
-  //     try {
-  //         // Call the Go AddGadget function with gadget type and coordinates
-  //         await window.go.umlproject.UMLProject.AddGadget(gadgetType, { x, y });
-  //         console.log(`Added gadget type ${gadgetType} at position (${x}, ${y})`);
-
-  //         // After adding a gadget, you might want to refresh the diagram
-  //         // or update the UI in some way
-
-  //     } catch (err) {
-  //         console.error("Error adding gadget:", err);
-  //         setError(err instanceof Error ? err.message : "Failed to add gadget");
-  //     }
-  // };
-
   useEffect(() => {
     // Register the event listener
-    EventsOnce("backend-event", (result) => {
+    EventsOn("backend-event", (result) => {
       // setCallbackResult(result);
       const components = result["components"]["gadgets"];
       console.log("components", components);
@@ -94,7 +81,6 @@ const App: React.FC = () => {
   }, ["backend-event"]);
 
   return (
-    
     <DndProvider backend={HTML5Backend}>
       <div className="section">
         <h1>Dr.UML</h1>
@@ -104,54 +90,81 @@ const App: React.FC = () => {
           </button>
           {<p>Diagram Name: {diagramName}</p>}
         </div>
-        </div>
+      </div>
       <div
         className="App"
         style={{
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
+          flexDirection: "row", // Layout with left and right sections
+          justifyContent: "space-between",
+          alignItems: "flex-start",
           height: "100vh",
           backgroundColor: "#121212",
           padding: "20px",
         }}
       >
-        <h1
+        {/* Left Section: Gadget Palette and Association Tool */}
+        <div
           style={{
-            color: "#ffffff",
-            marginBottom: "20px",
-            fontFamily: "Arial, sans-serif",
-            fontSize: "2rem",
+            width: "300px", // Fixed width for the left section
+            marginRight: "20px", // Add spacing between left section and Canvas
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px", // Add spacing between components
           }}
         >
-          Dr.UML
-        </h1>
-        <h1>Gadget Palette</h1>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                    <Gadget
-                        point={{ x: 200, y: 200 }}
-                        type="Class"
-                        layer={1}
-                        name="Class Gadget"
-                        onDrop={handleAddGadget}
-                    />
-                </div>
-        <h1>Association Tool</h1>
-        <Association
-          source={{ x: 100, y: 100 }}
-          target={{ x: 300, y: 300 }}
-          layer={1}
-          style={{ stroke: "#FF5733", strokeWidth: 3 }}
-          marker={{
-            type: "path",
-            d: "M 10 -5 0 0 10 5 Z",
-            fill: "#FF5733",
-          }}
-          onCreate={handleCreateAssociation}
-        />
+          <div>
+            <h2 style={{ color: "#ffffff", marginBottom: "10px" }}>Gadget Palette</h2>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Gadget
+                point={{ x: 200, y: 200 }}
+                type="Class"
+                layer={1}
+                name="Class Gadget"
+                onDrop={handleAddGadget}
+              />
+            </div>
+          </div>
 
-        <Canvas graph={graph} />
+          <div>
+            <h2 style={{ color: "#ffffff", marginBottom: "10px" }}>Association Tool</h2>
+            <Association
+              source={{ x: 100, y: 100 }}
+              target={{ x: 300, y: 300 }}
+              layer={1}
+              style={{ stroke: "#FF5733", strokeWidth: 3 }}
+              marker={{
+                type: "path",
+                d: "M 10 -5 0 0 10 5 Z",
+                fill: "#FF5733",
+              }}
+              onCreate={handleCreateAssociation}
+            />
+          </div>
+        </div>
+
+        {/* Center Section: Canvas */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Canvas graph={graph} />
+        </div>
+
+        {/* Right Section: ChatRoom */}
+        <div
+          style={{
+            width: "300px", // Fixed width for ChatRoom
+            marginLeft: "20px", // Add spacing between Canvas and ChatRoom
+          }}
+        >
+          <ChatRoom />
+        </div>
       </div>
     </DndProvider>
   );

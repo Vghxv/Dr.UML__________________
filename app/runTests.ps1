@@ -1,0 +1,3 @@
+cd  C:\Users\USER\Desktop\Class\senior\second_semester\OOAD\Project\Dr.UML\app
+go test -v "-coverprofile=coverage.out" ./...
+go tool cover "-func=coverage.out"
