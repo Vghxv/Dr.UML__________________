@@ -100,10 +100,6 @@ func (cs *Components) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err != nil {
 		return err
 	}
-	err = cs.updateDrawData()
-	if err != nil {
-		return err
-	}
 	return cs.updateDrawData()
 }
 

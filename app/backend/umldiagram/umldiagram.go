@@ -19,6 +19,15 @@ const (
 	supportedType   = ClassDiagram | UseCaseDiagram | SequenceDiagram
 )
 
+var AllDiagramTypes = []struct {
+	Value  DiagramType
+	Number int
+}{
+	{ClassDiagram, 1},
+	{UseCaseDiagram, 2},
+	{SequenceDiagram, 4},
+}
+
 func isValidDiagramType(input DiagramType) bool {
 	return input&supportedType == input && input != 0
 }
@@ -46,7 +55,7 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		return nil, duerror.NewInvalidArgumentError("Invalid diagram type")
 	}
 
-	return &UMLDiagram{
+	dg := UMLDiagram{
 		name:            name,
 		diagramType:     dt,
 		lastModified:    time.Now(),
@@ -54,7 +63,8 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		backgroundColor: utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
 		components:      components.NewComponents(),
 		drawData:        drawdata.Diagram{Color: drawdata.DefaultDiagramColor},
-	}, nil
+	}
+	return &dg, dg.components.RegisterUpdateParentDraw(dg.updateDrawData)
 }
 
 func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {

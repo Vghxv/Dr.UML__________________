@@ -1,109 +1,139 @@
-import { shapes, dia } from '@joint/core';
+import { shapes, dia } from "@joint/core";
 
 export interface GadgetOptions {
-    point: { x: number; y: number };
-    type: 'Class';  // 允許的 gadget 類型
-    layer: number;  // 元件的層級
-    size?: { width: number; height: number };  // 預設大小
-    color?: string;  // 背景顏色
-    outlineColor?: string;  // 邊框顏色
-    name?: string;  // 顯示名稱
+  point: { x: number; y: number };
+  type: "Class"; // Allowed gadget type
+  layer: number; // Layer of the gadget
+  size?: { width: number; height: number }; // Default size
+  color?: string; // Background color
+  outlineColor?: string; // Border color
+  name?: string; // Display name
+  attributesText?: string;
+  methodsText?: string;
+  fontFile?: string[]; // Font style
+  fontSize?: number[]; // Font size
 }
 
-const UMLClass = dia.Element.define('uml.Class', {
-    size: { width: 200, height: 120 },
-    attrs: {
-        header: {
-            x: 0,
-            y: 0,
-            width: 200,
-            height: 30,
-            fill: '#2ECC71',
-            stroke: '#000000',
+class UMLClass extends shapes.standard.Rectangle {
+constructor(options: GadgetOptions) {
+    console.log("Creating UMLClass with options:", options);
+    super({
+        position: options.point,
+        size: options.size || { width: 200, height: 120 },
+        attrs: {
+            header: {
+                x: 0,
+                y: 0,
+                width: options.size?.width || 200,
+                height: 30,
+                fill: "#2ECC71",
+                stroke: "#000000",
+            },
+            headerLabel: {
+                ref: "header",
+                refX: "50%",
+                refY: "50%",
+                textAnchor: "middle",
+                yAlignment: "middle",
+                text: options.name || "Class Name",
+                fill: "#FFFFFF",
+                fontWeight: "bold",
+                fontFamily: options.fontFile?.[0] || "normal",
+                fontSize: options.fontSize?.[0] || 69,
+            },
+            attributes: {
+                x: 0,
+                y: 30,
+                width: options.size?.width || 200,
+                height: (options.size?.height || 120) / 2,
+                fill: "#ECF0F1",
+                stroke: "#000000",
+            },
+            attributesLabel: {
+                ref: "attributes",
+                refX: 5,
+                refY: 5,
+                textAnchor: "left",
+                yAlignment: "top",
+                text: options.attributesText || "Attributes",
+                fill: "#333333",
+                fontFamily: options.fontFile?.[1] || "normal",
+                fontSize: options.fontSize || 69,
+            },
+            methods: {
+                x: 0,
+                y: 60,
+                width: options.size?.width || 200,
+                height: (options.size?.height || 120) / 2,
+                fill: "#ECF0F1",
+                stroke: "#000000",
+            },
+            methodsLabel: {
+                ref: "methods",
+                refX: 5,
+                refY: 5,
+                textAnchor: "left",
+                yAlignment: "top",
+                text: options.methodsText || "Methods",
+                fill: "#333333",
+                fontFamily: options.fontFile?.[2] || "normal", // Use custom font file if provided
+                fontSize: options.fontSize || 69, // Use custom font size if provided
+            },
         },
-        headerLabel: {
-            ref: 'header',
-            refX: '50%',
-            refY: '50%',
-            textAnchor: 'middle',
-            yAlignment: 'middle',
-            text: 'Class Name',
-            fill: '#FFFFFF',
-            fontWeight: 'bold',
-        },
-        attributes: {
-            x: 0,
-            y: 30,  // 緊接在 header 底下
-            width: 200,
-            height: 45,
-            fill: '#ECF0F1',
-            stroke: '#000000',
-        },
-        attributesLabel: {
-            ref: 'attributes',
-            refX: 5,
-            refY: 5,
-            textAnchor: 'left',
-            yAlignment: 'top',
-            text: 'Attributes',
-            fill: '#333333',
-        },
-        methods: {
-            x: 0,
-            y: 75,  // 緊接在 attributes 底下 (30 + 45)
-            width: 200,
-            height: 45,
-            fill: '#ECF0F1',
-            stroke: '#000000',
-        },
-        methodsLabel: {
-            ref: 'methods',
-            refX: 5,
-            refY: 5,
-            textAnchor: 'left',
-            yAlignment: 'top',
-            text: 'Methods',
-            fill: '#333333',
-        },
+        markup: [
+            { tagName: "rect", selector: "header", attributes: {} },
+            { tagName: "text", selector: "headerLabel", attributes: {} },
+            { tagName: "rect", selector: "attributes", attributes: {} },
+            { tagName: "text", selector: "attributesLabel", attributes: {} },
+            { tagName: "rect", selector: "methods", attributes: {} },
+            { tagName: "text", selector: "methodsLabel", attributes: {} },
+        ],
+        z: options.layer,
+    });
+}
+}
+
+export function createGadget(type: string, config: GadgetOptions): dia.Element {
+  switch (type) {
+    case "Class": {
+      return new UMLClass(config);
     }
-}, {
-    markup: [
-        { tagName: 'rect', selector: 'header' },
-        { tagName: 'text', selector: 'headerLabel' },
-        { tagName: 'rect', selector: 'attributes' },
-        { tagName: 'text', selector: 'attributesLabel' },
-        { tagName: 'rect', selector: 'methods' },
-        { tagName: 'text', selector: 'methodsLabel' },
-    ]
-});
+    default:
+      throw new Error(`Unknown gadget type: ${type}`);
+  }
+}
 
+export interface BackendGadget {
+  gadgetType: string;
+  x: number;
+  y: number;
+  layer: number;
+  height: number;
+  width: number;
+  color: number;
+    attributes: {
+        content: string;
+        height: number;
+        width: number;
+        fontSize: number;
+        fontStyle: number;
+        fontFile: string;
+    }[][];
+}
 
-export function createGadget({
-    point,
-    type,
-    layer,
-    size = { width: 150, height: 100 },  // 預設大小
-    color = '#FFFFFF',  // 預設顏色
-    outlineColor = '#000000',  // 預設邊框顏色
-    name = '',  // 預設名稱
-}: GadgetOptions): dia.Element {
-
-    switch (type) {
-        case 'Class': {
-            
-            return new UMLClass({
-                size: { width: size.width || 200, height: size.height || 150 },
-                position: point,
-                z: layer,
-                attrs: {
-                    header: { fill: '#3498DB' },
-                    headerLabel: { text: name || 'MyClass' },
-                    attributesLabel: { text: 'id: Int\nname: String' },
-                    methodsLabel: { text: '+getId(): Int\n+getName(): String' },
-                },
-            });
-        }
-        default:
-            throw new Error(`Unknown gadget type: ${type}`);  // 如果是未知的類型，拋出錯誤
-    }
+// Parse backend gadget JSON and convert it to a dia.Element
+export function parseBackendGadget(gadgetData: BackendGadget): dia.Element {
+    console.log("Parsing backend gadget data:", gadgetData);
+    return createGadget("Class", {
+      point: { x: gadgetData.x, y: gadgetData.y },
+      type: "Class",
+      layer: gadgetData.layer,
+      size: { width: gadgetData.width, height: gadgetData.height },
+      color: `#${gadgetData.color.toString(16).padStart(6, "0")}`,
+      name: gadgetData.attributes[0]?.[0]?.content || "Class Name", // Header
+      attributesText: gadgetData.attributes[1]?.map(attr => attr.content).join("\n") || "", // Attributes
+      methodsText: gadgetData.attributes[2]?.map(attr => attr.content).join("\n") || "", // Methods
+      fontFile: gadgetData.attributes.flatMap(row => row.map(attr => attr.fontFile)), // Extract fontFile as string[]
+      fontSize: gadgetData.attributes.flatMap(attr => attr.map(attr => attr.fontSize)),
+    });
 }

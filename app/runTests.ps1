@@ -1,0 +1,3 @@
+$env:APP_ROOT = $pwd
+go test -v "-coverprofile=coverage.out" ./...
+go tool cover "-func=coverage.out"
