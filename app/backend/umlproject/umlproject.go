@@ -20,11 +20,12 @@ type UMLProject struct {
 	diagrams       map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
 	openedDiagrams map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
 	activeDiagrams map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
-	// notifyDrawUpdate func() duerror.DUError TODO
 }
 
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx
+	// should not AddNewDiagram and SelectDiagram here
+	// will be removed in the future
 	p.AddNewDiagram(umldiagram.ClassDiagram, "new class diagram")
 	p.SelectDiagram("new class diagram")
 }
@@ -151,17 +152,6 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 	return nil
 }
 
-// GetUserData returns a struct with user information
-func (a *UMLProject) GetUserData() map[string]interface{} {
-	return map[string]interface{}{
-		"id":       1,
-		"username": "wailsuser",
-		"email":    "user@example.com",
-		"roles":    []string{"admin", "user"},
-		"active":   true,
-	}
-}
-
 func (p *UMLProject) DrawDigram() drawdata.Diagram {
 	if p.currentDiagram == nil {
 		return drawdata.Diagram{}
@@ -180,9 +170,9 @@ func (p *UMLProject) GetCurrentDiagram() *umldiagram.UMLDiagram {
 	return p.currentDiagram
 }
 
-func (p *UMLProject) GetCurrentDiagramName() string {
+func (p *UMLProject) GetCurrentDiagramName() (string, duerror.DUError) {
 	if p.currentDiagram == nil {
-		return ""
+		return "", duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	return p.currentDiagram.GetName()
+	return p.currentDiagram.GetName(), nil
 }
