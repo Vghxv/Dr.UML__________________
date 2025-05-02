@@ -1,26 +1,46 @@
 // Association.tsx
 import React, { useCallback } from 'react';
-import { createAssociation } from '../utils/createAssociation';
+import { createAssociation, parseBackendAssociation } from '../utils/createAssociation';
 import { dia } from '@joint/core';
 
 interface AssociationProps {
-    source: { x: number; y: number };
-    target: { x: number; y: number };
-    layer: number;
+    source?: { x: number; y: number }; // Optional if backendJson is provided
+    target?: { x: number; y: number }; // Optional if backendJson is provided
+    layer?: number; // Optional if backendJson is provided
     style?: dia.Link.Attributes['line']; // Optional line style
     marker?: dia.Link.Attributes['line']['targetMarker']; // Optional marker style
+    backendJson?: string; // Optional backend JSON string
     onCreate: (link: dia.Link) => void;
 }
 
-const Association: React.FC<AssociationProps> = ({ source, target, layer, style, marker, onCreate }) => {
+const Association: React.FC<AssociationProps> = ({
+    source,
+    target,
+    layer,
+    style,
+    marker,
+    backendJson,
+    onCreate,
+}) => {
     const handleCreateAssociation = useCallback(() => {
-        const link = createAssociation({ source, target, layer, style, marker });
-        if (onCreate && link) {
-            onCreate(link);
+        let link: dia.Link | null = null;
+
+        if (backendJson) {
+            // Parse backend JSON if provided
+            link = parseBackendAssociation(backendJson);
+        } else if (source && target && layer !== undefined) {
+            // Otherwise, create an association normally
+            link = createAssociation({ source, target, layer, style, marker });
         } else {
-            console.error('Failed to create association or onCreate is not defined.');
+            console.error('Insufficient data to create an association.');
         }
-    }, [source, target, layer, style, marker, onCreate]);
+
+        if (link) {
+            onCreate(link); // Ensure the onCreate function is called with the created link
+        } else {
+            console.error('Failed to create association.');
+        }
+    }, [source, target, layer, style, marker, backendJson, onCreate]);
 
     return (
         <button
@@ -42,3 +62,4 @@ const Association: React.FC<AssociationProps> = ({ source, target, layer, style,
 };
 
 export default Association;
+

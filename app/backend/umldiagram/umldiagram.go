@@ -12,12 +12,22 @@ import (
 
 type DiagramType int
 
+// TODO
 const (
 	ClassDiagram    = 1 << iota // 0x01
 	UseCaseDiagram  = 1 << iota // 0x02
 	SequenceDiagram = 1 << iota // 0x04
 	supportedType   = ClassDiagram | UseCaseDiagram | SequenceDiagram
 )
+
+var AllDiagramTypes = []struct {
+	Value  DiagramType
+	Number int
+}{
+	{ClassDiagram, 1},
+	{UseCaseDiagram, 2},
+	{SequenceDiagram, 4},
+}
 
 func isValidDiagramType(input DiagramType) bool {
 	return input&supportedType == input && input != 0

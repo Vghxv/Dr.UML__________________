@@ -1,6 +1,7 @@
 package umlproject
 
 import (
+	"context"
 	"time"
 
 	"Dr.uml/backend/component"
@@ -8,16 +9,25 @@ import (
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type UMLProject struct {
+	ctx            context.Context
 	name           string
 	lastModified   time.Time
 	currentDiagram *umldiagram.UMLDiagram            // The currently selected diagram
 	diagrams       map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
 	openedDiagrams map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
 	activeDiagrams map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
-	// notifyDrawUpdate func() duerror.DUError TODO
+}
+
+func (p *UMLProject) Startup(ctx context.Context) {
+	p.ctx = ctx
+	// should not AddNewDiagram and SelectDiagram here
+    // TODO: Remove this 
+	p.AddNewDiagram(umldiagram.ClassDiagram, "new class diagram")
+	p.SelectDiagram("new class diagram")
 }
 
 // NewUMLProject creates a new UMLProject instance
@@ -105,7 +115,7 @@ func (p *UMLProject) AddNewDiagram(
 	if err != nil {
 		return err
 	}
-	// diagram.RegisterNotifyDrawUpdate() TODO
+	diagram.RegisterNotifyDrawUpdate(p.InvalidateCanvas)
 
 	p.diagrams[name] = diagram
 	p.currentDiagram = diagram
@@ -128,6 +138,20 @@ func (p *UMLProject) createDiagram(path string) duerror.DUError {
 	return nil
 }
 
+func (p *UMLProject) InvalidateCanvas() duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	// p.notifyDrawUpdate(p.currentDiagram.GetName())
+	dd, err := p.currentDiagram.GetDrawData()
+	if err != nil {
+		return err
+	}
+	runtime.EventsEmit(p.ctx, "backend-event", dd)
+
+	return nil
+}
+
 func (p *UMLProject) DrawDigram() drawdata.Diagram {
 	if p.currentDiagram == nil {
 		return drawdata.Diagram{}
@@ -137,4 +161,18 @@ func (p *UMLProject) DrawDigram() drawdata.Diagram {
 		return drawdata.Diagram{}
 	}
 	return data
+}
+
+func (p *UMLProject) GetCurrentDiagram() *umldiagram.UMLDiagram {
+	if p.currentDiagram == nil {
+		return nil
+	}
+	return p.currentDiagram
+}
+
+func (p *UMLProject) GetCurrentDiagramName() (string, duerror.DUError) {
+	if p.currentDiagram == nil {
+		return "", duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	return p.currentDiagram.GetName(), nil
 }

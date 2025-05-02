@@ -24,15 +24,9 @@ const Gadget: React.FC<GadgetProps> = ({
     onDrop,
 }) => {
     const handleCreateGadget = useCallback(() => {
-        const gadget = createGadget({
-            point,
-            type,
-            layer,
-            size,
-            color,
-            outlineColor,
-            name,
-        });
+        const gadget = createGadget(
+            type, {point, layer, size, color, outlineColor, name} as GadgetProps
+        );
 
         if (gadget) {
             onDrop(gadget); // Ensure the onDrop function is called with the created gadget

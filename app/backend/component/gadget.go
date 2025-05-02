@@ -124,6 +124,9 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 }
 
 func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	if update == nil {
+		return duerror.NewInvalidArgumentError("update function is nil")
+	}
 	g.updateParentDraw = update
 	return nil
 }
