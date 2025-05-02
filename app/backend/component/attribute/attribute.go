@@ -107,7 +107,7 @@ func (att *Attribute) SetUnderline(value bool) duerror.DUError {
 // SetFontFile sets the font file path for the Attribute and updates the drawData accordingly.
 // Returns an error if the file path is invalid.
 func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
-	if !utils.IsValidFilePath(fontFile) {
+	if err := utils.ValidateFilePath(fontFile); err != nil {
 		return duerror.NewInvalidArgumentError("invalid font file path")
 	}
 	att.fontFile = fontFile

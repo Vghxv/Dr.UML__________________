@@ -12,7 +12,7 @@ import (
 
 type DiagramType int
 
-// TODO
+// TODO: ug want to refactor all the type things
 const (
 	ClassDiagram    = 1 << iota // 0x01
 	UseCaseDiagram  = 1 << iota // 0x02
@@ -29,11 +29,13 @@ var AllDiagramTypes = []struct {
 	{SequenceDiagram, 4},
 }
 
-func isValidDiagramType(input DiagramType) bool {
-	return input&supportedType == input && input != 0
+func validateDiagramType(input DiagramType) duerror.DUError {
+	if !(input&supportedType == input && input != 0) {
+		return duerror.NewInvalidArgumentError("Invalid diagram type")
+	}
+	return nil
 }
 
-// Diagram represents a UML diagram
 type UMLDiagram struct {
 	name            string
 	diagramType     DiagramType // e.g., "Class", "UseCase", "Sequence"
@@ -50,13 +52,13 @@ type UMLDiagram struct {
 }
 
 // Constructor
-func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
-	// TODO: this should be private
-	if !utils.IsValidFilePath(name) {
-		return nil, duerror.NewInvalidArgumentError("Invalid diagram name")
+func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
+	// TODO: also check the file is exist or not
+	if err := utils.ValidateFilePath(name); err != nil {
+		return nil, err
 	}
-	if !isValidDiagramType(dt) {
-		return nil, duerror.NewInvalidArgumentError("Invalid diagram type")
+	if err := validateDiagramType(dt); err != nil {
+		return nil, err
 	}
 	return &UMLDiagram{
 		name:                name,
@@ -75,12 +77,7 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 	}, nil
 }
 
-func LoadExistUMLDiagram() (*UMLDiagram, duerror.DUError) {
-	// TODO
-	return nil, nil
-}
-
-func CreateEmptyUMLDiagram() (*UMLDiagram, duerror.DUError) {
+func LoadExistUMLDiagram(name string) (*UMLDiagram, duerror.DUError) {
 	// TODO
 	return nil, nil
 }
@@ -94,22 +91,20 @@ func (ud *UMLDiagram) GetDiagramType() DiagramType {
 	return ud.diagramType
 }
 
+func (ud *UMLDiagram) GetLastModified() time.Time {
+	return ud.lastModified
+}
+
 // Other methods
 func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
-	gadget, err := component.NewGadget(gadgetType, point)
+	g, err := component.NewGadget(gadgetType, point)
 	if err != nil {
 		return err
 	}
-	err = gadget.RegisterUpdateParentDraw(ud.updateDrawData)
-	if err != nil {
+	if err = g.RegisterUpdateParentDraw(ud.updateDrawData); err != nil {
 		return err
 	}
-	err = ud.componentsContainer.Insert(gadget)
-	if err != nil {
-		return err
-	}
-	err = ud.updateDrawData()
-	if err != nil {
+	if err = ud.componentsContainer.Insert(g); err != nil {
 		return err
 	}
 	return ud.updateDrawData()
@@ -199,8 +194,8 @@ func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
 }
 
 // Draw
-func (ud *UMLDiagram) GetDrawData() (drawdata.Diagram, duerror.DUError) {
-	return ud.drawData, nil
+func (ud *UMLDiagram) GetDrawData() drawdata.Diagram {
+	return ud.drawData
 }
 
 func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) duerror.DUError {
