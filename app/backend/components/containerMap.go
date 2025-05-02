@@ -14,7 +14,7 @@ type containerMap struct {
 	compMap map[component.Component]bool
 }
 
-func NewContainerMap() componentsContainer {
+func NewContainerMap() Container {
 	return &containerMap{compMap: make(map[component.Component]bool)}
 }
 

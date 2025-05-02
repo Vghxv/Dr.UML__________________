@@ -7,18 +7,18 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
-// implement AssociationGraph interface
-type associationMap struct {
+// implement Graph interface
+type graphMap struct {
 	assMap map[*component.Gadget]map[*component.Gadget][]*component.Association
 }
 
-func NewAssociationMap() AssociationGraph {
-	return &associationMap{
+func NewGraphMap() Graph {
+	return &graphMap{
 		assMap: make(map[*component.Gadget]map[*component.Gadget][]*component.Association),
 	}
 }
 
-func (am *associationMap) FindStartEnd(st *component.Gadget, en *component.Gadget) ([]*component.Association, duerror.DUError) {
+func (am *graphMap) FindStartEnd(st *component.Gadget, en *component.Gadget) ([]*component.Association, duerror.DUError) {
 	if st == nil || en == nil {
 		return nil, duerror.NewInvalidArgumentError("start or end gadget is nil")
 	}
@@ -28,7 +28,7 @@ func (am *associationMap) FindStartEnd(st *component.Gadget, en *component.Gadge
 	return am.assMap[st][en], nil
 }
 
-func (am *associationMap) FindStart(st *component.Gadget) ([]*component.Association, duerror.DUError) {
+func (am *graphMap) FindStart(st *component.Gadget) ([]*component.Association, duerror.DUError) {
 	if st == nil {
 		return nil, duerror.NewInvalidArgumentError("start gadget is nil")
 	}
@@ -42,7 +42,7 @@ func (am *associationMap) FindStart(st *component.Gadget) ([]*component.Associat
 	return as, nil
 }
 
-func (am *associationMap) FindEnd(en *component.Gadget) ([]*component.Association, duerror.DUError) {
+func (am *graphMap) FindEnd(en *component.Gadget) ([]*component.Association, duerror.DUError) {
 	if en == nil {
 		return nil, duerror.NewInvalidArgumentError("end gadget is nil")
 	}
@@ -56,7 +56,7 @@ func (am *associationMap) FindEnd(en *component.Gadget) ([]*component.Associatio
 	return as, nil
 }
 
-func (am *associationMap) FindEither(g *component.Gadget) ([]*component.Association, duerror.DUError) {
+func (am *graphMap) FindEither(g *component.Gadget) ([]*component.Association, duerror.DUError) {
 	if g == nil {
 		return nil, duerror.NewInvalidArgumentError("gadget is nil")
 	}
@@ -84,16 +84,9 @@ func (am *associationMap) FindEither(g *component.Gadget) ([]*component.Associat
 	return asResult, nil
 }
 
-func validateAssociation(a *component.Association) duerror.DUError {
+func (am *graphMap) Update(a *component.Association, oldSt *component.Gadget, oldEn *component.Gadget) duerror.DUError {
 	if a == nil {
 		return duerror.NewInvalidArgumentError("association is nil")
-	}
-	return nil
-}
-
-func (am *associationMap) Update(a *component.Association, oldSt *component.Gadget, oldEn *component.Gadget) duerror.DUError {
-	if err := validateAssociation(a); err != nil {
-		return err
 	}
 	if oldSt == nil || oldEn == nil {
 		return duerror.NewInvalidArgumentError("old start or end gadget is nil")
@@ -112,9 +105,9 @@ func (am *associationMap) Update(a *component.Association, oldSt *component.Gadg
 	return am.Insert(a)
 }
 
-func (am *associationMap) Insert(a *component.Association) duerror.DUError {
-	if err := validateAssociation(a); err != nil {
-		return err
+func (am *graphMap) Insert(a *component.Association) duerror.DUError {
+	if a == nil {
+		return duerror.NewInvalidArgumentError("association is nil")
 	}
 	start := a.GetParentStart()
 	end := a.GetParentEnd()
@@ -129,9 +122,9 @@ func (am *associationMap) Insert(a *component.Association) duerror.DUError {
 	return nil
 }
 
-func (am *associationMap) Remove(a *component.Association) duerror.DUError {
-	if err := validateAssociation(a); err != nil {
-		return err
+func (am *graphMap) Remove(a *component.Association) duerror.DUError {
+	if a == nil {
+		return duerror.NewInvalidArgumentError("association is nil")
 	}
 	start := a.GetParentStart()
 	end := a.GetParentEnd()
@@ -156,7 +149,7 @@ func (am *associationMap) Remove(a *component.Association) duerror.DUError {
 }
 
 // return a list of associations that are connected to gadget
-func (am *associationMap) RemoveGadget(g *component.Gadget) ([]*component.Association, duerror.DUError) {
+func (am *graphMap) RemoveGadget(g *component.Gadget) ([]*component.Association, duerror.DUError) {
 	if g == nil {
 		return nil, duerror.NewInvalidArgumentError("gadget is nil")
 	}
