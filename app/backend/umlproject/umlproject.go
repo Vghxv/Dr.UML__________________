@@ -25,7 +25,7 @@ type UMLProject struct {
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx
 	// should not AddNewDiagram and SelectDiagram here
-	// will be removed in the future
+    // TODO: Remove this 
 	p.AddNewDiagram(umldiagram.ClassDiagram, "new class diagram")
 	p.SelectDiagram("new class diagram")
 }
