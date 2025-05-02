@@ -39,7 +39,7 @@ constructor(options: GadgetOptions) {
                 fill: "#FFFFFF",
                 fontWeight: "bold",
                 fontFamily: options.fontFile?.[0] || "normal",
-                fontSize: options.fontSize || 69,
+                fontSize: options.fontSize?.[0] || 69,
             },
             attributes: {
                 x: 0,
