@@ -64,8 +64,7 @@ func NewUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DUError) {
 		components:      components.NewComponents(),
 		drawData:        drawdata.Diagram{Color: drawdata.DefaultDiagramColor},
 	}
-	dg.components.RegisterUpdateParentDraw(dg.updateDrawData)
-	return &dg, nil
+	return &dg, dg.components.RegisterUpdateParentDraw(dg.updateDrawData)
 }
 
 func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {
@@ -98,7 +97,6 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err != nil {
 		return err
 	}
-	ud.updateDrawData()
 	return nil
 
 }
