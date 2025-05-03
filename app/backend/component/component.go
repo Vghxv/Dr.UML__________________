@@ -10,8 +10,8 @@ type Component interface {
 	// CreatePropertyTree() (PropertyTree, duerror.DUError)
 	// Copy() (Component, duerror.DUError)
 	Cover(p utils.Point) (bool, duerror.DUError)
-	GetLayer() (int, duerror.DUError)
+	GetLayer() int
 	SetLayer(layer int) duerror.DUError
-	GetDrawData() (any, duerror.DUError)
+	GetDrawData() any
 	RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError
 }

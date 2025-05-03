@@ -212,10 +212,7 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	// TODO
 	// as := make([]drawdata.Association, 0, len(ud.componentsSelected))
 	for _, c := range ud.componentsContainer.GetAll() {
-		cDrawData, err := c.GetDrawData()
-		if err != nil {
-			return err
-		}
+		cDrawData := c.GetDrawData()
 		if cDrawData == nil {
 			continue
 		}
