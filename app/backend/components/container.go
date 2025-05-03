@@ -6,7 +6,7 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
-type componentsContainer interface {
+type Container interface {
 	Insert(c component.Component) duerror.DUError
 	Remove(c component.Component) duerror.DUError
 	Search(p utils.Point) (component.Component, duerror.DUError)

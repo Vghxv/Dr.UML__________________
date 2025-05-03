@@ -5,7 +5,7 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
-type AssociationGraph interface {
+type Graph interface {
 	FindStartEnd(st *component.Gadget, en *component.Gadget) ([]*component.Association, duerror.DUError)
 	FindStart(st *component.Gadget) ([]*component.Association, duerror.DUError)
 	FindEnd(en *component.Gadget) ([]*component.Association, duerror.DUError)

@@ -27,8 +27,8 @@ func NewAssAttribute(ratio float64) (*AssAttribute, duerror.DUError) {
 }
 
 // GetRatio retrieves the ratio value of the AssAttribute
-func (att *AssAttribute) GetRatio() (float64, duerror.DUError) {
-	return att.ratio, nil
+func (att *AssAttribute) GetRatio() float64 {
+	return att.ratio
 }
 
 func (att *AssAttribute) GetAssDD() drawdata.AssAttribute {

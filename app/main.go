@@ -14,7 +14,9 @@ import (
 var assets embed.FS
 
 func main() {
-	project := umlproject.NewUMLProject("NewProject")
+	// TODO: handle error
+	project, _ := umlproject.CreateEmptyUMLProject("NewProject")
+
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "Dr.uml",

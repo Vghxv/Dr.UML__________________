@@ -33,8 +33,8 @@ func NewAttribute(content string) (*Attribute, duerror.DUError) {
 }
 
 // GetContent retrieves the content of the Attribute as a string along with an error if applicable.
-func (att *Attribute) GetContent() (string, duerror.DUError) {
-	return att.content, nil
+func (att *Attribute) GetContent() string {
+	return att.content
 }
 
 // SetContent updates the content field of the Attribute instance if the provided content is not empty.
@@ -44,11 +44,11 @@ func (att *Attribute) SetContent(content string) duerror.DUError {
 }
 
 // GetSize returns the size of the attribute and an error if the size is negative.
-func (att *Attribute) GetSize() (int, duerror.DUError) {
+func (att *Attribute) GetSize() int {
 	if att.size < 0 {
-		return 0, duerror.NewInvalidArgumentError("size was somehow set to negative. Is there a memory editor running?")
+		return 0
 	}
-	return att.size, nil
+	return att.size
 }
 
 // SetSize sets the size of the attribute. Returns an error if the size is negative.
@@ -61,8 +61,8 @@ func (att *Attribute) SetSize(size int) duerror.DUError {
 }
 
 // GetStyle returns the Textstyle of the Attribute and a possible DUError. It retrieves the current style applied.
-func (att *Attribute) GetStyle() (Textstyle, duerror.DUError) {
-	return att.style, nil
+func (att *Attribute) GetStyle() Textstyle {
+	return att.style
 }
 
 // SetStyle sets the style attribute for the text. Returns an error if the style contains unsupported flags.
@@ -107,7 +107,7 @@ func (att *Attribute) SetUnderline(value bool) duerror.DUError {
 // SetFontFile sets the font file path for the Attribute and updates the drawData accordingly.
 // Returns an error if the file path is invalid.
 func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
-	if !utils.IsValidFilePath(fontFile) {
+	if err := utils.ValidateFilePath(fontFile); err != nil {
 		return duerror.NewInvalidArgumentError("invalid font file path")
 	}
 	att.fontFile = fontFile
@@ -138,8 +138,8 @@ func (att *Attribute) Copy() (*Attribute, duerror.DUError) {
 	}, nil
 }
 
-func (att *Attribute) GetDrawData() (drawdata.Attribute, duerror.DUError) {
-	return att.drawData, nil
+func (att *Attribute) GetDrawData() drawdata.Attribute {
+	return att.drawData
 }
 
 func (att *Attribute) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
