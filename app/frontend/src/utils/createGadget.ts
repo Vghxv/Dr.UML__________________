@@ -1,7 +1,7 @@
 import { shapes, dia } from "@joint/core";
 import { GadgetProps } from "../components/Gadget";
 
-export interface ComponentProps {
+export interface BackendGadgetProps {
     gadgetType: string;
     x: number;
     y: number;
@@ -112,7 +112,7 @@ export function createGadget(type: string, config: GadgetProps): dia.Element {
 }
 
 // Parse backend gadget JSON and convert it to a dia.Element
-export function parseBackendGadget(gadgetData: ComponentProps): dia.Element {
+export function parseBackendGadget(gadgetData: BackendGadgetProps): dia.Element {
     console.log("Before Parse gadget:", gadgetData);
     const gadget = createGadget("Class", {
         gadgetType: gadgetData.gadgetType,

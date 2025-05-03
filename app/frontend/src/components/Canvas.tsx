@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { dia, shapes } from '@joint/core';
-import { parseBackendGadget, ComponentProps} from '../utils/createComponent';
+import { parseBackendGadget, BackendGadgetProps} from '../utils/createGadget';
 
 interface CanvasProps {
     graph: dia.Graph;
@@ -41,9 +41,9 @@ const Canvas: React.FC<CanvasProps> = ({ graph, backendData }) => {
     }, [graph, selectedElements]);
 
     useEffect(() => {
-        // Parse backend data and add gadgets and associations to the graph
+        console.log("Backend data:", backendData);
         if (backendData) {
-            backendData.gadgets.forEach((gadgetData: any) => {
+            backendData.gadgets.forEach((gadgetData: BackendGadgetProps) => {
                 const gadget = parseBackendGadget(gadgetData);
                 graph.addCell(gadget);
             });

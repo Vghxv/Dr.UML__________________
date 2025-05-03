@@ -3,11 +3,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "./App.css";
 import { dia } from "@joint/core";
-import Gadget from "./components/Gadget";
-import Association from "./components/Association";
 import Canvas from "./components/Canvas";
-import ChatRoom from "./components/ChatRoom";
-import { parseBackendGadget } from "./utils/createComponent";
 import { getCurrentDiagramName, addGadget, onBackendEvent, offBackendEvent } from "./utils/wailsBridge";
 
 const App: React.FC = () => {
@@ -28,7 +24,6 @@ const App: React.FC = () => {
     const handleAddGadget = async () => {
         try {
             await addGadget(1, { x: 100, y: 100 });
-            console.log("Gadget added");
         } catch (error) {
             console.error("Error adding gadget:", error);
         }
@@ -37,9 +32,10 @@ const App: React.FC = () => {
     useEffect(() => {
         // Register the event listener
         onBackendEvent("backend-event", (result) => {
-            const components = result["components"]["gadgets"];
+            console.log("Received data from backend:", result);
+            const components = result["gadgets"];
             console.log("Components:", components);
-            setBackendData(components); // <-- 儲存資料供 Canvas 使用
+            setBackendData(components);
         });
 
         // Clean up the event listener when the component unmounts

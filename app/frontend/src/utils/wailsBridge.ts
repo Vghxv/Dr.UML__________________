@@ -32,7 +32,7 @@ export async function getCurrentDiagramName(): Promise<string> {
 export async function addGadget(gadgetType: number, point: { x: number; y: number }): Promise<void> {
     try {
         await window.go.umlproject.UMLProject.AddGadget(gadgetType, point);
-        console.log("Gadget added successfully");
+        console.log("Gadget add to backend:", gadgetType, point);
     } catch (error) {
         console.error("Error adding gadget:", error);
         throw error;
@@ -41,6 +41,7 @@ export async function addGadget(gadgetType: number, point: { x: number; y: numbe
 
 // Register a backend event listener
 export function onBackendEvent(eventName: string, callback: (result: any) => void): void {
+    console.log("Registering event listener for:", eventName);
     EventsOn(eventName, callback);
 }
 

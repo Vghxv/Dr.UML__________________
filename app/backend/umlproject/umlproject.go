@@ -2,6 +2,7 @@ package umlproject
 
 import (
 	"context"
+	"log"
 	"maps"
 	"slices"
 	"time"
@@ -119,7 +120,7 @@ func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Poin
 		return err
 	}
 	p.lastModified = time.Now()
-	return nil
+	return p.InvalidateCanvas()
 }
 
 func (p *UMLProject) StartAddAssociation(point utils.Point) duerror.DUError {
@@ -150,6 +151,7 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	// p.notifyDrawUpdate(p.currentDiagram.GetName())
+	log.Println("InvalidateCanvas")
 	runtime.EventsEmit(p.ctx, "backend-event", p.GetDrawData())
 	return nil
 }

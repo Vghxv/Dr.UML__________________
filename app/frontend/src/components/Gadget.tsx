@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { dia } from '@joint/core';
-import { createGadget } from '../utils/createComponent';
+import { createGadget } from '../utils/createGadget';
 
 export interface GadgetProps {
     gadgetType: string;
