@@ -13,8 +13,7 @@ func TestGadget_GetDrawData(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, gadget)
 
-	data, err := gadget.GetDrawData()
-	assert.NoError(t, err)
+	data := gadget.GetDrawData()
 	assert.NotNil(t, data)
 	gdd := data.(drawdata.Gadget)
 	assert.NotNil(t, gdd)

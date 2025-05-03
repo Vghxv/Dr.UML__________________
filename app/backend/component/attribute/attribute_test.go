@@ -1,9 +1,10 @@
 package attribute
 
 import (
+	"testing"
+
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils/duerror"
-	"testing"
 )
 
 func TestAttribute_GetContent(t *testing.T) {
@@ -29,10 +30,7 @@ func TestAttribute_GetContent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.attribute.GetContent()
-			if (err != nil) != tt.hasError {
-				t.Errorf("unexpected error: %v", err)
-			}
+			result := tt.attribute.GetContent()
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
@@ -93,10 +91,7 @@ func TestAttribute_GetSize(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.attribute.GetSize()
-			if (err != nil) != tt.hasError {
-				t.Errorf("unexpected error: %v", err)
-			}
+			result := tt.attribute.GetSize()
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
@@ -156,10 +151,7 @@ func TestAttribute_GetStyle(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.attribute.GetStyle()
-			if (err != nil) != tt.hasError {
-				t.Errorf("unexpected error: %v", err)
-			}
+			result := tt.attribute.GetStyle()
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
@@ -509,10 +501,7 @@ func TestAttribute_GetDrawData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.attribute.GetDrawData()
-			if (err != nil) != tt.hasError {
-				t.Errorf("unexpected error: %v", err)
-			}
+			result := tt.attribute.GetDrawData()
 			if result.Content != tt.expected.Content {
 				t.Errorf("Content: expected %v, got %v", tt.expected.Content, result.Content)
 			}

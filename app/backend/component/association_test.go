@@ -1,8 +1,10 @@
 package component
 
 import (
-	"Dr.uml/backend/utils"
 	"testing"
+
+	"Dr.uml/backend/drawdata"
+	"Dr.uml/backend/utils"
 
 	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/utils/duerror"
@@ -52,32 +54,25 @@ func Test_Association_GetAttributes(t *testing.T) {
 
 func Test_Association_GetLayer(t *testing.T) {
 	tests := []struct {
-		name    string
-		ass     *Association
-		want    int
-		wantErr bool
+		name string
+		ass  *Association
+		want int
 	}{
 		{
-			name:    "valid layer 5",
-			ass:     &Association{layer: 5},
-			want:    5,
-			wantErr: false,
+			name: "valid layer 5",
+			ass:  &Association{layer: 5},
+			want: 5,
 		},
 		{
-			name:    "default layer 0",
-			ass:     &Association{},
-			want:    0,
-			wantErr: false,
+			name: "default layer 0",
+			ass:  &Association{},
+			want: 0,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.ass.GetLayer()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetLayer() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := tt.ass.GetLayer()
 			if got != tt.want {
 				t.Errorf("GetLayer() = %v, want %v", got, tt.want)
 			}
@@ -219,7 +214,7 @@ func Test_Association_SetLayer(t *testing.T) {
 				t.Errorf("SetLayer() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if !tt.wantErr {
-				got, _ := tt.ass.GetLayer()
+				got := tt.ass.GetLayer()
 				if got != tt.layer {
 					t.Errorf("Layer not set correctly, got = %v, want %v", got, tt.layer)
 				}
@@ -294,29 +289,26 @@ func Test_Association_UpdateDrawData(t *testing.T) {
 
 func Test_Association_GetDrawData(t *testing.T) {
 	tests := []struct {
-		name    string
-		ass     *Association
-		wantErr bool
+		name string
+		ass  *Association
+		want drawdata.Association
 	}{
 		{
-			name:    "get from valid association",
-			ass:     &Association{},
-			wantErr: false,
-		},
-		{
-			name:    "get from nil association",
-			ass:     nil,
-			wantErr: true,
+			name: "get from valid association",
+			ass:  &Association{},
+			want: drawdata.Association{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.ass != nil {
-				_, err := tt.ass.GetDrawData()
-				if (err != nil) != tt.wantErr {
-					t.Errorf("GetDrawData() error = %v, wantErr %v", err, tt.wantErr)
-				}
+			dd := tt.ass.GetDrawData()
+			add, ok := dd.(drawdata.Association)
+			if !ok {
+				t.Errorf("expected type drawdata.Association, but got a different type")
+			}
+			if add.AssType != tt.want.AssType {
+				t.Errorf("error mismatch: got %v, want error %v", add.AssType, tt.want.AssType)
 			}
 		})
 	}
