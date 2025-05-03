@@ -1,9 +1,9 @@
 package attribute
 
 import (
-	"Dr.uml/backend/utils/duerror"
-	"errors"
 	"testing"
+
+	"Dr.uml/backend/utils/duerror"
 )
 
 func TestAssAttribute_GetRatio(t *testing.T) {
@@ -25,13 +25,9 @@ func TestAssAttribute_GetRatio(t *testing.T) {
 				t.Errorf("NewAssAttribute() error = %v", err)
 				return
 			}
-			gotRatio, gotErr := attr.GetRatio()
-
+			gotRatio := attr.GetRatio()
 			if gotRatio != tt.wantRatio {
 				t.Errorf("GetRatio() = %v, want %v", gotRatio, tt.wantRatio)
-			}
-			if !errors.Is(gotErr, tt.wantErr) {
-				t.Errorf("GetRatio() error = %v, want %v", gotErr, tt.wantErr)
 			}
 		})
 	}

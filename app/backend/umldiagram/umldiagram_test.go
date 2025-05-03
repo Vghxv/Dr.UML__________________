@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewUMLDiagram(t *testing.T) {
+func TestCreateEmptyDiagram(t *testing.T) {
 	tests := []struct {
 		name        string
 		inputName   string
@@ -54,13 +54,13 @@ func TestNewUMLDiagram(t *testing.T) {
 			inputName:   "",
 			diagramType: ClassDiagram,
 			expectError: true,
-			errorMsg:    "Invalid diagram name",
+			errorMsg:    "file path is empty",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diagram, err := NewUMLDiagram(tt.inputName, tt.diagramType)
+			diagram, err := CreateEmptyUMLDiagram(tt.inputName, tt.diagramType)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -75,7 +75,8 @@ func TestNewUMLDiagram(t *testing.T) {
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
 				// New assertions
 				assert.Equal(t, utils.Color{R: 255, G: 255, B: 255}, diagram.backgroundColor)
-				assert.NotNil(t, diagram.components)
+				assert.NotNil(t, diagram.componentsContainer)
+				assert.NotNil(t, diagram.componentsGraph)
 			}
 		})
 	}
@@ -116,14 +117,14 @@ func TestCheckDiagramType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := isValidDiagramType(tt.diagramType)
-			assert.Equal(t, tt.expected, result)
+			noError := validateDiagramType(tt.diagramType) == nil
+			assert.Equal(t, tt.expected, noError)
 		})
 	}
 }
 
 func TestUMLDiagramGetters(t *testing.T) {
-	diagram, err := NewUMLDiagram("TestDiagram", ClassDiagram)
+	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
 	assert.NoError(t, err)
 	assert.NotNil(t, diagram)
 
@@ -131,43 +132,4 @@ func TestUMLDiagramGetters(t *testing.T) {
 
 	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20})
 	assert.NoError(t, err)
-}
-
-func TestNewUMLDiagramWithPath(t *testing.T) {
-	tests := []struct {
-		name        string
-		path        string
-		expectError bool
-		errorMsg    string
-	}{
-		{
-			name:        "ValidPath",
-			path:        "test.uml",
-			expectError: false,
-		},
-		{
-			name:        "InvalidPath",
-			path:        "",
-			expectError: true,
-			errorMsg:    "Invalid diagram name",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			diagram, err := NewUMLDiagramWithPath(tt.path)
-
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Nil(t, diagram)
-				assert.Equal(t, tt.errorMsg, err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, diagram)
-				assert.Equal(t, tt.path, diagram.GetName())
-				assert.Equal(t, DiagramType(ClassDiagram), diagram.diagramType)
-				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
-			}
-		})
-	}
 }

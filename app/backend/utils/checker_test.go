@@ -9,7 +9,7 @@ func TestIsValidFilePath(t *testing.T) {
 	tests := []struct {
 		name     string
 		path     string
-		expected bool
+		hasError bool
 	}{
 		// Common cases
 		{"EmptyPath", "", false},
@@ -34,9 +34,9 @@ func TestIsValidFilePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := IsValidFilePath(tt.path)
-			if result != tt.expected {
-				t.Errorf("IsValidFilePath(%q) = %v, expected %v", tt.path, result, tt.expected)
+			err := ValidateFilePath(tt.path)
+			if (err != nil) == tt.hasError {
+				t.Errorf("ValidateFilePath() error = %v, wantErr %v", err, tt.hasError)
 			}
 		})
 	}

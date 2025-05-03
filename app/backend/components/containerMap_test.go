@@ -132,14 +132,14 @@ func TestContainerMap_Search(t *testing.T) {
 	// search with layer check
 	c1.EXPECT().Cover(p).Return(true, nil).Times(2)
 	c2.EXPECT().Cover(p).Return(true, nil).Times(2)
-	c1.EXPECT().GetLayer().Return(2, nil).Times(1)
-	c2.EXPECT().GetLayer().Return(1, nil).Times(1)
+	c1.EXPECT().GetLayer().Return(2).Times(1)
+	c2.EXPECT().GetLayer().Return(1).Times(1)
 	c, err = cm.Search(p)
 	assert.NoError(t, err)
 	assert.Equal(t, c, c1)
 
-	c1.EXPECT().GetLayer().Return(1, nil).Times(1)
-	c2.EXPECT().GetLayer().Return(2, nil).Times(1)
+	c1.EXPECT().GetLayer().Return(1).Times(1)
+	c2.EXPECT().GetLayer().Return(2).Times(1)
 	c, err = cm.Search(p)
 	assert.NoError(t, err)
 	assert.Equal(t, c, c2)
@@ -147,16 +147,6 @@ func TestContainerMap_Search(t *testing.T) {
 	// error in cover
 	cm.Remove(c2)
 	c1.EXPECT().Cover(p).Return(false, duerror.NewInvalidArgumentError("")).Times(1)
-	c, err = cm.Search(p)
-	assert.Error(t, err)
-	assert.Nil(t, c)
-
-	// error in layer
-	cm.Insert(c2)
-	c1.EXPECT().Cover(p).Return(true, nil).MaxTimes(1)
-	c2.EXPECT().Cover(p).Return(true, nil).MaxTimes(1)
-	c1.EXPECT().GetLayer().Return(0, nil).MaxTimes(1)
-	c2.EXPECT().GetLayer().Return(0, duerror.NewInvalidArgumentError("")).MaxTimes(1)
 	c, err = cm.Search(p)
 	assert.Error(t, err)
 	assert.Nil(t, c)
