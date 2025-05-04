@@ -9,14 +9,14 @@ export interface BackendGadgetProps {
     height: number;
     width: number;
     color: string;
-      attributes: {
-          content: string;
-          height: number;
-          width: number;
-          fontSize: number;
-          fontStyle: number;
-          fontFile: string;
-      }[][];
+    attributes: {
+        content: string;
+        height: number;
+        width: number;
+        fontSize: number;
+        fontStyle: number;
+        fontFile: string;
+    }[][];
 }
 
 class UMLClass extends shapes.standard.Rectangle {
@@ -131,21 +131,21 @@ export function parseBackendGadget(gadgetData: BackendGadgetProps): dia.Element 
             fontStyle: gadgetData.attributes[0][0].fontStyle,
             fontFile: gadgetData.attributes[0][0].fontFile,
         },
-        attributes: gadgetData.attributes.map(attr => ({
-            content: attr[1].content,
-            height: attr[1].height,
-            width: attr[1].width,
-            fontSize: attr[1].fontSize,
-            fontStyle: attr[1].fontStyle,
-            fontFile: attr[1].fontFile,
+        attributes: gadgetData.attributes[1].map(attr => ({
+            content: attr.content,
+            height: attr.height,
+            width: attr.width,
+            fontSize: attr.fontSize,
+            fontStyle: attr.fontStyle,
+            fontFile: attr.fontFile,
         })),
-        methods: gadgetData.attributes.map(method => ({
-            content: method[2].content,
-            height: method[2].height,
-            width: method[2].width,
-            fontSize: method[2].fontSize,
-            fontStyle: method[2].fontStyle,
-            fontFile: method[2].fontFile,
+        methods: gadgetData.attributes[2].map(method => ({
+            content: method.content,
+            height: method.height,
+            width: method.width,
+            fontSize: method.fontSize,
+            fontStyle: method.fontStyle,
+            fontFile: method.fontFile,
         })),
     });
     console.log("Parsed gadget:", gadget);

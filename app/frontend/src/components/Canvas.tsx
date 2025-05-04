@@ -1,29 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { dia, shapes } from '@joint/core';
 import { parseBackendGadget, BackendGadgetProps} from '../utils/createGadget';
+import { BackendCanvasProps, createCanvas } from '../utils/createCanvas';
 
-interface CanvasProps {
+export interface CanvasProps {
     graph: dia.Graph;
-    backendData: any; // JSON data for gadgets and associations
+    paper: dia.Paper;
+    backendData?: BackendCanvasProps; // JSON data for gadgets and associations
 }
 
-const Canvas: React.FC<CanvasProps> = ({ graph, backendData }) => {
+const Canvas: React.FC<{ backendData : BackendCanvasProps}> = ({ backendData }) => {
     const paperRef = useRef<HTMLDivElement>(null);
+    const [graph, setGraph] = useState<dia.Graph | null>(null);
+    const [paper, setPaper] = useState<dia.Paper | null>(null);
     const [selectedElements, setSelectedElements] = useState<dia.Element[]>([]);
 
     useEffect(() => {
-        if (paperRef.current) {
-            // Initialize the Paper
-            const paper = new dia.Paper({
-                el: paperRef.current,
-                model: graph,
-                width: 800,
-                height: 600,
-                gridSize: 10,
-                drawGrid: true,
-                interactive: true, // Enable interactivity
-            });
-
+        if (graph && paper) {
             // Handle mouse interactions
             paper.on('element:pointerclick', (elementView) => {
                 const element = elementView.model;
@@ -38,17 +31,15 @@ const Canvas: React.FC<CanvasProps> = ({ graph, backendData }) => {
                 setSelectedElements([]); // Deselect all elements when clicking on blank space
             });
         }
-    }, [graph, selectedElements]);
+    }, [graph, paper, selectedElements]);
 
     useEffect(() => {
-        console.log("Backend data:", backendData);
-        if (backendData) {
-            backendData.gadgets.forEach((gadgetData: BackendGadgetProps) => {
-                const gadget = parseBackendGadget(gadgetData);
-                graph.addCell(gadget);
-            });
+        if (paperRef.current && !paper) {
+            const { graph, paper } = createCanvas(paperRef.current, backendData);
+            setGraph(graph);
+            setPaper(paper);
         }
-    }, [backendData, graph]);
+    }, [paperRef, backendData, paper]);
 
     return (
         <div
