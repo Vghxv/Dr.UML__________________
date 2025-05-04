@@ -2,7 +2,6 @@ package umlproject
 
 import (
 	"context"
-	"log"
 	"maps"
 	"slices"
 	"time"
@@ -22,6 +21,7 @@ type UMLProject struct {
 	currentDiagram    *umldiagram.UMLDiagram            // The currently selected diagram
 	availableDiagrams map[string]bool                   // Use a map to store diagrams, keyed by their ID
 	activeDiagrams    map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
+	runFrontend       bool
 }
 
 // Constructor
@@ -48,6 +48,7 @@ func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx
 	// should not AddNewDiagram and SelectDiagram here
 	// TODO: Remove this
+	p.runFrontend = true
 	p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "new class diagram")
 	p.SelectDiagram("new class diagram")
 }
@@ -111,7 +112,23 @@ func (p *UMLProject) CreateEmptyUMLDiagram(diagramType umldiagram.DiagramType, d
 	return nil
 }
 
-// AddGadget
+func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
+	// TODO: save file?
+	if _, ok := p.activeDiagrams[diagramName]; !ok {
+		return duerror.NewInvalidArgumentError("Diagram not loaded")
+	}
+	if p.currentDiagram != nil && p.currentDiagram.GetName() == diagramName {
+		p.currentDiagram = nil
+	}
+	delete(p.activeDiagrams, diagramName)
+	return nil
+}
+
+func (p *UMLProject) DeleteDiagram(diagramName string) duerror.DUError {
+	// TODO: remove the file
+	return nil
+}
+
 func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
@@ -124,6 +141,9 @@ func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Poin
 }
 
 func (p *UMLProject) StartAddAssociation(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
 	return p.currentDiagram.StartAddAssociation(point)
 }
 
@@ -132,6 +152,17 @@ func (p *UMLProject) EndAddAssociation(associationType component.AssociationType
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	if err := p.currentDiagram.EndAddAssociation(associationType, point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return p.InvalidateCanvas()
+}
+
+func (p *UMLProject) RemoveSelectedComponents() duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.RemoveSelectedComponents(); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -147,11 +178,15 @@ func (p *UMLProject) GetDrawData() drawdata.Diagram {
 }
 
 func (p *UMLProject) InvalidateCanvas() duerror.DUError {
+	if !p.runFrontend {
+		return nil
+	}
+
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	// p.notifyDrawUpdate(p.currentDiagram.GetName())
-	log.Println("InvalidateCanvas")
+	// log.Println("InvalidateCanvas")
 	runtime.EventsEmit(p.ctx, "backend-event", p.GetDrawData())
 	return nil
 }

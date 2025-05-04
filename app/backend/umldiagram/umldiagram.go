@@ -79,7 +79,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 
 func LoadExistUMLDiagram(name string) (*UMLDiagram, duerror.DUError) {
 	// TODO
-	return nil, nil
+	return CreateEmptyUMLDiagram(name, ClassDiagram)
 }
 
 // Getters
