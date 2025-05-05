@@ -46,7 +46,7 @@ const App: React.FC = () => {
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="section">
-                <h1>Dr.UML</h1>
+                <h1 style={{fontFamily: "Inkfree"}}>Dr.UML</h1>
 
                 <div style={{ marginBottom: "10px" }}>
                     <button className="btn" onClick={handleGetDiagramName}>
