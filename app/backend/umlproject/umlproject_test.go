@@ -4,293 +4,256 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
-	"Dr.uml/backend/utils/duerror"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewUMLProject(t *testing.T) {
-	// Given
-	name := "TestProject"
+	// valid name
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	assert.Equal(t, "TestProject", p.GetName())
 
-	// When
-	project := NewUMLProject(name)
-
-	// Then
-	assert.Equal(t, name, project.GetName(), "Project name should match the provided name")
-	assert.False(t, project.lastModified.IsZero(), "LastModified time should not be zero")
-	assert.NotNil(t, project.diagrams, "Diagrams map should be initialized")
-	assert.NotNil(t, project.openedDiagrams, "OpenedDiagrams map should be initialized")
+	// invalid name
+	_, err = CreateEmptyUMLProject("")
+	assert.Error(t, err)
 }
 
-func TestOpenProject(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+func TestGetName(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
 
-	// Create diagrams with valid DiagramType
-	diagram1, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
-	require.NoError(t, err, "Failed to create diagram1")
-
-	diagram2, err := umldiagram.NewUMLDiagram("Diagram2", umldiagram.SequenceDiagram)
-	require.NoError(t, err, "Failed to create diagram2")
-
-	project.diagrams[diagram1.GetName()] = diagram1
-	project.diagrams[diagram2.GetName()] = diagram2
-	project.openedDiagrams[diagram1.GetName()] = diagram1
-
-	// When
-	activeDiagrams, availableDiagrams, duErr := project.OpenProject()
-
-	// Then
-	assert.NoError(t, duErr, "OpenProject should not return an error")
-	assert.NotNil(t, activeDiagrams, "ActiveDiagrams should not be nil")
-	assert.Len(t, activeDiagrams, 1, "There should be 1 active diagram")
-	assert.Len(t, availableDiagrams, 2, "There should be 2 available diagrams")
-
-	// Check diagram names in availableDiagrams
-	expectedNames := []string{"Diagram1", "Diagram2"}
-	for _, name := range expectedNames {
-		assert.Contains(t, availableDiagrams, name, "AvailableDiagrams should contain %s", name)
-	}
-
-	// Verify activeDiagrams map was not populated
-	assert.Len(t, project.activeDiagrams, 0, "Project's activeDiagrams map should be empty")
+	name := p.GetName()
+	assert.Equal(t, "TestProject", name)
 }
 
-func TestGetAvailableDiagrams(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+func TestGetLastModified(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
 
-	diagram1, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
-	require.NoError(t, err, "Failed to create diagram1")
-
-	diagram2, err := umldiagram.NewUMLDiagram("Diagram2", umldiagram.SequenceDiagram)
-	require.NoError(t, err, "Failed to create diagram2")
-
-	project.diagrams[diagram1.GetName()] = diagram1
-	project.diagrams[diagram2.GetName()] = diagram2
-
-	// When
-	diagrams := project.GetAvailableDiagrams()
-
-	// Then
-	assert.Len(t, diagrams, 2, "Should return 2 available diagrams")
-
-	expected := []string{"Diagram1", "Diagram2"}
-	for _, name := range expected {
-		assert.Contains(t, diagrams, name, "Available diagrams should contain %s", name)
-	}
+	lastModified := p.GetLastModified()
+	assert.WithinDuration(t, time.Now(), lastModified, time.Second)
 }
 
-func TestGetLastOpenedDiagrams(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+func TestGetCurrentDiagramName(t *testing.T) {
+	// no selected diagram
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	name := p.GetCurrentDiagramName()
+	assert.Equal(t, "", name)
 
-	diagram1, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
-	require.NoError(t, err, "Failed to create diagram1")
+	// selected diagram
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+	name = p.GetCurrentDiagramName()
+	assert.Equal(t, "TestDiagram", name)
+}
 
-	diagram2, err := umldiagram.NewUMLDiagram("Diagram2", umldiagram.SequenceDiagram)
-	require.NoError(t, err, "Failed to create diagram2")
+func TestGetAvailableDiagramsNames(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
 
-	project.openedDiagrams[diagram1.GetName()] = diagram1
-	project.openedDiagrams[diagram2.GetName()] = diagram2
+	// no diagrams
+	names := p.GetAvailableDiagramsNames()
+	assert.Empty(t, names)
 
-	// When
-	opened := project.GetLastOpenedDiagrams()
+	// one diagram
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram1")
+	assert.NoError(t, err)
+	names = p.GetAvailableDiagramsNames()
+	assert.Equal(t, []string{"TestDiagram1"}, names)
 
-	// Then
-	assert.Len(t, opened, 2, "Should return 2 last opened diagrams")
+	// two diagrams
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram2")
+	assert.NoError(t, err)
+	names = p.GetAvailableDiagramsNames()
+	assert.ElementsMatch(t, []string{"TestDiagram1", "TestDiagram2"}, names)
+}
 
-	expected := []string{"Diagram1", "Diagram2"}
-	for _, name := range expected {
-		assert.Contains(t, opened, name, "Last opened diagrams should contain %s", name)
-	}
+func TestGetActiveDiagramsNames(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// no active diagrams
+	names := p.GetActiveDiagramsNames()
+	assert.Empty(t, names)
+
+	// one active diagram
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram1")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram1")
+	assert.NoError(t, err)
+	names = p.GetActiveDiagramsNames()
+	assert.Equal(t, []string{"TestDiagram1"}, names)
+
+	// two active diagrams
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram2")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram2")
+	assert.NoError(t, err)
+	names = p.GetActiveDiagramsNames()
+	assert.ElementsMatch(t, []string{"TestDiagram1", "TestDiagram2"}, names)
 }
 
 func TestSelectDiagram(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
 
-	diagram, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
-	require.NoError(t, err, "Failed to create diagram")
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
 
-	project.diagrams[diagram.GetName()] = diagram
+	// success, select a active diagram
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+	name := p.GetCurrentDiagramName()
+	assert.Equal(t, "TestDiagram", name)
 
-	// When
-	err = project.SelectDiagram(diagram.GetName())
+	// success, select a non-active diagram
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+	name = p.GetCurrentDiagramName()
+	assert.Equal(t, "TestDiagram", name)
 
-	// Then
-	assert.NoError(t, err, "SelectDiagram should not return an error")
-	assert.Equal(t, diagram, project.currentDiagram, "CurrentDiagram should be set to the selected diagram")
+	// diagram not exist
+	err = p.SelectDiagram("NonExistentDiagram")
+	assert.Error(t, err)
+
+	// TODO: error when LoadExistUMLDiagram
 }
 
-func TestAddGadget(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+func TestCreateEmptyUMLDiagram(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
 
-	diagram, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
-	require.NoError(t, err, "Failed to create diagram")
+	// create success
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	names := p.GetAvailableDiagramsNames()
+	assert.Equal(t, []string{"TestDiagram"}, names)
 
-	project.diagrams[diagram.GetName()] = diagram
-	project.currentDiagram = diagram
+	// duplicate name
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.Error(t, err)
 
-	gadgetType := component.Class
-	previousModified := project.lastModified
-	time.Sleep(time.Millisecond) // Ensure time difference
-	err = project.SelectDiagram(diagram.GetName())
-	assert.NoError(t, err, "SelectDiagram should not return an error")
-	// When
-	err = project.AddGadget(gadgetType, utils.Point{X: 10, Y: 20})
+	// invalid diagram type
+	err = p.CreateEmptyUMLDiagram(umldiagram.DiagramType(100), "TestDiagram2")
+	assert.Error(t, err)
 
-	assert.NoError(t, err, "AddGadget should not return an error")
-	assert.True(t, project.lastModified.After(previousModified), "LastModified should be updated")
+	// invalid name
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "")
+	assert.Error(t, err)
 }
 
-func TestAddNewDiagram(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+func TestCloseDiagram(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
 
-	diagramType := umldiagram.ClassDiagram
-	name := "NewDiagram"
-	previousModified := project.lastModified
-	time.Sleep(time.Millisecond) // Ensure time difference
+	// success, close a non-selected diagram
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	names := p.GetAvailableDiagramsNames()
+	assert.Equal(t, []string{"TestDiagram"}, names)
+	names = p.GetActiveDiagramsNames()
+	assert.Empty(t, names)
 
-	// When
-	err := project.AddNewDiagram(umldiagram.DiagramType(diagramType), name)
+	// success, close a selected diagram
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	name := p.GetCurrentDiagramName()
+	assert.Equal(t, "", name)
+	names = p.GetActiveDiagramsNames()
+	assert.Empty(t, names)
 
-	// Then
-	assert.NoError(t, err, "AddNewDiagram should not return an error")
-	assert.Len(t, project.diagrams, 1, "Should have 1 diagram")
-	assert.Len(t, project.openedDiagrams, 1, "Should have 1 opened diagram")
-	assert.NotNil(t, project.currentDiagram, "CurrentDiagram should be set")
-
-	if project.currentDiagram != nil {
-		assert.Equal(t, name, project.currentDiagram.GetName(), "CurrentDiagram should have the provided name")
-	}
-
-	assert.True(t, project.lastModified.After(previousModified), "LastModified should be updated")
-
-	// Test invalid diagram type
-	err = project.AddNewDiagram(0, "InvalidDiagram")
-	assert.Error(t, err, "Should return error for invalid diagram type")
-	assert.Equal(t, duerror.NewInvalidArgumentError("Invalid diagram type").Error(), err.Error(),
-		"Should return 'Invalid diagram type' error")
+	// close a non-active diagram
+	err = p.CloseDiagram("TestDiagram")
+	assert.Error(t, err)
 }
 
-func TestCreateDiagram(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
-	path := "test/path/diagram"
-
-	// When
-	err := project.createDiagram(path)
-
-	// Then
-	assert.NoError(t, err, "createDiagram should not return an error from stub")
-	assert.Len(t, project.diagrams, 1, "Should have 1 diagram")
-	assert.Len(t, project.openedDiagrams, 1, "Should have 1 opened diagram")
-	assert.NotNil(t, project.currentDiagram, "CurrentDiagram should be set")
-	assert.False(t, project.lastModified.IsZero(), "LastModified should be updated")
+func TestDeleteDiagram(t *testing.T) {
+	// TODO
 }
 
-func TestInvalidPathDiagram(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
-	invalidPaths := []string{
-		"test/path/diagram<>",
-		"test/path/diagram*",
-		"test/path/diagram?",
-		"test/path/diagram|",
-		"test/path/diagram\"",
-	}
+func AddGadget(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
 
-	// Then
-	for _, path := range invalidPaths {
-		err := project.createDiagram(path)
-		assert.Error(t, err, "Should return error for invalid path: %s", path)
-		assert.Equal(t, duerror.NewInvalidArgumentError("Invalid diagram name").Error(), err.Error(),
-			"Should return 'Invalid diagram name' error for path: %s", path)
-	}
+	// success
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	assert.NoError(t, err)
+
+	// invalid gadget type
+	err = p.AddGadget(component.GadgetType(-1), utils.Point{X: 0, Y: 0})
+	assert.Error(t, err)
+
+	// no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	assert.Error(t, err)
 }
 
-func TestSelectDiagram_DiagramNotFound(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+func TestStartAddAssociation(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
 
-	// When
-	err := project.SelectDiagram("NonexistentDiagram")
+	// success
+	err = p.StartAddAssociation(utils.Point{X: 0, Y: 0})
+	assert.NoError(t, err)
 
-	// Then
-	assert.Error(t, err, "Should return error when selecting non-existent diagram")
-	assert.Equal(t, duerror.NewInvalidArgumentError("Diagram not found").Error(), err.Error(),
-		"Should return 'Diagram not found' error")
+	// invalid point
+	err = p.StartAddAssociation(utils.Point{X: -1, Y: 0})
+	assert.Error(t, err)
+
+	// no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.StartAddAssociation(utils.Point{X: 0, Y: 0})
+	assert.Error(t, err)
+
 }
 
-func TestAddNewDiagram_DuplicateName(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
-	name := "NewDiagram"
-
-	// Add first diagram
-	err := project.AddNewDiagram(umldiagram.ClassDiagram, name)
-	require.NoError(t, err, "Should not return error on first diagram")
-
-	// When - Try to add second diagram with same name
-	err = project.AddNewDiagram(umldiagram.ClassDiagram, name)
-
-	// Then
-	assert.Error(t, err, "Should return error when adding diagram with duplicate name")
-	assert.Equal(t, duerror.NewInvalidArgumentError("Diagram name already exists").Error(), err.Error(),
-		"Should return 'Diagram name already exists' error")
+func TestEndAddAssociation(t *testing.T) {
+	// TODO: diagram.EndAddAssociation WIP
 }
 
-func TestCreateDiagram_EmptyPath(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
-
-	// When
-	err := project.createDiagram("")
-
-	// Then
-	assert.Error(t, err, "Should return error when creating diagram with empty path")
-	assert.Equal(t, duerror.NewInvalidArgumentError("Invalid diagram name").Error(), err.Error(),
-		"Should return 'Invalid diagram name' error")
+func TestRemoveSelectedComponents(t *testing.T) {
+	// TODO: diagram.RemoveSelectedComponents WIP
 }
 
-func TestOpenProject_NoOpenedDiagrams(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
+func TestGetDrawData(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
 
-	diagram, err := umldiagram.NewUMLDiagram("Diagram1", umldiagram.ClassDiagram)
-	require.NoError(t, err, "Failed to create diagram")
+	// success
+	data := p.GetDrawData()
+	assert.Len(t, data.Gadgets, 1)
 
-	project.diagrams[diagram.GetName()] = diagram
-	// Don't add to openedDiagrams
-
-	// When
-	activeDiagrams, availableDiagrams, err := project.OpenProject()
-
-	// Then
-	assert.NoError(t, err, "OpenProject should not return an error")
-	assert.Len(t, activeDiagrams, 0, "Should have 0 active diagrams")
-	assert.Len(t, availableDiagrams, 1, "Should have 1 available diagram")
-	assert.Len(t, project.activeDiagrams, 0, "Project's activeDiagrams map should be empty")
-}
-
-func TestInvalidateCanvas_NoDiagram(t *testing.T) {
-	// Given
-	project := NewUMLProject("TestProject")
-	// Don't select a diagram, so currentDiagram will be nil
-
-	// When
-	err := project.InvalidateCanvas()
-
-	// Then
-	assert.Error(t, err, "Should return error when no diagram is selected")
-	assert.Equal(t, duerror.NewInvalidArgumentError("No current diagram selected").Error(), err.Error(),
-		"Should return 'No current diagram selected' error")
+	// no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	data = p.GetDrawData()
+	assert.Empty(t, data)
 }

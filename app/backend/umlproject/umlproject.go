@@ -2,6 +2,8 @@ package umlproject
 
 import (
 	"context"
+	"maps"
+	"slices"
 	"time"
 
 	"Dr.uml/backend/component"
@@ -13,166 +15,178 @@ import (
 )
 
 type UMLProject struct {
-	ctx            context.Context
-	name           string
-	lastModified   time.Time
-	currentDiagram *umldiagram.UMLDiagram            // The currently selected diagram
-	diagrams       map[string]*umldiagram.UMLDiagram // Use a map to store diagrams, keyed by their ID
-	openedDiagrams map[string]*umldiagram.UMLDiagram // Keep track of opened diagrams
-	activeDiagrams map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
+	ctx               context.Context
+	name              string
+	lastModified      time.Time
+	currentDiagram    *umldiagram.UMLDiagram            // The currently selected diagram
+	availableDiagrams map[string]bool                   // Use a map to store diagrams, keyed by their ID
+	activeDiagrams    map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
+	runFrontend       bool
 }
 
+// Constructor
+func CreateEmptyUMLProject(fileName string) (*UMLProject, duerror.DUError) {
+	// TODO: also check the file is exist or not
+	if err := utils.ValidateFilePath(fileName); err != nil {
+		return nil, err
+	}
+	return &UMLProject{
+		name:              fileName,
+		lastModified:      time.Now(),
+		availableDiagrams: make(map[string]bool),
+		activeDiagrams:    make(map[string]*umldiagram.UMLDiagram),
+	}, nil
+}
+
+func LoadExistUMLProject(fileName string) (*UMLProject, duerror.DUError) {
+	// TODO
+	return nil, nil
+}
+
+// Other functions
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx
 	// should not AddNewDiagram and SelectDiagram here
-    // TODO: Remove this 
-	p.AddNewDiagram(umldiagram.ClassDiagram, "new class diagram")
+	// TODO: Remove this
+	p.runFrontend = true
+	p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "new class diagram")
 	p.SelectDiagram("new class diagram")
 }
 
-// NewUMLProject creates a new UMLProject instance
-func NewUMLProject(name string) *UMLProject {
-
-	return &UMLProject{
-		name:           name,
-		lastModified:   time.Now(),
-		diagrams:       make(map[string]*umldiagram.UMLDiagram),
-		openedDiagrams: make(map[string]*umldiagram.UMLDiagram),
-		activeDiagrams: make(map[string]*umldiagram.UMLDiagram),
-	}
-}
-
-// GetName returns the name of the UMLProject
+// Getter
 func (p *UMLProject) GetName() string {
 	return p.name
 }
 
-// OpenProject returns the active diagrams and available diagrams in the project
-func (p *UMLProject) OpenProject() ([]string, []string, duerror.DUError) {
-	return p.GetLastOpenedDiagrams(), p.GetAvailableDiagrams(), nil
+func (p *UMLProject) GetLastModified() time.Time {
+	return p.lastModified
 }
 
-// GetAvailableDiagrams returns a list of the names of all available diagrams in the project
-func (p *UMLProject) GetAvailableDiagrams() []string {
-	diagramList := make([]string, 0, len(p.diagrams))
-	for _, diagram := range p.diagrams {
-		diagramList = append(diagramList, diagram.GetName())
+func (p *UMLProject) GetCurrentDiagramName() string {
+	if p.currentDiagram == nil {
+		return ""
 	}
-	return diagramList
+	return p.currentDiagram.GetName()
 }
 
-// GetLastOpenedDiagrams returns a list of the names of the last opened diagrams
-func (p *UMLProject) GetLastOpenedDiagrams() []string {
-	openedDiagramList := make([]string, 0, len(p.openedDiagrams))
-	for _, diagram := range p.openedDiagrams {
-		openedDiagramList = append(openedDiagramList, diagram.GetName())
+func (p *UMLProject) GetAvailableDiagramsNames() []string {
+	return slices.Collect(maps.Keys(p.availableDiagrams))
+}
+
+func (p *UMLProject) GetActiveDiagramsNames() []string {
+	activeNames := make([]string, 0, len(p.activeDiagrams))
+	for _, d := range p.activeDiagrams {
+		activeNames = append(activeNames, d.GetName())
 	}
-	return openedDiagramList
+	return activeNames
 }
 
-// SelectDiagram sets the current diagram to the one with the given ID
+// Other methods
+// SelectDiagram makes a diagram to be the current diagram, loads it if not loaded yet
 func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
-	if diagram, ok := p.diagrams[diagramName]; ok {
-		p.currentDiagram = diagram
-		return nil
+	if _, ok := p.availableDiagrams[diagramName]; !ok {
+		return duerror.NewInvalidArgumentError("Diagram not found")
 	}
-	return duerror.NewInvalidArgumentError("Diagram not found")
+	if _, ok := p.activeDiagrams[diagramName]; !ok {
+		diagram, err := umldiagram.LoadExistUMLDiagram(diagramName)
+		if err != nil {
+			return err
+		}
+		p.activeDiagrams[diagramName] = diagram
+	}
+	p.currentDiagram = p.activeDiagrams[diagramName]
+	return nil
 }
 
-// AddGadget
-func (p *UMLProject) AddGadget(
-	gadgetType component.GadgetType,
-	point utils.Point,
-) duerror.DUError {
-
-	err := p.currentDiagram.AddGadget(gadgetType, point)
+func (p *UMLProject) CreateEmptyUMLDiagram(diagramType umldiagram.DiagramType, diagramName string) duerror.DUError {
+	if _, ok := p.availableDiagrams[diagramName]; ok {
+		return duerror.NewInvalidArgumentError("Diagram name already exists")
+	}
+	d, err := umldiagram.CreateEmptyUMLDiagram(diagramName, diagramType)
 	if err != nil {
 		return err
 	}
+	p.availableDiagrams[diagramName] = true
+	p.activeDiagrams[diagramName] = d
 	p.lastModified = time.Now()
 	return nil
+}
 
+func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
+	// TODO: save file?
+	if _, ok := p.activeDiagrams[diagramName]; !ok {
+		return duerror.NewInvalidArgumentError("Diagram not loaded")
+	}
+	if p.currentDiagram != nil && p.currentDiagram.GetName() == diagramName {
+		p.currentDiagram = nil
+	}
+	delete(p.activeDiagrams, diagramName)
+	return nil
+}
+
+func (p *UMLProject) DeleteDiagram(diagramName string) duerror.DUError {
+	// TODO: remove the file
+	return nil
+}
+
+func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.AddGadget(gadgetType, point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return p.InvalidateCanvas()
 }
 
 func (p *UMLProject) StartAddAssociation(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
 	return p.currentDiagram.StartAddAssociation(point)
 }
 
 func (p *UMLProject) EndAddAssociation(associationType component.AssociationType, point utils.Point) duerror.DUError {
-	return p.currentDiagram.EndAddAssociation(associationType, [2]utils.Point{point, point})
-}
-
-// Add diagram
-func (p *UMLProject) AddNewDiagram(
-	diagramType umldiagram.DiagramType,
-	name string,
-) duerror.DUError {
-	if _, exists := p.diagrams[name]; exists {
-		return duerror.NewInvalidArgumentError("Diagram name already exists")
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-
-	diagram, err := umldiagram.NewUMLDiagram(name, diagramType)
-	if err != nil {
+	if err := p.currentDiagram.EndAddAssociation(associationType, point); err != nil {
 		return err
 	}
-	diagram.RegisterNotifyDrawUpdate(p.InvalidateCanvas)
-
-	p.diagrams[name] = diagram
-	p.currentDiagram = diagram
-	p.openedDiagrams[name] = diagram
 	p.lastModified = time.Now()
-	return nil
-
+	return p.InvalidateCanvas()
 }
 
-// CreateDiagram(path) creates a new instance of the diagram and load the diagram info at path
-func (p *UMLProject) createDiagram(path string) duerror.DUError {
-	diagram, err := umldiagram.NewUMLDiagramWithPath(path)
-	if err != nil {
+func (p *UMLProject) RemoveSelectedComponents() duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.RemoveSelectedComponents(); err != nil {
 		return err
 	}
-	p.diagrams[diagram.GetName()] = diagram
-	p.currentDiagram = diagram
-	p.openedDiagrams[diagram.GetName()] = diagram
 	p.lastModified = time.Now()
 	return nil
+}
+
+// Draw
+func (p *UMLProject) GetDrawData() drawdata.Diagram {
+	if p.currentDiagram == nil {
+		return drawdata.Diagram{}
+	}
+	return p.currentDiagram.GetDrawData()
 }
 
 func (p *UMLProject) InvalidateCanvas() duerror.DUError {
+	if !p.runFrontend {
+		return nil
+	}
+
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	// p.notifyDrawUpdate(p.currentDiagram.GetName())
-	dd, err := p.currentDiagram.GetDrawData()
-	if err != nil {
-		return err
-	}
-	runtime.EventsEmit(p.ctx, "backend-event", dd)
-
+	// log.Println("InvalidateCanvas")
+	runtime.EventsEmit(p.ctx, "backend-event", p.GetDrawData())
 	return nil
-}
-
-func (p *UMLProject) DrawDigram() drawdata.Diagram {
-	if p.currentDiagram == nil {
-		return drawdata.Diagram{}
-	}
-	data, err := p.currentDiagram.GetDrawData()
-	if err != nil {
-		return drawdata.Diagram{}
-	}
-	return data
-}
-
-func (p *UMLProject) GetCurrentDiagram() *umldiagram.UMLDiagram {
-	if p.currentDiagram == nil {
-		return nil
-	}
-	return p.currentDiagram
-}
-
-func (p *UMLProject) GetCurrentDiagramName() (string, duerror.DUError) {
-	if p.currentDiagram == nil {
-		return "", duerror.NewInvalidArgumentError("No current diagram selected")
-	}
-	return p.currentDiagram.GetName(), nil
 }

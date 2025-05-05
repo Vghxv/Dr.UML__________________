@@ -51,12 +51,11 @@ func (mr *MockComponentMockRecorder) Cover(p interface{}) *gomock.Call {
 }
 
 // GetDrawData mocks base method.
-func (m *MockComponent) GetDrawData() (any, duerror.DUError) {
+func (m *MockComponent) GetDrawData() any {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDrawData")
 	ret0, _ := ret[0].(any)
-	ret1, _ := ret[1].(duerror.DUError)
-	return ret0, ret1
+	return ret0
 }
 
 // GetDrawData indicates an expected call of GetDrawData.
@@ -66,12 +65,11 @@ func (mr *MockComponentMockRecorder) GetDrawData() *gomock.Call {
 }
 
 // GetLayer mocks base method.
-func (m *MockComponent) GetLayer() (int, duerror.DUError) {
+func (m *MockComponent) GetLayer() int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLayer")
 	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(duerror.DUError)
-	return ret0, ret1
+	return ret0
 }
 
 // GetLayer indicates an expected call of GetLayer.

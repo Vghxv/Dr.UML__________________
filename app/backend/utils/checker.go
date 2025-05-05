@@ -3,20 +3,22 @@ package utils
 import (
 	"path/filepath"
 	"strings"
+
+	"Dr.uml/backend/utils/duerror"
 )
 
 // IsValidFilePath checks if a file path is valid.
 // The function dislikes any invalid chars from all platforms.
 // That is, even on a linux system, it will not allow the path to contain invalid chars from Windows.
-func IsValidFilePath(path string) bool {
+func ValidateFilePath(path string) duerror.DUError {
 	if path == "" {
-		return false
+		return duerror.NewInvalidArgumentError("file path is empty")
 	}
 
 	path = filepath.Clean(path)
 
 	if strings.ContainsAny(path, `<>"|?*`) {
-		return false
+		return duerror.NewInvalidArgumentError("file path contains invalid characters")
 	}
 	reserved := []string{
 		"CON", "PRN", "AUX", "NUL",
@@ -34,17 +36,17 @@ func IsValidFilePath(path string) bool {
 
 	for _, r := range reserved {
 		if baseName == r {
-			return false
+			return duerror.NewInvalidArgumentError("file name contains invalid characters")
 		}
 	}
 	if strings.ContainsRune(path, '\000') {
-		return false
+		return duerror.NewInvalidArgumentError("file path contains null character")
 	}
 
 	// 檢查路徑長度
 	if len(path) > 255 {
-		return false
+		return duerror.NewInvalidArgumentError("file path exceeds 255 characters")
 	}
 
-	return true
+	return nil
 }

@@ -1,68 +1,77 @@
-import React, { useCallback } from 'react';
-import { createGadget } from '../utils/createGadget';
+import React, { useEffect, useRef } from 'react';
 import { dia } from '@joint/core';
+import { createGadget } from '../utils/createGadget';
 
-interface GadgetProps {
-    point: { x: number; y: number };
-    type: 'Class';
+export interface GadgetProps {
+    gadgetType: string;
+    x: number;
+    y: number;
     layer: number;
-    size?: { width: number; height: number };
-    color?: string;
-    outlineColor?: string;
-    name?: string;
-    onDrop: (gadget: dia.Element) => void;
+    height: number;
+    width: number;
+    color: string;
+    header: string;
+    header_atrributes: {
+        content: string;
+        height: number;
+        width: number;
+        fontSize: number;
+        fontStyle: number;
+        fontFile: string;
+    }
+    attributes: {
+        content: string;
+        height: number;
+        width: number;
+        fontSize: number;
+        fontStyle: number;
+        fontFile: string;
+    }[];
+    methods: {
+        content: string;
+        height: number;
+        width: number;
+        fontSize: number;
+        fontStyle: number;
+        fontFile: string;
+    }[];
 }
 
-const Gadget: React.FC<GadgetProps> = ({
-    point,
-    type,
-    layer,
-    size = { width: 100, height: 60 },
-    color = '#f0f0f0',
-    outlineColor = '#007BFF',
-    name = '',
-    onDrop,
-}) => {
-    const handleCreateGadget = useCallback(() => {
-        const gadget = createGadget(
-            type, {point, layer, size, color, outlineColor, name} as GadgetProps
-        );
+const Gadget: React.FC<GadgetProps> = (props) => {
+    const containerRef = useRef<HTMLDivElement>(null);
 
-        if (gadget) {
-            onDrop(gadget); // Ensure the onDrop function is called with the created gadget
-        } else {
-            console.error('Failed to create gadget.');
+    useEffect(() => {
+        if (containerRef.current) {
+            // Create the gadget using the createGadget function
+            const gadget = createGadget(props.gadgetType, props);
+
+            // Render the gadget inside the container
+            const paper = new dia.Paper({
+                el: containerRef.current,
+                model: new dia.Graph(),
+                width: props.width,
+                height: props.height,
+                interactive: false, // Disable interactivity for rendering purposes
+            });
+
+            paper.model.addCell(gadget);
         }
-    }, [point, type, layer, size, color, outlineColor, name, onDrop]);
+    }, [props]);
 
     return (
         <div
-            onClick={handleCreateGadget}
+            ref={containerRef}
             style={{
-                width: size.width,
-                height: size.height,
-                backgroundColor: color,
-                border: `2px solid ${outlineColor}`,
-                borderRadius:  '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                position: 'absolute',
+                left: props.x,
+                top: props.y,
+                width: props.width,
+                height: props.height,
             }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-            }}
-        >
-            <span style={{ color: '#333', fontSize: '14px', fontWeight: 'bold' }}>{name}</span>
-        </div>
+        />
     );
 };
 
 export default Gadget;
+
+

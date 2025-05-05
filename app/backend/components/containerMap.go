@@ -14,7 +14,7 @@ type containerMap struct {
 	compMap map[component.Component]bool
 }
 
-func NewContainerMap() componentsContainer {
+func NewContainerMap() Container {
 	return &containerMap{compMap: make(map[component.Component]bool)}
 }
 
@@ -48,15 +48,7 @@ func (cp *containerMap) Search(p utils.Point) (component.Component, duerror.DUEr
 			candidate = c
 			continue
 		}
-		candidateLayer, err := candidate.GetLayer()
-		if err != nil {
-			return nil, err
-		}
-		cLayer, err := c.GetLayer()
-		if err != nil {
-			return nil, err
-		}
-		if cLayer > candidateLayer {
+		if c.GetLayer() > candidate.GetLayer() {
 			candidate = c
 		}
 	}

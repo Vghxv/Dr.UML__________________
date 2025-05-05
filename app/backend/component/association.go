@@ -47,18 +47,19 @@ func (this *Association) GetAssType() AssociationType {
 }
 
 func (this *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUError) {
+	// TODO: should not do this
 	if len(this.attributes) == 0 {
 		return nil, duerror.NewInvalidArgumentError("no attributes found")
 	}
 	return this.attributes, nil
 }
 
-func (this *Association) GetDrawData() (any, duerror.DUError) {
-	return nil, nil
+func (this *Association) GetDrawData() any {
+	return this.drawdata
 }
 
-func (this *Association) GetLayer() (int, duerror.DUError) {
-	return this.layer, nil
+func (this *Association) GetLayer() int {
+	return this.layer
 }
 
 func (this *Association) GetParentEnd() *Gadget {
