@@ -21,6 +21,48 @@ export interface BackendGadgetProps {
 
 class UMLClass extends shapes.standard.Rectangle {
     constructor(options: GadgetProps) {
+        console.log("Initializing UMLClass with options:", options);
+
+        // Dynamically generate markup and attrs for attributes
+        const attributeTexts = options.attributes.map((attr, i) => ({
+            tagName: "text",
+            selector: `attributeLabel${i}`,
+            attributes: {}
+        }));
+        const attributeAttrs = options.attributes.reduce((acc, attr, i) => {
+            acc[`attributeLabel${i}`] = {
+                text: attr.content,
+                refX: 5,
+                refY: 35 + i * 20,
+                textAnchor: "left",
+                yAlignment: "top",
+                fill: "#333333", // You can change this to attr.fontStyle -> color mapping
+                fontFamily: attr.fontFile || "Arial",
+                fontSize: attr.fontSize || 12,
+            };
+            return acc;
+        }, {} as Record<string, any>);
+
+        // Dynamically generate markup and attrs for methods
+        const methodTexts = options.methods.map((method, i) => ({
+            tagName: "text",
+            selector: `methodLabel${i}`,
+            attributes: {}
+        }));
+        const methodAttrs = options.methods.reduce((acc, method, i) => {
+            acc[`methodLabel${i}`] = {
+                text: method.content,
+                refX: 5,
+                refY: 30 + (options.height / 2) + 5 + i * 20,
+                textAnchor: "left",
+                yAlignment: "top",
+                fill: "#333333",
+                fontFamily: method.fontFile || "Arial",
+                fontSize: method.fontSize || 12,
+            };
+            return acc;
+        }, {} as Record<string, any>);
+
         super({
             position: { x: options.x, y: options.y },
             size: { width: options.width, height: options.height },
@@ -42,7 +84,7 @@ class UMLClass extends shapes.standard.Rectangle {
                     text: options.header || "Class Name",
                     fill: "#FFFFFF",
                     fontWeight: "bold",
-                    fontFamily: options.header_atrributes.fontFile || "normal",
+                    fontFamily: options.header_atrributes.fontFile || "Arial",
                     fontSize: options.header_atrributes.fontSize || 12,
                 },
                 attributes: {
@@ -53,19 +95,6 @@ class UMLClass extends shapes.standard.Rectangle {
                     fill: "#ECF0F1",
                     stroke: "#000000",
                 },
-                attributesLabel: {
-                    ref: "attributes",
-                    refX: 5,
-                    refY: 5,
-                    textAnchor: "left",
-                    yAlignment: "top",
-                    text: options.attributes
-                        .map(attr => attr.content)
-                        .join("\n") || "Attributes",
-                    fill: "#333333",
-                    fontFamily: options.attributes[0]?.fontFile || "normal",
-                    fontSize: options.attributes[0]?.fontSize || 12,
-                },
                 methods: {
                     x: 0,
                     y: 30 + options.height / 2,
@@ -74,27 +103,16 @@ class UMLClass extends shapes.standard.Rectangle {
                     fill: "#ECF0F1",
                     stroke: "#000000",
                 },
-                methodsLabel: {
-                    ref: "methods",
-                    refX: 5,
-                    refY: 5,
-                    textAnchor: "left",
-                    yAlignment: "top",
-                    text: options.methods
-                        .map(method => method.content)
-                        .join("\n") || "Methods",
-                    fill: "#333333",
-                    fontFamily: options.methods[0]?.fontFile || "normal",
-                    fontSize: options.methods[0]?.fontSize || 12,
-                },
+                ...attributeAttrs,
+                ...methodAttrs
             },
             markup: [
                 { tagName: "rect", selector: "header", attributes: {} },
                 { tagName: "text", selector: "headerLabel", attributes: {} },
                 { tagName: "rect", selector: "attributes", attributes: {} },
-                { tagName: "text", selector: "attributesLabel", attributes: {} },
                 { tagName: "rect", selector: "methods", attributes: {} },
-                { tagName: "text", selector: "methodsLabel", attributes: {} },
+                ...attributeTexts,
+                ...methodTexts,
             ],
             z: options.layer,
         });
@@ -102,16 +120,15 @@ class UMLClass extends shapes.standard.Rectangle {
 }
 
 export function createGadget(type: string, config: GadgetProps): dia.Element {
-  switch (type) {
-    case "Class": {
-      return new UMLClass(config);
+    switch (type) {
+        case "Class": {
+            return new UMLClass(config);
+        }
+        default:
+            throw new Error(`Unknown gadget type: ${type}`);
     }
-    default:
-      throw new Error(`Unknown gadget type: ${type}`);
-  }
 }
 
-// Parse backend gadget JSON and convert it to a dia.Element
 export function parseBackendGadget(gadgetData: BackendGadgetProps): dia.Element {
     console.log("Before Parse gadget:", gadgetData);
     const gadget = createGadget("Class", {
