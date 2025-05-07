@@ -10,6 +10,7 @@ import {
     offBackendEvent,
 } from "./utils/wailsBridge";
 import { BackendCanvasProps } from "./utils/createCanvas";
+import mockData from './assets/mock/gadget';
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
@@ -72,7 +73,7 @@ const App: React.FC = () => {
                     alignItems: "center",
                 }}
             >
-                {backendData && <Canvas backendData={backendData} />}
+                {backendData && <Canvas backendData={mockData} />}
             </div>
         </DndProvider>
     );
