@@ -330,10 +330,7 @@ func TestAttribute_IsBold(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.attribute.IsBold()
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
+			result := tt.attribute.IsBold()
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
@@ -361,10 +358,7 @@ func TestAttribute_IsItalic(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.attribute.IsItalic()
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
+			result := tt.attribute.IsItalic()
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
@@ -392,10 +386,7 @@ func TestAttribute_IsUnderline(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := tt.attribute.IsUnderline()
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
+			result := tt.attribute.IsUnderline()
 			if result != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, result)
 			}
