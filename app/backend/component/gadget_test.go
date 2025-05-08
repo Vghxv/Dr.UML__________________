@@ -46,6 +46,8 @@ func TestNewGadget(t *testing.T) {
 	// invalid gadget type
 	g, err = NewGadget(-1, utils.Point{X: 1, Y: 1})
 	assert.Error(t, err)
+
+	// some errors are hard to test :(
 }
 
 // Getter
@@ -241,6 +243,9 @@ func TestRegisterUpdateParentDraw(t *testing.T) {
 	assert.NoError(t, g.RegisterUpdateParentDraw(mp.UpdateParentDraw))
 	assert.Equal(t, 0, mp.Times)
 
-	assert.NoError(t, g.SetPoint(utils.Point{X: 2, Y: 2}))
+	assert.NoError(t, g.AddAttribute(0, "test"))
 	assert.Equal(t, 1, mp.Times)
+
+	// nil function
+	assert.Error(t, g.RegisterUpdateParentDraw(nil))
 }
