@@ -48,7 +48,7 @@ func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUErr
 	for i, contents := range gadgetDefaultAtts[gadgetType] {
 		g.attributes[i] = make([]*attribute.Attribute, 0, len(contents))
 		for _, content := range contents {
-			if err := g.AddAttribute(content, i); err != nil {
+			if err := g.AddAttribute(i, content); err != nil {
 				return nil, err
 			}
 		}
@@ -83,6 +83,14 @@ func (g *Gadget) GetColor() utils.Color {
 
 func (g *Gadget) GetGadgetType() GadgetType {
 	return g.gadgetType
+}
+
+func (g *Gadget) GetAttributesLen() []int {
+	lengths := make([]int, len(g.attributes))
+	for i, atts := range g.attributes {
+		lengths[i] = len(atts)
+	}
+	return lengths
 }
 
 // Setter
@@ -121,7 +129,7 @@ func (g *Gadget) Cover(p utils.Point) (bool, duerror.DUError) {
 	return p.X >= tl.X && p.X <= br.X && p.Y >= tl.Y && p.Y <= br.Y, nil
 }
 
-func (g *Gadget) AddAttribute(content string, section int) duerror.DUError {
+func (g *Gadget) AddAttribute(section int, content string) duerror.DUError {
 	if section < 0 || section >= len(g.attributes) {
 		return duerror.NewInvalidArgumentError("section out of range")
 	}
@@ -136,7 +144,7 @@ func (g *Gadget) AddAttribute(content string, section int) duerror.DUError {
 	return g.updateDrawData()
 }
 
-func (g *Gadget) RemoveAttribute(index int, section int) duerror.DUError {
+func (g *Gadget) RemoveAttribute(section int, index int) duerror.DUError {
 	if section < 0 || section >= len(g.attributes) {
 		return duerror.NewInvalidArgumentError("section out of range")
 	}
