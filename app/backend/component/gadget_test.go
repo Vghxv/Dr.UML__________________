@@ -120,14 +120,14 @@ func TestCover(t *testing.T) {
 	width := g.GetDrawData().(drawdata.Gadget).Width
 	height := g.GetDrawData().(drawdata.Gadget).Height
 
-	// coners
-	coners := []utils.Point{
+	// corners
+	corners := []utils.Point{
 		{X: 1, Y: 1},                  // top-left
 		{X: 1 + width, Y: 1},          // top-right
 		{X: 1, Y: 1 + height},         // bottom-left
 		{X: 1 + width, Y: 1 + height}, // bottom-right
 	}
-	for _, corner := range coners {
+	for _, corner := range corners {
 		val, err := g.Cover(corner)
 		assert.NoError(t, err)
 		assert.True(t, val)
