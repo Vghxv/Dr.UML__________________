@@ -161,7 +161,7 @@ func (g *Gadget) GetDrawData() any {
 }
 
 func (g *Gadget) updateDrawData() duerror.DUError {
-	height := drawdata.LineWidth + drawdata.Margin
+	height := drawdata.LineWidth
 	maxAttWidth := 0
 	atts := make([][]drawdata.Attribute, len(g.attributes))
 	for i, attsRow := range g.attributes {
@@ -172,9 +172,9 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 			if attDrawData.Width > maxAttWidth {
 				maxAttWidth = attDrawData.Width
 			}
-			height += attDrawData.Height + drawdata.Margin
+			height += drawdata.Margin + attDrawData.Height
 		}
-		height += drawdata.LineWidth
+		height += drawdata.Margin + drawdata.LineWidth
 	}
 	width := maxAttWidth + drawdata.Margin*2 + drawdata.LineWidth*2
 

@@ -198,6 +198,9 @@ func TestRemoveAttribute(t *testing.T) {
 }
 
 func TestGetDrawData(t *testing.T) {
+	L := drawdata.LineWidth
+	M := drawdata.Margin
+
 	gadget, err := NewGadget(Class, utils.Point{X: 1, Y: 1})
 	assert.NoError(t, err)
 	assert.NotNil(t, gadget)
@@ -206,14 +209,38 @@ func TestGetDrawData(t *testing.T) {
 	assert.NotNil(t, data)
 	gdd := data.(drawdata.Gadget)
 	assert.NotNil(t, gdd)
-
-	// check default values
-	assert.Equal(t, int(Class), gdd.GadgetType)
 	assert.Equal(t, 1, gdd.X)
 	assert.Equal(t, 1, gdd.Y)
 	assert.Equal(t, 0, gdd.Layer)
+	assert.Equal(t, drawdata.DefaultGadgetColor, gdd.Color)
+
+	// check default att
+	h := L
+	maxAttWidth := 0
+	for i := 0; i < len(gdd.Attributes); i++ {
+		for j := 0; j < len(gdd.Attributes[i]); j++ {
+			if gdd.Attributes[i][j].Width > maxAttWidth {
+				maxAttWidth = gdd.Attributes[i][j].Width
+			}
+			h += M + gdd.Attributes[i][j].Height
+		}
+		h += M + L
+	}
+	w := maxAttWidth + M*2 + L*2
+	assert.Equal(t, w, gdd.Width)
+	assert.Equal(t, h, gdd.Height)
 	assert.Equal(t, 3, len(gdd.Attributes))
 	assert.Equal(t, "Name", gdd.Attributes[0][0].Content)
 	assert.Equal(t, "Attributes", gdd.Attributes[1][0].Content)
 	assert.Equal(t, "Methods", gdd.Attributes[2][0].Content)
+}
+
+func TestRegisterUpdateParentDraw(t *testing.T) {
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	mp := mockParent{}
+	assert.NoError(t, g.RegisterUpdateParentDraw(mp.UpdateParentDraw))
+	assert.Equal(t, 0, mp.Times)
+
+	assert.NoError(t, g.SetPoint(utils.Point{X: 2, Y: 2}))
+	assert.Equal(t, 1, mp.Times)
 }
