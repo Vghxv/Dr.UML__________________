@@ -115,18 +115,18 @@ func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
 }
 
 // IsBold checks if the bold style is applied to the attribute and returns a boolean along with an error if any occurs.
-func (att *Attribute) IsBold() (bool, duerror.DUError) {
-	return att.style&Bold != 0, nil
+func (att *Attribute) IsBold() bool {
+	return att.style&Bold != 0
 }
 
 // IsItalic checks if the Italic style flag is set in the Attribute's style and returns a boolean and an error if any.
-func (att *Attribute) IsItalic() (bool, duerror.DUError) {
-	return att.style&Italic != 0, nil
+func (att *Attribute) IsItalic() bool {
+	return att.style&Italic != 0
 }
 
 // IsUnderline determines whether the underline style is applied to the attribute and returns an error if any occurs.
-func (att *Attribute) IsUnderline() (bool, duerror.DUError) {
-	return att.style&Underline != 0, nil
+func (att *Attribute) IsUnderline() bool {
+	return att.style&Underline != 0
 }
 
 // Copy creates and returns a deep copy of the Attribute with identical content, size, and style. It returns an error if any occurs.
