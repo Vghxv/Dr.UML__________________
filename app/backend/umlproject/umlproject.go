@@ -95,6 +95,9 @@ func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 		p.activeDiagrams[diagramName] = diagram
 	}
 	p.currentDiagram = p.activeDiagrams[diagramName]
+	// TODO: when multiple diagrams exists, unregister the old one
+	p.currentDiagram.RegisterNotifyDrawUpdate(p.InvalidateCanvas)
+
 	return nil
 }
 
@@ -137,7 +140,7 @@ func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Poin
 		return err
 	}
 	p.lastModified = time.Now()
-	return p.InvalidateCanvas()
+	return nil
 }
 
 func (p *UMLProject) StartAddAssociation(point utils.Point) duerror.DUError {
@@ -155,7 +158,7 @@ func (p *UMLProject) EndAddAssociation(associationType component.AssociationType
 		return err
 	}
 	p.lastModified = time.Now()
-	return p.InvalidateCanvas()
+	return nil
 }
 
 func (p *UMLProject) RemoveSelectedComponents() duerror.DUError {
@@ -185,8 +188,6 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	// p.notifyDrawUpdate(p.currentDiagram.GetName())
-	// log.Println("InvalidateCanvas")
 	runtime.EventsEmit(p.ctx, "backend-event", p.GetDrawData())
 	return nil
 }
