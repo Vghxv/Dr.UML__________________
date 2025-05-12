@@ -192,17 +192,17 @@ func AddGadget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// success
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
 	assert.NoError(t, err)
 
 	// invalid gadget type
-	err = p.AddGadget(component.GadgetType(-1), utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.GadgetType(-1), utils.Point{X: 0, Y: 0}, 0, 0x808080)
 	assert.Error(t, err)
 
 	// no diagram selected
 	err = p.CloseDiagram("TestDiagram")
 	assert.NoError(t, err)
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
 	assert.Error(t, err)
 }
 
@@ -245,7 +245,7 @@ func TestGetDrawData(t *testing.T) {
 	assert.NoError(t, err)
 	err = p.SelectDiagram("TestDiagram")
 	assert.NoError(t, err)
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
 
 	// success
 	data := p.GetDrawData()

@@ -9,7 +9,9 @@ interface WindowWithGo extends Window {
                 SelectDiagram(name: string): Promise<void>;
                 AddGadget(
                     gadgetType: number,
-                    point: { x: number; y: number }
+                    point: { x: number; y: number },
+                    layer: number,
+                    color: number
                 ): Promise<void>;
             };
         };
@@ -29,9 +31,9 @@ export async function getCurrentDiagramName(): Promise<string> {
 }
 
 // Add a new gadget to the diagram
-export async function addGadget(gadgetType: number, point: { x: number; y: number }): Promise<void> {
+export async function addGadget(gadgetType: number, point: { x: number; y: number }, layer: number, color: number): Promise<void> {
     try {
-        await window.go.umlproject.UMLProject.AddGadget(gadgetType, point);
+        await window.go.umlproject.UMLProject.AddGadget(gadgetType, point, layer, color);
         console.log("Gadget add to backend:", gadgetType, point);
     } catch (error) {
         console.error("Error adding gadget:", error);
