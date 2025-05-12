@@ -55,6 +55,32 @@ func (cp *containerMap) Search(p utils.Point) (component.Component, duerror.DUEr
 	return candidate, nil
 }
 
+func (cp *containerMap) SearchGadget(p utils.Point) (*component.Gadget, duerror.DUError) {
+	var candidate *component.Gadget
+	for c := range cp.compMap {
+		switch c.(type) {
+		case *component.Gadget:
+			cover, err := c.Cover(p)
+			if err != nil {
+				return nil, err
+			}
+			if !cover {
+				continue
+			}
+			if candidate == nil {
+				candidate = c.(*component.Gadget)
+				continue
+			}
+			if c.GetLayer() < candidate.GetLayer() {
+				candidate = c.(*component.Gadget)
+			}
+		default:
+			continue
+		}
+	}
+	return candidate, nil
+}
+
 func (cp *containerMap) GetAll() []component.Component {
 	return slices.Collect(maps.Keys(cp.compMap))
 }

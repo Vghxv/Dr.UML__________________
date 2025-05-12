@@ -44,8 +44,10 @@ type UMLDiagram struct {
 	backgroundColor utils.Color
 
 	componentsContainer components.Container
-	componentsGraph     components.Graph
-	componentsSelected  map[component.Component]bool
+	// TODO: ug want to refactor once more
+	// componentsGraph     components.Graph
+	componentsSelected map[component.Component]bool
+	asscoiations       map[*component.Gadget]([2][]*component.Association)
 
 	notifyDrawUpdate func() duerror.DUError
 	drawData         drawdata.Diagram
@@ -67,7 +69,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 		startPoint:          utils.Point{X: 0, Y: 0},
 		backgroundColor:     utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
 		componentsContainer: components.NewContainerMap(),
-		componentsGraph:     components.NewGraphMap(),
+		asscoiations:        make(map[*component.Gadget]([2][]*component.Association)),
 		componentsSelected:  make(map[component.Component]bool),
 		drawData: drawdata.Diagram{
 			Margin:    drawdata.Margin,
@@ -107,6 +109,7 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err = ud.componentsContainer.Insert(g); err != nil {
 		return err
 	}
+	ud.asscoiations[g] = [2][]*component.Association{{}, {}}
 	return ud.updateDrawData()
 }
 
@@ -131,14 +134,31 @@ func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {
 }
 
 func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPoint utils.Point) duerror.DUError {
+	stPoint := ud.startPoint
+	ud.startPoint = utils.Point{X: 0, Y: 0}
 	if err := ud.validatePoint(endPoint); err != nil {
 		return err
 	}
-	// TODO: serach parents
-	// st := ud.startPoint
-	// en := endPoint
-	parents := [2]*component.Gadget{}
-	a, err := component.NewAssociation(parents, component.AssociationType(assType))
+
+	// serach parents
+	stGad, err := ud.componentsContainer.SearchGadget(stPoint)
+	if err != nil {
+		return err
+	}
+	if stGad == nil {
+		return duerror.NewInvalidArgumentError("start point does not contain a gadget")
+	}
+	enGad, err := ud.componentsContainer.SearchGadget(endPoint)
+	if err != nil {
+		return err
+	}
+	if enGad == nil {
+		return duerror.NewInvalidArgumentError("end point does not contain a gadget")
+	}
+
+	// create association
+	parents := [2]*component.Gadget{stGad, enGad}
+	a, err := component.NewAssociation(parents, component.AssociationType(assType), stPoint, endPoint)
 	if err != nil {
 		return err
 	}
@@ -148,9 +168,16 @@ func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPo
 	if err = ud.componentsContainer.Insert(a); err != nil {
 		return err
 	}
-	if err = ud.componentsGraph.Insert(a); err != nil {
-		return err
-	}
+
+	// record it
+	asses := ud.asscoiations[stGad]
+	asses[0] = append(asses[0], a)
+	ud.asscoiations[stGad] = asses
+
+	asses = ud.asscoiations[enGad]
+	asses[1] = append(asses[1], a)
+	ud.asscoiations[enGad] = asses
+
 	return ud.updateDrawData()
 }
 
@@ -209,8 +236,7 @@ func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) du
 
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	gs := make([]drawdata.Gadget, 0, len(ud.componentsSelected))
-	// TODO
-	// as := make([]drawdata.Association, 0, len(ud.componentsSelected))
+	as := make([]drawdata.Association, 0, len(ud.componentsSelected))
 	for _, c := range ud.componentsContainer.GetAll() {
 		cDrawData := c.GetDrawData()
 		if cDrawData == nil {
@@ -220,7 +246,7 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 		case *component.Gadget:
 			gs = append(gs, cDrawData.(drawdata.Gadget))
 		case *component.Association:
-			continue
+			as = append(as, cDrawData.(drawdata.Association))
 		}
 	}
 	ud.drawData.Gadgets = gs

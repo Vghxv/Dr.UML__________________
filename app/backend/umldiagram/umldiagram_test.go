@@ -76,7 +76,6 @@ func TestCreateEmptyDiagram(t *testing.T) {
 				// New assertions
 				assert.Equal(t, utils.Color{R: 255, G: 255, B: 255}, diagram.backgroundColor)
 				assert.NotNil(t, diagram.componentsContainer)
-				assert.NotNil(t, diagram.componentsGraph)
 			}
 		})
 	}
