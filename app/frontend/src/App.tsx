@@ -6,6 +6,7 @@ import Canvas from "./components/Canvas";
 import {
     getCurrentDiagramName,
     addGadget,
+    getCanvasData,
     onBackendEvent,
     offBackendEvent,
 } from "./utils/wailsBridge";
@@ -38,7 +39,19 @@ const App: React.FC = () => {
         }
     };
 
+    const loadCanvasData = async () => {
+        try {
+            const data = await getCanvasData();
+            setBackendData(data);
+        } catch (error) {
+            console.error("Error loading canvas data:", error);
+        }
+    };
+
     useEffect(() => {
+        // Load canvas data when component mounts
+        loadCanvasData();
+
         onBackendEvent("backend-event", (result) => {
             console.log("Received data from backend:", result);
             setBackendData(result);
@@ -63,7 +76,7 @@ const App: React.FC = () => {
 
                 <div style={{ marginBottom: "10px" }}>
                     <button className="btn" onClick={handleAddGadget}>
-                        Load Gadget From Backend
+                        Add New Gadget
                     </button>
                 </div>
             </div>
