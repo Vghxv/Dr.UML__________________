@@ -11,10 +11,12 @@ import {
 } from "./utils/wailsBridge";
 import { BackendCanvasProps } from "./utils/createCanvas";
 import mockData from './assets/mock/gadget';
+import CreateGadgetPopup from "./components/CreateGadgetPopup";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [backendData, setBackendData] = useState<BackendCanvasProps | null>(null);
+    const [showPopup, setShowPopup] = useState(false);
 
     const handleGetDiagramName = async () => {
         try {
@@ -30,7 +32,7 @@ const App: React.FC = () => {
         // Generate random positions between 50 and 500
         const randomX = Math.floor(Math.random() * 450) + 50;
         const randomY = Math.floor(Math.random() * 450) + 50;
-        await addGadget(1, { x: randomX, y: randomY });
+        await addGadget(1, { x: randomX, y: randomY }, 0, 0x0000FF);
     } catch (error) {
         console.error("Error adding gadget:", error);
     }
@@ -39,7 +41,7 @@ const App: React.FC = () => {
     useEffect(() => {
         onBackendEvent("backend-event", (result) => {
             console.log("Received data from backend:", result);
-            setBackendData(result); // 假設 result 是完整的 BackendCanvasProps 結構
+            setBackendData(result);
         });
 
         return () => {
@@ -65,6 +67,24 @@ const App: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            <div style={{ marginBottom: "10px" }}>
+                <button className="btn" onClick={() => setShowPopup(true)}>
+                    + Create Gadget (Popup)
+                </button>
+            </div>
+
+            {showPopup && (
+                <CreateGadgetPopup
+                    onCreate={(gadget) => {
+                        // 這裡可以將 gadget 傳給後端或存在 local state
+                        console.log("New Gadget Created:", gadget);
+                        setShowPopup(false); // 關閉 popup
+                    }}
+                    onCancel={() => setShowPopup(false)}
+                />
+            )}
+
 
             {/* Center Section: Canvas */}
             <div
