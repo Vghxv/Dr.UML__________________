@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { dia, shapes } from '@joint/core';
-import { parseBackendGadget, BackendGadgetProps} from '../utils/createGadget';
+import { parseBackendGadget, BackendGadgetProps } from '../utils/createGadget';
 import { BackendCanvasProps, createCanvas } from '../utils/createCanvas';
 
 export interface CanvasProps {
@@ -9,7 +9,7 @@ export interface CanvasProps {
     backendData?: BackendCanvasProps; // JSON data for gadgets and associations
 }
 
-const Canvas: React.FC<{ backendData : BackendCanvasProps}> = ({ backendData }) => {
+const Canvas: React.FC<{ backendData: BackendCanvasProps }> = ({ backendData }) => {
     const paperRef = useRef<HTMLDivElement>(null);
     const [graph, setGraph] = useState<dia.Graph | null>(null);
     const [paper, setPaper] = useState<dia.Paper | null>(null);

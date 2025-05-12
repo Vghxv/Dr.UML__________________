@@ -28,15 +28,15 @@ const App: React.FC = () => {
     };
 
     const handleAddGadget = async () => {
-    try {
-        // Generate random positions between 50 and 500
-        const randomX = Math.floor(Math.random() * 450) + 50;
-        const randomY = Math.floor(Math.random() * 450) + 50;
-        await addGadget(1, { x: randomX, y: randomY }, 0, 0x0000FF);
-    } catch (error) {
-        console.error("Error adding gadget:", error);
-    }
-};
+        try {
+            // Generate random positions between 50 and 500
+            const randomX = Math.floor(Math.random() * 450) + 50;
+            const randomY = Math.floor(Math.random() * 450) + 50;
+            await addGadget(1, { x: randomX, y: randomY }, 0, 0x0000FF);
+        } catch (error) {
+            console.error("Error adding gadget:", error);
+        }
+    };
 
     useEffect(() => {
         onBackendEvent("backend-event", (result) => {
@@ -52,7 +52,7 @@ const App: React.FC = () => {
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="section">
-                <h1 style={{fontFamily: "Inkfree"}}>Dr.UML</h1>
+                <h1 style={{ fontFamily: "Inkfree" }}>Dr.UML</h1>
 
                 <div style={{ marginBottom: "10px" }}>
                     <button className="btn" onClick={handleGetDiagramName}>
