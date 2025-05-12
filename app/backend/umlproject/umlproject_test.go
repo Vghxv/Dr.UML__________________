@@ -247,6 +247,7 @@ func TestGetDrawData(t *testing.T) {
 	assert.NoError(t, err)
 	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
 
+	assert.NoError(t, err)
 	// success
 	data := p.GetDrawData()
 	assert.Len(t, data.Gadgets, 1)
