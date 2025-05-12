@@ -24,7 +24,7 @@ type UMLProject struct {
 	runFrontend       bool
 }
 
-// Constructor
+// CreateEmptyUMLProject Constructor
 func CreateEmptyUMLProject(fileName string) (*UMLProject, duerror.DUError) {
 	// TODO: also check the file is exist or not
 	if err := utils.ValidateFilePath(fileName); err != nil {
@@ -43,25 +43,26 @@ func LoadExistUMLProject(fileName string) (*UMLProject, duerror.DUError) {
 	return nil, nil
 }
 
-// Other functions
+// Startup will be passed in wails.Run
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx
-	// should not AddNewDiagram and SelectDiagram here
-	// TODO: Remove this
+	// TODO: Remove this bcz can't handle error here
 	p.runFrontend = true
 	p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "new class diagram")
 	p.SelectDiagram("new class diagram")
 }
 
-// Getter
+// GetName returns the name of the UML project.
 func (p *UMLProject) GetName() string {
 	return p.name
 }
 
+// GetLastModified returns the last modified timestamp of the UML project.
 func (p *UMLProject) GetLastModified() time.Time {
 	return p.lastModified
 }
 
+// GetCurrentDiagramName returns the name of the currently selected diagram in the UML project, or an empty string if none is selected.
 func (p *UMLProject) GetCurrentDiagramName() string {
 	if p.currentDiagram == nil {
 		return ""
@@ -69,10 +70,12 @@ func (p *UMLProject) GetCurrentDiagramName() string {
 	return p.currentDiagram.GetName()
 }
 
+// GetAvailableDiagramsNames returns the names of all available diagrams in the UML project as a slice of strings.
 func (p *UMLProject) GetAvailableDiagramsNames() []string {
 	return slices.Collect(maps.Keys(p.availableDiagrams))
 }
 
+// GetActiveDiagramsNames returns the names of all active diagrams in the UML project as a slice of strings.
 func (p *UMLProject) GetActiveDiagramsNames() []string {
 	activeNames := make([]string, 0, len(p.activeDiagrams))
 	for _, d := range p.activeDiagrams {
@@ -81,7 +84,6 @@ func (p *UMLProject) GetActiveDiagramsNames() []string {
 	return activeNames
 }
 
-// Other methods
 // SelectDiagram makes a diagram to be the current diagram, loads it if not loaded yet
 func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 	if _, ok := p.availableDiagrams[diagramName]; !ok {
@@ -96,9 +98,8 @@ func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 	}
 	p.currentDiagram = p.activeDiagrams[diagramName]
 	// TODO: when multiple diagrams exists, unregister the old one
-	p.currentDiagram.RegisterNotifyDrawUpdate(p.InvalidateCanvas)
 
-	return nil
+	return p.currentDiagram.RegisterUpdateParentDraw(p.InvalidateCanvas)
 }
 
 func (p *UMLProject) CreateEmptyUMLDiagram(diagramType umldiagram.DiagramType, diagramName string) duerror.DUError {
@@ -172,7 +173,6 @@ func (p *UMLProject) RemoveSelectedComponents() duerror.DUError {
 	return nil
 }
 
-// Draw
 func (p *UMLProject) GetDrawData() drawdata.Diagram {
 	if p.currentDiagram == nil {
 		return drawdata.Diagram{}
@@ -189,5 +189,39 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	runtime.EventsEmit(p.ctx, "backend-event", p.GetDrawData())
+	return nil
+}
+
+func (p *UMLProject) AddAttributeToGadget(content string, section int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.AddAttributeToGadget(content, section); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SelectComponent(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SelectComponent(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) UnselectComponent(point utils.Point) duerror.DUError {
+
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.UnselectComponent(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
 	return nil
 }
