@@ -47,7 +47,7 @@ type UMLDiagram struct {
 	componentsSelected  map[component.Component]bool
 	associations        map[*component.Gadget]([2][]*component.Association)
 
-	notifyDrawUpdate func() duerror.DUError
+	updateParentDraw func() duerror.DUError
 	drawData         drawdata.Diagram
 }
 
@@ -260,18 +260,32 @@ func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
 	return nil
 }
 
-// Draw
 func (ud *UMLDiagram) GetDrawData() drawdata.Diagram {
 	return ud.drawData
 }
 
-func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) duerror.DUError {
+func (ud *UMLDiagram) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
 	if update == nil {
 		return duerror.NewInvalidArgumentError("update function cannot be nil")
 	}
-	ud.notifyDrawUpdate = update
+	ud.updateParentDraw = update
 	return nil
 
+}
+
+func (ud *UMLDiagram) AddAttributeToGadget(content string, section int) duerror.DUError {
+
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only add attribute to one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.AddAttribute(content, section); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
@@ -291,8 +305,8 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	}
 	ud.drawData.Gadgets = gs
 	ud.drawData.Associations = as
-	if ud.notifyDrawUpdate == nil {
+	if ud.updateParentDraw == nil {
 		return nil
 	}
-	return ud.notifyDrawUpdate()
+	return ud.updateParentDraw()
 }
