@@ -15,9 +15,9 @@ const Canvas: React.FC<{ backendData : BackendCanvasProps}> = ({ backendData }) 
     const [paper, setPaper] = useState<dia.Paper | null>(null);
     const [selectedElements, setSelectedElements] = useState<dia.Element[]>([]);
 
+    // TODO: remove this part, since this moniters individual element, should monitor canvas onclick instead
     useEffect(() => {
         if (graph && paper) {
-            // Handle mouse interactions
             paper.on('element:pointerclick', (elementView) => {
                 const element = elementView.model;
                 if (selectedElements.includes(element)) {
@@ -28,18 +28,18 @@ const Canvas: React.FC<{ backendData : BackendCanvasProps}> = ({ backendData }) 
             });
 
             paper.on('blank:pointerclick', () => {
-                setSelectedElements([]); // Deselect all elements when clicking on blank space
+                setSelectedElements([]);
             });
         }
     }, [graph, paper, selectedElements]);
 
     useEffect(() => {
-        if (paperRef.current && !paper) {
+        if (paperRef.current) {
             const { graph, paper } = createCanvas(paperRef.current, backendData);
             setGraph(graph);
             setPaper(paper);
         }
-    }, [paperRef, backendData, paper]);
+    }, [backendData]);
 
     return (
         <div
