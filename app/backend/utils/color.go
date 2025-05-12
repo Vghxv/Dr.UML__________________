@@ -1,11 +1,13 @@
 package utils
 
+import "fmt"
+
 type Color struct {
 	R, G, B uint8
 }
 
-func (c *Color) ToHex() int {
-	return int(c.R)<<16 | int(c.G)<<8 | int(c.B)
+func (c *Color) ToHexString() string {
+	return "#" + fmt.Sprintf("%02X%02X%02X", c.R, c.G, c.B)
 }
 
 func FromHex(i int) Color {
