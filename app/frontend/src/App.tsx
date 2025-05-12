@@ -26,12 +26,15 @@ const App: React.FC = () => {
     };
 
     const handleAddGadget = async () => {
-        try {
-            await addGadget(1, { x: 100, y: 100 });
-        } catch (error) {
-            console.error("Error adding gadget:", error);
-        }
-    };
+    try {
+        // Generate random positions between 50 and 500
+        const randomX = Math.floor(Math.random() * 450) + 50;
+        const randomY = Math.floor(Math.random() * 450) + 50;
+        await addGadget(1, { x: randomX, y: randomY });
+    } catch (error) {
+        console.error("Error adding gadget:", error);
+    }
+};
 
     useEffect(() => {
         onBackendEvent("backend-event", (result) => {
@@ -73,7 +76,7 @@ const App: React.FC = () => {
                     alignItems: "center",
                 }}
             >
-                {backendData && <Canvas backendData={mockData} />}
+                {backendData && <Canvas backendData={backendData} />}
             </div>
         </DndProvider>
     );
