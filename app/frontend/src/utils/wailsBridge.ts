@@ -13,6 +13,7 @@ interface WindowWithGo extends Window {
                     layer: number,
                     color: number
                 ): Promise<void>;
+                GetDrawData(): Promise<any>;
             };
         };
     };
@@ -41,6 +42,16 @@ export async function addGadget(gadgetType: number, point: { x: number; y: numbe
     }
 }
 
+// Get canvas data without adding a gadget
+export async function getCanvasData(): Promise<any> {
+    try {
+        return await window.go.umlproject.UMLProject.GetDrawData();
+    } catch (error) {
+        console.error("Error fetching canvas data:", error);
+        throw error;
+    }
+}
+
 // Register a backend event listener
 export function onBackendEvent(eventName: string, callback: (result: any) => void): void {
     console.log("Registering event listener for:", eventName);
@@ -49,5 +60,6 @@ export function onBackendEvent(eventName: string, callback: (result: any) => voi
 
 // Unregister a backend event listener
 export function offBackendEvent(eventName: string): void {
+    console.log("Unregistering event listener for:", eventName);
     EventsOff(eventName);
 }
