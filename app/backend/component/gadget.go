@@ -32,15 +32,15 @@ type Gadget struct {
 	updateParentDraw func() duerror.DUError
 }
 
-func NewGadget(gadgetType GadgetType, point utils.Point) (*Gadget, duerror.DUError) {
+func NewGadget(gadgetType GadgetType, point utils.Point, layer int, color int) (*Gadget, duerror.DUError) {
 	if err := validateGadgetType(gadgetType); err != nil {
 		return nil, err
 	}
 	g := Gadget{
 		gadgetType: gadgetType,
 		point:      point,
-		layer:      0,
-		color:      utils.FromHex(drawdata.DefaultGadgetColor),
+		layer:      layer,
+		color:      utils.FromHex(color),
 	}
 
 	// Init default attributes
@@ -107,7 +107,7 @@ func (g *Gadget) SetLayer(layer int) duerror.DUError {
 
 func (g *Gadget) SetColor(color utils.Color) duerror.DUError {
 	g.color = color
-	g.drawData.Color = color.ToHex()
+	g.drawData.Color = color.ToHexString()
 	if g.updateParentDraw == nil {
 		return nil
 	}
@@ -176,7 +176,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Layer = g.layer
 	g.drawData.Height = height
 	g.drawData.Width = width
-	g.drawData.Color = g.color.ToHex()
+	g.drawData.Color = g.color.ToHexString()
 	g.drawData.Attributes = atts
 
 	if g.updateParentDraw == nil {

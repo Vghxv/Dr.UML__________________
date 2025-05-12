@@ -9,7 +9,7 @@ import (
 )
 
 func TestGadget_GetDrawData(t *testing.T) {
-	gadget, err := NewGadget(Class, utils.Point{X: 1, Y: 1})
+	gadget, err := NewGadget(Class, utils.Point{X: 1, Y: 1}, 0, 0x808080)
 	assert.NoError(t, err)
 	assert.NotNil(t, gadget)
 

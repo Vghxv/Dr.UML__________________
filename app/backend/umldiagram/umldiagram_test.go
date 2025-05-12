@@ -130,6 +130,6 @@ func TestUMLDiagramGetters(t *testing.T) {
 
 	assert.Equal(t, "TestDiagram", diagram.GetName())
 
-	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20})
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, 0x808080)
 	assert.NoError(t, err)
 }

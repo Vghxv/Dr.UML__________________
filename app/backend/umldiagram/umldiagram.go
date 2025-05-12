@@ -96,8 +96,8 @@ func (ud *UMLDiagram) GetLastModified() time.Time {
 }
 
 // Other methods
-func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
-	g, err := component.NewGadget(gadgetType, point)
+func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int) duerror.DUError {
+	g, err := component.NewGadget(gadgetType, point, layer, color)
 	if err != nil {
 		return err
 	}
