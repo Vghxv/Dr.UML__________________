@@ -31,17 +31,18 @@ class ClassElement {
         };
 
         this.headerHeight = calculateSectionHeight(0, headerLen);
-        this.attributesHeight = calculateSectionHeight(1, attributesLen); 
+        this.attributesHeight = calculateSectionHeight(1, attributesLen);
     }
 
     draw(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
         ctx.fillStyle = this.op.color;
         ctx.fillRect(this.op.x, this.op.y, this.op.width, this.headerHeight);
         ctx.fillStyle = "white";
-        ctx.fillRect(this.op.x, this.op.y + this.headerHeight, this.op.width, this.attributesHeight);
+        ctx.fillRect(this.op.x, this.op.y + this.headerHeight, this.op.width, this.op.height - this.headerHeight);
         ctx.fillStyle = "black";
         ctx.strokeRect(this.op.x, this.op.y, this.op.width, this.op.height);
         ctx.beginPath();
+
         ctx.moveTo(this.op.x, this.op.y + this.headerHeight);
         ctx.lineTo(this.op.x + this.op.width, this.op.y + this.headerHeight);
 
