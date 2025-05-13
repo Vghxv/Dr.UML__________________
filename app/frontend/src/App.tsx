@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import "./App.css";
-import Canvas from "./components/Canvas";
 import {
     getCurrentDiagramName,
     addGadget,
@@ -10,13 +7,14 @@ import {
     onBackendEvent,
     offBackendEvent,
 } from "./utils/wailsBridge";
-import { BackendCanvasProps } from "./utils/createCanvas";
-import mockData from './assets/mock/gadget';
-import CreateGadgetPopup from "./components/CreateGadgetPopup";
+import { CanvasProps } from "./utils/Props";
+import DrawingCanvas from "./components/Canvas";
+// import mockData from './assets/mock/gadget';
+// import CreateGadgetPopup from "./components/CreateGadgetPopup";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
-    const [backendData, setBackendData] = useState<BackendCanvasProps | null>(null);
+    const [backendData, setBackendData] = useState<CanvasProps | null>(null);
     const [showPopup, setShowPopup] = useState(false);
 
     const handleGetDiagramName = async () => {
@@ -33,7 +31,8 @@ const App: React.FC = () => {
             // Generate random positions between 50 and 500
             const randomX = Math.floor(Math.random() * 450) + 50;
             const randomY = Math.floor(Math.random() * 450) + 50;
-            await addGadget(1, { x: randomX, y: randomY }, 0, 0x0000FF);
+            // TODO: import gadget type from backend
+            await addGadget(1, { x: randomX, y: randomY }, 0, 0x00FF00);
         } catch (error) {
             console.error("Error adding gadget:", error);
         }
@@ -63,7 +62,7 @@ const App: React.FC = () => {
     }, []);
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <div>
             <div className="section">
                 <h1 style={{ fontFamily: "Inkfree" }}>Dr.UML</h1>
 
@@ -87,7 +86,7 @@ const App: React.FC = () => {
                 </button>
             </div>
 
-            {showPopup && (
+            {/* {showPopup && (
                 <CreateGadgetPopup
                     onCreate={(gadget) => {
                         // 這裡可以將 gadget 傳給後端或存在 local state
@@ -96,9 +95,7 @@ const App: React.FC = () => {
                     }}
                     onCancel={() => setShowPopup(false)}
                 />
-            )}
-
-
+            )} */}
             {/* Center Section: Canvas */}
             <div
                 style={{
@@ -109,9 +106,10 @@ const App: React.FC = () => {
                     alignItems: "center",
                 }}
             >
-                {backendData && <Canvas backendData={backendData} />}
+                {/*{backendData && <Canvas backendData={backendData} />}*/}
+                <DrawingCanvas backendData={backendData} />
             </div>
-        </DndProvider>
+        </div>
     );
 };
 
