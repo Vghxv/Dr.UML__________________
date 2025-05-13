@@ -12,7 +12,6 @@ import (
 
 type DiagramType int
 
-// TODO: ug want to refactor all the type things
 const (
 	ClassDiagram    = 1 << iota // 0x01
 	UseCaseDiagram  = 1 << iota // 0x02

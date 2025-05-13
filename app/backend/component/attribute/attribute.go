@@ -19,7 +19,6 @@ type Attribute struct {
 }
 
 func NewAttribute(content string) (*Attribute, duerror.DUError) {
-	// TODO
 	att := &Attribute{
 		content:  content,
 		size:     drawdata.DefaultAttributeFontSize,
