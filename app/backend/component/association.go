@@ -217,8 +217,7 @@ func (this *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 	stDelta := utils.AddPoints(st, delta)
 	enDelta := utils.AddPoints(en, delta)
 
-	// TODO: correct threshold
-	threshold := float64(5)
+	threshold := float64(4)
 	return dist(stDelta, enDelta, p) <= threshold ||
 		dist(st, stDelta, p) <= threshold ||
 		dist(en, enDelta, p) <= threshold, nil
@@ -244,21 +243,43 @@ func (this *Association) updateDrawData() duerror.DUError {
 		return duerror.NewInvalidArgumentError("association or parents are nil")
 	}
 
+	this.drawdata.DeltaX = 0
+	this.drawdata.DeltaY = 0
+	var startPoint, endPoint utils.Point
 	if this.parents[0] != this.parents[1] {
+		// diff parents: start and end both snap to edges of their parents
 		stGdd := this.parents[0].GetDrawData().(*drawdata.Gadget)
-		startPoint := snapToEdge(utils.Point{stGdd.X, stGdd.Y}, stGdd.Width, stGdd.Height, this.startPointRatio)
+		startPoint = snapToEdge(utils.Point{X: stGdd.X, Y: stGdd.Y}, stGdd.Width, stGdd.Height, this.startPointRatio)
 		enGdd := this.parents[1].GetDrawData().(*drawdata.Gadget)
-		endPoint := snapToEdge(utils.Point{enGdd.X, enGdd.Y}, enGdd.Width, enGdd.Height, this.endPointRatio)
-
-		this.drawdata.StartX = startPoint.X
-		this.drawdata.StartY = startPoint.Y
-		this.drawdata.EndX = endPoint.X
-		this.drawdata.EndY = endPoint.Y
-		this.drawdata.DeltaX = 0
-		this.drawdata.DeltaY = 0
+		endPoint = snapToEdge(utils.Point{X: enGdd.X, Y: enGdd.Y}, enGdd.Width, enGdd.Height, this.endPointRatio)
 	} else {
-		// TODO: parents are same
+		// same parents: choose a side closest to the start point, and calculate delta
+		gdd := this.parents[0].GetDrawData().(*drawdata.Gadget)
+		startPoint = snapToEdge(utils.Point{X: gdd.X, Y: gdd.Y}, gdd.Width, gdd.Height, this.startPointRatio)
+		endPoint.X, endPoint.Y = startPoint.X, startPoint.Y
+		if startPoint.X == gdd.X || startPoint.X == gdd.X+gdd.Width {
+			// left / right
+			endPoint.Y = gdd.Y + int(float64(gdd.Height)*this.endPointRatio[1])
+			this.drawdata.DeltaX = utils.AbsInt(startPoint.Y-endPoint.Y) / 2
+			if startPoint.X == gdd.X {
+				// left, deltaX is negative
+				this.drawdata.DeltaX = -this.drawdata.DeltaX
+			}
+		} else if startPoint.Y == gdd.Y || startPoint.Y == gdd.Y+gdd.Height {
+			endPoint.X = gdd.X + int(float64(gdd.Width)*this.endPointRatio[0])
+			// up / bottom
+			this.drawdata.DeltaY = utils.AbsInt(startPoint.X-endPoint.X) / 2
+			if startPoint.Y == gdd.Y {
+				// up, deltaY is negative
+				this.drawdata.DeltaY = -this.drawdata.DeltaY
+			}
+		}
 	}
+
+	this.drawdata.StartX = startPoint.X
+	this.drawdata.StartY = startPoint.Y
+	this.drawdata.EndX = endPoint.X
+	this.drawdata.EndY = endPoint.Y
 
 	this.drawdata.AssType = int(this.assType)
 	this.drawdata.Attributes = make([]drawdata.AssAttribute, len(this.attributes))
