@@ -47,8 +47,8 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null }> = ({ backendD
                 margin: '20px auto',
                 position: 'relative',
             }}
-            width="800"
-            height="600"
+            width="1024"
+            height="768"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
