@@ -5,7 +5,7 @@ interface ChatMessageProps {
     text: string;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({user, text}) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ user, text }) => {
     return (
         <div
             style={{
@@ -16,10 +16,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({user, text}) => {
                 boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
             }}
         >
-            <strong style={{color: '#333'}}>{user}:</strong>{' '}
-            <span style={{color: '#555'}}>{text}</span> {/* Subtle text color */}
-            <div style={{fontSize: '0.8em', color: '#999', marginTop: '5px'}}>
-                {new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+            <strong style={{ color: '#333' }}>{user}:</strong>{' '}
+            <span style={{ color: '#555' }}>{text}</span> {/* Subtle text color */}
+            <div style={{ fontSize: '0.8em', color: '#999', marginTop: '5px' }}>
+                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
         </div>
     );
