@@ -139,7 +139,7 @@ func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPo
 		return err
 	}
 
-	// serach parents
+	// search parents
 	stGad, err := ud.componentsContainer.SearchGadget(stPoint)
 	if err != nil {
 		return err
