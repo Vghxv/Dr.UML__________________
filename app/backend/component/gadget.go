@@ -16,11 +16,19 @@ const (
 
 var gadgetDefaultAtts = map[GadgetType]([][]string){
 	Class: [][]string{
-		{"Name"},
-		{"Attributes"},
-		{"Methods"},
+		{"UMLProject"},
+		{},
+		{"GetAvailableDiagrams(): List<String>", "GetLastOpenedDiagrams(): List<String>", "SelectDiagram(diagramName: String): DUError", "CreateDiagram(diagramName: String): DUError"},
 	},
 }
+
+// var gadgetDefaultAtts = map[GadgetType]([][]string){
+// 	Class: [][]string{
+// 		{"UMLProject"},
+// 		{"id: String", "name: String", "lastModified: Date"},
+// 		{},
+// 	},
+// }
 
 type Gadget struct {
 	gadgetType       GadgetType
