@@ -39,8 +39,8 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 	if parents[0] == nil || parents[1] == nil {
 		return nil, duerror.NewInvalidArgumentError("parents are nil")
 	}
-	stGdd := parents[0].GetDrawData().(*drawdata.Gadget)
-	enGdd := parents[1].GetDrawData().(*drawdata.Gadget)
+	stGdd := parents[0].GetDrawData().(drawdata.Gadget)
+	enGdd := parents[1].GetDrawData().(drawdata.Gadget)
 	a := &Association{
 		assType: assType,
 		parents: [2]*Gadget{parents[0], parents[1]},
@@ -173,7 +173,7 @@ func (this *Association) SetStartPoint(point utils.Point) duerror.DUError {
 	if this.parents[0] == nil {
 		return duerror.NewInvalidArgumentError("parent is nil")
 	}
-	gdd := this.parents[0].GetDrawData().(*drawdata.Gadget)
+	gdd := this.parents[0].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")
 	}
@@ -186,7 +186,7 @@ func (this *Association) SetEndPoint(point utils.Point) duerror.DUError {
 	if this.parents[1] == nil {
 		return duerror.NewInvalidArgumentError("parent is nil")
 	}
-	gdd := this.parents[1].GetDrawData().(*drawdata.Gadget)
+	gdd := this.parents[1].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")
 	}
@@ -248,13 +248,13 @@ func (this *Association) updateDrawData() duerror.DUError {
 	var startPoint, endPoint utils.Point
 	if this.parents[0] != this.parents[1] {
 		// diff parents: start and end both snap to edges of their parents
-		stGdd := this.parents[0].GetDrawData().(*drawdata.Gadget)
+		stGdd := this.parents[0].GetDrawData().(drawdata.Gadget)
 		startPoint = snapToEdge(utils.Point{X: stGdd.X, Y: stGdd.Y}, stGdd.Width, stGdd.Height, this.startPointRatio)
-		enGdd := this.parents[1].GetDrawData().(*drawdata.Gadget)
+		enGdd := this.parents[1].GetDrawData().(drawdata.Gadget)
 		endPoint = snapToEdge(utils.Point{X: enGdd.X, Y: enGdd.Y}, enGdd.Width, enGdd.Height, this.endPointRatio)
 	} else {
 		// same parents: choose a side closest to the start point, and calculate delta
-		gdd := this.parents[0].GetDrawData().(*drawdata.Gadget)
+		gdd := this.parents[0].GetDrawData().(drawdata.Gadget)
 		startPoint = snapToEdge(utils.Point{X: gdd.X, Y: gdd.Y}, gdd.Width, gdd.Height, this.startPointRatio)
 		endPoint.X, endPoint.Y = startPoint.X, startPoint.Y
 		if startPoint.X == gdd.X || startPoint.X == gdd.X+gdd.Width {
