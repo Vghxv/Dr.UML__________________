@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import "./App.css";
 import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
 
 import {AddGadget, GetCurrentDiagramName, GetDrawData} from "../wailsjs/go/umlproject/UMLProject";
