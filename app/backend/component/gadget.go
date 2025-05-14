@@ -7,6 +7,15 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
+// testing purpose
+var gadgetDefaultAtts = map[GadgetType]([][]string){
+	Class: [][]string{
+		{"UMLProject"},
+		{"id: String", "name: String", "lastModified: Date"},
+		{"GetAvailableDiagrams(): List<String>", "GetLastOpenedDiagrams(): List<String>", "SelectDiagram(diagramName: String): DUError", "CreateDiagram(diagramName: String): DUError"},
+	},
+}
+
 type GadgetType int
 
 const (
@@ -14,33 +23,17 @@ const (
 	supportedGadgetType            = Class
 )
 
-var gadgetDefaultAtts = map[GadgetType]([][]string){
-	Class: [][]string{
-		{"UMLProject"},
-		{},
-		{"GetAvailableDiagrams(): List<String>", "GetLastOpenedDiagrams(): List<String>", "SelectDiagram(diagramName: String): DUError", "CreateDiagram(diagramName: String): DUError"},
-	},
-}
-
-// var gadgetDefaultAtts = map[GadgetType]([][]string){
-// 	Class: [][]string{
-// 		{"UMLProject"},
-// 		{"id: String", "name: String", "lastModified: Date"},
-// 		{},
-// 	},
-// }
-
 type Gadget struct {
 	gadgetType       GadgetType
 	point            utils.Point
 	layer            int
-	attributes       [][]*attribute.Attribute // Gadget have multiple sections, each section have multiple attributes
+	attributes       [][]*attribute.Attribute // Gadget has multiple sections, each section has multiple attributes
 	color            utils.Color
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
 
-func NewGadget(gadgetType GadgetType, point utils.Point, layer int, color int) (*Gadget, duerror.DUError) {
+func NewGadget(gadgetType GadgetType, point utils.Point, layer int, color int, header string) (*Gadget, duerror.DUError) {
 	if err := validateGadgetType(gadgetType); err != nil {
 		return nil, err
 	}
@@ -62,6 +55,21 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, color int) (
 		}
 	}
 
+	//// Init attributes with three sections
+	//g.attributes = make([][]*attribute.Attribute, 3)
+	//
+	//// The first section contains the header
+	//g.attributes[0] = make([]*attribute.Attribute, 0, 1)
+	//if header != "" {
+	//	if err := g.AddAttribute(header, 0); err != nil {
+	//		return nil, err
+	//	}
+	//}
+	//
+	//// The second and third sections are empty
+	//g.attributes[1] = make([]*attribute.Attribute, 0)
+	//g.attributes[2] = make([]*attribute.Attribute, 0)
+
 	if err := g.updateDrawData(); err != nil {
 		return nil, err
 	}
@@ -76,7 +84,7 @@ func validateGadgetType(input GadgetType) duerror.DUError {
 	return nil
 }
 
-// Getter
+// GetPoint Getter
 func (g *Gadget) GetPoint() utils.Point {
 	return g.point
 }
@@ -106,27 +114,28 @@ func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
 	g.point = point
 	g.drawData.X = point.X
 	g.drawData.Y = point.Y
-	if g.updateParentDraw == nil {
-		return nil
-	}
+	//if g.updateParentDraw == nil {
+	//	return nil
+	//}
 	return g.updateParentDraw()
 }
 
 func (g *Gadget) SetLayer(layer int) duerror.DUError {
 	g.layer = layer
 	g.drawData.Layer = layer
-	if g.updateParentDraw == nil {
-		return nil
-	}
+	//if g.updateParentDraw == nil {
+	//	return nil
+	//}
 	return g.updateParentDraw()
 }
 
-func (g *Gadget) SetColor(color utils.Color) duerror.DUError {
-	g.color = color
-	g.drawData.Color = color.ToHexString()
-	if g.updateParentDraw == nil {
-		return nil
-	}
+func (g *Gadget) SetColor(color string) duerror.DUError {
+	hex := utils.FromHexString(color)
+	g.color = hex
+	g.drawData.Color = hex.ToHexString()
+	//if g.updateParentDraw == nil {
+	//	return nil
+	//}
 	return g.updateParentDraw()
 }
 
@@ -207,4 +216,43 @@ func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror
 	}
 	g.updateParentDraw = update
 	return nil
+}
+
+func (g *Gadget) SetAttrContent(section int, index int, content string) duerror.DUError {
+	if section < 0 || section >= len(g.attributes) {
+		return duerror.NewInvalidArgumentError("section out of range")
+	}
+	if index < 0 || index >= len(g.attributes[section]) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
+	if err := g.attributes[section][index].SetContent(content); err != nil {
+		return err
+	}
+	return g.updateDrawData()
+}
+
+func (g *Gadget) SetAttrSize(section int, index int, size int) duerror.DUError {
+	if section < 0 || section >= len(g.attributes) {
+		return duerror.NewInvalidArgumentError("section out of range")
+	}
+	if index < 0 || index >= len(g.attributes[section]) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
+	if err := g.attributes[section][index].SetSize(size); err != nil {
+		return err
+	}
+	return g.updateDrawData()
+}
+
+func (g *Gadget) SetAttrStyle(section int, index int, style int) duerror.DUError {
+	if section < 0 || section >= len(g.attributes) {
+		return duerror.NewInvalidArgumentError("section out of range")
+	}
+	if index < 0 || index >= len(g.attributes[section]) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
+	if err := g.attributes[section][index].SetStyle(attribute.Textstyle(style)); err != nil {
+		return err
+	}
+	return g.updateDrawData()
 }

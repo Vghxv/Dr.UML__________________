@@ -192,17 +192,17 @@ func TestAddGadget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// success
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 	assert.NoError(t, err)
 
 	// invalid gadget type
-	err = p.AddGadget(component.GadgetType(3), utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.GadgetType(3), utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 	assert.Error(t, err)
 
 	// no diagram selected
 	err = p.CloseDiagram("TestDiagram")
 	assert.NoError(t, err)
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 	assert.Error(t, err)
 }
 
@@ -243,7 +243,7 @@ func TestRemoveSelectedComponents(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add and select a component
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 	assert.NoError(t, err)
 	err = p.SelectComponent(utils.Point{X: 5, Y: 5})
 	assert.NoError(t, err)
@@ -266,7 +266,7 @@ func TestGetDrawData(t *testing.T) {
 	assert.NoError(t, err)
 	err = p.SelectDiagram("TestDiagram")
 	assert.NoError(t, err)
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 
 	assert.NoError(t, err)
 	// success
@@ -289,7 +289,7 @@ func TestAddAttributeToGadget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a gadget
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 	assert.NoError(t, err)
 
 	// Select the gadget
@@ -316,7 +316,7 @@ func TestSelectComponent(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a gadget
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 	assert.NoError(t, err)
 
 	// Select the component
@@ -339,7 +339,7 @@ func TestUnselectComponent(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a gadget
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080)
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
 	assert.NoError(t, err)
 
 	// Select the component
