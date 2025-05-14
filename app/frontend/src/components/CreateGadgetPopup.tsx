@@ -1,185 +1,107 @@
-export { };
-// WIP
-// import React, { useState } from "react";
-// import { GadgetProps } from "../utils/Props"; // 請確保這個 interface 定義存在
+import React, { useState } from "react";
 
-// const GadgetEditorPopup: React.FC = () => {
-//   const [form, setForm] = useState<GadgetProps>({
-//     gadgetType: "Class",
-//     x: 100,
-//     y: 100,
-//     layer: 0,
-//     height: 90,
-//     width: 88,
-//     color: "#cccccc",
-//     header: "New Gadget",
-//     header_atrributes: {
-//       content: "Header",
-//       height: 22,
-//       width: 80,
-//       fontSize: 12,
-//       fontStyle: 0,
-//       fontFile: "Inkfree.ttf",
-//     },
-//     attributes: [],
-//     methods: [],
-//   });
+interface GadgetPopupProps {
+    isOpen: boolean;
+    onCreate: (gadget: any) => void;
+    onClose: () => void;
+}
 
-//   const handleInputChange = (field: string, value: any) => {
-//     setForm({ ...form, [field]: value });
-//   };
+export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onClose }) => {
+    const [formData, setFormData] = useState({
+        id: 0,
+        name: "",
+        x: 100,
+        y: 100,
+        color: "#FF0000",
+    });
 
-//   const handleHeaderChange = (field: string, value: any) => {
-//     setForm({
-//       ...form,
-//       header_atrributes: { ...form.header_atrributes, [field]: value },
-//     });
-//   };
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: name === "x" || name === "y" || name === "id" ? parseInt(value) : value });
+    };
 
-//   const addAttribute = () => {
-//     const newAttr = {
-//       content: "Attribute",
-//       height: 22,
-//       width: 80,
-//       fontSize: 12,
-//       fontStyle: 0,
-//       fontFile: "Inkfree.ttf",
-//     };
-//     setForm({ ...form, attributes: [...form.attributes, newAttr] });
-//   };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const { id, name, x, y, color } = formData;
+        onCreate({ id, name, position: { x, y }, color });
+    };
 
-//   const addMethod = () => {
-//     const newMethod = {
-//       content: "Method",
-//       height: 22,
-//       width: 80,
-//       fontSize: 12,
-//       fontStyle: 0,
-//       fontFile: "Inkfree.ttf",
-//     };
-//     setForm({ ...form, methods: [...form.methods, newMethod] });
-//   };
+    if (!isOpen) return null;
 
-//   return (
-//     <div style={styles.overlay}>
-//       <div style={styles.popup}>
-//         <h2 style={styles.sectionTitle}>📦 Gadget Editor</h2>
-
-//         <div style={styles.section}>
-//           <label>Gadget Type:</label>
-//           <input value={form.gadgetType} onChange={(e) => handleInputChange("gadgetType", e.target.value)} />
-
-//           <div style={styles.row}>
-//             <label>X:</label>
-//             <input type="number" value={form.x} onChange={(e) => handleInputChange("x", Number(e.target.value))} />
-
-//             <label>Y:</label>
-//             <input type="number" value={form.y} onChange={(e) => handleInputChange("y", Number(e.target.value))} />
-//           </div>
-
-//           <div style={styles.row}>
-//             <label>Layer:</label>
-//             <input type="number" value={form.layer} onChange={(e) => handleInputChange("layer", Number(e.target.value))} />
-
-//             <label>Color:</label>
-//             <input type="color" value={form.color} onChange={(e) => handleInputChange("color", e.target.value)} />
-//           </div>
-
-//           <div style={styles.row}>
-//             <label>Width:</label>
-//             <input type="number" value={form.width} onChange={(e) => handleInputChange("width", Number(e.target.value))} />
-//             <label>Height:</label>
-//             <input type="number" value={form.height} onChange={(e) => handleInputChange("height", Number(e.target.value))} />
-//           </div>
-
-//           <label>Header Text:</label>
-//           <input value={form.header} onChange={(e) => handleInputChange("header", e.target.value)} />
-//         </div>
-
-//         <div style={styles.section}>
-//           <h3>🎨 Header Attributes</h3>
-//           <label>Content:</label>
-//           <input value={form.header_atrributes.content} onChange={(e) => handleHeaderChange("content", e.target.value)} />
-//           <div style={styles.row}>
-//             <label>Height:</label>
-//             <input type="number" value={form.header_atrributes.height} onChange={(e) => handleHeaderChange("height", Number(e.target.value))} />
-//             <label>Width:</label>
-//             <input type="number" value={form.header_atrributes.width} onChange={(e) => handleHeaderChange("width", Number(e.target.value))} />
-//           </div>
-//           <label>Font Size:</label>
-//           <input type="number" value={form.header_atrributes.fontSize} onChange={(e) => handleHeaderChange("fontSize", Number(e.target.value))} />
-//           <label>Font Style:</label>
-//           <input type="number" value={form.header_atrributes.fontStyle} onChange={(e) => handleHeaderChange("fontStyle", Number(e.target.value))} />
-//           <label>Font File:</label>
-//           <input value={form.header_atrributes.fontFile} onChange={(e) => handleHeaderChange("fontFile", e.target.value)} />
-//         </div>
-
-//         <div style={styles.section}>
-//           <h3>📋 Attributes</h3>
-//           <button onClick={addAttribute}>+ Add Attribute</button>
-//           <ul>
-//             {form.attributes.map((attr, i) => (
-//               <li key={i}>{attr.content}</li>
-//             ))}
-//           </ul>
-//         </div>
-
-//         <div style={styles.section}>
-//           <h3>🔧 Methods</h3>
-//           <button onClick={addMethod}>+ Add Method</button>
-//           <ul>
-//             {form.methods.map((m, i) => (
-//               <li key={i}>{m.content}</li>
-//             ))}
-//           </ul>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// const styles: { [key: string]: React.CSSProperties } = {
-//   overlay: {
-//     position: "fixed",
-//     top: 0,
-//     left: 0,
-//     width: "100vw",
-//     height: "100vh",
-//     backgroundColor: "rgba(0, 0, 0, 0.5)",
-//     display: "flex",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     zIndex: 1000,
-//   },
-//   popup: {
-//     backgroundColor: "#ffffff",
-//     padding: "24px",
-//     borderRadius: "10px",
-//     width: "460px",
-//     maxHeight: "90vh",
-//     overflowY: "auto",
-//     boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-//   },
-//   section: {
-//     marginBottom: "20px",
-//     borderBottom: "1px solid #ddd",
-//     paddingBottom: "10px",
-//   },
-//   sectionTitle: {
-//     marginBottom: "20px",
-//     fontSize: "22px",
-//     color: "#333",
-//   },
-//   row: {
-//     display: "flex",
-//     gap: "10px",
-//     alignItems: "center",
-//     marginBottom: "10px",
-//   },
-// };
-
-// export default GadgetEditorPopup;
-// const CreateComponentPopup: React.FC<GadgetProps> = ({ onClose }) => {
-
-
-// }
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+                <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Create Gadget</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                        <input
+                            type="number"
+                            name="id"
+                            value={formData.id}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 rounded-lg p-2"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            className="w-full border border-gray-300 rounded-lg p-2"
+                        />
+                    </div>
+                    <div className="flex space-x-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">X</label>
+                            <input
+                                type="number"
+                                name="x"
+                                value={formData.x}
+                                onChange={handleChange}
+                                className="w-full border border-gray-300 rounded-lg p-2"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Y</label>
+                            <input
+                                type="number"
+                                name="y"
+                                value={formData.y}
+                                onChange={handleChange}
+                                className="w-full border border-gray-300 rounded-lg p-2"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                        <input
+                            type="color"
+                            name="color"
+                            value={formData.color}
+                            onChange={handleChange}
+                            className="w-full h-10 p-1"
+                        />
+                    </div>
+                    <div className="flex justify-end space-x-3 pt-4">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-800"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-semibold"
+                        >
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};

@@ -23,3 +23,19 @@ export interface GadgetProps {
         fontFile: string;
     }[][];
 }
+
+export interface AssociationProps {
+    assType: number;
+    layer: number;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+    attributes: {
+        content: string;
+        fontSize: number;
+        fontStyle: number;
+        fontFile: string;
+        ratio: number;
+    }[];
+}
