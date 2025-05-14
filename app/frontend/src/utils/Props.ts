@@ -14,6 +14,7 @@ export interface GadgetProps {
     height: number;
     width: number;
     color: string;
+    isSelected: boolean;
     attributes: {
         content: string;
         height: number;
