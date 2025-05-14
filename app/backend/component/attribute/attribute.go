@@ -1,11 +1,10 @@
 package attribute
 
 import (
-	"os"
-
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
+	"os"
 )
 
 // Attribute represents a configurable textual element with content, size, and style properties expressed as Textstyle.
@@ -59,7 +58,7 @@ func (att *Attribute) SetSize(size int) duerror.DUError {
 	return att.updateDrawData()
 }
 
-// GetStyle returns the Textstyle of the Attribute and a possible DUError. It retrieves the current style applied.
+// GetStyle returns the Text style of the Attribute and a possible DUError. It retrieves the current style applied.
 func (att *Attribute) GetStyle() Textstyle {
 	return att.style
 }

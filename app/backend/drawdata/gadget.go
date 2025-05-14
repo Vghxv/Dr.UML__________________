@@ -11,5 +11,6 @@ type Gadget struct {
 	Height     int           `json:"height"`
 	Width      int           `json:"width"`
 	Color      string        `json:"color"`
+	IsSelected bool          `json:"isSelected"`
 	Attributes [][]Attribute `json:"attributes"`
 }

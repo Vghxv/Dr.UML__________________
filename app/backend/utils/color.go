@@ -1,6 +1,9 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Color struct {
 	R, G, B uint8
@@ -17,4 +20,17 @@ func FromHex(i int) Color {
 		B: uint8(i & 0xFF),
 	}
 	// return Color{R: uint8(i >> 16), G: uint8(i >> 8), B: uint8(i)}
+}
+
+// parse string like "#FF00FF"
+func FromHexString(s string) Color {
+	if len(s) != 7 || s[0] != '#' {
+		return Color{}
+	}
+	hex := s[1:]
+	i, err := strconv.ParseInt(hex, 16, 32)
+	if err != nil {
+		return Color{}
+	}
+	return FromHex(int(i))
 }
