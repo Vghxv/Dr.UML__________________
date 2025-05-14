@@ -29,73 +29,180 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onCl
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-                <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Create Gadget</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+        <div style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 50
+            }}>
+            <div style={{
+                backgroundColor: 'white',
+                borderRadius: '1rem',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                padding: '1.5rem',
+                width: '100%',
+                maxWidth: '28rem'
+            }}>
+                <h2 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    marginBottom: '1.5rem',
+                    color: '#2d3748'
+                }}>Create Gadget</h2>
+                <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ 
+                            display: 'block', 
+                            fontSize: '0.875rem', 
+                            fontWeight: 500, 
+                            color: '#4a5568', 
+                            marginBottom: '0.25rem' 
+                        }}>ID</label>
                         <input
                             type="number"
                             name="id"
                             value={formData.id}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded-lg p-2"
+                            style={{
+                                width: '100%',
+                                border: '1px solid #d2d6dc',
+                                borderRadius: '0.5rem',
+                                padding: '0.5rem'
+                            }}
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ 
+                            display: 'block', 
+                            fontSize: '0.875rem', 
+                            fontWeight: 500, 
+                            color: '#4a5568', 
+                            marginBottom: '0.25rem' 
+                        }}>Name</label>
                         <input
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded-lg p-2"
+                            style={{
+                                width: '100%',
+                                border: '1px solid #d2d6dc',
+                                borderRadius: '0.5rem',
+                                padding: '0.5rem'
+                            }}
                         />
                     </div>
-                    <div className="flex space-x-4">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">X</label>
+                    <div style={{ 
+                        display: 'flex', 
+                        gap: '1rem',
+                        marginBottom: '1rem'
+                    }}>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ 
+                                display: 'block', 
+                                fontSize: '0.875rem', 
+                                fontWeight: 500, 
+                                color: '#4a5568', 
+                                marginBottom: '0.25rem' 
+                            }}>X</label>
                             <input
                                 type="number"
                                 name="x"
                                 value={formData.x}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-lg p-2"
+                                style={{
+                                    width: '100%',
+                                    border: '1px solid #d2d6dc',
+                                    borderRadius: '0.5rem',
+                                    padding: '0.5rem'
+                                }}
                             />
                         </div>
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Y</label>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ 
+                                display: 'block', 
+                                fontSize: '0.875rem', 
+                                fontWeight: 500, 
+                                color: '#4a5568', 
+                                marginBottom: '0.25rem' 
+                            }}>Y</label>
                             <input
                                 type="number"
                                 name="y"
                                 value={formData.y}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-lg p-2"
+                                style={{
+                                    width: '100%',
+                                    border: '1px solid #d2d6dc',
+                                    borderRadius: '0.5rem',
+                                    padding: '0.5rem'
+                                }}
                             />
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ 
+                            display: 'block', 
+                            fontSize: '0.875rem', 
+                            fontWeight: 500, 
+                            color: '#4a5568', 
+                            marginBottom: '0.25rem' 
+                        }}>Color</label>
                         <input
                             type="color"
                             name="color"
                             value={formData.color}
                             onChange={handleChange}
-                            className="w-full h-10 p-1"
+                            style={{
+                                width: '100%',
+                                height: '2.5rem',
+                                padding: '0.25rem'
+                            }}
                         />
                     </div>
-                    <div className="flex justify-end space-x-3 pt-4">
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'flex-end', 
+                        gap: '0.75rem', 
+                        paddingTop: '1rem' 
+                    }}>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-800"
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '0.5rem',
+                                backgroundColor: '#d1d5db',
+                                color: '#1f2937',
+                                border: 'none',
+                                cursor: 'pointer'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#9ca3af'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#d1d5db'}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-semibold"
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '0.5rem',
+                                backgroundColor: '#eab308',
+                                color: 'white',
+                                fontWeight: 600,
+                                border: 'none',
+                                cursor: 'pointer'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#ca8a04'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#eab308'}
                         >
                             Create
                         </button>
