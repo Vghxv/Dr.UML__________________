@@ -96,8 +96,8 @@ func (ud *UMLDiagram) GetLastModified() time.Time {
 }
 
 // Other methods
-func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int) duerror.DUError {
-	g, err := component.NewGadget(gadgetType, point, layer, color)
+func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int, header string) duerror.DUError {
+	g, err := component.NewGadget(gadgetType, point, layer, color, header)
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 		return nil
 	}
 	ud.componentsSelected[c] = true
-	return nil
+	return ud.updateDrawData()
 }
 
 func (ud *UMLDiagram) UnselectComponent(point utils.Point) duerror.DUError {
@@ -185,7 +185,7 @@ func (ud *UMLDiagram) UnselectComponent(point utils.Point) duerror.DUError {
 		return nil
 	}
 	delete(ud.componentsSelected, c)
-	return nil
+	return ud.updateDrawData()
 }
 
 func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
@@ -220,7 +220,101 @@ func (ud *UMLDiagram) AddAttributeToGadget(content string, section int) duerror.
 	}
 	return nil
 }
+func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.DUError {
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only remove attribute from one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.RemoveAttribute(section, index); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
 
+func (ud *UMLDiagram) SetPointGadget(point utils.Point) duerror.DUError {
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only set point to one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.SetPoint(point); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) SetSetLayerGadget(layer int) duerror.DUError {
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only set layer to one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.SetLayer(layer); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) SetColorGadget(color string) duerror.DUError {
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only set color to one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.SetColor(color); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only set content to one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.SetAttrContent(section, index, content); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+func (ud *UMLDiagram) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only set size to one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.SetAttrSize(section, index, size); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+func (ud *UMLDiagram) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
+	if len(ud.componentsSelected) != 1 {
+		return duerror.NewInvalidArgumentError("can only set style to one gadget")
+	}
+	for c := range ud.componentsSelected {
+		if g, ok := c.(*component.Gadget); ok {
+			if err := g.SetAttrStyle(section, index, style); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	gs := make([]drawdata.Gadget, 0, len(ud.componentsSelected))
 	// TODO
@@ -232,6 +326,12 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 		}
 		switch c.(type) {
 		case *component.Gadget:
+			// check if this gadget is in componentsSelected
+			if _, ok := ud.componentsSelected[c]; ok {
+				gadget := cDrawData.(drawdata.Gadget)
+				gadget.IsSelected = true
+				gs = append(gs, gadget)
+			}
 			gs = append(gs, cDrawData.(drawdata.Gadget))
 		case *component.Association:
 			continue

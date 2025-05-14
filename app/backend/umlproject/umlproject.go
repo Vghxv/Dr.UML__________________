@@ -133,11 +133,11 @@ func (p *UMLProject) DeleteDiagram(diagramName string) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int) duerror.DUError {
+func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int, header string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.AddGadget(gadgetType, point, layer, color); err != nil {
+	if err := p.currentDiagram.AddGadget(gadgetType, point, layer, color, header); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -203,6 +203,17 @@ func (p *UMLProject) AddAttributeToGadget(content string, section int) duerror.D
 	return nil
 }
 
+func (p *UMLProject) RemoveAttributeFromGadget(section int, index int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.RemoveAttributeFromGadget(section, index); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
 func (p *UMLProject) SelectComponent(point utils.Point) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
@@ -214,12 +225,79 @@ func (p *UMLProject) SelectComponent(point utils.Point) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) UnselectComponent(point utils.Point) duerror.DUError {
+//func (p *UMLProject) UnselectComponent(point utils.Point) duerror.DUError {
+//
+//	if p.currentDiagram == nil {
+//		return duerror.NewInvalidArgumentError("No current diagram selected")
+//	}
+//	if err := p.currentDiagram.UnselectComponent(point); err != nil {
+//		return err
+//	}
+//	p.lastModified = time.Now()
+//	return nil
+//}
+
+func (p *UMLProject) SetPointGadget(point utils.Point) duerror.DUError {
 
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.UnselectComponent(point); err != nil {
+	if err := p.currentDiagram.SetPointGadget(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetSetLayerGadget(layer int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetSetLayerGadget(layer); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetColorGadget(color string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetColorGadget(color); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrContentGadget(section, index, content); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrSizeGadget(section, index, size); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrStyleGadget(section, index, style); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
