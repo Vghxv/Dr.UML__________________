@@ -47,9 +47,14 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null }> = ({backendDa
     }, [backendData]);
 
     const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        console.log("handleMouseDown");
+        const rect = canvasRef.current?.getBoundingClientRect();
+        const x = Math.round(event.clientX - (rect?.left || 0));
+        const y = Math.round(event.clientY - (rect?.top || 0));
+        console.log("Mouse down at:", x, y);
         SelectComponent(ToPoint(
-            event.clientX - (canvasRef.current?.offsetLeft || 0),
-            event.clientY - (canvasRef.current?.offsetTop || 0)
+            x,
+            y
         )).then(() => {
                 console.log("handleMouseDown");
             }
