@@ -172,7 +172,13 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 	if c == nil {
 		return nil
 	}
-	ud.componentsSelected[c] = true
+	// if is in componentsSelected remove it, else add it
+	if _, ok := ud.componentsSelected[c]; ok {
+		delete(ud.componentsSelected, c)
+	} else {
+		ud.componentsSelected[c] = true
+	}
+	//ud.componentsSelected[c] = true
 	return ud.updateDrawData()
 }
 
