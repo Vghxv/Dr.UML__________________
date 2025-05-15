@@ -27,19 +27,17 @@ hide circle
     end note
 
     object Gadget {
-        id
-        type
+        gadgetType
         color
         position
-        zIndex
+        layer
     }
 
     object Association {
-        id
-        type
-        color
-        position
-        zIndex
+        associationType
+        startPosition
+        endPosition
+        layer
     }
 
     object Submodule {
@@ -92,7 +90,6 @@ hide circle
     }
 
 
-    User "1" -- "*" UMLProject : manages
     UMLProject "1" -- "*" UMLDiagram : manages
     note right on link
         A UMLroject can has multi UMLDiagrams.
