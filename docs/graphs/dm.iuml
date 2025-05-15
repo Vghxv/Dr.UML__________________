@@ -1,8 +1,8 @@
 @startuml
 hide circle
-hide method
-hide attribute
-hide link
+'hide method
+'hide attribute
+'hide link
 
 
     object User {

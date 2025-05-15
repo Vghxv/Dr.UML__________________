@@ -5,8 +5,8 @@ group#gold #white openProject
     participant ":UI"
     participant ":UMLProject"
     
-    ":UI" -> ":UMLProject": openProject()
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": openProject()
+    note left of ":UMLProject" #red: by Controller
     ":UMLProject" -> ":UMLProject": diagrams = GetAvailableDiagrams()
     return
     note right of ":UMLProject" #red: by Expert (UI want to know the diagram)
@@ -15,7 +15,7 @@ group#gold #white openProject
     ":UMLProject" -> ":UMLProject": lastOpenedDiagrams = GetLastOpenedDiagrams()
     note right of ":UMLProject" #red: by Expert (UI want to know the lastOpenedDiagrams)
     note right of ":UMLProject": GetLastOpenedDiagrams() returns names of diagrams that were opened last time
-    return 
+    return
 
     loop#gold #white diagramName in lastOpenedDiagrams
         ":UMLProject" --> "diagram:UMLDiagram" ** : createDiagram(diagramName)
@@ -36,8 +36,8 @@ end
 autonumber
 autoactivate on
 group#gold #white selectDiagram
-    ":UI" -> ":UMLProject": selectDiagram(diagramName)
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": selectDiagram(diagramName)
+    note left of ":UMLProject" #red: by Controller
         opt#gold #white diagramName not in activeDiagrams
             note right of ":UMLProject": load the selected diamgram if it has not been loaded
             ":UMLProject" --> "diagram:UMLDiagram" ** :  createDiagram(diagramName)"
@@ -47,7 +47,7 @@ group#gold #white selectDiagram
             return
         end
         ":UMLProject" -> ":UMLProject" : currentDiagram = activeDiagrams[diagramName]
-        return 
+        return
     return
 end selectDiagram
 @enduml
@@ -57,8 +57,8 @@ end selectDiagram
 autonumber
 autoactivate on
 group#gold #white addGadgetToDiagram
-   ":UI" -> ":UMLProject": addGadget(type, point)
-    note right of ":UI" #red: by Controller
+   -> ":UMLProject": addGadget(type, point)
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram"  : addGadget(type, point)
            "currentDiagram\n:*UMLDiagram" -> ":Components"  : addGadget(type, point)
                 ":Components"  --> "gadget:Gadget" **  : createGadget(type, point)
@@ -77,27 +77,27 @@ end addGadgetToDiagram
 autonumber
 autoactivate on
 group#gold #white addAssociationToDiagram
-":UI" -> ":UMLProject": startAddAssociation(point)
-note right of ":UI" #red: by Controller
+-> ":UMLProject": startAddAssociation(point)
+note left of ":UMLProject" #red: by Controller
     ":UMLProject" -> "currentDiagram\n:*UMLDiagram": startAddAssociation(point)
         "currentDiagram\n:*UMLDiagram" -> "currentDiagram\n:*UMLDiagram": startPoint = point
         return
     return
 return
 ...
-":UI" -> ":UMLProject": endAddAssociation(type, point)
+-> ":UMLProject": endAddAssociation(type, point)
     ":UMLProject" -> "currentDiagram\n:*UMLDiagram": endAddAssociation(type, point)
         "currentDiagram\n:*UMLDiagram" -> ":Components": addAssociation(type, startPoint, point)
             ":Components" -> ":Components": parents = [findGadget(startPoint), findGadget(point)]
             return
-            
+
             opt#gold #white both parents are not null
                 ":Components" --> "ass:Association" ** : createAssociation(type, parents)
                 note right of ":Components" #red: by Creator
 
                 ":Components" -> ":Components" : adjustAssociationPath(*association)
                 note right of ":Components": adjust the pathing of newly created association to prevent overlapping
-                return 
+                return
 
                 ":Components" -> ":Components": components = append(components, ass)
                 note right of ":Components": append is a golang built-in function
@@ -114,8 +114,8 @@ end addAssociationToDiagram
 autonumber
 autoactivate on
 group#gold #white selectComponent
-    ":UI" -> ":UMLProject": selectComponent(point)
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": selectComponent(point)
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram": selectComponent(point)
             "currentDiagram\n:*UMLDiagram" -> ":Components": selectComponent(point)
             loop#gold #white component covering point
@@ -124,7 +124,7 @@ group#gold #white selectComponent
                 return
                 note right of ":Components": add component to a list of selected-component pointers
             end
-            
+
             opt#gold #white only select one component
                 ":Components" -> "SelectedComponent\n:Component": setupProperty()
                 "SelectedComponent\n:Component" -> "SelectedComponent\n:Component": tree = createPropertyTree()
@@ -149,8 +149,8 @@ end selectComponent
 autonumber
 autoactivate on
 group#gold #white unselectComponent
-    ":UI" -> ":UMLProject": unselectComponent(point)
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": unselectComponent(point)
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram": unselectComponent(point)
             "currentDiagram\n:*UMLDiagram" -> ":Components": unselectComponent(point)
             loop#gold #white component cover point
@@ -171,8 +171,8 @@ end unselectComponent
 group#gold #white unselectAllComponents
 autonumber
 autoactivate on
-    ":UI" -> ":UMLProject": unselectAllComponents()
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": unselectAllComponents()
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram": unselectAllComponents()
             "currentDiagram\n:*UMLDiagram" -> ":Components": unselectAllComponents()
                 ":Components" -> ":Components": selectedComponents = []
@@ -190,8 +190,8 @@ end unselectAll
 autonumber
 autoactivate on
 group#gold #white copyComponents
-    ":UI" -> ":UMLProject": CopyComponents()
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": CopyComponents()
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram": ExportSubmodule("clipboard")
         note over ":UMLProject"
         "clipboard" is a special submodule
@@ -214,8 +214,8 @@ end copyComponents
 autonumber
 autoactivate on
 group#gold #white pasteComponents
-    ":UI" -> ":UMLProject": PasteComponents(point)
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": PasteComponents(point)
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram": ImportSubmodule("clipboard", point)
         ref over ":UMLProject" , "currentDiagram\n:*UMLDiagram" : import submodule
         return
@@ -228,8 +228,8 @@ end pasteComponents
 autonumber
 autoactivate on
 group#gold #white importSubmodule
-    ":UI" -> ":UMLProject": ImportSubmodule(submoduleName, point)
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": ImportSubmodule(submoduleName, point)
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram": ImportSubmodule(submoduleName, point)
             "currentDiagram\n:*UMLDiagram" -> ":Components": ImportSubmodule(submoduleName, point)
             ":Components" -> ":Submodule":  <<static>>\nimportCompnents = ImportSubmodule(submoduleName)
@@ -253,10 +253,14 @@ end importSubmodule
 autonumber
 autoactivate on
 group#gold #white updateProperty
-    ":UI" -> ":propertyManager": updateProperty(name, value)
-    note over ":UI", ":propertyManager"
+     -> ":UMLProject": updateProperty(name, value)
+    note left of ":UMLProject" #red: by Controller
+    ":UMLProject" -> ":propertyManager": updateProperty(name, value)
+    note over ":UMLProject", ":propertyManager"
     updateProperty(name, value) will 🪄update the property of the selected component.
     end note
+    return
+
     return
 end updateProperty
 @enduml
@@ -266,10 +270,10 @@ end updateProperty
 /'undo'/
 autoactivate on
 group#gold #white undo
-    ":UI" -> ":UMLProject" : undo()
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject" : undo()
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram:UMLDiagram" : undo()
-        note right 
+        note right
         UMLDiagram::undo() {
             if (undoDeque.size() > 0) {
                 auto& command = undoDeque.top();
@@ -289,10 +293,10 @@ end undo
 /'redo'/
 autoactivate on
 group#gold #white redo
-    ":UI" -> ":UMLProject" : redo()
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject" : redo()
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram:UMLDiagram" : redo()
-        note right 
+        note right
         UMLDiagram::undo() {
             if (redoDeque.size() > 0) {
                 auto& command = redoDeque.top();
@@ -312,8 +316,8 @@ end undo
 autonumber
 autoactivate on
 group#gold #white deleteComponent
-    ":UI" -> ":UMLProject": DeleteComponent()
-    note right of ":UI" #red: by Controller
+    -> ":UMLProject": DeleteComponent()
+    note left of ":UMLProject" #red: by Controller
         ":UMLProject" -> "currentDiagram\n:*UMLDiagram": DeleteComponent()
             "currentDiagram\n:*UMLDiagram" -> ":Components": DeleteComponent()
 
@@ -340,8 +344,8 @@ autonumber
 autoactivate on
 group#gold #white moveComponent
 
-":UI" -> ":UMLProject" : StartDragging(point)
-note right of ":UI" #red: by Controller
+-> ":UMLProject" : StartDragging(point)
+note left of ":UMLProject" #red: by Controller
     ":UMLProject" -> "currentDiagram:*UMLDiagram" : StartDragging(point)
         "currentDiagram:*UMLDiagram" -> "currentDiagram:*UMLDiagram" : moveStartPoint = point
         return
@@ -349,8 +353,8 @@ note right of ":UI" #red: by Controller
 return
 ...
 
-":UI" ->":UMLProject" : StopDragging(point)
-note right of ":UI" #red: by Controller
+->":UMLProject" : StopDragging(point)
+note left of ":UMLProject" #red: by Controller
     ":UMLProject" -> "currentDiagram:*UMLDiagram" : StopDragging(point)
         "currentDiagram:*UMLDiagram" -> ":Components" : MoveSelectedComponents(point - moveStartPoint)
             loop#gold component in selectedComponents
@@ -377,7 +381,7 @@ end moveComponent
 autonumber
 autoactivate on
 group#gold #white drawAll
-":UI" -> ":UMLProject": drawAll(graphic)
+-> ":UMLProject": drawAll(graphic)
     ":UMLProject" -> "currentDiagram:*UMLDiagram": drawAll(graphic)
         "currentDiagram:*UMLDiagram" -> ":Components": drawAll(graphic)
             loop#gold #white component in components
