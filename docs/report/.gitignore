@@ -1,0 +1,6 @@
+out/
+!out/main.pdf
+
+svg-inkscape/
+*.out
+*.log
