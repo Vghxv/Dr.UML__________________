@@ -19,12 +19,15 @@
 
 %% START TIME MACHINE
 
+
     \section{Change History}
+
     \subsection{HW1}
     \begin{itemize}
         \item Add section Problem statement.
         \item Add section Development Language.
     \end{itemize}
+
     \subsection{HW2}
 
     \begin{itemize}
@@ -58,7 +61,39 @@
         \item Add Design Class Model
     \end{itemize}
 
+    \subsection{hw6}
+    \begin{itemize}
+        \item Update Figure
+        \begin{itemize}
+            \item Domain model with associations
+            \item Domain model with associations and attributes
+        \end{itemize}
+        \item Use case
+        \begin{itemize}
+            \item UC01
+            \begin{itemize}
+                \item In Main Success Scenario step 1, Change the wording from "drag" to "select''.
+                \item  Replace  "1-4 steps can be repeated" in the Main Success Scenario with
+                "User can skip any step from 1 to 4" in the Extension.
+                \item Remove extension 4.d.
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+    
+%    \subsection{hw7}
+%    \begin{itemize}
+%        \item Update Figure
+%            \begin{itemize}
+%                \item Sequence diagram
+%                \begin{itemize}
+%                    \item Remove UI from all sequence diagrams.
+%                    \item Add UMLProject to UpdateProperty by controller pattern.
+%                \end{itemize}
+%            \end{itemize}
+%    \end{itemize}
+
 %% START HW1
+
 
     \section{Problem statement}
 
@@ -73,6 +108,7 @@
 
 
 %% START HW2
+
 
     \section{Summary of System Features}
 
@@ -95,6 +131,7 @@
         \caption{Use case diagram}
     \end{figure}
 
+
     \section{Use Cases}
 
     \subsection{UC01: Edit UML}
@@ -115,7 +152,7 @@
         \item \textbf{Success Guarantee}: UML is edited according to the User’s specifications.
         \item \textbf{Main Success Scenario}:
         \begin{enumerate}
-            \item User selects Gadgets from Toolbox.
+            \item User \hl{selects} Gadgets from Toolbox.
             \item User edits the Gadgets.
             \item User establishes connections between Gadgets via Associations.
             \item User modifies the Associations as needed.
@@ -126,25 +163,26 @@
             UML will revert to the last successfully saved state.
             \item *b When editing text, User may design their text as desired(See UC09)
             \item *c User may select Gadgets within the canvas.
-            \item *d When User drags Gadget with multiple Associations, System will automatically update them.
+            \item *d When User drags Gadget with multiple Associations, System will automatically \hl{update} them.
             \item *e User can determine the layering order when Gadgets overlap.
             \item *f User may copy and paste Components.
             \begin{enumerate}
                 \item Copying or pasting Associations will also include connected Gadgets.
             \end{enumerate}
             \item *g User may undo or redo actions.
-            \item *h User can skip any step from 1 to 4
+            \item \hl{*h User can skip any step from 1 to 4}
             \item 1.a Edit fails if Gadget is dragged to an invalid location.
             \item 1.b User can also import an available Submodule in the current Project.
             \item 2.a Different types of Gadgets will have distinct Fields available for editing.
             \item 2.b Edited Gadgets will automatically scale to fit the changes.
-            \item 2.c User can modify the color of a Gadget. The color will apply to Gadget's background.
+            \item 2.c User can modify the color of a Gadget. The color will apply to \hl{Gadget's background.}
             \item 2.d User can move the Gadget as long as the destination is valid. The associations will be updated automatically.
             \item 3.a Deleting a Gadget will also remove the associated connections.
             \item 3.b Self-Associations are allowed.
             \item 4.a User may change the type of Association.
             \item 4.b User may add, remove, and move text Fields in Association.
-            \item 4.e User can modify the path of an Association.
+            \item \sethlcolor{red}\hl{4.d When multiple Associations are created between two Gadgets, System will automatically distinguish the different paths to prevent overlap.}
+            \item 4.d User can modify the path of an Association.
         \end{itemize}
         \item \textbf{Special Requirements}:
         \begin{itemize}
@@ -451,7 +489,10 @@
 
 
 % END
+
+
     \section{Non-functional Requirements and Constraints}
+
     \subsection{Performance Requirements}
     \begin{itemize}
         \item \textbf{NFR1: Response Time}: Operations (e.g., dragging components, editing text, collaboration) should respond within \textbf{1s}.
@@ -460,6 +501,7 @@
         \item \textbf{NFR4: Export Speed}: UML diagrams should be converted to PNG, JPEG, SVG, or WebP formats within \textbf{5 seconds}.
         \item \textbf{NFR5: Network Efficiency}: Collaboration mode should minimize data traffic and prioritize critical updates to reduce bandwidth usage.
     \end{itemize}
+
     \subsection{Usability Requirements}
     \begin{itemize}
         \item \textbf{UR1: User-friendly Interface}: Users should be able to understand basic operations within \textbf{20 minutes}.
@@ -467,6 +509,7 @@
         \item \textbf{UR3: Accessibility}: Keyboard shortcuts should be provided to enhance usability.
         \item \textbf{UR4: Collaboration Features}: Users should see real-time updates and be able to communicate via chat or annotations.
     \end{itemize}
+
     \subsection{Reliability \& Availability Requirements}
     \begin{itemize}
         \item \textbf{RAR1: Uptime}: The system should maintain \textbf{99.9\% availability}.
@@ -480,7 +523,7 @@
     \begin{itemize}
         \item Submodule: a part of UML diagram, it can be imported into other UML diagram
         \item Gadget: a block contains text Fields
-        \item Toolbox: A bar containing  Components, allowing Users to add them to the canvas.
+        \item Toolbox: A bar containing Components, allowing Users to add them to the canvas.
         \item Association: connection between two Gadgets
         \item Field: the place where User can insert text
         \item Session: A shared project allowing other Users to collaborate.
@@ -493,8 +536,6 @@
     \end{itemize}
 
 
-
-
     \section{Software Environments}
     Golang.
 
@@ -502,6 +543,7 @@
 
 
     \section {Domain model}
+
     \subsection{Domain Class Diagram Showing Only Concepts}
 
     \subsubsection{Classes Identified}
@@ -512,17 +554,17 @@
             \caption{Classes Identified}
             \begin{tabular}{|l|l|l|l|l|}
                 \hline
-                *User & System & *UMLDiagram & Component & *Gadget \\
+                *User        & System             & *UMLDiagram & Component  & *Gadget     \\
                 \hline
-                *Association & TextField & Path & UMLFile & Filesystem \\
+                *Association & TextField          & Path        & UMLFile    & Filesystem  \\
                 \hline
-                *UMLProject & ImageFormat & Filename & *Submodule & Field \\
+                *UMLProject  & ImageFormat        & Filename    & *Submodule & Field       \\
                 \hline
-                DiagramType & VerificationResult & Host & Client & *Session \\
+                DiagramType  & VerificationResult & Host        & Client     & *Session    \\
                 \hline
-                Project & Connection & *Chatroom & *Message & ChatHistory \\
+                Project      & Connection         & *Chatroom   & *Message   & ChatHistory \\
                 \hline
-                TextStyle & & & & \\
+                TextStyle    &                    &             &            &             \\
                 \hline
             \end{tabular}
             \begin{tablenotes}
@@ -536,6 +578,7 @@
 
 
     \newpage
+
     \subsubsection{Bad Classes}
 
     \begin{table}[h]
@@ -545,22 +588,20 @@
             \toprule
             \textbf{Attributes} & \textbf{Super Class} & \textbf{Abstract Concepts} & \textbf{Implementation Construction}  & \textbf{Too UI}\\
             \midrule
-            TextField & Component & System & UMLFile  &Toolbox\\
-            ImageFormat &  & Host & Filesystem  &Canvas\\
-            Filename &  & Client & VerificationResult  &\\
-            Field &  & Project & ChatHistory  &\\
-            DiagramType &  & Connection & TextStyle  &\\
-            position &  &  &   &\\
-            fontSize &  &  &   &\\
-            isBold &  &  &   &\\
-            isItalic &  &  &   &\\
-            isUnderline &  &  &   &\\
+            TextField           & Component            & System                     & UMLFile                              & Toolbox         \\
+            ImageFormat         &                      & Host                       & Filesystem                           & Canvas          \\
+            Filename            &                      & Client                     & VerificationResult                   &                 \\
+            Field               &                      & Project                    & ChatHistory                          &                 \\
+            DiagramType         &                      & Connection                 & TextStyle                            &                 \\
+            position            &                      &                            &                                      &                 \\
+            fontSize            &                      &                            &                                      &                 \\
+            isBold              &                      &                            &                                      &                 \\
+            isItalic            &                      &                            &                                      &                 \\
+            isUnderline         &                      &                            &                                      &                 \\
             \bottomrule
         \end{tabular}
         \label{tab:categories}
     \end{table}
-
-
 
     \subsubsection{Good Classes}
 
@@ -568,6 +609,7 @@
         \centering
         \includesvg[inkscapelatex=false,width=0.7\columnwidth]{assets/hw3/dm}
         \caption{Domain class diagram showing only concepts}
+        \label{fig:dm}
     \end{figure}
 
     \subsection{Add Associations}
@@ -588,24 +630,25 @@
 
     \begin{figure}[H]
         \centering
-        \includesvg[inkscapelatex=false,height=0.5\textheight]{assets/hw3/dmWithAss}
+        \includesvg[inkscapelatex=false,height=0.5\textheight]{assets/hw6/dmWithAss}
         \caption{Domain class diagram with associations added}
-
+        \label{fig:dmWithAss}
     \end{figure}
 
     \subsection{Add Attributes}
 
     \begin{figure}[H]
         \centering
-        \includesvg[inkscapelatex=false,height=0.4\textheight]{assets/hw4/dmWithAssAndAtt}
+        \includesvg[inkscapelatex=false,height=0.4\textheight]{assets/hw6/dmWithAssAndAtt}
         \caption{Domain class diagram with attributes added.}
+        \label{fig:dmWithAssAndAtt}
     \end{figure}
-
 
 
 % END HW3
 
 % START HW4
+
 
     \section{Logical Architecture}
 
@@ -614,6 +657,7 @@
         \includesvg[inkscapelatex=false,height=0.9\textheight]{assets/hw4/pkg}
         \caption{Logical architecture}
     \end{figure}
+
 
     \section{System Sequence Diagrams with GRASP Patterns}
     We pick UC1 as our most significant use-case. Since UC1 is made of series of system events, we decide to provide SSDs for each one of them.
@@ -632,14 +676,12 @@
         \caption{addAssociationToDiagram}
     \end{figure}
 
-
-    \subsection{addGadgetToDiagram}
+    tt\subsection{addGadgetToDiagram}
     \begin{figure}[H]
         \centering
         \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/addGadgetToDiagram}
         \caption{addGadgetToDiagram}
     \end{figure}
-
 
     \subsection{copyComponents}
     \begin{figure}[H]
@@ -648,15 +690,12 @@
         \caption{copyComponents}
     \end{figure}
 
-
     \subsection{deleteComponent}
     \begin{figure}[H]
         \centering
         \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/deleteComponent}
         \caption{deleteComponent}
     \end{figure}
-
-
 
     \subsection{drawAll}
     \begin{figure}[H]
@@ -666,6 +705,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{importSubmodule}
     \begin{figure}[H]
         \centering
@@ -674,6 +714,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{moveComponent}
     \begin{figure}[H]
         \centering
@@ -682,6 +723,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{openProject}
     \begin{figure}[H]
         \centering
@@ -689,14 +731,12 @@
         \caption{openProject}
     \end{figure}
 
-
     \subsection{pasteComponents}
     \begin{figure}[H]
         \centering
         \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/pasteComponents}
         \caption{pasteComponents}
     \end{figure}
-
 
     \subsection{redo}
     \begin{figure}[H]
@@ -713,6 +753,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{selectComponent}
     \begin{figure}[H]
         \centering
@@ -721,6 +762,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{selectDiagram}
     \begin{figure}[H]
         \centering
@@ -729,6 +771,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{unselectAllComponents}
     \begin{figure}[H]
         \centering
@@ -737,6 +780,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{unselectComponent}
     \begin{figure}[H]
         \centering
@@ -745,6 +789,7 @@
     \end{figure}
 
 % finish scale
+
     \subsection{updateProperty}
     \begin{figure}[H]
         \centering
@@ -764,116 +809,128 @@
 % END HW4
 
 % START HW5
- \section{Implementation Class Model}
- \begin{figure}[H]
-   \centering
-     \includesvg[inkscapelatex=false,height=0.8\textheight]{assets/hw5/idcd}
-   \caption{Design Class Diagram}
- \end{figure}
-  HW5 TODO
- \newpage
 
 
- \section{Calculate Line of Code}
-
- \begin{longtable}{|c|c|c|c|}
- \hline
- No & Class Name & Number of methods & Line of Code in Class \\
- \hline
- \endfirsthead
- \endhead
- \hline
- 1 & AssAttribute & 10 & 98 \\
- 2 & Attribute & 18 & 160 \\
- 3 & Association & 17 & 185 \\
- 4 & Component & 5 & 17 \\
- 6 & Gadget & 9 & 133 \\
- 7 & AssociationGraph & 8 & 18 \\
- 8 & AssociationMap & 10 & 178 \\
- 9 & Components & 10 & 154 \\
- 10 & ComponentsContainer & 5 & 15 \\
- 11 & ContainerMap & 6 & 70 \\
- 12 & UMLDiagram & 10 & 123 \\
- 13 & UMLProject & 12 & 140 \\
- 14 & ConnectionError & 2 & 13 \\
- 15 & DUError & 1 & 6 \\
- 16 & FileIOError & 3 & 13 \\
- 17 & InvalidArgumentError & 3 & 13 \\
- 18 & MemoryFullError & 3 & 13 \\
- 19 & FileIOError & 3 & 13 \\
- 20 & SendError & 3 & 13 \\
- 21 & Point & 5 & 33 \\
- Total & - & 143 & 1408 \\
- \hline
- \end{longtable}
-
- \section{Programming}
- \subsection{Snapshots of System Execution}
-     \begin{center}
-     \includegraphics[width=0.95\linewidth]
-         {assets/hw5/snapshots_of_system_execution}
-     \end{center}
- \subsection{Source Code Listing}
-     \includegraphics[width=0.95\linewidth]
-         {assets/hw5/snapshot_gadget_code}
+    \section{Implementation Class Model}
+    \begin{figure}[H]
+        \centering
+        \includesvg[inkscapelatex=false,height=0.8\textheight]{assets/hw5/idcd}
+        \caption{Design Class Diagram}
+    \end{figure}
+    HW5 TODO
+    \newpage
 
 
-     \includegraphics[width=0.95\linewidth]
-         {assets/hw5/snapshot_association_code}
+    \section{Misc}
+
+    \subsection{View online}
+    Since the report contains many images, we suggest visiting the \href{https://github.com/CSIEHaTerX/Dr.UML/}{GitHub repository} to view higher-resolution versions.\\
+    \includegraphics[]{assets/repoQRCode.png}
 
 
+    \section{Calculate Line of Code}
 
- \section{Unit Testing}
+    \begin{longtable}{|c|c|c|c|}
+        \hline
+        No    & Class Name           & Number of methods & Line of Code in Class \\
+        \hline
+        \endfirsthead
+        \endhead
+        \hline
+        1     & AssAttribute         & 10                & 98                    \\
+        2     & Attribute            & 18                & 160                   \\
+        3     & Association          & 17                & 185                   \\
+        4     & Component            & 5                 & 17                    \\
+        6     & Gadget               & 9                 & 133                   \\
+        7     & AssociationGraph     & 8                 & 18                    \\
+        8     & AssociationMap       & 10                & 178                   \\
+        9     & Components           & 10                & 154                   \\
+        10    & ComponentsContainer  & 5                 & 15                    \\
+        11    & ContainerMap         & 6                 & 70                    \\
+        12    & UMLDiagram           & 10                & 123                   \\
+        13    & UMLProject           & 12                & 140                   \\
+        14    & ConnectionError      & 2                 & 13                    \\
+        15    & DUError              & 1                 & 6                     \\
+        16    & FileIOError          & 3                 & 13                    \\
+        17    & InvalidArgumentError & 3                 & 13                    \\
+        18    & MemoryFullError      & 3                 & 13                    \\
+        19    & FileIOError          & 3                 & 13                    \\
+        20    & SendError            & 3                 & 13                    \\
+        21    & Point                & 5                 & 33                    \\
+        Total & -                    & 143               & 1408                  \\
+        \hline
+    \end{longtable}
 
- \subsection{Snapshot}
 
- \begin{figure}[H]
-   \begin{center}
-     \includegraphics[width=0.95\linewidth]
-         {assets/hw5/unit_test.png}
-   \caption{Unit test snapshot}
-   \end{center}
- \end{figure}
+    \section{Programming}
 
- \subsection{Code listing}
+    \subsection{Snapshots of System Execution}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]
+        {assets/hw5/snapshots_of_system_execution}
+    \end{center}
 
- \begin{figure}[H]
-   \begin{center}
-     \includegraphics[width=0.4\linewidth]
-         {assets/hw5/unit_test_code.png}
-   \caption{Unit test code}
-   \end{center}
- \end{figure}
+    \subsection{Source Code Listing}
+    \includegraphics[width=0.95\linewidth]
+    {assets/hw5/snapshot_gadget_code}
 
 
- \begin{CJK*}{UTF8}{bsmi}  for Chinese
- \begin{longtable}{|c|c|c|c|}
- \hline
- Info & Total \\
- \hline
- \endfirsthead
- \endhead
- \hline
- production code & 1648 \\
- class in production code & 15 \\
- methods in production code & 183 \\
- number of unit tests & 173 \\
- lines of unit tests & 2036 \\
- 蕭耕宏's time effort & 48 \\
- 張庭瑋's time effort & 48 \\
- 黃冠鈞's time effort & 48 \\
- 吳宥駒's time effort & 48 \\
- total time effort & 192 \\
- \hline
- \end{longtable}
- \end{CJK*}
+    \includegraphics[width=0.95\linewidth]
+    {assets/hw5/snapshot_association_code}
 
+
+    \section{Unit Testing}
+
+    \subsection{Snapshot}
+
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=0.95\linewidth]
+            {assets/hw5/unit_test.png}
+            \caption{Unit test snapshot}
+        \end{center}
+    \end{figure}
+
+    \subsection{Code listing}
+
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=0.4\linewidth]
+            {assets/hw5/unit_test_code.png}
+            \caption{Unit test code}
+        \end{center}
+    \end{figure}
+
+
+    \begin{CJK*}{UTF8}{bsmi}
+        for Chinese
+        \begin{longtable}{|c|c|c|c|}
+            \hline
+            Info                       & Total \\
+            \hline
+            \endfirsthead
+            \endhead
+            \hline
+            production code            & 1648  \\
+            class in production code   & 15    \\
+            methods in production code & 183   \\
+            number of unit tests       & 173   \\
+            lines of unit tests        & 2036  \\
+            蕭耕宏's time effort          & 48    \\
+            張庭瑋's time effort          & 48    \\
+            黃冠鈞's time effort          & 48    \\
+            吳宥駒's time effort          & 48    \\
+            total time effort          & 192   \\
+            \hline
+        \end{longtable}
+    \end{CJK*}
 
 
 % % END HW5
 
 
     \section{Misc}
+
     \subsection{View online}
     Since the report contains many images, we suggest visiting the \href{https://github.com/CSIEHaTerX/Dr.UML/}{GitHub repository} to view higher-resolution versions.\\
     \includegraphics[]{assets/repoQRCode.png}
