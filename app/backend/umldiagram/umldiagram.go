@@ -197,12 +197,18 @@ func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUErro
 	en := a.GetParentEnd()
 	if _, ok := ud.associations[st]; ok {
 		stList := ud.associations[st][0]
-		stList = slices.Delete(stList, slices.Index(stList, a), slices.Index(stList, a)+1)
+		index := slices.Index(stList, a)
+		if index >= 0 {
+			stList = slices.Delete(stList, index, index+1)
+		}
 		ud.associations[st] = [2][]*component.Association{stList, ud.associations[st][1]}
 	}
 	if _, ok := ud.associations[en]; ok {
 		enList := ud.associations[en][1]
-		enList = slices.Delete(enList, slices.Index(enList, a), slices.Index(enList, a)+1)
+		index := slices.Index(enList, a)
+		if index >= 0 {
+			enList = slices.Delete(enList, index, index+1)
+		}
 		ud.associations[en] = [2][]*component.Association{ud.associations[en][0], enList}
 	}
 	delete(ud.componentsSelected, a)
