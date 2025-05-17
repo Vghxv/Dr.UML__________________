@@ -156,6 +156,7 @@ func (this *Association) SetLayer(layer int) duerror.DUError {
 }
 
 func (this *Association) SetParentStart(gadget *Gadget, point utils.Point) duerror.DUError {
+	// TODO: make sure update diagram's associations too
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
@@ -164,6 +165,7 @@ func (this *Association) SetParentStart(gadget *Gadget, point utils.Point) duerr
 }
 
 func (this *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
+	// TODO: make sure update diagram's associations too
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
