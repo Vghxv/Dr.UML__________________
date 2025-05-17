@@ -51,7 +51,9 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 			float64(enPoint.X-enGdd.X) / float64(enGdd.Width),
 			float64(enPoint.Y-enGdd.Y) / float64(enGdd.Height)},
 	}
-	a.updateDrawData()
+	if err := a.updateDrawData(); err != nil {
+		return nil, err
+	}
 	return a, nil
 }
 
@@ -274,6 +276,10 @@ func (this *Association) updateDrawData() duerror.DUError {
 				this.drawdata.DeltaY = -this.drawdata.DeltaY
 			}
 		}
+	}
+
+	if utils.EqualPoints(startPoint, endPoint) {
+		return duerror.NewInvalidArgumentError("start and end points are the same")
 	}
 
 	this.drawdata.StartX = startPoint.X

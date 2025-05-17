@@ -14,18 +14,20 @@ import (
 func Test_NewAssociation(t *testing.T) {
 	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
 	tests := []struct {
-		name    string
-		parents [2]*Gadget
-		assType AssociationType
-		wantErr bool
+		name                 string
+		parents              [2]*Gadget
+		assType              AssociationType
+		startPoint, endPoint utils.Point
+		wantErr              bool
 	}{
-		{"valid association", [2]*Gadget{gadget, gadget}, Extension, false},
-		{"nil parent", [2]*Gadget{nil, gadget}, Extension, true},
-		{"invalid assType", [2]*Gadget{gadget, gadget}, 0, true},
+		{"valid association", [2]*Gadget{gadget, gadget}, Extension, utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1}, false},
+		{"same point", [2]*Gadget{gadget, gadget}, Extension, utils.Point{X: 0, Y: 0}, utils.Point{X: 0, Y: 0}, true},
+		{"nil parent", [2]*Gadget{nil, gadget}, Extension, utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1}, true},
+		{"invalid assType", [2]*Gadget{gadget, gadget}, 0, utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewAssociation(tt.parents, tt.assType, utils.Point{}, utils.Point{})
+			_, err := NewAssociation(tt.parents, tt.assType, tt.startPoint, tt.endPoint)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
 			}
@@ -69,8 +71,10 @@ func Test_Association_Getters(t *testing.T) {
 func Test_Association_Setters(t *testing.T) {
 	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
 	ass := &Association{
-		assType: Extension,
-		parents: [2]*Gadget{gadget, gadget},
+		assType:         Extension,
+		parents:         [2]*Gadget{gadget, gadget},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
 
 	t.Run("SetAssType", func(t *testing.T) {
@@ -104,7 +108,7 @@ func Test_Association_Setters(t *testing.T) {
 	})
 
 	t.Run("SetParentEnd", func(t *testing.T) {
-		err := ass.SetParentEnd(gadget, utils.Point{})
+		err := ass.SetParentEnd(gadget, utils.Point{X: 1, Y: 1})
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -118,8 +122,10 @@ func Test_Association_AddAttribute(t *testing.T) {
 	att := &attribute.AssAttribute{}
 	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
 	ass := &Association{
-		assType: Extension,
-		parents: [2]*Gadget{gadget, gadget},
+		assType:         Extension,
+		parents:         [2]*Gadget{gadget, gadget},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
 
 	t.Run("Add valid attribute", func(t *testing.T) {
@@ -144,8 +150,10 @@ func Test_Association_RemoveAttribute(t *testing.T) {
 	att := &attribute.AssAttribute{}
 	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
 	ass := &Association{
-		parents:    [2]*Gadget{gadget, gadget},
-		attributes: []*attribute.AssAttribute{att},
+		parents:         [2]*Gadget{gadget, gadget},
+		attributes:      []*attribute.AssAttribute{att},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
 
 	t.Run("Remove valid attribute", func(t *testing.T) {
@@ -170,8 +178,10 @@ func Test_Association_MoveAttribute(t *testing.T) {
 	att := &attribute.AssAttribute{}
 	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
 	ass := &Association{
-		parents:    [2]*Gadget{gadget, gadget},
-		attributes: []*attribute.AssAttribute{att},
+		parents:         [2]*Gadget{gadget, gadget},
+		attributes:      []*attribute.AssAttribute{att},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
 
 	t.Run("Move valid attribute", func(t *testing.T) {
@@ -221,11 +231,12 @@ func Test_Association_Cover(t *testing.T) {
 }
 
 func Test_Association_UpdateDrawData(t *testing.T) {
+	g1, _ := NewGadget(Class, utils.Point{X: 0, Y: 0})
+	g2, _ := NewGadget(Class, utils.Point{X: 10, Y: 10})
 	ass := &Association{
-		parents: [2]*Gadget{
-			{point: utils.Point{X: 0, Y: 0}},
-			{point: utils.Point{X: 10, Y: 10}},
-		},
+		parents:         [2]*Gadget{g1, g2},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
 
 	t.Run("Update with valid data", func(t *testing.T) {
