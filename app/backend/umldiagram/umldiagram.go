@@ -46,7 +46,7 @@ type UMLDiagram struct {
 	// TODO: ug want to refactor once more
 	// componentsGraph     components.Graph
 	componentsSelected map[component.Component]bool
-	asscoiations       map[*component.Gadget]([2][]*component.Association)
+	associations       map[*component.Gadget]([2][]*component.Association)
 
 	notifyDrawUpdate func() duerror.DUError
 	drawData         drawdata.Diagram
@@ -68,7 +68,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 		startPoint:          utils.Point{X: 0, Y: 0},
 		backgroundColor:     utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
 		componentsContainer: components.NewContainerMap(),
-		asscoiations:        make(map[*component.Gadget]([2][]*component.Association)),
+		associations:        make(map[*component.Gadget]([2][]*component.Association)),
 		componentsSelected:  make(map[component.Component]bool),
 		drawData: drawdata.Diagram{
 			Margin:    drawdata.Margin,
@@ -108,7 +108,7 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err = ud.componentsContainer.Insert(g); err != nil {
 		return err
 	}
-	ud.asscoiations[g] = [2][]*component.Association{{}, {}}
+	ud.associations[g] = [2][]*component.Association{{}, {}}
 	return ud.updateDrawData()
 }
 
@@ -168,14 +168,14 @@ func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPo
 		return err
 	}
 
-	// record it
-	asses := ud.asscoiations[stGad]
-	asses[0] = append(asses[0], a)
-	ud.asscoiations[stGad] = asses
+	// record it, cant modify the slice, being a value of the map, directly
+	tmp := ud.associations[stGad]
+	tmp[0] = append(tmp[0], a)
+	ud.associations[stGad] = tmp
 
-	asses = ud.asscoiations[enGad]
-	asses[1] = append(asses[1], a)
-	ud.asscoiations[enGad] = asses
+	tmp = ud.associations[enGad]
+	tmp[1] = append(tmp[1], a)
+	ud.associations[enGad] = tmp
 
 	return ud.updateDrawData()
 }
