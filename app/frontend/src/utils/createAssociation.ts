@@ -1,76 +1,81 @@
 import { AssociationProps } from "./Props";
 
 class AssociationElement {
-    public op: AssociationProps;
+    public assProps: AssociationProps;
 
-    constructor(options: AssociationProps) {
-        this.op = options;
+    constructor(props: AssociationProps, margin: number) {
+        this.assProps = props;
     }
 
-    draw(ctx: CanvasRenderingContext2D, lineWidth: number) {
-        ctx.save();
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = "black";
+    draw(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
 
-        // 處理不同的 assType
-        switch (this.op.assType) {
-            case 0: // 普通實線
-                ctx.setLineDash([]);
-                break;
-            case 1: // 虛線
-                ctx.setLineDash([5, 5]);
-                break;
-            case 2: // 繼承（箭頭）
-                ctx.setLineDash([]);
-                this.drawArrow(ctx);
-                break;
-            // 可擴充其他關係如聚合、依賴等
-            default:
-                ctx.setLineDash([]);
+        if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
+            this.drawNormalAss(ctx, margin, lineWidth);
+        }
+        else{
+            this.drawSelfAss(ctx, margin, lineWidth);
         }
 
-        // 畫主線
-        ctx.beginPath();
-        ctx.moveTo(this.op.startX, this.op.startY);
-        ctx.lineTo(this.op.endX, this.op.endY);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        // draw selected association
+        // if (isSelected) {
+        //     ctx.setLineDash([5, 3]);
+        //     ctx.strokeStyle = "#FFA500";
+        //     ctx.lineWidth = lineWidth * 2;
+        //     ctx.stroke();
+        //     ctx.setLineDash([]);
+        //     ctx.strokeStyle = "black";
+        //     ctx.lineWidth = lineWidth;
+        // }
 
-        // 畫屬性文字
-        this.op.attributes.forEach(attr => {
-            const midX = this.op.startX + (this.op.endX - this.op.startX) * attr.ratio;
-            const midY = this.op.startY + (this.op.endY - this.op.startY) * attr.ratio;
+        const drawArrow = () => {
+            const dx = this.assProps.deltaX;
+            const dy = this.assProps.deltaY;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            const unitX = dx / len;
+            const unitY = dy / len;
+            const arrowSize = 10;
 
-            ctx.font = `${attr.fontSize}px ${attr.fontFile}`;
+            const arrowX = this.assProps.endX - unitX * arrowSize;
+            const arrowY = this.assProps.endY - unitY * arrowSize;
+
+            ctx.beginPath();
+            ctx.moveTo(this.assProps.endX, this.assProps.endY);
+            ctx.lineTo(arrowX - unitY * 5, arrowY + unitX * 5);
+            ctx.lineTo(arrowX + unitY * 5, arrowY - unitX * 5);
+            ctx.closePath();
             ctx.fillStyle = "black";
-            ctx.fillText(attr.content, midX + 5, midY - 5); // 偏移避免覆蓋線條
-        });
+            ctx.fill();
+        };
 
-        ctx.restore();
+        drawArrow();
     }
 
-    private drawArrow(ctx: CanvasRenderingContext2D) {
-        const { startX, startY, endX, endY } = this.op;
-        const headlen = 10;
-
-        const angle = Math.atan2(endY - startY, endX - startX);
-
-        const arrowX = endX;
-        const arrowY = endY;
-
-        const x1 = arrowX - headlen * Math.cos(angle - Math.PI / 6);
-        const y1 = arrowY - headlen * Math.sin(angle - Math.PI / 6);
-        const x2 = arrowX - headlen * Math.cos(angle + Math.PI / 6);
-        const y2 = arrowY - headlen * Math.sin(angle + Math.PI / 6);
-
+    drawNormalAss(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(arrowX, arrowY);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+        ctx.moveTo(this.assProps.startX, this.assProps.startY);
+        ctx.lineTo(this.assProps.endX, this.assProps.endY);
+        ctx.fillStyle = "black";
+        ctx.fill();
+    }
+
+    drawSelfAss(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
+        ctx.beginPath();
+        ctx.moveTo(this.assProps.startX, this.assProps.startY);
+        ctx.lineTo(this.assProps.startX + this.assProps.deltaX, this.assProps.startY + this.assProps.deltaY);
+        ctx.lineTo(this.assProps.deltaX, this.assProps.deltaY);
+        ctx.fillStyle = "black";
+        ctx.fill();
     }
 }
 
-export function createAssociation(config: AssociationProps) {
-    return new AssociationElement(config);
+
+
+export function createAss(type: string, config: AssociationProps, margin: number) {
+    switch (type) {
+        case "Association": {
+            return new AssociationElement(config, margin);
+        }
+        default:
+            throw new Error(`Unknown association type: ${type}`);
+    }
 }
