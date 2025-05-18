@@ -59,6 +59,7 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 
 // other function
 func snapToEdge(rec utils.Point, width int, height int, ratio [2]float64) utils.Point {
+	// snap a point onto the edge of a rectangle, the point is float {xRatio, yRatio}
 	leftDist := ratio[0]
 	rightDist := 1 - ratio[0]
 	topDist := ratio[1]
