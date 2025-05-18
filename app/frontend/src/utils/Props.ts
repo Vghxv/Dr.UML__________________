@@ -32,6 +32,8 @@ export interface AssociationProps {
     startY: number;
     endX: number;
     endY: number;
+    deltaX: number;
+    deltaY: number;
     attributes: {
         content: string;
         fontSize: number;
