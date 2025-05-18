@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {CanvasProps, GadgetProps} from '../utils/Props';
 import {createGadget} from '../utils/createGadget';
+import { createAss } from '../utils/createAssociation';
 import {ToPoint} from '../utils/wailsBridge'
 import {
     SelectComponent,
@@ -34,6 +35,11 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null }> = ({backendDa
                         selectedCount++;
                         selectedGad = gadget;
                     }
+                });
+                
+                backendData?.Association?.forEach((association) => {
+                    const ass = createAss("Association", association, backendData.margin);
+                    ass.draw(ctx, backendData.margin, backendData.lineWidth);
                 });
 
                 setSelectedGadgetCount(selectedCount);
