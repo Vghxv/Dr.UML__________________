@@ -3,7 +3,7 @@ export interface CanvasProps {
     color: number;
     lineWidth: number;
     gadgets?: GadgetProps[];
-    // Association?: AssociationProps[];
+    Association?: AssociationProps[];
 }
 
 export interface GadgetProps {

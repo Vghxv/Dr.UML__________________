@@ -2,12 +2,14 @@ import React, {useEffect, useState} from "react";
 import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
 
 import {AddGadget, GetCurrentDiagramName, GetDrawData} from "../wailsjs/go/umlproject/UMLProject";
-
+import { mockAssociation } from "./assets/mock/ass";
 
 import {CanvasProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
 // import mockData from './assets/mock/gadget';
 import {GadgetPopup} from "./components/CreateGadgetPopup";
+import Toolbar from "./components/Toolbar";
+import { createAss } from "./utils/createAssociation";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
@@ -34,6 +36,16 @@ const App: React.FC = () => {
         } catch (error) {
             console.error("Error adding gadget:", error);
         }
+    };
+
+    // 新增 addAss handler
+    const handleAddAss = async () => {
+        // 直接將 mockAssociation 加入 backendData.Association
+        setBackendData(prev => {
+            if (!prev) return prev;
+            const newAss = prev.Association ? [...prev.Association, mockAssociation] : [mockAssociation];
+            return { ...prev, Association: newAss };
+        });
     };
 
     const loadCanvasData = async () => {
@@ -106,48 +118,26 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <div className="section">
-                <h1 style={{fontFamily: "Inkfree"}}>Dr.UML</h1>
-
-                <div style={{marginBottom: "10px"}}>
-                    <button className="btn" onClick={handleGetDiagramName}>
-                        Get Diagram Name
-                    </button>
-                    {diagramName && <p>Diagram Name: {diagramName}</p>}
-                </div>
-
-                <div style={{marginBottom: "10px"}}>
-                    <button className="btn" onClick={handleAddGadget}>
-                        Add New Gadget
-                    </button>
-                </div>
-            </div>
-
-            <div style={{marginBottom: "10px"}}>
-                <button className="btn" onClick={() => setShowPopup(true)}>
-                    + Create Gadget (Popup)
-                </button>
-            </div>
-            <div>
-                {showPopup && (
-                    <GadgetPopup
-                        isOpen={showPopup}
-                        onCreate={(gadget: {
-                            id: number;
-                            name: string;
-                            position: { x: number; y: number };
-                            color: string
-                        }) => {
-                            console.log("New Gadget Created:", gadget);
-                            setShowPopup(false);
-                        }}
-                        onClose={() => setShowPopup(false)}
-                    />
-                )}
-            </div>
+            <h1 style={{fontFamily: "Inkfree"}}>Dr.UML</h1>
+            <Toolbar
+                onGetDiagramName={handleGetDiagramName}
+                onAddGadget={handleAddGadget}
+                onShowPopup={() => setShowPopup(true)}
+                onAddAss={handleAddAss}
+                diagramName={diagramName}
+            />
+            {showPopup && (
+                <GadgetPopup
+                    isOpen={showPopup}
+                    onCreate={(gadget) => {
+                        console.log("New Gadget Created:", gadget);
+                        setShowPopup(false);
+                    }}
+                    onClose={() => setShowPopup(false)}
+                />
+            )}
             <DrawingCanvas backendData={backendData}/>
         </div>
-
     );
 };
 
