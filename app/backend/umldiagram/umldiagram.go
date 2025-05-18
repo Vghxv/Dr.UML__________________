@@ -1,6 +1,7 @@
 package umldiagram
 
 import (
+	"slices"
 	"time"
 
 	"Dr.uml/backend/component"
@@ -12,7 +13,6 @@ import (
 
 type DiagramType int
 
-// TODO: ug want to refactor all the type things
 const (
 	ClassDiagram    = 1 << iota // 0x01
 	UseCaseDiagram  = 1 << iota // 0x02
@@ -44,8 +44,8 @@ type UMLDiagram struct {
 	backgroundColor utils.Color
 
 	componentsContainer components.Container
-	componentsGraph     components.Graph
 	componentsSelected  map[component.Component]bool
+	associations        map[*component.Gadget]([2][]*component.Association)
 
 	notifyDrawUpdate func() duerror.DUError
 	drawData         drawdata.Diagram
@@ -67,7 +67,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 		startPoint:          utils.Point{X: 0, Y: 0},
 		backgroundColor:     utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
 		componentsContainer: components.NewContainerMap(),
-		componentsGraph:     components.NewGraphMap(),
+		associations:        make(map[*component.Gadget]([2][]*component.Association)),
 		componentsSelected:  make(map[component.Component]bool),
 		drawData: drawdata.Diagram{
 			Margin:    drawdata.Margin,
@@ -107,12 +107,8 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err = ud.componentsContainer.Insert(g); err != nil {
 		return err
 	}
+	ud.associations[g] = [2][]*component.Association{{}, {}}
 	return ud.updateDrawData()
-}
-
-func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
-	// TODO
-	return nil
 }
 
 func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
@@ -131,14 +127,31 @@ func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {
 }
 
 func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPoint utils.Point) duerror.DUError {
+	stPoint := ud.startPoint
+	ud.startPoint = utils.Point{X: 0, Y: 0}
 	if err := ud.validatePoint(endPoint); err != nil {
 		return err
 	}
-	// TODO: serach parents
-	// st := ud.startPoint
-	// en := endPoint
-	parents := [2]*component.Gadget{}
-	a, err := component.NewAssociation(parents, component.AssociationType(assType))
+
+	// search parents
+	stGad, err := ud.componentsContainer.SearchGadget(stPoint)
+	if err != nil {
+		return err
+	}
+	if stGad == nil {
+		return duerror.NewInvalidArgumentError("start point does not contain a gadget")
+	}
+	enGad, err := ud.componentsContainer.SearchGadget(endPoint)
+	if err != nil {
+		return err
+	}
+	if enGad == nil {
+		return duerror.NewInvalidArgumentError("end point does not contain a gadget")
+	}
+
+	// create association
+	parents := [2]*component.Gadget{stGad, enGad}
+	a, err := component.NewAssociation(parents, component.AssociationType(assType), stPoint, endPoint)
 	if err != nil {
 		return err
 	}
@@ -148,20 +161,74 @@ func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPo
 	if err = ud.componentsContainer.Insert(a); err != nil {
 		return err
 	}
-	if err = ud.componentsGraph.Insert(a); err != nil {
-		return err
-	}
+
+	// record it, cant modify the slice, being a value of the map, directly
+	tmp := ud.associations[stGad]
+	tmp[0] = append(tmp[0], a)
+	ud.associations[stGad] = tmp
+
+	tmp = ud.associations[enGad]
+	tmp[1] = append(tmp[1], a)
+	ud.associations[enGad] = tmp
+
 	return ud.updateDrawData()
 }
 
+func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
+	if _, ok := ud.associations[gad]; ok {
+		for _, a := range ud.associations[gad][0] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		for _, a := range ud.associations[gad][1] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		delete(ud.associations, gad)
+	}
+	delete(ud.componentsSelected, gad)
+	return ud.componentsContainer.Remove(gad)
+}
+
 func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUError {
-	// TODO
-	return nil
+	st := a.GetParentStart()
+	en := a.GetParentEnd()
+	if _, ok := ud.associations[st]; ok {
+		stList := ud.associations[st][0]
+		index := slices.Index(stList, a)
+		if index >= 0 {
+			stList = slices.Delete(stList, index, index+1)
+		}
+		ud.associations[st] = [2][]*component.Association{stList, ud.associations[st][1]}
+	}
+	if _, ok := ud.associations[en]; ok {
+		enList := ud.associations[en][1]
+		index := slices.Index(enList, a)
+		if index >= 0 {
+			enList = slices.Delete(enList, index, index+1)
+		}
+		ud.associations[en] = [2][]*component.Association{ud.associations[en][0], enList}
+	}
+	delete(ud.componentsSelected, a)
+	return ud.componentsContainer.Remove(a)
 }
 
 func (ud *UMLDiagram) RemoveSelectedComponents() duerror.DUError {
-	// TODO
-	return nil
+	for c := range ud.componentsSelected {
+		switch c := c.(type) {
+		case *component.Gadget:
+			if err := ud.removeGadget(c); err != nil {
+				return err
+			}
+		case *component.Association:
+			if err := ud.removeAssociation(c); err != nil {
+				return err
+			}
+		}
+	}
+	return ud.updateDrawData()
 }
 
 func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
@@ -209,8 +276,7 @@ func (ud *UMLDiagram) RegisterNotifyDrawUpdate(update func() duerror.DUError) du
 
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	gs := make([]drawdata.Gadget, 0, len(ud.componentsSelected))
-	// TODO
-	// as := make([]drawdata.Association, 0, len(ud.componentsSelected))
+	as := make([]drawdata.Association, 0, len(ud.componentsSelected))
 	for _, c := range ud.componentsContainer.GetAll() {
 		cDrawData := c.GetDrawData()
 		if cDrawData == nil {
@@ -220,11 +286,11 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 		case *component.Gadget:
 			gs = append(gs, cDrawData.(drawdata.Gadget))
 		case *component.Association:
-			continue
+			as = append(as, cDrawData.(drawdata.Association))
 		}
 	}
 	ud.drawData.Gadgets = gs
-	// ud.drawData.Associations = as
+	ud.drawData.Associations = as
 	if ud.notifyDrawUpdate == nil {
 		return nil
 	}

@@ -7,9 +7,9 @@ const (
 )
 
 type Diagram struct {
-	Margin    int      `json:"margin"`
-	LineWidth int      `json:"lineWidth"`
-	Color     int      `json:"color"`
-	Gadgets   []Gadget `json:"gadgets"`
-	// Associations []Association `json:"associations"`
+	Margin       int           `json:"margin"`
+	LineWidth    int           `json:"lineWidth"`
+	Color        int           `json:"color"`
+	Gadgets      []Gadget      `json:"gadgets"`
+	Associations []Association `json:"associations"`
 }

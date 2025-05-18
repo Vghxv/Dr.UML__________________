@@ -27,10 +27,7 @@ func (cp *containerMap) Insert(c component.Component) duerror.DUError {
 }
 
 func (cp *containerMap) Remove(c component.Component) duerror.DUError {
-	_, ok := cp.compMap[c]
-	if ok {
-		delete(cp.compMap, c)
-	}
+	delete(cp.compMap, c)
 	return nil
 }
 
@@ -50,6 +47,32 @@ func (cp *containerMap) Search(p utils.Point) (component.Component, duerror.DUEr
 		}
 		if c.GetLayer() > candidate.GetLayer() {
 			candidate = c
+		}
+	}
+	return candidate, nil
+}
+
+func (cp *containerMap) SearchGadget(p utils.Point) (*component.Gadget, duerror.DUError) {
+	var candidate *component.Gadget
+	for c := range cp.compMap {
+		switch c := c.(type) {
+		case *component.Gadget:
+			cover, err := c.Cover(p)
+			if err != nil {
+				return nil, err
+			}
+			if !cover {
+				continue
+			}
+			if candidate == nil {
+				candidate = c
+				continue
+			}
+			if c.GetLayer() < candidate.GetLayer() {
+				candidate = c
+			}
+		default:
+			continue
 		}
 	}
 	return candidate, nil

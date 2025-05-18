@@ -1,401 +1,269 @@
+// VIBE CODING
+
 package component
 
 import (
 	"testing"
 
+	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
-
-	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/utils/duerror"
 )
 
-func Test_Association_GetAssType(t *testing.T) {
+func Test_NewAssociation(t *testing.T) {
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
 	tests := []struct {
-		name   string
-		ass    *Association
-		expect AssociationType
+		name                 string
+		parents              [2]*Gadget
+		assType              AssociationType
+		startPoint, endPoint utils.Point
+		wantErr              bool
 	}{
-		{"valid type", &Association{assType: 2}, 2},
-		{"default type", &Association{}, 0},
+		{"valid association", [2]*Gadget{gadget, gadget}, Extension, utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1}, false},
+		{"same point", [2]*Gadget{gadget, gadget}, Extension, utils.Point{X: 0, Y: 0}, utils.Point{X: 0, Y: 0}, true},
+		{"nil parent", [2]*Gadget{nil, gadget}, Extension, utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1}, true},
+		{"invalid assType", [2]*Gadget{gadget, gadget}, 0, utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.ass.GetAssType(); got != tt.expect {
-				t.Errorf("expected %v, got %v", tt.expect, got)
-			}
-		})
-	}
-}
-
-func Test_Association_GetAttributes(t *testing.T) {
-	att := &attribute.AssAttribute{}
-	tests := []struct {
-		name    string
-		ass     *Association
-		expect  []*attribute.AssAttribute
-		wantErr bool
-	}{
-		{"with attributes", &Association{attributes: []*attribute.AssAttribute{att}}, []*attribute.AssAttribute{att}, false},
-		{"no attributes", &Association{}, nil, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.ass.GetAttributes()
+			_, err := NewAssociation(tt.parents, tt.assType, tt.startPoint, tt.endPoint)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
 			}
-			if len(got) != len(tt.expect) {
-				t.Errorf("expected %v, got %v", tt.expect, got)
-			}
 		})
 	}
 }
 
-func Test_Association_GetLayer(t *testing.T) {
-	tests := []struct {
-		name string
-		ass  *Association
-		want int
-	}{
-		{
-			name: "valid layer 5",
-			ass:  &Association{layer: 5},
-			want: 5,
-		},
-		{
-			name: "default layer 0",
-			ass:  &Association{},
-			want: 0,
-		},
+func Test_Association_Getters(t *testing.T) {
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
+	ass := &Association{
+		assType: Extension,
+		layer:   5,
+		parents: [2]*Gadget{gadget, gadget},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.ass.GetLayer()
-			if got != tt.want {
-				t.Errorf("GetLayer() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	t.Run("GetAssType", func(t *testing.T) {
+		if ass.GetAssType() != Extension {
+			t.Errorf("expected %v, got %v", Extension, ass.GetAssType())
+		}
+	})
+
+	t.Run("GetLayer", func(t *testing.T) {
+		if ass.GetLayer() != 5 {
+			t.Errorf("expected %v, got %v", 5, ass.GetLayer())
+		}
+	})
+
+	t.Run("GetParentStart", func(t *testing.T) {
+		if ass.GetParentStart() != gadget {
+			t.Errorf("expected %v, got %v", gadget, ass.GetParentStart())
+		}
+	})
+
+	t.Run("GetParentEnd", func(t *testing.T) {
+		if ass.GetParentEnd() != gadget {
+			t.Errorf("expected %v, got %v", gadget, ass.GetParentEnd())
+		}
+	})
 }
 
-func Test_Association_SetParentStartEnd(t *testing.T) {
-	gadget := &Gadget{}
-	tests := []struct {
-		name      string
-		ass       *Association
-		getMethod func(*Association) (*Gadget, duerror.DUError)
-		setMethod func(*Association, *Gadget) duerror.DUError
-		gadget    *Gadget
-		wantErr   bool
-	}{
-		{"get valid start", &Association{parents: [2]*Gadget{gadget, gadget}}, func(a *Association) (*Gadget, duerror.DUError) { return a.GetParentStart(), nil }, nil, gadget, false},
-		{"get valid end", &Association{parents: [2]*Gadget{gadget, gadget}}, func(a *Association) (*Gadget, duerror.DUError) { return a.GetParentEnd(), nil }, nil, gadget, false},
-		{"set valid start", &Association{}, nil, func(a *Association, g *Gadget) duerror.DUError { return a.SetParentStart(g) }, gadget, false},
-		{"set valid end", &Association{}, nil, func(a *Association, g *Gadget) duerror.DUError { return a.SetParentEnd(g) }, gadget, false},
-		{"set nil start", &Association{}, nil, func(a *Association, g *Gadget) duerror.DUError { return a.SetParentStart(nil) }, nil, true},
-		{"set nil end", &Association{}, nil, func(a *Association, g *Gadget) duerror.DUError { return a.SetParentEnd(nil) }, nil, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.getMethod != nil {
-				got, err := tt.getMethod(tt.ass)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
-				}
-				if got != tt.gadget {
-					t.Errorf("expected %v, got %v", tt.gadget, got)
-				}
-			}
-			if tt.setMethod != nil {
-				err := tt.setMethod(tt.ass, tt.gadget)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
-				}
-			}
-		})
-	}
-}
-
-func Test_Association_SetAssType(t *testing.T) {
-	tests := []struct {
-		name    string
-		ass     *Association
-		assType AssociationType
-		wantErr bool
-	}{
-		{"set valid type", &Association{}, 1, false},
-		{"set invalid type", &Association{}, 0, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.ass.SetAssType(tt.assType)
-			if tt.ass.GetAssType() != tt.assType {
-				t.Errorf("expected association type %v, got %v", tt.assType, tt.ass.GetAssType())
-			}
-		})
-	}
-}
-
-func Test_Association_Cover(t *testing.T) {
-	tests := []struct {
-		name    string
-		ass     *Association
-		point   utils.Point
-		want    bool
-		wantErr bool
-	}{
-		{
-			name: "point inside",
-			ass: &Association{
-				parents: [2]*Gadget{
-					{point: utils.Point{X: 0, Y: 0}},
-					{point: utils.Point{X: 10, Y: 10}},
-				},
-			},
-			point:   utils.Point{X: 5, Y: 5},
-			want:    false, /*TODO: Change after the func is implemented*/
-			wantErr: false,
-		},
-		{
-			name: "point outside",
-			ass: &Association{
-				parents: [2]*Gadget{
-					{point: utils.Point{X: 0, Y: 0}},
-					{point: utils.Point{X: 10, Y: 10}},
-				},
-			},
-			point:   utils.Point{X: 20, Y: 20},
-			want:    false,
-			wantErr: false,
-		},
+func Test_Association_Setters(t *testing.T) {
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
+	ass := &Association{
+		assType:         Extension,
+		parents:         [2]*Gadget{gadget, gadget},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.ass.Cover(tt.point)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Cover() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("Cover() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+	t.Run("SetAssType", func(t *testing.T) {
+		err := ass.SetAssType(Extension)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if ass.GetAssType() != Extension {
+			t.Errorf("expected %v, got %v", Extension, ass.GetAssType())
+		}
+	})
 
-func Test_Association_SetLayer(t *testing.T) {
-	tests := []struct {
-		name    string
-		ass     *Association
-		layer   int
-		wantErr bool
-	}{
-		{
-			name:    "set valid layer",
-			ass:     &Association{},
-			layer:   5,
-			wantErr: false,
-		},
-		{
-			name:    "set negative layer",
-			ass:     &Association{},
-			layer:   -1,
-			wantErr: false,
-		},
-	}
+	t.Run("SetLayer", func(t *testing.T) {
+		err := ass.SetLayer(10)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if ass.GetLayer() != 10 {
+			t.Errorf("expected %v, got %v", 10, ass.GetLayer())
+		}
+	})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.ass.SetLayer(tt.layer)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("SetLayer() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if !tt.wantErr {
-				got := tt.ass.GetLayer()
-				if got != tt.layer {
-					t.Errorf("Layer not set correctly, got = %v, want %v", got, tt.layer)
-				}
-			}
-		})
-	}
-}
+	t.Run("SetParentStart", func(t *testing.T) {
+		err := ass.SetParentStart(gadget, utils.Point{})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if ass.GetParentStart() != gadget {
+			t.Errorf("expected %v, got %v", gadget, ass.GetParentStart())
+		}
+	})
 
-func Test_Association_UpdateDrawData(t *testing.T) {
-	tests := []struct {
-		name    string
-		ass     *Association
-		wantErr bool
-	}{
-		{
-			name:    "update with nil association",
-			ass:     nil,
-			wantErr: true,
-		},
-		{
-			name:    "orphan ass",
-			ass:     &Association{},
-			wantErr: true,
-		},
-		{
-			name: "valid update",
-			ass: &Association{
-				parents: [2]*Gadget{
-					{point: utils.Point{X: 0, Y: 0}},
-					{point: utils.Point{X: 10, Y: 10}},
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "nil att update",
-			ass: &Association{
-				parents: [2]*Gadget{
-					{point: utils.Point{X: 0, Y: 0}},
-					{point: utils.Point{X: 10, Y: 10}},
-				},
-				attributes: []*attribute.AssAttribute{nil},
-			},
-			wantErr: true,
-		},
-		{
-			name: "valid with attributes",
-			ass: &Association{
-				parents: [2]*Gadget{
-					{point: utils.Point{X: 0, Y: 0}},
-					{point: utils.Point{X: 10, Y: 10}},
-				},
-				attributes: []*attribute.AssAttribute{},
-			},
-			wantErr: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.name == "valid update" {
-				attr, _ := attribute.NewAssAttribute(0.2)
-				tt.ass.attributes = append(tt.ass.attributes, attr)
-			}
-			err := tt.ass.updateDrawData()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("UpdateDrawData() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func Test_Association_GetDrawData(t *testing.T) {
-	tests := []struct {
-		name string
-		ass  *Association
-		want drawdata.Association
-	}{
-		{
-			name: "get from valid association",
-			ass:  &Association{},
-			want: drawdata.Association{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			dd := tt.ass.GetDrawData()
-			add, ok := dd.(drawdata.Association)
-			if !ok {
-				t.Errorf("expected type drawdata.Association, but got a different type")
-			}
-			if add.AssType != tt.want.AssType {
-				t.Errorf("error mismatch: got %v, want error %v", add.AssType, tt.want.AssType)
-			}
-		})
-	}
+	t.Run("SetParentEnd", func(t *testing.T) {
+		err := ass.SetParentEnd(gadget, utils.Point{X: 1, Y: 1})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if ass.GetParentEnd() != gadget {
+			t.Errorf("expected %v, got %v", gadget, ass.GetParentEnd())
+		}
+	})
 }
 
 func Test_Association_AddAttribute(t *testing.T) {
 	att := &attribute.AssAttribute{}
-	tests := []struct {
-		name    string
-		ass     *Association
-		att     *attribute.AssAttribute
-		wantErr bool
-	}{
-		{"add valid attribute", &Association{}, att, true},
-		{"add nil attribute", &Association{}, nil, true},
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
+	ass := &Association{
+		assType:         Extension,
+		parents:         [2]*Gadget{gadget, gadget},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.ass.AddAttribute(tt.att)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
-			}
-		})
-	}
+
+	t.Run("Add valid attribute", func(t *testing.T) {
+		err := ass.AddAttribute(att)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(ass.attributes) != 1 {
+			t.Errorf("expected 1 attribute, got %v", len(ass.attributes))
+		}
+	})
+
+	t.Run("Add nil attribute", func(t *testing.T) {
+		err := ass.AddAttribute(nil)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+	})
 }
 
 func Test_Association_RemoveAttribute(t *testing.T) {
 	att := &attribute.AssAttribute{}
-	tests := []struct {
-		name    string
-		ass     *Association
-		index   int
-		wantErr bool
-	}{
-		{"valid remove", &Association{attributes: []*attribute.AssAttribute{att}}, 0, true},
-		{"invalid index", &Association{attributes: []*attribute.AssAttribute{att}}, 1, true},
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
+	ass := &Association{
+		parents:         [2]*Gadget{gadget, gadget},
+		attributes:      []*attribute.AssAttribute{att},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.ass.RemoveAttribute(tt.index)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
-			}
-		})
-	}
+
+	t.Run("Remove valid attribute", func(t *testing.T) {
+		err := ass.RemoveAttribute(0)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(ass.attributes) != 0 {
+			t.Errorf("expected 0 attributes, got %v", len(ass.attributes))
+		}
+	})
+
+	t.Run("Remove invalid index", func(t *testing.T) {
+		err := ass.RemoveAttribute(1)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+	})
 }
 
 func Test_Association_MoveAttribute(t *testing.T) {
 	att := &attribute.AssAttribute{}
-	tests := []struct {
-		name    string
-		ass     *Association
-		index   int
-		ratio   float64
-		wantErr bool
-	}{
-		{"valid move", &Association{attributes: []*attribute.AssAttribute{att}}, 0, 0.5, false},
-		{"invalid index", &Association{attributes: []*attribute.AssAttribute{att}}, 1, 0.5, true},
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
+	ass := &Association{
+		parents:         [2]*Gadget{gadget, gadget},
+		attributes:      []*attribute.AssAttribute{att},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.ass.MoveAttribute(tt.index, tt.ratio)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
-			}
-		})
-	}
+
+	t.Run("Move valid attribute", func(t *testing.T) {
+		err := ass.MoveAttribute(0, 0.5)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("Move invalid index", func(t *testing.T) {
+		err := ass.MoveAttribute(1, 0.5)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+	})
 }
 
-func Test_NewAssociation(t *testing.T) {
-	gadget := &Gadget{}
-	tests := []struct {
-		name    string
-		parents [2]*Gadget
-		assType AssociationType
-		wantErr bool
-	}{
-		{"valid association", [2]*Gadget{gadget, gadget}, 1, false},
-		{"nil parent", [2]*Gadget{nil, gadget}, 1, true},
-		{"invalid assType", [2]*Gadget{gadget, gadget}, 0, true},
+func Test_Association_Cover(t *testing.T) {
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
+	ass := &Association{
+		parents: [2]*Gadget{gadget, gadget},
+		drawdata: drawdata.Association{
+			StartX: 0, StartY: 0,
+			EndX: 10, EndY: 10,
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewAssociation(tt.parents, tt.assType)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error mismatch: got %v, want error %v", err, tt.wantErr)
-			}
-		})
+
+	t.Run("Point inside threshold", func(t *testing.T) {
+		covered, err := ass.Cover(utils.Point{X: 5, Y: 5})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if !covered {
+			t.Errorf("expected point to be covered")
+		}
+	})
+
+	t.Run("Point outside threshold", func(t *testing.T) {
+		covered, err := ass.Cover(utils.Point{X: 20, Y: 20})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if covered {
+			t.Errorf("expected point to not be covered")
+		}
+	})
+}
+
+func Test_Association_UpdateDrawData(t *testing.T) {
+	g1, _ := NewGadget(Class, utils.Point{X: 0, Y: 0})
+	g2, _ := NewGadget(Class, utils.Point{X: 10, Y: 10})
+	ass := &Association{
+		parents:         [2]*Gadget{g1, g2},
+		startPointRatio: [2]float64{0, 0},
+		endPointRatio:   [2]float64{1, 1},
 	}
+
+	t.Run("Update with valid data", func(t *testing.T) {
+		err := ass.updateDrawData()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+}
+
+func Test_Association_RegisterUpdateParentDraw(t *testing.T) {
+	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
+	ass := &Association{
+		parents: [2]*Gadget{gadget, gadget},
+	}
+
+	t.Run("Register valid function", func(t *testing.T) {
+		err := ass.RegisterUpdateParentDraw(func() duerror.DUError { return nil })
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("Register nil function", func(t *testing.T) {
+		err := ass.RegisterUpdateParentDraw(nil)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+	})
 }
