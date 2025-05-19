@@ -1,8 +1,6 @@
 @startuml
 hide circle
-'hide method
 hide attribute
-'hide link
 
 
     object User {
@@ -19,12 +17,12 @@ hide attribute
     object UMLDiagram {
         filename
         type
-        backgoundColor
+        backgroundColor
         lastEdit
     }
-    note right
-        Each UMLDiagram is a diagram.
-    end note
+'    note right
+'        Each UMLDiagram is a diagram.
+'    end note
 
     object Gadget {
         gadgetType
@@ -89,6 +87,7 @@ hide attribute
         status
     }
 
+@endtuml
 
     UMLProject "1" -- "*" UMLDiagram : 🡧manages
     note right on link
