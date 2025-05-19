@@ -1,6 +1,6 @@
 @startuml
 autonumber
- -> ":UMLProject": openProject(pojectName)
+ -> ":UMLProject": openProject(projectName)
 opt#gold #white
      -> ":UMLProject": selectDiagram(diagramName)
 end
