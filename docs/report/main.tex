@@ -61,7 +61,7 @@
         \item Add Design Class Model
     \end{itemize}
 
-    \subsection{hw6}
+    \subsection{HW6}
     \begin{itemize}
         \item Update Figure
         \begin{itemize}
@@ -78,8 +78,12 @@
                 \item Remove extension 4.d.
             \end{itemize}
         \end{itemize}
+        \item Domain Model
+        \begin{itemize}
+            \item Remove TextFiled, ImageFormat, Filename, Field, and Component from Bad
+        \end{itemize}
     \end{itemize}
-    
+
 %    \subsection{hw7}
 %    \begin{itemize}
 %        \item Update Figure
@@ -586,18 +590,14 @@
         \caption{Categorization of Terms}
         \begin{tabular}{l l l ll}
             \toprule
-            \textbf{Attributes} & \textbf{Super Class} & \textbf{Abstract Concepts} & \textbf{Implementation Construction}  & \textbf{Too UI}\\
+            \textbf{Attributes} & \textbf{Abstract Concepts} & \textbf{Implementation Construction}  & \textbf{Too UI}\\
             \midrule
-            TextField           & Component            & System                     & UMLFile                              & Toolbox         \\
-            ImageFormat         &                      & Host                       & Filesystem                           & Canvas          \\
-            Filename            &                      & Client                     & VerificationResult                   &                 \\
-            Field               &                      & Project                    & ChatHistory                          &                 \\
-            DiagramType         &                      & Connection                 & TextStyle                            &                 \\
-            position            &                      &                            &                                      &                 \\
-            fontSize            &                      &                            &                                      &                 \\
-            isBold              &                      &                            &                                      &                 \\
-            isItalic            &                      &                            &                                      &                 \\
-            isUnderline         &                      &                            &                                      &                 \\
+            fontSize & System & UMLFile & Toolbox \\
+            isBold & Host & Filesystem & Canvas \\
+            isItalic & Client & VerificationResult & \\
+            isUnderline & Project & ChatHistory & \\
+            DiagramType & & Connection & TextStyle & \\
+            position    & &            &           & \\
             \bottomrule
         \end{tabular}
         \label{tab:categories}
@@ -676,7 +676,9 @@
         \caption{addAssociationToDiagram}
     \end{figure}
 
-    tt\subsection{addGadgetToDiagram}
+    tt
+
+    \subsection{addGadgetToDiagram}
     \begin{figure}[H]
         \centering
         \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/addGadgetToDiagram}
