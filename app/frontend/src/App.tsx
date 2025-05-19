@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
 
 import {AddGadget, GetCurrentDiagramName, GetDrawData} from "../wailsjs/go/umlproject/UMLProject";
-import { mockAssociation } from "./assets/mock/ass";
+import { mockAssociation, mockSelfAssociation } from "./assets/mock/ass";
 
 import {CanvasProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
