@@ -33,3 +33,23 @@ export const mockAssociation: AssociationProps = {
         }
     ]
 };
+
+export const mockSelfAssociation: AssociationProps = {
+    assType: 1,
+    layer: 0,
+    startX: 300,
+    startY: 200,
+    endX: 300,      // 對於 self-association，endX/endY 可與 startX/startY 相同
+    endY: 200,
+    deltaX: 60,     // 控制自連線的彎曲程度與方向
+    deltaY: 80,
+    attributes: [
+        {
+            content: "self",
+            fontSize: 14,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.5
+        }
+    ]
+};
