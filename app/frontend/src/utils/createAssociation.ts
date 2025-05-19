@@ -16,27 +16,7 @@ class AssociationElement {
             this.drawSelfAss(ctx, margin, lineWidth);
         }
 
-        const drawArrow = () => {
-            const dx = this.assProps.deltaX;
-            const dy = this.assProps.deltaY;
-            const len = Math.sqrt(dx * dx + dy * dy);
-            const unitX = dx / len;
-            const unitY = dy / len;
-            const arrowSize = 10;
-
-            const arrowX = this.assProps.endX - unitX * arrowSize;
-            const arrowY = this.assProps.endY - unitY * arrowSize;
-
-            ctx.beginPath();
-            ctx.moveTo(this.assProps.endX, this.assProps.endY);
-            ctx.lineTo(arrowX - unitY * 5, arrowY + unitX * 5);
-            ctx.lineTo(arrowX + unitY * 5, arrowY - unitX * 5);
-            ctx.closePath();
-            ctx.fillStyle = "black";
-            ctx.fill();
-        };
-
-        drawArrow();
+        this.drawArrow(ctx, margin, lineWidth);
 
         // Draw label text(s) if present
         this.drawText(ctx, margin);
@@ -74,6 +54,43 @@ class AssociationElement {
         ctx.lineTo(this.assProps.deltaX, this.assProps.deltaY);
         ctx.strokeStyle = "black";
         ctx.lineWidth = lineWidth;
+        ctx.stroke();
+    }
+
+    drawArrow(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number){
+        let dx, dy, ex, ey;
+        if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
+            // 一般連線
+            dx = this.assProps.endX - this.assProps.startX;
+            dy = this.assProps.endY - this.assProps.startY;
+            ex = this.assProps.endX;
+            ey = this.assProps.endY;
+        } else {
+            // self-association，箭頭要根據最後一段
+            const sx = this.assProps.startX + this.assProps.deltaX;
+            const sy = this.assProps.startY + this.assProps.deltaY;
+            dx = this.assProps.endX - sx;
+            dy = this.assProps.endY - sy;
+            ex = this.assProps.endX;
+            ey = this.assProps.endY;
+        }
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len === 0) return;
+
+        const unitX = dx / len;
+        const unitY = dy / len;
+        const arrowSize = 10;
+
+        const arrowX = ex - unitX * arrowSize;
+        const arrowY = ey - unitY * arrowSize;
+
+        ctx.beginPath();
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(arrowX - unitY * 5, arrowY + unitX * 5);
+        ctx.lineTo(arrowX + unitY * 5, arrowY - unitX * 5);
+        ctx.closePath();
+        ctx.fillStyle = "black";
+        ctx.fill();
         ctx.stroke();
     }
 }
