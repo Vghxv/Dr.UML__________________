@@ -77,6 +77,11 @@
                 "User can skip any step from 1 to 4" in the Extension.
                 \item Remove extension 4.d.
             \end{itemize}
+            \item UC08
+            \begin{itemize}
+                \item Add System feedbacks(step 5) in main success scenario.
+                \item Fix Misc typos.
+            \end{itemize}
         \end{itemize}
         \item Domain Model
         \begin{itemize}
@@ -185,7 +190,6 @@
             \item 3.b Self-Associations are allowed.
             \item 4.a User may change the type of Association.
             \item 4.b User may add, remove, and move text Fields in Association.
-            \item \sethlcolor{red}\hl{4.d When multiple Associations are created between two Gadgets, System will automatically distinguish the different paths to prevent overlap.}
             \item 4.d User can modify the path of an Association.
         \end{itemize}
         \item \textbf{Special Requirements}:
@@ -468,12 +472,13 @@
             \item User add a new Attribute into the Component.
             \item User select an Attribute.
             \item User change the size, font, type of the texts.
-            \item Steps 1-3 are repeated in any order until the editing is complete.
+            \item \hl{System updates according to last step.}
+            \item Steps 1--\hl{5} are repeated in any order until the editing is complete.
         \end{enumerate}
         \item \textbf{Extensions}:
         \begin{itemize}
             \item *a If a Component or Attribute is deselected during editing, System saves its current state.
-            \item 2.a User may select a exited Attribute instead of creating a new one.
+            \item 2.a User may select \hl{an} exited Attribute instead of creating a new one.
             \item 3.a After an Attribute is selected, User may also remove it from the Component.
             \item 4.a Text type has these options:
             \begin{itemize}
