@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
 
 import {AddGadget, GetCurrentDiagramName, GetDrawData} from "../wailsjs/go/umlproject/UMLProject";
-import { mockAssociation, mockSelfAssociation } from "./assets/mock/ass";
+import { mockAssociation, mockSelfAssociation, mockHorizontalAssociation, mockVerticalAssociation, mockSelfAssociationLeft, mockSelfAssociationUp} from "./assets/mock/ass";
 
 import {CanvasProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
@@ -43,7 +43,7 @@ const App: React.FC = () => {
         // 直接將 mockAssociation 加入 backendData.Association
         setBackendData(prev => {
             if (!prev) return prev;
-            const newAss = prev.Association ? [...prev.Association, mockAssociation] : [mockAssociation];
+            const newAss = prev.Association ? [...prev.Association, mockSelfAssociationUp] : [mockSelfAssociationUp];
             return { ...prev, Association: newAss };
         });
     };
