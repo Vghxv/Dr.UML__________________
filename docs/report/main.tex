@@ -662,263 +662,262 @@
 
 % START HW4
 
-
-    \section{Logical Architecture}
-
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.9\textheight]{assets/hw4/pkg}
-        \caption{Logical architecture}
-    \end{figure}
-
-
-    \section{System Sequence Diagrams with GRASP Patterns}
-    We pick UC1 as our most significant use-case. Since UC1 is made of series of system events, we decide to provide SSDs for each one of them.
-
-    \subsection{main SSD}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.9\textheight]{assets/hw4/ssd_merge}
-        \caption{main SSD}
-    \end{figure}
-
-    \subsection{addAssociationToDiagram}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.6\textheight]{assets/hw4/addAssociationToDiagram}
-        \caption{addAssociationToDiagram}
-    \end{figure}
-
-    tt
-
-    \subsection{addGadgetToDiagram}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/addGadgetToDiagram}
-        \caption{addGadgetToDiagram}
-    \end{figure}
-
-    \subsection{copyComponents}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/copyComponents}
-        \caption{copyComponents}
-    \end{figure}
-
-    \subsection{deleteComponent}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/deleteComponent}
-        \caption{deleteComponent}
-    \end{figure}
-
-    \subsection{drawAll}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.65\textheight]{assets/hw4/drawAll}
-        \caption{drawAll}
-    \end{figure}
-
-% finish scale
-
-    \subsection{importSubmodule}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.35\textheight]{assets/hw4/importSubmodule}
-        \caption{importSubmodule}
-    \end{figure}
-
-% finish scale
-
-    \subsection{moveComponent}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.6\textheight]{assets/hw4/moveComponent}
-        \caption{moveComponent}
-    \end{figure}
-
-% finish scale
-
-    \subsection{openProject}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.7\textheight]{assets/hw4/openProject}
-        \caption{openProject}
-    \end{figure}
-
-    \subsection{pasteComponents}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/pasteComponents}
-        \caption{pasteComponents}
-    \end{figure}
-
-    \subsection{redo}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/redo}
-        \caption{redo}
-    \end{figure}
-
-    \subsection{undo}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/undo}
-        \caption{undo}
-    \end{figure}
-
-% finish scale
-
-    \subsection{selectComponent}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.5\textheight]{assets/hw4/selectComponent}
-        \caption{selectComponent}
-    \end{figure}
-
-% finish scale
-
-    \subsection{selectDiagram}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.6\textheight]{assets/hw4/selectDiagram}
-        \caption{selectDiagram}
-    \end{figure}
-
-% finish scale
-
-    \subsection{unselectAllComponents}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/unselectAllComponents}
-        \caption{unselectAllComponents}
-    \end{figure}
-
-% finish scale
-
-    \subsection{unselectComponent}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/unselectComponent}
-        \caption{unselectComponent}
-    \end{figure}
-
-% finish scale
-
-    \subsection{updateProperty}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.3\textheight]{assets/hw4/updateProperty}
-        \caption{updateProperty}
-    \end{figure}
-
-
-    \section{Design Class Model}
-
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.65\textheight,angle=90]{assets/hw4/dcd}
-        \caption{Design Class Diagram}
-    \end{figure}
-
-% END HW4
-
-% START HW5
-
-
-    \section{Implementation Class Model}
-    \begin{figure}[H]
-        \centering
-        \includesvg[inkscapelatex=false,height=0.55\textheight,angle=90]{assets/hw5/idcd}
-        \caption{Design Class Diagram}
-    \end{figure}
-    HW5 TODO
-    \newpage
-
-
-    \section{Misc}
-
-    \subsection{View online}
-    Since the report contains many images, we suggest visiting the \href{https://github.com/CSIEHaTerX/Dr.UML/}{GitHub repository} to view higher-resolution versions.\\
-    \includegraphics[]{assets/repoQRCode.png}
-
-
-    \section{Calculate Line of Code}
-
-    \begin{longtable}{|c|c|c|c|}
-        \hline
-        No    & Class Name           & Number of methods & Line of Code in Class \\
-        \hline
-        \endfirsthead
-        \endhead
-        \hline
-        1     & AssAttribute         & 10                & 98                    \\
-        2     & Attribute            & 18                & 160                   \\
-        3     & Association          & 17                & 185                   \\
-        4     & Component            & 5                 & 17                    \\
-        6     & Gadget               & 9                 & 133                   \\
-        7     & AssociationGraph     & 8                 & 18                    \\
-        8     & AssociationMap       & 10                & 178                   \\
-        9     & Components           & 10                & 154                   \\
-        10    & ComponentsContainer  & 5                 & 15                    \\
-        11    & ContainerMap         & 6                 & 70                    \\
-        12    & UMLDiagram           & 10                & 123                   \\
-        13    & UMLProject           & 12                & 140                   \\
-        14    & ConnectionError      & 2                 & 13                    \\
-        15    & DUError              & 1                 & 6                     \\
-        16    & FileIOError          & 3                 & 13                    \\
-        17    & InvalidArgumentError & 3                 & 13                    \\
-        18    & MemoryFullError      & 3                 & 13                    \\
-        19    & FileIOError          & 3                 & 13                    \\
-        20    & SendError            & 3                 & 13                    \\
-        21    & Point                & 5                 & 33                    \\
-        Total & -                    & 143               & 1408                  \\
-        \hline
-    \end{longtable}
-
-
-    \section{Programming}
-
-    \subsection{Snapshots of System Execution}
-    \begin{center}
-        \includegraphics[width=0.95\linewidth]
-        {assets/hw5/snapshots_of_system_execution}
-    \end{center}
-
-    \subsection{Source Code Listing}
-    \includegraphics[width=0.95\linewidth]
-    {assets/hw5/snapshot_gadget_code}
-
-
-    \includegraphics[width=0.95\linewidth]
-    {assets/hw5/snapshot_association_code}
-
-
-    \section{Unit Testing}
-
-    \subsection{Snapshot}
-
-    \begin{figure}[H]
-        \begin{center}
-            \includegraphics[width=0.95\linewidth]
-            {assets/hw5/unit_test.png}
-            \caption{Unit test snapshot}
-        \end{center}
-    \end{figure}
-
-    \subsection{Code listing}
-
-    \begin{figure}[H]
-        \begin{center}
-            \includegraphics[width=0.4\linewidth]
-            {assets/hw5/unit_test_code.png}
-            \caption{Unit test code}
-        \end{center}
-    \end{figure}
-
+%
+%    \section{Logical Architecture}
+%
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.9\textheight]{assets/hw4/pkg}
+%        \caption{Logical architecture}
+%    \end{figure}
+%
+%
+%    \section{System Sequence Diagrams with GRASP Patterns}
+%    We pick UC1 as our most significant use-case. Since UC1 is made of series of system events, we decide to provide SSDs for each one of them.
+%
+%    \subsection{main SSD}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.9\textheight]{assets/hw4/ssd_merge}
+%        \caption{main SSD}
+%    \end{figure}
+%
+%    \subsection{addAssociationToDiagram}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.6\textheight]{assets/hw4/addAssociationToDiagram}
+%        \caption{addAssociationToDiagram}
+%    \end{figure}
+%
+%    tt
+%
+%    \subsection{addGadgetToDiagram}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/addGadgetToDiagram}
+%        \caption{addGadgetToDiagram}
+%    \end{figure}
+%
+%    \subsection{copyComponents}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/copyComponents}
+%        \caption{copyComponents}
+%    \end{figure}
+%
+%    \subsection{deleteComponent}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/deleteComponent}
+%        \caption{deleteComponent}
+%    \end{figure}
+%
+%    \subsection{drawAll}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.65\textheight]{assets/hw4/drawAll}
+%        \caption{drawAll}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{importSubmodule}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.35\textheight]{assets/hw4/importSubmodule}
+%        \caption{importSubmodule}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{moveComponent}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.6\textheight]{assets/hw4/moveComponent}
+%        \caption{moveComponent}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{openProject}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.7\textheight]{assets/hw4/openProject}
+%        \caption{openProject}
+%    \end{figure}
+%
+%    \subsection{pasteComponents}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/pasteComponents}
+%        \caption{pasteComponents}
+%    \end{figure}
+%
+%    \subsection{redo}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/redo}
+%        \caption{redo}
+%    \end{figure}
+%
+%    \subsection{undo}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/undo}
+%        \caption{undo}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{selectComponent}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.5\textheight]{assets/hw4/selectComponent}
+%        \caption{selectComponent}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{selectDiagram}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.6\textheight]{assets/hw4/selectDiagram}
+%        \caption{selectDiagram}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{unselectAllComponents}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/unselectAllComponents}
+%        \caption{unselectAllComponents}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{unselectComponent}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.45\textheight]{assets/hw4/unselectComponent}
+%        \caption{unselectComponent}
+%    \end{figure}
+%
+%% finish scale
+%
+%    \subsection{updateProperty}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.3\textheight]{assets/hw4/updateProperty}
+%        \caption{updateProperty}
+%    \end{figure}
+%
+%
+%    \section{Design Class Model}
+%
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.65\textheight,angle=90]{assets/hw4/dcd}
+%        \caption{Design Class Diagram}
+%    \end{figure}
+%
+%% END HW4
+%
+%% START HW5
+%
+%
+%    \section{Implementation Class Model}
+%    \begin{figure}[H]
+%        \centering
+%        \includesvg[inkscapelatex=false,height=0.55\textheight,angle=90]{assets/hw5/idcd}
+%        \caption{Design Class Diagram}
+%    \end{figure}
+%    HW5 TODO
+%    \newpage
+%
+%
+%    \section{Misc}
+%
+%    \subsection{View online}
+%    Since the report contains many images, we suggest visiting the \href{https://github.com/CSIEHaTerX/Dr.UML/}{GitHub repository} to view higher-resolution versions.\\
+%    \includegraphics[]{assets/repoQRCode.png}
+%
+%
+%    \section{Calculate Line of Code}
+%
+%    \begin{longtable}{|c|c|c|c|}
+%        \hline
+%        No    & Class Name           & Number of methods & Line of Code in Class \\
+%        \hline
+%        \endfirsthead
+%        \endhead
+%        \hline
+%        1     & AssAttribute         & 10                & 98                    \\
+%        2     & Attribute            & 18                & 160                   \\
+%        3     & Association          & 17                & 185                   \\
+%        4     & Component            & 5                 & 17                    \\
+%        6     & Gadget               & 9                 & 133                   \\
+%        7     & AssociationGraph     & 8                 & 18                    \\
+%        8     & AssociationMap       & 10                & 178                   \\
+%        9     & Components           & 10                & 154                   \\
+%        10    & ComponentsContainer  & 5                 & 15                    \\
+%        11    & ContainerMap         & 6                 & 70                    \\
+%        12    & UMLDiagram           & 10                & 123                   \\
+%        13    & UMLProject           & 12                & 140                   \\
+%        14    & ConnectionError      & 2                 & 13                    \\
+%        15    & DUError              & 1                 & 6                     \\
+%        16    & FileIOError          & 3                 & 13                    \\
+%        17    & InvalidArgumentError & 3                 & 13                    \\
+%        18    & MemoryFullError      & 3                 & 13                    \\
+%        19    & FileIOError          & 3                 & 13                    \\
+%        20    & SendError            & 3                 & 13                    \\
+%        21    & Point                & 5                 & 33                    \\
+%        Total & -                    & 143               & 1408                  \\
+%        \hline
+%    \end{longtable}
+%
+%
+%    \section{Programming}
+%
+%    \subsection{Snapshots of System Execution}
+%    \begin{center}
+%        \includegraphics[width=0.95\linewidth]
+%        {assets/hw5/snapshots_of_system_execution}
+%    \end{center}
+%
+%    \subsection{Source Code Listing}
+%    \includegraphics[width=0.95\linewidth]
+%    {assets/hw5/snapshot_gadget_code}
+%
+%
+%    \includegraphics[width=0.95\linewidth]
+%    {assets/hw5/snapshot_association_code}
+%
+%
+%    \section{Unit Testing}
+%
+%    \subsection{Snapshot}
+%
+%    \begin{figure}[H]
+%        \begin{center}
+%            \includegraphics[width=0.95\linewidth]
+%            {assets/hw5/unit_test.png}
+%            \caption{Unit test snapshot}
+%        \end{center}
+%    \end{figure}
+%
+%    \subsection{Code listing}
+%
+%    \begin{figure}[H]
+%        \begin{center}
+%            \includegraphics[width=0.4\linewidth]
+%            {assets/hw5/unit_test_code.png}
+%            \caption{Unit test code}
+%        \end{center}
+%    \end{figure}
+%
 
     \begin{CJK*}{UTF8}{bsmi}
-        for Chinese
         \begin{longtable}{|c|c|c|c|}
             \hline
             Info                       & Total \\
