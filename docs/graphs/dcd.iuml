@@ -313,15 +313,15 @@ class pasteCommand{
 ' interface
 
 
-Gadget <|-- Component
-Association <|-- Component
+Gadget ..|> Component
+Association ..|> Component
 
-AssAttribute <|--Attribute
+AssAttribute --|>Attribute
 
-addCommand <|-- ICommand
-editCommand <|-- ICommand
-deleteCommand <|-- ICommand
-pasteCommand <|-- ICommand
+ICommand <|.. addCommand
+editCommand ..|> ICommand
+ICommand <|. deleteCommand
+pasteCommand .|> ICommand
 
 
 ' General
@@ -338,32 +338,34 @@ Chatroom --> Timer
 Chatroom *-- Message
 
 
-UMLProject *-- UMLDiagram
+UMLProject  *--  UMLDiagram
 UMLProject *-- Timer
 UMLProject *-- Session
 UMLProject --> ICommand
+UMLProject --> Submodule
 
 UMLDiagram --> DiagramType
 UMLDiagram *-- Component
 UMLDiagram --> Timer
 UMLDiagram *-- Verifier
 UMLDiagram *-- commandManager
-UMLDiagram --> ICommand
+UMLDiagram --> Submodule
 
-Component --> Submodule
+Component <-- Submodule
 
 Component --> PropertyManager
 
-Gadget --> GadgetType
-Gadget --> Attribute
+Gadget  -->  GadgetType
+Gadget  -->  Attribute
 
-Association --> AssociationType
-Association --> AssAttribute
+Association  -->   AssociationType
+Association  -->  AssAttribute
 
-Attribute --> TextStyle
+Attribute  -->  TextStyle
 
-Verifier --> DiagramType
+Verifier  -->   DiagramType
 
+commandManager  -->  ICommand
 
 
 @enduml
