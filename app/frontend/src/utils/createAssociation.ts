@@ -23,11 +23,9 @@ class AssociationElement {
     }
 
     drawText(ctx: CanvasRenderingContext2D, margin: number) {
-        // attributes: { content, fontSize, fontStyle, fontFile, ratio }[]
         if (Array.isArray(this.assProps.attributes)) {
             this.assProps.attributes.forEach(attr => {
-                if (attr && typeof attr.content === "string") {
-                    // 計算線段上顯示位置
+                if (attr) {
                     const x = this.assProps.startX + (this.assProps.endX - this.assProps.startX) * (attr.ratio ?? 0.5);
                     const y = this.assProps.startY + (this.assProps.endY - this.assProps.startY) * (attr.ratio ?? 0.5);
                     ctx.font = `${attr.fontSize || 12}px ${attr.fontFile || "Arial"}`;
@@ -48,32 +46,42 @@ class AssociationElement {
     }
 
     drawSelfAss(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
+        const { startX, startY, endX, endY, deltaX, deltaY } = this.assProps;
+
+        const p0x = startX, p0y = startY;
+        const p1x = startX + deltaX, p1y = startY + deltaY;
+        const p2x = endX + deltaX, p2y = endY + deltaY;
+        const p3x = endX, p3y = endY;
+
         ctx.beginPath();
-        ctx.moveTo(this.assProps.startX, this.assProps.startY);
-        ctx.lineTo(this.assProps.startX + this.assProps.deltaX, this.assProps.startY + this.assProps.deltaY);
-        ctx.lineTo(this.assProps.deltaX, this.assProps.deltaY);
+        ctx.moveTo(p0x, p0y);
+        ctx.lineTo(p1x, p1y);
+        ctx.lineTo(p2x, p2y);
+        ctx.lineTo(p3x, p3y);
         ctx.strokeStyle = "black";
         ctx.lineWidth = lineWidth;
         ctx.stroke();
     }
 
     drawArrow(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number){
-        let dx, dy, ex, ey;
+        let fromX, fromY, toX, toY;
+
         if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
-            // 一般連線
-            dx = this.assProps.endX - this.assProps.startX;
-            dy = this.assProps.endY - this.assProps.startY;
-            ex = this.assProps.endX;
-            ey = this.assProps.endY;
+            // Normal association: arrow at end of straight line
+            fromX = this.assProps.startX;
+            fromY = this.assProps.startY;
+            toX = this.assProps.endX;
+            toY = this.assProps.endY;
         } else {
-            // self-association，箭頭要根據最後一段
-            const sx = this.assProps.startX + this.assProps.deltaX;
-            const sy = this.assProps.startY + this.assProps.deltaY;
-            dx = this.assProps.endX - sx;
-            dy = this.assProps.endY - sy;
-            ex = this.assProps.endX;
-            ey = this.assProps.endY;
+            // Self-association: arrow at end of last segment (from end+delta to end)
+            fromX = this.assProps.endX + this.assProps.deltaX;
+            fromY = this.assProps.endY + this.assProps.deltaY;
+            toX = this.assProps.endX;
+            toY = this.assProps.endY;
         }
+
+        const dx = toX - fromX;
+        const dy = toY - fromY;
         const len = Math.sqrt(dx * dx + dy * dy);
         if (len === 0) return;
 
@@ -81,13 +89,15 @@ class AssociationElement {
         const unitY = dy / len;
         const arrowSize = 10;
 
-        const arrowX = ex - unitX * arrowSize;
-        const arrowY = ey - unitY * arrowSize;
+        // Arrow tip at (toX, toY)
+        // Two base points of the arrowhead
+        const baseX = toX - unitX * arrowSize;
+        const baseY = toY - unitY * arrowSize;
 
         ctx.beginPath();
-        ctx.moveTo(ex, ey);
-        ctx.lineTo(arrowX - unitY * 5, arrowY + unitX * 5);
-        ctx.lineTo(arrowX + unitY * 5, arrowY - unitX * 5);
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(baseX - unitY * 5, baseY + unitX * 5);
+        ctx.lineTo(baseX + unitY * 5, baseY - unitX * 5);
         ctx.closePath();
         ctx.fillStyle = "black";
         ctx.fill();
