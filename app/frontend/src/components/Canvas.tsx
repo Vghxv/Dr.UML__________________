@@ -1,7 +1,10 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {CanvasProps, GadgetProps} from '../utils/Props';
-import {createGadget} from '../utils/createGadget';
+import React, { useEffect, useRef } from 'react';
+import { CanvasProps, GadgetProps } from '../utils/Props';
+import { createGadget } from '../utils/createGadget';
 import { createAss } from '../utils/createAssociation';
+import { useCanvasMouseEvents } from '../hooks/useCanvasMouseEvents';
+import { useSelection } from '../hooks/useSelection';
+import GadgetPropertiesPanel from './GadgetPropertiesPanel';
 import {ToPoint} from '../utils/wailsBridge'
 import {
     SelectComponent,
@@ -10,13 +13,13 @@ import {
     SetSetLayerGadget,
     SetAttrContentGadget,
     SetAttrSizeGadget,
-    SetAttrStyleGadget
+    SetAttrStyleGadget,
+    GetDrawData
 } from "../../wailsjs/go/umlproject/UMLProject";
 
-const DrawingCanvas: React.FC<{ backendData: CanvasProps | null }> = ({backendData}) => {
+const DrawingCanvas: React.FC<{ backendData: CanvasProps | null, reloadBackendData?: () => void }> = ({backendData, reloadBackendData}) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
-    const [selectedGadget, setSelectedGadget] = useState<GadgetProps | null>(null);
+    const { selectedGadgetCount, selectedGadget } = useSelection(backendData?.gadgets);
 
     const redrawCanvas = () => {
         const canvas = canvasRef.current;
@@ -24,58 +27,35 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null }> = ({backendDa
             const ctx = canvas.getContext('2d');
             if (ctx) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                let selectedCount = 0;
-                let selectedGad: GadgetProps | null = null;
 
                 backendData?.gadgets?.forEach((gadget: GadgetProps) => {
                     const gad = createGadget("Class", gadget, backendData.margin);
                     gad.draw(ctx, backendData.margin, backendData.lineWidth);
-
-                    if (gadget.isSelected) {
-                        selectedCount++;
-                        selectedGad = gadget;
-                    }
                 });
-                
+
                 backendData?.Association?.forEach((association) => {
                     const ass = createAss("Association", association, backendData.margin);
                     ass.draw(ctx, backendData.margin, backendData.lineWidth);
                 });
 
-                setSelectedGadgetCount(selectedCount);
-                setSelectedGadget(selectedCount === 1 ? selectedGad : null);
+                // 更新選取狀態（確保每次都用最新 gadgets）
+                // updateSelection(backendData?.gadgets);
             }
         }
-    }
+    };
 
     useEffect(() => {
         redrawCanvas();
     }, [backendData]);
 
-    const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        console.log("handleMouseDown");
-        const rect = canvasRef.current?.getBoundingClientRect();
-        const x = Math.round(event.clientX - (rect?.left || 0));
-        const y = Math.round(event.clientY - (rect?.top || 0));
-        console.log("Mouse down at:", x, y);
-        SelectComponent(ToPoint(
-            x,
-            y
-        )).then(() => {
-                console.log("handleMouseDown");
+    const { handleMouseDown, handleMouseMove, handleMouseUp } = useCanvasMouseEvents(
+        canvasRef,
+        () => {
+            if (reloadBackendData) {
+                reloadBackendData();
             }
-        ).catch((error) => {
-                console.error("Error selecting component:", error);
-            }
-        );
-    };
-
-    const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        // TODO: add some hover things
-    };
-
-    const handleMouseUp = () => {
-    };
+        }
+    );
 
     const updateGadgetProperty = (property: string, value: any) => {
         if (!selectedGadget || !backendData || !backendData.gadgets) return;
@@ -183,135 +163,6 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null }> = ({backendDa
         redrawCanvas();
     };
 
-    // Side panel component for editing gadget properties
-    const GadgetPropertiesPanel = () => {
-        if (!selectedGadget) return null;
-
-        return (
-            <div style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                width: '300px',
-                height: '100%',
-                backgroundColor: '#f0f0f0',
-                padding: '20px',
-                boxShadow: '-2px 0 5px rgba(0,0,0,0.2)',
-                overflowY: 'auto'
-            }}>
-                <h3>Gadget Properties</h3>
-
-                {/* Basic properties */}
-                <div style={{marginBottom: '15px'}}>
-                    <label style={{display: 'block', marginBottom: '5px'}}>X Position:</label>
-                    <input
-                        type="number"
-                        value={selectedGadget.x}
-                        onChange={(e) => updateGadgetProperty('x', parseInt(e.target.value))}
-                        style={{width: '100%', padding: '5px'}}
-                    />
-                </div>
-
-                <div style={{marginBottom: '15px'}}>
-                    <label style={{display: 'block', marginBottom: '5px'}}>Y Position:</label>
-                    <input
-                        type="number"
-                        value={selectedGadget.y}
-                        onChange={(e) => updateGadgetProperty('y', parseInt(e.target.value))}
-                        style={{width: '100%', padding: '5px'}}
-                    />
-                </div>
-
-                <div style={{marginBottom: '15px'}}>
-                    <label style={{display: 'block', marginBottom: '5px'}}>Layer:</label>
-                    <input
-                        type="number"
-                        value={selectedGadget.layer}
-                        onChange={(e) => updateGadgetProperty('layer', parseInt(e.target.value))}
-                        style={{width: '100%', padding: '5px'}}
-                    />
-                </div>
-
-                <div style={{marginBottom: '15px'}}>
-                    <label style={{display: 'block', marginBottom: '5px'}}>Color:</label>
-                    <input
-                        type="color"
-                        value={selectedGadget.color}
-                        onChange={(e) => updateGadgetProperty('color', e.target.value)}
-                        style={{width: '100%', padding: '5px'}}
-                    />
-                </div>
-
-                {/* Attributes */}
-                <h4>Attributes</h4>
-                {selectedGadget.attributes.map((attrGroup, groupIndex) => (
-                    <div key={`group-${groupIndex}`} style={{marginBottom: '20px'}}>
-                        <h5>Group {groupIndex + 1}</h5>
-                        {attrGroup.map((attr, attrIndex) => (
-                            <div key={`attr-${groupIndex}-${attrIndex}`} style={{
-                                marginBottom: '15px',
-                                padding: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '5px'
-                            }}>
-                                <div style={{marginBottom: '10px'}}>
-                                    <label style={{display: 'block', marginBottom: '5px'}}>Content:</label>
-                                    <input
-                                        type="text"
-                                        value={attr.content}
-                                        onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.content`, e.target.value)}
-                                        style={{width: '100%', padding: '5px'}}
-                                    />
-                                </div>
-
-                                <div style={{marginBottom: '10px'}}>
-                                    <label style={{display: 'block', marginBottom: '5px'}}>Font Size:</label>
-                                    <input
-                                        type="number"
-                                        value={attr.fontSize}
-                                        onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontSize`, parseInt(e.target.value))}
-                                        style={{width: '100%', padding: '5px'}}
-                                    />
-                                </div>
-
-                                <div style={{marginBottom: '10px'}}>
-                                    <label style={{display: 'block', marginBottom: '5px'}}>Font Style:</label>
-                                    <select
-                                        value={attr.fontStyle}
-                                        onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyle`, parseInt(e.target.value))}
-                                        style={{width: '100%', padding: '5px'}}
-                                    >
-                                        {/*TODO: make this part work */}
-                                        <option value={0}>Normal</option>
-                                        <option value={1}>Italic</option>
-                                        <option value={2}>Bold</option>
-                                        <option value={3}>Bold Italic</option>
-                                    </select>
-                                </div>
-
-                                <div style={{marginBottom: '10px'}}>
-                                    <label style={{display: 'block', marginBottom: '5px'}}>Font File:</label>
-                                    <select
-                                        value={attr.fontFile}
-                                        onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontFile`, e.target.value)}
-                                        style={{width: '100%', padding: '5px'}}
-                                    >
-                                        <option value="Arial">Arial</option>
-                                        <option value="Helvetica">Helvetica</option>
-                                        <option value="Times New Roman">Times New Roman</option>
-                                        <option value="Courier New">Courier New</option>
-                                        <option value="Georgia">Georgia</option>
-                                        <option value="Verdana">Verdana</option>
-                                    </select>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
     return (
         <div style={{position: 'relative', display: 'flex'}}>
             <canvas
@@ -330,7 +181,12 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null }> = ({backendDa
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
             />
-            {selectedGadgetCount === 1 && <GadgetPropertiesPanel/>}
+            {selectedGadgetCount === 1 && (
+                <GadgetPropertiesPanel
+                    selectedGadget={selectedGadget}
+                    updateGadgetProperty={updateGadgetProperty}
+                />
+            )}
         </div>
     );
 };
