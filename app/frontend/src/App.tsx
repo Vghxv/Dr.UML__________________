@@ -122,7 +122,7 @@ const App: React.FC = () => {
                     onClose={() => setShowPopup(false)}
                 />
             )}
-            <DrawingCanvas backendData={backendData}/>
+            <DrawingCanvas backendData={backendData} reloadBackendData={loadCanvasData} />
         </div>
     );
 };
