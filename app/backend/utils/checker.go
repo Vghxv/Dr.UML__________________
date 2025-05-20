@@ -50,3 +50,19 @@ func ValidateFilePath(path string) duerror.DUError {
 
 	return nil
 }
+
+// ValidateSection checks if a section is valid for a given number of sections
+// It returns a DUError if the section is out of range
+func ValidateSection(section, numSections int) duerror.DUError {
+	if section < 0 || section >= numSections {
+		return duerror.NewInvalidArgumentError("section out of range")
+	}
+	return nil
+}
+
+func ValidateIndex(index, numItems int) duerror.DUError {
+	if index < 0 || index >= numItems {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
+	return nil
+}
