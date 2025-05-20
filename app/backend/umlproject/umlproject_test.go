@@ -297,13 +297,13 @@ func TestAddAttributeToGadget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add attribute to the gadget
-	err = p.AddAttributeToGadget("newAttribute", 1)
+	err = p.AddAttributeToGadget(1, "newAttribute")
 	assert.NoError(t, err)
 
 	// No diagram selected
 	err = p.CloseDiagram("TestDiagram")
 	assert.NoError(t, err)
-	err = p.AddAttributeToGadget("newAttribute", 1)
+	err = p.AddAttributeToGadget(1, "newAttribute")
 	assert.Error(t, err)
 }
 
