@@ -25,19 +25,6 @@ const App: React.FC = () => {
         }
     };
 
-    // TODO: remove this when CreateGadgetPopup is done
-    const handleAddGadget = async () => {
-        try {
-            // Generate random positions between 50 and 500
-            const randomX = Math.floor(Math.random() * 450) + 50;
-            const randomY = Math.floor(Math.random() * 450) + 50;
-            // TODO: import gadget type from backend
-            await AddGadget(1, ToPoint(randomX, randomY), 0, 0x00FF00, "sample header");
-        } catch (error) {
-            console.error("Error adding gadget:", error);
-        }
-    };
-
     // 新增 addAss handler
     const handleAddAss = async () => {
         // 直接將 mockAssociation 加入 backendData.Association
@@ -121,7 +108,6 @@ const App: React.FC = () => {
             <h1 style={{fontFamily: "Inkfree"}}>Dr.UML</h1>
             <Toolbar
                 onGetDiagramName={handleGetDiagramName}
-                onAddGadget={handleAddGadget}
                 onShowPopup={() => setShowPopup(true)}
                 onAddAss={handleAddAss}
                 diagramName={diagramName}

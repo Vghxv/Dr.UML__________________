@@ -2,7 +2,6 @@ import React from "react";
 
 interface ToolbarProps {
     onGetDiagramName: () => void;
-    onAddGadget: () => void;
     onShowPopup: () => void;
     onAddAss: () => void;
     diagramName?: string | null;
@@ -10,7 +9,6 @@ interface ToolbarProps {
 
 const Toolbar: React.FC<ToolbarProps> = ({
     onGetDiagramName,
-    onAddGadget,
     onShowPopup,
     onAddAss,
     diagramName
@@ -59,25 +57,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 Diagram Name: {diagramName}
             </span>
         )}
-        <button
-            onClick={onAddGadget}
-            style={{
-                background: '#43c59e',
-                color: 'white',
-                border: 'none',
-                borderRadius: '7px',
-                padding: '10px 20px',
-                fontWeight: 600,
-                fontSize: '15px',
-                cursor: 'pointer',
-                boxShadow: '0 1px 4px rgba(67,197,158,0.12)',
-                transition: 'background 0.2s',
-            }}
-            onMouseOver={e => (e.currentTarget.style.background = '#2ea97b')}
-            onMouseOut={e => (e.currentTarget.style.background = '#43c59e')}
-        >
-            Add New Gadget
-        </button>
         <button
             onClick={onShowPopup}
             style={{

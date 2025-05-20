@@ -1,47 +1,59 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
+import {AddGadget} from "../../wailsjs/go/umlproject/UMLProject";
+import {ToPoint} from "../utils/wailsBridge";
+import {component} from "../../wailsjs/go/models";
 
-interface GadgetPopupProps {
+export interface GadgetPopupProps {
     isOpen: boolean;
     onCreate: (gadget: any) => void;
     onClose: () => void;
 }
 
-export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onClose }) => {
+export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClose}) => {
+    // TODO: import type from backend
     const [formData, setFormData] = useState({
-        id: 0,
-        name: "",
-        x: 100,
-        y: 100,
-        color: "#FF0000",
+        gtype: 1,
+        x: 0,
+        y: 0,
+        layer: 0,
+        color: "#0000FF",
+        header: "sample header",
     });
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: name === "x" || name === "y" || name === "id" ? parseInt(value) : value });
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const {name, value} = e.target;
+        setFormData({...formData, [name]: name === "x" || name === "y" || name === "layer" || name === "gtype" ? parseInt(value) : value});
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const { id, name, x, y, color } = formData;
-        onCreate({ id, name, position: { x, y }, color });
+        const {gtype, x, y, layer, color, header} = formData;
+        onCreate({gtype, position: {x, y}, layer, color: color, header});
+        AddGadget(gtype, ToPoint(x, y), layer, color, "sample header").then(
+            (res) => {
+                console.log(res)
+            },
+            (err) => {
+                console.log(err)
+            }
+        )
     };
 
     if (!isOpen) return null;
 
     return (
         <div style={{
-                position: 'fixed',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                backdropFilter: 'blur(4px)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 50
-            }}>
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 50
+        }}>
             <div style={{
                 backgroundColor: 'white',
                 borderRadius: '1rem',
@@ -57,19 +69,18 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onCl
                     marginBottom: '1.5rem',
                     color: '#2d3748'
                 }}>Create Gadget</h2>
-                <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ 
-                            display: 'block', 
-                            fontSize: '0.875rem', 
-                            fontWeight: 500, 
-                            color: '#4a5568', 
-                            marginBottom: '0.25rem' 
-                        }}>ID</label>
-                        <input
-                            type="number"
-                            name="id"
-                            value={formData.id}
+                <form onSubmit={handleSubmit} style={{marginBottom: '1rem'}}>
+                    <div style={{marginBottom: '1rem'}}>
+                        <label style={{
+                            display: 'block',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            color: '#4a5568',
+                            marginBottom: '0.25rem'
+                        }}>Gadget type</label>
+                        <select
+                            name="gtype"
+                            value={formData.gtype}
                             onChange={handleChange}
                             style={{
                                 width: '100%',
@@ -77,20 +88,22 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onCl
                                 borderRadius: '0.5rem',
                                 padding: '0.5rem'
                             }}
-                        />
+                        >
+                            <option value={component.GadgetType.Class}>Class</option>
+                        </select>
                     </div>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ 
-                            display: 'block', 
-                            fontSize: '0.875rem', 
-                            fontWeight: 500, 
-                            color: '#4a5568', 
-                            marginBottom: '0.25rem' 
+                    <div style={{marginBottom: '1rem'}}>
+                        <label style={{
+                            display: 'block',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            color: '#4a5568',
+                            marginBottom: '0.25rem'
                         }}>Name</label>
                         <input
                             type="text"
-                            name="name"
-                            value={formData.name}
+                            name="header"
+                            value={formData.header}
                             onChange={handleChange}
                             style={{
                                 width: '100%',
@@ -100,18 +113,18 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onCl
                             }}
                         />
                     </div>
-                    <div style={{ 
-                        display: 'flex', 
+                    <div style={{
+                        display: 'flex',
                         gap: '1rem',
                         marginBottom: '1rem'
                     }}>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ 
-                                display: 'block', 
-                                fontSize: '0.875rem', 
-                                fontWeight: 500, 
-                                color: '#4a5568', 
-                                marginBottom: '0.25rem' 
+                        <div style={{flex: 1}}>
+                            <label style={{
+                                display: 'block',
+                                fontSize: '0.875rem',
+                                fontWeight: 500,
+                                color: '#4a5568',
+                                marginBottom: '0.25rem'
                             }}>X</label>
                             <input
                                 type="number"
@@ -126,13 +139,13 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onCl
                                 }}
                             />
                         </div>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ 
-                                display: 'block', 
-                                fontSize: '0.875rem', 
-                                fontWeight: 500, 
-                                color: '#4a5568', 
-                                marginBottom: '0.25rem' 
+                        <div style={{flex: 1}}>
+                            <label style={{
+                                display: 'block',
+                                fontSize: '0.875rem',
+                                fontWeight: 500,
+                                color: '#4a5568',
+                                marginBottom: '0.25rem'
                             }}>Y</label>
                             <input
                                 type="number"
@@ -148,13 +161,13 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onCl
                             />
                         </div>
                     </div>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ 
-                            display: 'block', 
-                            fontSize: '0.875rem', 
-                            fontWeight: 500, 
-                            color: '#4a5568', 
-                            marginBottom: '0.25rem' 
+                    <div style={{marginBottom: '1rem'}}>
+                        <label style={{
+                            display: 'block',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            color: '#4a5568',
+                            marginBottom: '0.25rem'
                         }}>Color</label>
                         <input
                             type="color"
@@ -168,11 +181,11 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onCl
                             }}
                         />
                     </div>
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'flex-end', 
-                        gap: '0.75rem', 
-                        paddingTop: '1rem' 
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: '0.75rem',
+                        paddingTop: '1rem'
                     }}>
                         <button
                             type="button"
