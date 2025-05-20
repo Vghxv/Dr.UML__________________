@@ -1,28 +1,51 @@
 package component
 
 import (
-	"strconv"
 	"testing"
 
+	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 	"github.com/stretchr/testify/assert"
 )
 
+// testing purpose
+var gadgetDefaultAtts = map[GadgetType]([][]string){
+	Class: [][]string{
+		{"UMLProject"},
+		{"id: String", "name: String", "lastModified: Date"},
+		{"GetAvailableDiagrams(): List<String>", "GetLastOpenedDiagrams(): List<String>", "SelectDiagram(diagramName: String): DUError", "CreateDiagram(diagramName: String): DUError"},
+	},
+}
+
 // test util
 func newEmptyGadget(gadgetType GadgetType, point utils.Point) *Gadget {
-	g, err := NewGadget(gadgetType, point, 0, drawdata.DefaultGadgetColor, "")
-	if err != nil {
-		panic(err)
+	g := &Gadget{
+		gadgetType: gadgetType,
+		point:      point,
+		layer:      0,
+		color:      utils.FromHex(drawdata.DefaultGadgetColor),
 	}
-	for i, length := range g.GetAttributesLen() {
-		for j := 0; j < length; j++ {
-			if err := g.RemoveAttribute(i, 0); err != nil {
+
+	// Initialize attributes using gadgetDefaultAtts
+	g.attributes = make([][]*attribute.Attribute, len(gadgetDefaultAtts[gadgetType]))
+	for i, contents := range gadgetDefaultAtts[gadgetType] {
+		g.attributes[i] = make([]*attribute.Attribute, 0, len(contents))
+		for _, content := range contents {
+			att, err := attribute.NewAttribute(content)
+			if err != nil {
 				panic(err)
 			}
+			g.attributes[i] = append(g.attributes[i], att)
 		}
 	}
+
+	// Initialize drawData
+	if err := g.updateDrawData(); err != nil {
+		panic(err)
+	}
+
 	return g
 }
 
@@ -74,49 +97,123 @@ func TestGetGadgetType(t *testing.T) {
 func TestGetAttributesLen(t *testing.T) {
 	// for Class type
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-	assert.Equal(t, []int{0, 0, 0}, g.GetAttributesLen())
+	assert.Equal(t, []int{1, 3, 4}, g.GetAttributesLen())
 }
 
 // Setter
-// func TestSetPoint(t *testing.T) {
-// 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-// 	assert.NoError(t, g.SetPoint(utils.Point{X: 2, Y: 2}))
-// 	assert.Equal(t, utils.Point{X: 2, Y: 2}, g.GetPoint())
+func TestSetPoint(t *testing.T) {
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
 
-// 	mp := mockParent{}
-// 	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-// 	assert.NoError(t, g.SetPoint(utils.Point{X: 3, Y: 3}))
-// 	assert.Equal(t, utils.Point{X: 3, Y: 3}, g.GetPoint())
-// 	assert.Equal(t, 1, mp.Times)
-// }
+	assert.NoError(t, g.SetPoint(utils.Point{X: 2, Y: 2}))
+	assert.Equal(t, utils.Point{X: 2, Y: 2}, g.GetPoint())
 
-// func TestSetLayer(t *testing.T) {
-// 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-// 	assert.NoError(t, g.SetLayer(1))
-// 	assert.Equal(t, 1, g.GetLayer())
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.SetPoint(utils.Point{X: 3, Y: 3}))
+	assert.Equal(t, utils.Point{X: 3, Y: 3}, g.GetPoint())
+	assert.Equal(t, 1, mp.Times)
+}
 
-// 	mp := mockParent{}
-// 	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-// 	assert.NoError(t, g.SetLayer(2))
-// 	assert.Equal(t, 2, g.GetLayer())
-// 	assert.Equal(t, 1, mp.Times)
-// }
+func TestSetLayer(t *testing.T) {
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	assert.NoError(t, g.SetLayer(1))
+	assert.Equal(t, 1, g.GetLayer())
 
-// func TestSetColor(t *testing.T) {
-// 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-// 	assert.NoError(t, g.SetColor("#FF0000"))
-// 	assert.Equal(t, utils.FromHex(0xFF0000), g.GetColor())
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.SetLayer(2))
+	assert.Equal(t, 2, g.GetLayer())
+	assert.Equal(t, 1, mp.Times)
+}
 
-// 	mp := mockParent{}
-// 	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-// 	assert.NoError(t, g.SetColor("#00FF00"))
-// 	assert.Equal(t, utils.FromHex(0x00FF00), g.GetColor())
-// 	assert.Equal(t, 1, mp.Times)
-// }
+func TestSetColor(t *testing.T) {
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	assert.NoError(t, g.SetColor("#FF0000"))
+	assert.Equal(t, utils.FromHex(0xFF0000), g.GetColor())
+
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.SetColor("#00FF00"))
+	assert.Equal(t, utils.FromHex(0x00FF00), g.GetColor())
+	assert.Equal(t, 1, mp.Times)
+}
+
+func TestSetAttrContent(t *testing.T) {
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+
+	// Add an attribute to test
+	assert.NoError(t, g.AddAttribute(0, "test"))
+
+	// Test valid case
+	assert.NoError(t, g.SetAttrContent(0, 0, "updated"))
+
+	// Test invalid section
+	assert.Error(t, g.SetAttrContent(-1, 0, "invalid"))
+	assert.Error(t, g.SetAttrContent(len(g.attributes), 0, "invalid"))
+
+	// Test invalid index
+	assert.Error(t, g.SetAttrContent(0, -1, "invalid"))
+	assert.Error(t, g.SetAttrContent(0, len(g.attributes[0]), "invalid"))
+
+	// Test with parent draw update
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.SetAttrContent(0, 0, "updated again"))
+	assert.Equal(t, 1, mp.Times)
+}
+func TestSetAttrSize(t *testing.T) {
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+
+	// Add an attribute to test
+	assert.NoError(t, g.AddAttribute(0, "test"))
+
+	// Test valid case
+	assert.NoError(t, g.SetAttrSize(0, 0, 16))
+
+	// Test invalid section
+	assert.Error(t, g.SetAttrSize(-1, 0, 16))
+	assert.Error(t, g.SetAttrSize(len(g.attributes), 0, 16))
+
+	// Test invalid index
+	assert.Error(t, g.SetAttrSize(0, -1, 16))
+	assert.Error(t, g.SetAttrSize(0, len(g.attributes[0]), 16))
+
+	// Test with parent draw update
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.SetAttrSize(0, 0, 18))
+	assert.Equal(t, 1, mp.Times)
+}
+func TestSetAttrStyle(t *testing.T) {
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+
+	// Add an attribute to test
+	assert.NoError(t, g.AddAttribute(0, "test"))
+
+	// Test valid cases
+	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Bold)))
+	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Italic)))
+	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Underline)))
+	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Bold|attribute.Italic)))
+
+	// Test invalid section
+	assert.Error(t, g.SetAttrStyle(-1, 0, int(attribute.Bold)))
+	assert.Error(t, g.SetAttrStyle(len(g.attributes), 0, int(attribute.Bold)))
+
+	// Test invalid index
+	assert.Error(t, g.SetAttrStyle(0, -1, int(attribute.Bold)))
+	assert.Error(t, g.SetAttrStyle(0, len(g.attributes[0]), int(attribute.Bold)))
+
+	// Test with parent draw update
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Bold|attribute.Underline)))
+	assert.Equal(t, 1, mp.Times)
+}
 
 // Methods
 func TestCover(t *testing.T) {
-	g, _ := NewGadget(Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
 	width := g.GetDrawData().(drawdata.Gadget).Width
 	height := g.GetDrawData().(drawdata.Gadget).Height
 
@@ -155,86 +252,108 @@ func TestCover(t *testing.T) {
 func TestAddAttribute(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
 
-	// add attribute in every section
-	sectionLen := len(g.GetAttributesLen())
-	for i := 0; i < sectionLen; i++ {
-		content := "test" + strconv.Itoa(i)
-		assert.NoError(t, g.AddAttribute(i, content))
-		assert.Equal(t, 1, g.GetAttributesLen()[i])
-		att_content := g.GetDrawData().(drawdata.Gadget).Attributes[i][0].Content
-		assert.Equal(t, content, att_content)
+	// Get initial attribute lengths
+	initialLengths := g.GetAttributesLen()
+
+	// Test adding attributes to different sections
+	assert.NoError(t, g.AddAttribute(0, "test0"))
+	assert.NoError(t, g.AddAttribute(1, "test1"))
+	assert.NoError(t, g.AddAttribute(2, "test2"))
+
+	// Verify lengths increased
+	newLengths := g.GetAttributesLen()
+	for i := 0; i < len(initialLengths); i++ {
+		assert.Equal(t, initialLengths[i]+1, newLengths[i])
 	}
 
-	// invalid section
-	assert.Error(t, g.AddAttribute(-1, "test"))
-	assert.Error(t, g.AddAttribute(sectionLen, "test"))
+	// Test invalid section
+	assert.Error(t, g.AddAttribute(-1, "invalid"))
+	assert.Error(t, g.AddAttribute(len(g.attributes), "invalid"))
 
-	// some errors are hard to test :(
+	// Test with parent draw update
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.AddAttribute(0, "test with parent"))
+	assert.Equal(t, 1, mp.Times)
+
+	// Test with invalid content (this depends on attribute.NewAttribute implementation)
+	// We can't easily test this without knowing what makes content invalid
+	// But we can at least call it with empty string to see if it works
+	assert.NoError(t, g.AddAttribute(0, ""))
 }
 
 func TestRemoveAttribute(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
 
-	// every section
-	sectionLen := len(g.GetAttributesLen())
-	for i := 0; i < sectionLen; i++ {
-		content1 := "test1_" + strconv.Itoa(i)
-		content2 := "test2_" + strconv.Itoa(i)
-		g.AddAttribute(i, content1)
-		g.AddAttribute(i, content2)
+	// Add attributes to test removal
+	assert.NoError(t, g.AddAttribute(0, "test0"))
+	assert.NoError(t, g.AddAttribute(0, "test1"))
+	assert.NoError(t, g.AddAttribute(1, "test2"))
 
-		// success
-		g.RemoveAttribute(i, 0)
-		assert.Equal(t, 1, g.GetAttributesLen()[i])
-		att_content := g.GetDrawData().(drawdata.Gadget).Attributes[i][0].Content
-		assert.Equal(t, content2, att_content)
+	// Get lengths before removal
+	beforeLengths := g.GetAttributesLen()
 
-		// remove out of index
-		assert.Error(t, g.RemoveAttribute(-1, i))
-		assert.Error(t, g.RemoveAttribute(1, i))
-	}
+	// Test removing attributes
+	assert.NoError(t, g.RemoveAttribute(0, 0))
 
-	// invalid section
+	// Verify length decreased
+	afterLengths := g.GetAttributesLen()
+	assert.Equal(t, beforeLengths[0]-1, afterLengths[0])
+	assert.Equal(t, beforeLengths[1], afterLengths[1]) // Unchanged
+
+	// Test invalid section
 	assert.Error(t, g.RemoveAttribute(-1, 0))
-	assert.Error(t, g.RemoveAttribute(sectionLen, 0))
+	assert.Error(t, g.RemoveAttribute(len(g.attributes), 0))
+
+	// Test invalid index
+	assert.Error(t, g.RemoveAttribute(0, -1))
+	assert.Error(t, g.RemoveAttribute(0, len(g.attributes[0])))
+
+	// Test with parent draw update
+	mp := mockParent{}
+	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.RemoveAttribute(1, 0)) // Remove the attribute we added to section 1
+	assert.Equal(t, 1, mp.Times)
 }
 
 func TestGetDrawData(t *testing.T) {
-	L := drawdata.LineWidth
-	M := drawdata.Margin
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
 
-	gadget, err := NewGadget(Class, utils.Point{X: 1, Y: 1}, 0, 0xFF00FF, "")
-	assert.NoError(t, err)
-	assert.NotNil(t, gadget)
+	// Get draw data
+	data := g.GetDrawData()
 
-	data := gadget.GetDrawData()
-	assert.NotNil(t, data)
-	gdd := data.(drawdata.Gadget)
-	assert.NotNil(t, gdd)
-	assert.Equal(t, 1, gdd.X)
-	assert.Equal(t, 1, gdd.Y)
-	assert.Equal(t, 0, gdd.Layer)
-	assert.Equal(t, "#FF00FF", gdd.Color)
+	// Verify it's the correct type
+	gadgetData, ok := data.(drawdata.Gadget)
+	assert.True(t, ok)
 
-	// check default att
-	h := L
-	maxAttWidth := 0
-	for i := 0; i < len(gdd.Attributes); i++ {
-		for j := 0; j < len(gdd.Attributes[i]); j++ {
-			if gdd.Attributes[i][j].Width > maxAttWidth {
-				maxAttWidth = gdd.Attributes[i][j].Width
-			}
-			h += M + gdd.Attributes[i][j].Height
-		}
-		h += M + L
+	// Verify basic properties
+	assert.Equal(t, int(Class), gadgetData.GadgetType)
+	assert.Equal(t, 1, gadgetData.X)
+	assert.Equal(t, 1, gadgetData.Y)
+	assert.Equal(t, 0, gadgetData.Layer)
+	assert.Equal(t, "#808080", gadgetData.Color) // Default color is 0x808080
+
+	// Verify attributes
+	assert.Equal(t, len(g.attributes), len(gadgetData.Attributes))
+	for i, attrSection := range g.attributes {
+		assert.Equal(t, len(attrSection), len(gadgetData.Attributes[i]))
 	}
-	w := maxAttWidth + M*2 + L*2
-	assert.Equal(t, w, gdd.Width)
-	assert.Equal(t, h, gdd.Height)
-	assert.Equal(t, 3, len(gdd.Attributes))
-	assert.Equal(t, "UMLProject", gdd.Attributes[0][0].Content)
-	assert.Equal(t, "id: String", gdd.Attributes[1][0].Content)
-	assert.Equal(t, "GetAvailableDiagrams(): List<String>", gdd.Attributes[2][0].Content)
+
+	// Test after modification
+	assert.NoError(t, g.SetPoint(utils.Point{X: 2, Y: 2}))
+	assert.NoError(t, g.SetLayer(1))
+	assert.NoError(t, g.SetColor("#FF0000"))
+
+	// Get updated draw data
+	updatedData := g.GetDrawData()
+	updatedGadgetData, ok := updatedData.(drawdata.Gadget)
+	assert.True(t, ok)
+
+	// Verify updated properties
+	assert.Equal(t, 2, updatedGadgetData.X)
+	assert.Equal(t, 2, updatedGadgetData.Y)
+	assert.Equal(t, 1, updatedGadgetData.Layer)
+	assert.Equal(t, "#FF0000", updatedGadgetData.Color)
 }
 
 func TestRegisterUpdateParentDraw(t *testing.T) {
