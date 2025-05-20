@@ -345,3 +345,10 @@ func TestLoadExistUMLProject(t *testing.T) {
 	assert.Nil(t, p)
 	assert.Nil(t, err)
 }
+
+func TestOpenDiagram(t *testing.T) {
+	proj, err := CreateEmptyUMLProject("fuck")
+	assert.NoError(t, err)
+	err = proj.OpenDiagram("/home/df/GolfsjklandProjects/Quiddity/app/backend/example.json5")
+	assert.NoError(t, err)
+}
