@@ -1,7 +1,7 @@
 package drawdata
 
 // a default gadget color (grey)
-const DefaultGadgetColor = 0x808080
+const DefaultGadgetColor = "#808080"
 
 type Gadget struct {
 	GadgetType int           `json:"gadgetType"`

@@ -196,11 +196,11 @@ func (p *UMLProject) DeleteDiagram(diagramName string) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int, header string) duerror.DUError {
+func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, colorHexStr string, header string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.AddGadget(gadgetType, point, layer, color, header); err != nil {
+	if err := p.currentDiagram.AddGadget(gadgetType, point, layer, colorHexStr, header); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -263,18 +263,6 @@ func (p *UMLProject) SelectComponent(point utils.Point) duerror.DUError {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	if err := p.currentDiagram.SelectComponent(point); err != nil {
-		return err
-	}
-	p.lastModified = time.Now()
-	return nil
-}
-
-func (p *UMLProject) UnselectComponent(point utils.Point) duerror.DUError {
-	// TODO: possibly remove this method in the future
-	if p.currentDiagram == nil {
-		return duerror.NewInvalidArgumentError("No current diagram selected")
-	}
-	if err := p.currentDiagram.UnselectComponent(point); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()

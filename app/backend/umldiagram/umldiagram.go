@@ -64,9 +64,9 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 		diagramType:         dt,
 		lastModified:        time.Now(),
 		startPoint:          utils.Point{X: 0, Y: 0},
-		backgroundColor:     utils.FromHex(drawdata.DefaultDiagramColor), // Default white background
+		backgroundColor:     utils.FromHexString(drawdata.DefaultDiagramColor), // Default white background
 		componentsContainer: components.NewContainerMap(),
-		associations:        make(map[*component.Gadget]([2][]*component.Association)),
+		associations:        make(map[*component.Gadget][2][]*component.Association),
 		componentsSelected:  make(map[component.Component]bool),
 		drawData: drawdata.Diagram{
 			Margin:    drawdata.Margin,
@@ -178,8 +178,8 @@ func (ud *UMLDiagram) SetAttrStyleGadget(section int, index int, style int) duer
 }
 
 // Methods
-func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int, header string) duerror.DUError {
-	g, err := component.NewGadget(gadgetType, point, layer, color, header)
+func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, colorHexStr string, header string) duerror.DUError {
+	g, err := component.NewGadget(gadgetType, point, layer, colorHexStr, header)
 	if err != nil {
 		return err
 	}

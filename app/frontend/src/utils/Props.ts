@@ -1,6 +1,6 @@
 export interface CanvasProps {
     margin: number;
-    color: number;
+    color: string;
     lineWidth: number;
     gadgets?: GadgetProps[];
     Association?: AssociationProps[];

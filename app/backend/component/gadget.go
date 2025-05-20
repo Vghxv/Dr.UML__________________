@@ -40,7 +40,7 @@ func validateGadgetType(input GadgetType) duerror.DUError {
 }
 
 // Constructor
-func NewGadget(gadgetType GadgetType, point utils.Point, layer int, color int, header string) (*Gadget, duerror.DUError) {
+func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr string, header string) (*Gadget, duerror.DUError) {
 	if err := validateGadgetType(gadgetType); err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, color int, h
 		gadgetType: gadgetType,
 		point:      point,
 		layer:      layer,
-		color:      utils.FromHex(color),
+		color:      utils.FromHexString(colorHexStr),
 	}
 
 	// Init attributes with three sections

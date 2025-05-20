@@ -156,7 +156,7 @@ func TestUMLDiagramGetters(t *testing.T) {
 	assert.Equal(t, drawdata.LineWidth, drawData.LineWidth)
 	assert.Equal(t, drawdata.DefaultDiagramColor, drawData.Color)
 
-	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, 0x808080, "sample header")
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
 	assert.NoError(t, err)
 }
 func TestUMLDiagram_AddGadget(t *testing.T) {
@@ -342,7 +342,7 @@ func TestUpdateDrawData(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a gadget
-	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, 0x808080, "sample header")
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
 	assert.NoError(t, err)
 
 	// Check that drawData contains the gadget
@@ -377,7 +377,7 @@ func TestAddAttributeToGadget(t *testing.T) {
 	assert.Equal(t, "can only operate on one component", err.Error())
 
 	// Add a gadget to the diagram
-	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, 0x808080, "sample header")
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
 	assert.NoError(t, err)
 
 	// Get the gadget from the container
@@ -400,7 +400,7 @@ func TestAddAttributeToGadget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a second gadget
-	err = diagram.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, 0x808080, "sample header 2")
+	err = diagram.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "sample header 2")
 	assert.NoError(t, err)
 
 	// Get all gadgets

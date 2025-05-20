@@ -6,6 +6,7 @@ class ClassElement {
     public len: number;
     public headerHeight: number;
     public attributesHeight: number;
+    public colorHexStr: string;
 
     constructor(props: GadgetProps, margin: number) {
         this.gadgetProps = props;
@@ -32,11 +33,12 @@ class ClassElement {
 
         this.headerHeight = calculateSectionHeight(0, headerLen);
         this.attributesHeight = calculateSectionHeight(1, attributesLen);
+        this.colorHexStr = props.color;
     }
 
     draw(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
         ctx.beginPath();
-        ctx.fillStyle = this.gadgetProps.color;
+        ctx.fillStyle = this.colorHexStr;
         ctx.fillRect(this.gadgetProps.x, this.gadgetProps.y, this.gadgetProps.width, this.headerHeight);
         ctx.fillStyle = "white";
         ctx.fillRect(this.gadgetProps.x, this.gadgetProps.y + this.headerHeight, this.gadgetProps.width, this.gadgetProps.height - this.headerHeight);

@@ -25,7 +25,7 @@ func newEmptyGadget(gadgetType GadgetType, point utils.Point) *Gadget {
 		gadgetType: gadgetType,
 		point:      point,
 		layer:      0,
-		color:      utils.FromHex(drawdata.DefaultGadgetColor),
+		color:      utils.FromHexString(drawdata.DefaultGadgetColor),
 	}
 
 	// Initialize attributes using gadgetDefaultAtts
@@ -86,7 +86,7 @@ func TestGetLayer(t *testing.T) {
 
 func TestGetColor(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-	assert.Equal(t, utils.FromHex(drawdata.DefaultGadgetColor), g.GetColor())
+	assert.Equal(t, utils.FromHexString(drawdata.DefaultGadgetColor), g.GetColor())
 }
 
 func TestGetGadgetType(t *testing.T) {
@@ -103,46 +103,49 @@ func TestGetAttributesLen(t *testing.T) {
 // Setter
 func TestSetPoint(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
 
 	assert.NoError(t, g.SetPoint(utils.Point{X: 2, Y: 2}))
 	assert.Equal(t, utils.Point{X: 2, Y: 2}, g.GetPoint())
 
-	mp := mockParent{}
-	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
 	assert.NoError(t, err)
 	assert.NoError(t, g.SetPoint(utils.Point{X: 3, Y: 3}))
 	assert.Equal(t, utils.Point{X: 3, Y: 3}, g.GetPoint())
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, 2, mp.Times)
 }
 
 func TestSetLayer(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
 	assert.NoError(t, g.SetLayer(1))
 	assert.Equal(t, 1, g.GetLayer())
 
-	mp := mockParent{}
-	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
 	assert.NoError(t, err)
 	assert.NoError(t, g.SetLayer(2))
 	assert.Equal(t, 2, g.GetLayer())
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, 2, mp.Times)
 }
 
 func TestSetColor(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-	assert.NoError(t, g.SetColor("#FF0000"))
-	assert.Equal(t, utils.FromHex(0xFF0000), g.GetColor())
-
 	mp := mockParent{}
 	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, g.SetColor("#FF0000"))
+	assert.Equal(t, utils.FromHexString("#FF0000"), g.GetColor())
+
 	assert.NoError(t, err)
 	assert.NoError(t, g.SetColor("#00FF00"))
-	assert.Equal(t, utils.FromHex(0x00FF00), g.GetColor())
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, utils.FromHexString("#00FF00"), g.GetColor())
+	assert.Equal(t, 2, mp.Times)
 }
 
 func TestSetAttrContent(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 
 	// Add an attribute to test
 	assert.NoError(t, g.AddAttribute(0, "test"))
@@ -159,14 +162,14 @@ func TestSetAttrContent(t *testing.T) {
 	assert.Error(t, g.SetAttrContent(0, len(g.attributes[0]), "invalid"))
 
 	// Test with parent draw update
-	mp := mockParent{}
-	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-	assert.NoError(t, err)
 	assert.NoError(t, g.SetAttrContent(0, 0, "updated again"))
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, 3, mp.Times)
 }
 func TestSetAttrSize(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 
 	// Add an attribute to test
 	assert.NoError(t, g.AddAttribute(0, "test"))
@@ -183,15 +186,14 @@ func TestSetAttrSize(t *testing.T) {
 	assert.Error(t, g.SetAttrSize(0, len(g.attributes[0]), 16))
 
 	// Test with parent draw update
-	mp := mockParent{}
-	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-	assert.NoError(t, err)
 	assert.NoError(t, g.SetAttrSize(0, 0, 18))
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, 3, mp.Times)
 }
 func TestSetAttrStyle(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	// Add an attribute to test
 	assert.NoError(t, g.AddAttribute(0, "test"))
 
@@ -210,11 +212,8 @@ func TestSetAttrStyle(t *testing.T) {
 	assert.Error(t, g.SetAttrStyle(0, len(g.attributes[0]), int(attribute.Bold)))
 
 	// Test with parent draw update
-	mp := mockParent{}
-	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-	assert.NoError(t, err)
 	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Bold|attribute.Underline)))
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, 6, mp.Times)
 }
 
 // Methods
@@ -257,7 +256,9 @@ func TestCover(t *testing.T) {
 
 func TestAddAttribute(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	// Get initial attribute lengths
 	initialLengths := g.GetAttributesLen()
 
@@ -277,11 +278,8 @@ func TestAddAttribute(t *testing.T) {
 	assert.Error(t, g.AddAttribute(len(g.attributes), "invalid"))
 
 	// Test with parent draw update
-	mp := mockParent{}
-	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-	assert.NoError(t, err)
 	assert.NoError(t, g.AddAttribute(0, "test with parent"))
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, 4, mp.Times)
 
 	// Test with invalid content (this depends on attribute.NewAttribute implementation)
 	// We can't easily test this without knowing what makes content invalid
@@ -291,6 +289,9 @@ func TestAddAttribute(t *testing.T) {
 
 func TestRemoveAttribute(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 
 	// Add attributes to test removal
 	assert.NoError(t, g.AddAttribute(0, "test0"))
@@ -317,16 +318,15 @@ func TestRemoveAttribute(t *testing.T) {
 	assert.Error(t, g.RemoveAttribute(0, len(g.attributes[0])))
 
 	// Test with parent draw update
-	mp := mockParent{}
-	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
-	assert.NoError(t, err)
 	assert.NoError(t, g.RemoveAttribute(1, 0)) // Remove the attribute we added to section 1
-	assert.Equal(t, 1, mp.Times)
+	assert.Equal(t, 5, mp.Times)
 }
 
 func TestGetDrawData(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-
+	mp := mockParent{}
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	// Get draw data
 	data := g.GetDrawData()
 
@@ -339,7 +339,7 @@ func TestGetDrawData(t *testing.T) {
 	assert.Equal(t, 1, gadgetData.X)
 	assert.Equal(t, 1, gadgetData.Y)
 	assert.Equal(t, 0, gadgetData.Layer)
-	assert.Equal(t, "#808080", gadgetData.Color) // Default color is 0x808080
+	assert.Equal(t, drawdata.DefaultGadgetColor, gadgetData.ColorHexStr)
 
 	// Verify attributes
 	assert.Equal(t, len(g.attributes), len(gadgetData.Attributes))
@@ -361,7 +361,7 @@ func TestGetDrawData(t *testing.T) {
 	assert.Equal(t, 2, updatedGadgetData.X)
 	assert.Equal(t, 2, updatedGadgetData.Y)
 	assert.Equal(t, 1, updatedGadgetData.Layer)
-	assert.Equal(t, "#FF0000", updatedGadgetData.Color)
+	assert.Equal(t, "#FF0000", updatedGadgetData.ColorHexStr)
 }
 
 func TestRegisterUpdateParentDraw(t *testing.T) {
