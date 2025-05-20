@@ -14,21 +14,20 @@ import (
 type DiagramType int
 
 const (
-	ClassDiagram    = 1 << iota // 0x01
-	UseCaseDiagram  = 1 << iota // 0x02
-	SequenceDiagram = 1 << iota // 0x04
-	supportedType   = ClassDiagram | UseCaseDiagram | SequenceDiagram
+	ClassDiagram = 1 << iota // 0x01
+	UseCaseDiagram
+	SequenceDiagram
+	supportedType = ClassDiagram
 )
 
 var AllDiagramTypes = []struct {
 	Value  DiagramType
-	Number int
+	TSName string
 }{
-	{ClassDiagram, 1},
-	{UseCaseDiagram, 2},
-	{SequenceDiagram, 4},
+	{ClassDiagram, "ClassDiagram"},
 }
 
+// Other methods
 func validateDiagramType(input DiagramType) duerror.DUError {
 	if !(input&supportedType == input && input != 0) {
 		return duerror.NewInvalidArgumentError("Invalid diagram type")
@@ -95,7 +94,90 @@ func (ud *UMLDiagram) GetLastModified() time.Time {
 	return ud.lastModified
 }
 
-// Other methods
+// Setters
+func (ud *UMLDiagram) SetPointGadget(point utils.Point) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetPoint(point)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+func (ud *UMLDiagram) SetSetLayerGadget(layer int) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetLayer(layer)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+func (ud *UMLDiagram) SetColorGadget(colorHexStr string) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetColor(colorHexStr)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+func (ud *UMLDiagram) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetAttrContent(section, index, content)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+func (ud *UMLDiagram) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetAttrSize(section, index, size)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+func (ud *UMLDiagram) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetAttrStyle(section, index, style)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+// Methods
 func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, color int, header string) duerror.DUError {
 	g, err := component.NewGadget(gadgetType, point, layer, color, header)
 	if err != nil {
@@ -109,13 +191,6 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	}
 	ud.associations[g] = [2][]*component.Association{{}, {}}
 	return ud.updateDrawData()
-}
-
-func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
-	if point.X < 0 || point.Y < 0 {
-		return duerror.NewInvalidArgumentError("point coordinates must be non-negative")
-	}
-	return nil
 }
 
 func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {
@@ -174,47 +249,6 @@ func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPo
 	return ud.updateDrawData()
 }
 
-func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
-	if _, ok := ud.associations[gad]; ok {
-		for _, a := range ud.associations[gad][0] {
-			if err := ud.removeAssociation(a); err != nil {
-				return err
-			}
-		}
-		for _, a := range ud.associations[gad][1] {
-			if err := ud.removeAssociation(a); err != nil {
-				return err
-			}
-		}
-		delete(ud.associations, gad)
-	}
-	delete(ud.componentsSelected, gad)
-	return ud.componentsContainer.Remove(gad)
-}
-
-func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUError {
-	st := a.GetParentStart()
-	en := a.GetParentEnd()
-	if _, ok := ud.associations[st]; ok {
-		stList := ud.associations[st][0]
-		index := slices.Index(stList, a)
-		if index >= 0 {
-			stList = slices.Delete(stList, index, index+1)
-		}
-		ud.associations[st] = [2][]*component.Association{stList, ud.associations[st][1]}
-	}
-	if _, ok := ud.associations[en]; ok {
-		enList := ud.associations[en][1]
-		index := slices.Index(enList, a)
-		if index >= 0 {
-			enList = slices.Delete(enList, index, index+1)
-		}
-		ud.associations[en] = [2][]*component.Association{ud.associations[en][0], enList}
-	}
-	delete(ud.componentsSelected, a)
-	return ud.componentsContainer.Remove(a)
-}
-
 func (ud *UMLDiagram) RemoveSelectedComponents() duerror.DUError {
 	for c := range ud.componentsSelected {
 		switch c := c.(type) {
@@ -266,6 +300,94 @@ func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
 	return nil
 }
 
+func (ud *UMLDiagram) AddAttributeToGadget(section int, content string) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.AddAttribute(section, content)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.RemoveAttribute(section, index)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+// Private methods
+func (ud *UMLDiagram) getSelectedComponent() (component.Component, duerror.DUError) {
+	if len(ud.componentsSelected) != 1 {
+		return nil, duerror.NewInvalidArgumentError("can only operate on one component")
+	}
+	for c := range ud.componentsSelected {
+		return c, nil
+	}
+	return nil, duerror.NewInvalidArgumentError("no component selected")
+}
+
+func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
+	if _, ok := ud.associations[gad]; ok {
+		for _, a := range ud.associations[gad][0] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		for _, a := range ud.associations[gad][1] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		delete(ud.associations, gad)
+	}
+	delete(ud.componentsSelected, gad)
+	return ud.componentsContainer.Remove(gad)
+}
+
+func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUError {
+	st := a.GetParentStart()
+	en := a.GetParentEnd()
+	if _, ok := ud.associations[st]; ok {
+		stList := ud.associations[st][0]
+		index := slices.Index(stList, a)
+		if index >= 0 {
+			stList = slices.Delete(stList, index, index+1)
+		}
+		ud.associations[st] = [2][]*component.Association{stList, ud.associations[st][1]}
+	}
+	if _, ok := ud.associations[en]; ok {
+		enList := ud.associations[en][1]
+		index := slices.Index(enList, a)
+		if index >= 0 {
+			enList = slices.Delete(enList, index, index+1)
+		}
+		ud.associations[en] = [2][]*component.Association{ud.associations[en][0], enList}
+	}
+	delete(ud.componentsSelected, a)
+	return ud.componentsContainer.Remove(a)
+}
+
+func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
+	if point.X < 0 || point.Y < 0 {
+		return duerror.NewInvalidArgumentError("point coordinates must be non-negative")
+	}
+	return nil
+}
+
+// draw
 func (ud *UMLDiagram) GetDrawData() drawdata.Diagram {
 	return ud.drawData
 }
@@ -279,115 +401,6 @@ func (ud *UMLDiagram) RegisterUpdateParentDraw(update func() duerror.DUError) du
 
 }
 
-func (ud *UMLDiagram) AddAttributeToGadget(content string, section int) duerror.DUError {
-
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only add attribute to one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.AddAttribute(section, content); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.DUError {
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only remove attribute from one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.RemoveAttribute(section, index); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (ud *UMLDiagram) SetPointGadget(point utils.Point) duerror.DUError {
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only set point to one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.SetPoint(point); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (ud *UMLDiagram) SetSetLayerGadget(layer int) duerror.DUError {
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only set layer to one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.SetLayer(layer); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (ud *UMLDiagram) SetColorGadget(color string) duerror.DUError {
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only set color to one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.SetColor(color); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (ud *UMLDiagram) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only set content to one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.SetAttrContent(section, index, content); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-func (ud *UMLDiagram) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only set size to one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.SetAttrSize(section, index, size); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-func (ud *UMLDiagram) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
-	if len(ud.componentsSelected) != 1 {
-		return duerror.NewInvalidArgumentError("can only set style to one gadget")
-	}
-	for c := range ud.componentsSelected {
-		if g, ok := c.(*component.Gadget); ok {
-			if err := g.SetAttrStyle(section, index, style); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
 func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	gs := make([]drawdata.Gadget, 0, len(ud.componentsSelected))
 	as := make([]drawdata.Association, 0, len(ud.componentsSelected))

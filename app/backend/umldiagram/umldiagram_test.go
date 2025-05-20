@@ -31,13 +31,15 @@ func TestCreateEmptyDiagram(t *testing.T) {
 			name:        "ValidUseCaseDiagram",
 			inputName:   "test2.uml",
 			diagramType: UseCaseDiagram,
-			expectError: false,
+			expectError: true,
+			errorMsg:    "Invalid diagram type",
 		},
 		{
 			name:        "ValidSequenceDiagram",
 			inputName:   "test3.uml",
 			diagramType: SequenceDiagram,
-			expectError: false,
+			expectError: true,
+			errorMsg:    "Invalid diagram type",
 		},
 		{
 			name:        "InvalidDiagramType",
@@ -107,12 +109,12 @@ func TestCheckDiagramType(t *testing.T) {
 		{
 			name:        "UseCaseDiagram",
 			diagramType: UseCaseDiagram,
-			expected:    true,
+			expected:    false,
 		},
 		{
 			name:        "SequenceDiagram",
 			diagramType: SequenceDiagram,
-			expected:    true,
+			expected:    false,
 		},
 		{
 			name:        "InvalidDiagram",
@@ -369,10 +371,10 @@ func TestAddAttributeToGadget(t *testing.T) {
 	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
 	assert.NoError(t, err)
 
-	// Try to add attribute with no selected components
-	err = diagram.AddAttributeToGadget("attribute", 0)
+	// Try to add an attribute with no selected components
+	err = diagram.AddAttributeToGadget(0, "attribute")
 	assert.Error(t, err)
-	assert.Equal(t, "can only add attribute to one gadget", err.Error())
+	assert.Equal(t, "can only operate on one component", err.Error())
 
 	// Add a gadget to the diagram
 	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, 0x808080, "sample header")
@@ -389,7 +391,7 @@ func TestAddAttributeToGadget(t *testing.T) {
 	diagram.componentsSelected[gadget] = true
 
 	// Add attribute
-	err = diagram.AddAttributeToGadget("NewAttribute", 0)
+	err = diagram.AddAttributeToGadget(0, "NewAttribute")
 	assert.NoError(t, err)
 
 	// Test with multiple selected components
@@ -411,9 +413,9 @@ func TestAddAttributeToGadget(t *testing.T) {
 	}
 
 	// Try to add attribute with multiple gadgets selected
-	err = diagram.AddAttributeToGadget("attribute", 0)
+	err = diagram.AddAttributeToGadget(0, "attribute")
 	assert.Error(t, err)
-	assert.Equal(t, "can only add attribute to one gadget", err.Error())
+	assert.Equal(t, "can only operate on one component", err.Error())
 }
 
 // Mock container for testing selection methods
