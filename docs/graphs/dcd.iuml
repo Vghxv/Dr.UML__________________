@@ -69,6 +69,14 @@ class UMLDiagram{
     - backgroundColor: Color
     - lastModified: Date
     - startPoint: Point
+    - components: List<Component>
+    - selectedComponents: List<*Component>
+
+    - createAssociation(type: associationType, parents: Pair<*Gadget, *Gadget>): DUError
+    - clone(List<*Component> components): DUError
+    - findGadget(point: Point): *Gadget
+    - adjustAssociationPath(association: *Association): DUError
+    - setupProperty(component: *Component): DUError
 
     + AddGadget(type: gadgetType, point: Point): DUError
     + StartAddAssociation(point: Point): DUError
@@ -84,6 +92,11 @@ class UMLDiagram{
     + StartDragging(point: Point): DUError
     + StopDragging(point: Point): DUError
     + DrawAll(graphics: Graphics): DUError
+
+    + AddAssociation(type: associationType, startPoint: Point, endPoint: Point): DUError
+    + MoveSelectedComponent(delta: Point): DUError
+    + GetGroupComponents(): List<*Component>
+
 }
 
 
@@ -97,30 +110,6 @@ Interface Component {
 
 }
 ' TODO: getHitBox()
-
-class Components {
-    - components: List<Component>
-    - selectedComponents: List<*Component>
-
-    + AddGadget(type: gadgetType, point: Point): DUError
-    + AddAssociation(type: associationType, startPoint: Point, endPoint: Point): DUError
-    + DeleteComponent(): DUError
-    + SelectComponent(point: Point): DUError
-    + UnselectComponent(point: Point): DUError
-    + MoveSelectedComponent(delta: Point): DUError
-    + ExportSubmodule(target: String): DUError
-    + GetGroupComponents(): List<*Component>
-    + DrawAll(graphic: Graphics): DUError
-
-    - createGadget(type: gadgetType, point: Point): DUError
-    - createAssociation(type: associationType, parents: Pair<*Gadget, *Gadget>): DUError
-    - clone(List<*Component> components): DUError
-    - findGadget(point: Point): *Gadget
-    - adjustAssociationPath(association: *Association): DUError
-    - setupProperty(component: *Component): DUError
-
-}
-
 
 class Gadget{
     - type: GadgetType
@@ -324,15 +313,15 @@ class pasteCommand{
 ' interface
 
 
-Gadget <|-- Component
-Association <|-- Component
+Gadget ..|> Component
+Association ..|> Component
 
-AssAttribute <|--Attribute
+AssAttribute --|>Attribute
 
-addCommand <|-- ICommand
-editCommand <|-- ICommand
-deleteCommand <|-- ICommand
-pasteCommand <|-- ICommand
+ICommand <|.. addCommand
+editCommand ..|> ICommand
+ICommand <|. deleteCommand
+pasteCommand .|> ICommand
 
 
 ' General
@@ -349,33 +338,34 @@ Chatroom --> Timer
 Chatroom *-- Message
 
 
-UMLProject *-- UMLDiagram
+UMLProject  *--  UMLDiagram
 UMLProject *-- Timer
 UMLProject *-- Session
 UMLProject --> ICommand
+UMLProject --> Submodule
 
 UMLDiagram --> DiagramType
-UMLDiagram *-- Components
+UMLDiagram *-- Component
 UMLDiagram --> Timer
 UMLDiagram *-- Verifier
 UMLDiagram *-- commandManager
-UMLDiagram --> ICommand
+UMLDiagram --> Submodule
 
-Components *-- Component
-Components --> Submodule
+Component <-- Submodule
 
 Component --> PropertyManager
 
-Gadget --> GadgetType
-Gadget --> Attribute
+Gadget  -->  GadgetType
+Gadget  -->  Attribute
 
-Association --> AssociationType
-Association --> AssAttribute
+Association  -->   AssociationType
+Association  -->  AssAttribute
 
-Attribute --> TextStyle
+Attribute  -->  TextStyle
 
-Verifier --> DiagramType
+Verifier  -->   DiagramType
 
+commandManager  -->  ICommand
 
 
 @enduml
@@ -405,7 +395,6 @@ Chatroom --> DUError
 Message --> DUError
 UMLProject --> DUError
 UMLDiagram --> DUError
-Components --> DUError
 Gadget --> DUError
 Association --> DUError
 Attribute --> DUError

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="49.8253 28.8171 254.6569 567.4694" width="254.657px" height="567.469px">
+  <g id="graph0" class="graph" transform="matrix(0.9250699877738953, 0, 0, 0.9250699877738953, 52.10978698730469, 514.0162963867188)">
+    <title>diagram</title>
+    <g id="clust1" class="cluster" transform="matrix(1, 0, 0, 1, -123.233971, 0)">
+      <title>cluster_presentation</title>
+      <polygon fill="none" stroke="black" points="173,-448 173,-524.5 295,-524.5 295,-448 173,-448"/>
+      <text text-anchor="middle" x="234" y="-507.2" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">User Interface</text>
+    </g>
+    <g id="clust2" class="cluster">
+      <title>cluster_business</title>
+      <polygon fill="none" stroke="black" points="8,-8 8,-416.5 236,-416.5 236,-8 8,-8"/>
+      <text text-anchor="middle" x="122" y="-399.2" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">Domain Layer</text>
+    </g>
+    <g id="clust3" class="cluster">
+      <title>cluster_colab</title>
+      <polygon fill="none" stroke="black" points="16,-124 16,-308.5 106,-308.5 106,-124 16,-124"/>
+      <text text-anchor="middle" x="61" y="-291.2" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">Collaboration</text>
+    </g>
+    <g id="clust4" class="cluster">
+      <title>cluster_canvas</title>
+      <polygon fill="none" stroke="black" points="114,-16 114,-308.5 228,-308.5 228,-16 114,-16"/>
+      <text text-anchor="middle" x="171" y="-291.2" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">Diagram</text>
+    </g>
+    <g id="clust6" class="cluster">
+      <title>cluster_tech</title>
+      <polygon fill="none" stroke="black" points="54.825 88.934 54.825 12.364 166.825 12.364 166.825 88.934 54.825 88.934"/>
+      <text text-anchor="middle" x="110.825" y="29.68" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre; font-size: 14px;">Technical Service</text>
+    </g>
+    <g id="node1" class="node" transform="matrix(1, 0, 0, 1, -122.152969, 0)">
+      <title>GUI Application</title>
+      <polygon fill="none" stroke="black" points="287.38,-492 192.62,-492 192.62,-496 180.62,-496 180.62,-456 287.38,-456 287.38,-492"/>
+      <polyline fill="none" stroke="black" points="180.62,-492 192.62,-492"/>
+      <text text-anchor="middle" x="234" y="-468.95" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">GUI Application</text>
+    </g>
+    <g id="node2" class="node">
+      <title>UML Project</title>
+      <polygon fill="none" stroke="black" points="168.411 -384 91.651 -384 91.651 -388 79.651 -388 79.651 -348 168.411 -348 168.411 -384"/>
+      <polyline fill="none" stroke="black" points="79.651 -384 91.651 -384"/>
+      <text text-anchor="middle" x="124.031" y="-360.95" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre; font-size: 14px;">UML Project</text>
+    </g>
+    <g id="edge7" class="edge">
+      <title>GUI Application-&gt;UML Project</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M 114.588 -456.474 C 116.471 -438.514 116.856 -414.747 118.978 -394.854"/>
+      <polygon fill="black" stroke="black" points="120.564 -389.135 119.76 -385.511 116.212 -394.572 121.849 -394.805"/>
+    </g>
+    <g id="node8" class="node">
+      <title>Logging</title>
+      <polygon fill="none" stroke="black" points="124.705 44.894 74.945 44.894 74.945 40.89 62.945 40.89 62.945 80.927 124.705 80.927 124.705 44.894"/>
+      <polyline fill="none" stroke="black" points="62.945 44.894 74.945 44.894"/>
+      <text text-anchor="middle" x="93.825" y="67.965" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre; font-size: 14px;">Logging</text>
+    </g>
+    <g id="edge8" class="edge">
+      <title>GUI Application-&gt;Logging</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M 166.251 -476.068 C 298.924 -394.031 316.754 -5.75 168.19 67.683"/>
+      <polygon fill="black" stroke="black" points="178.495 64.501 179.365 67.024 167.365 67.961 177.545 61.501"/>
+    </g>
+    <g id="node3" class="node">
+      <title>Session</title>
+      <polygon fill="none" stroke="black" points="97.62,-276 52.38,-276 52.38,-280 40.38,-280 40.38,-240 97.62,-240 97.62,-276"/>
+      <polyline fill="none" stroke="black" points="40.38,-276 52.38,-276"/>
+      <text text-anchor="middle" x="69" y="-252.95" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">Session</text>
+    </g>
+    <g id="edge2" class="edge">
+      <title>UML Project-&gt;Session</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M 101.441 -347.62 C 92.437 -334.195 75.172 -293.11 70.672 -283.464"/>
+      <polygon fill="black" stroke="black" points="74.17 -284.97 69.006 -277.179 68.807 -286.818 74.478 -285.463"/>
+    </g>
+    <g id="node5" class="node">
+      <title>UML Diagram</title>
+      <polygon fill="none" stroke="black" points="220.25,-276 133.75,-276 133.75,-280 121.75,-280 121.75,-240 220.25,-240 220.25,-276"/>
+      <polyline fill="none" stroke="black" points="121.75,-276 133.75,-276"/>
+      <text text-anchor="middle" x="171" y="-252.95" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">UML Diagram</text>
+    </g>
+    <g id="edge3" class="edge">
+      <title>UML Project-&gt;UML Diagram</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M 136.049 -347.484 C 136.049 -347.484 151.468 -313.778 157.387 -288.314"/>
+      <polygon fill="black" stroke="black" points="160.982 -283.975 160.27 -277.697 155.281 -286.757 161.293 -287.803"/>
+    </g>
+    <g id="edge10" class="edge">
+      <title>UML Project-&gt;Logging</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M 168.515 -365.179 C 249.078 -329.869 318.858 -75.656 177.094 54.715"/>
+      <polygon fill="black" stroke="black" points="175.159 52.337 167.359 58.302 176.807 58.97 175.987 55.848"/>
+    </g>
+    <g id="node4" class="node">
+      <title>Chatroom</title>
+      <polygon fill="none" stroke="black" points="98.38,-168 39.62,-168 39.62,-172 27.62,-172 27.62,-132 98.38,-132 98.38,-168"/>
+      <polyline fill="none" stroke="black" points="27.62,-168 39.62,-168"/>
+      <text text-anchor="middle" x="63" y="-144.95" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">Chatroom</text>
+    </g>
+    <g id="edge1" class="edge">
+      <title>Session-&gt;Chatroom</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M68.04,-239.97C67.12,-223.76 65.72,-199.06 64.63,-179.79"/>
+      <polygon fill="black" stroke="black" points="68.13,-179.64 64.07,-169.85 61.14,-180.03 68.13,-179.64"/>
+    </g>
+    <g id="edge9" class="edge">
+      <title>Session-&gt;Logging</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M 39.833 -259.597 C 18.582 -260.868 -50.273 -69.676 52.548 61.692"/>
+      <polygon fill="black" stroke="black" points="45.247 55.512 42.616 59.595 53.675 62.083 47.44 52.21"/>
+    </g>
+    <g id="node6" class="node">
+      <title>Submodule</title>
+      <polygon fill="none" stroke="black" points="200.12,-168 133.88,-168 133.88,-172 121.88,-172 121.88,-132 200.12,-132 200.12,-168"/>
+      <polyline fill="none" stroke="black" points="121.88,-168 133.88,-168"/>
+      <text text-anchor="middle" x="161" y="-144.95" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">Submodule</text>
+    </g>
+    <g id="edge6" class="edge">
+      <title>UML Diagram-&gt;Submodule</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M169.39,-239.97C167.86,-223.76 165.53,-199.06 163.72,-179.79"/>
+      <polygon fill="black" stroke="black" points="167.2,-179.47 162.78,-169.85 160.23,-180.13 167.2,-179.47"/>
+    </g>
+    <g id="node7" class="node">
+      <title>Component</title>
+      <polygon fill="none" stroke="black" points="210.88,-60 143.12,-60 143.12,-64 131.12,-64 131.12,-24 210.88,-24 210.88,-60"/>
+      <polyline fill="none" stroke="black" points="131.12,-60 143.12,-60"/>
+      <text text-anchor="middle" x="171" y="-36.95" font-family="Times New Roman,serif" font-size="14.00" style="white-space: pre;">Component</text>
+    </g>
+    <g id="edge4" class="edge">
+      <title>UML Diagram-&gt;Component</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M 186.69 -239.6 C 215.029 -209.161 226.724 -109.565 187.32 -69.99"/>
+      <polygon fill="black" stroke="black" points="190.51,-68.52 182.56,-61.53 184.42,-71.96 190.51,-68.52"/>
+    </g>
+    <g id="edge5" class="edge">
+      <title>Submodule-&gt;Component</title>
+      <path fill="none" stroke="black" stroke-dasharray="5,2" d="M162.61,-131.97C164.14,-115.76 166.47,-91.06 168.28,-71.79"/>
+      <polygon fill="black" stroke="black" points="171.77,-72.13 169.22,-61.85 164.8,-71.47 171.77,-72.13"/>
+    </g>
+  </g>
+</svg>

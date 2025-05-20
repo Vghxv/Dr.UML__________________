@@ -1,0 +1,309 @@
+@startuml
+    class AssAttribute << (S,Aquamarine) >> {
+        - ratio float64
+        - assDD AssAttribute
+        - updateParentDraw <font color=blue>func</font>() DUError
+
+        + GetRatio() float64
+        + GetAssDD() AssAttribute
+        + SetContent(content string) DUError
+        + SetSize(size int) DUError
+        + SetStyle(style Textstyle) DUError
+        + SetFontFile(fontFile string) DUError
+        + SetRatio(ratio float64) DUError
+        + UpdateDrawData() 
+        + RegisterUpdateParentDraw(update <font color=blue>func</font>() DUError) DUError
+
+    }
+    class Attribute << (S,Aquamarine) >> {
+        - content string
+        - size int
+        - style Textstyle
+        - fontFile string
+        - drawData Attribute
+        - updateParentDraw <font color=blue>func</font>() DUError
+
+        - updateDrawData() DUError
+
+        + GetContent() string
+        + SetContent(content string) DUError
+        + GetSize() int
+        + SetSize(size int) DUError
+        + GetStyle() Textstyle
+        + SetStyle(style Textstyle) DUError
+        + SetBold(value bool) DUError
+        + SetItalic(value bool) DUError
+        + SetUnderline(value bool) DUError
+        + SetFontFile(fontFile string) DUError
+        + IsBold() bool
+        + IsItalic() bool
+        + IsUnderline() bool
+        + Copy() (*Attribute, DUError)
+        + GetDrawData() Attribute
+        + RegisterUpdateParentDraw(update <font color=blue>func</font>() DUError) DUError
+
+    }
+    class Textstyle << (T, #FF7700) >>  {
+    }
+
+
+    class Association << (S,Aquamarine) >> {
+        - assType AssociationType
+        - layer int
+        - attributes []*AssAttribute
+        - parents []*Gadget
+        - drawdata Association
+        - updateParentDraw <font color=blue>func</font>() DUError
+
+        - updateDrawData() DUError
+
+        + GetAssType() AssociationType
+        + GetAttributes() ([]*AssAttribute, DUError)
+        + GetDrawData() any
+        + GetLayer() int
+        + GetParentEnd() *Gadget
+        + GetParentStart() *Gadget
+        + SetAssType(assType AssociationType) DUError
+        + SetLayer(layer int) DUError
+        + SetParentStart(gadget *Gadget) DUError
+        + SetParentEnd(gadget *Gadget) DUError
+        + AddAttribute(attribute *AssAttribute) DUError
+        + Cover(p Point) (bool, DUError)
+        + MoveAttribute(index int, ratio float64) DUError
+        + RemoveAttribute(index int) DUError
+        + RegisterUpdateParentDraw(update <font color=blue>func</font>() DUError) DUError
+
+    }
+    interface Component  {
+        + Cover(p Point) (bool, DUError)
+        + GetLayer() int
+        + SetLayer(layer int) DUError
+        + GetDrawData() any
+        + RegisterUpdateParentDraw(update <font color=blue>func</font>() DUError) DUError
+
+    }
+    class Gadget << (S,Aquamarine) >> {
+        - gadgetType GadgetType
+        - point Point
+        - layer int
+        - attributes [][]*Attribute
+        - color Color
+        - drawData Gadget
+        - updateParentDraw <font color=blue>func</font>() DUError
+
+        - updateDrawData() DUError
+
+        + GetPoint() Point
+        + GetLayer() int
+        + GetColor() Color
+        + GetGadgetType() GadgetType
+        + GetAttributesLen() []int
+        + SetPoint(point Point) DUError
+        + SetLayer(layer int) DUError
+        + SetColor(color Color) DUError
+        + Cover(p Point) (bool, DUError)
+        + AddAttribute(section int, content string) DUError
+        + RemoveAttribute(section int, index int) DUError
+        + GetDrawData() any
+        + RegisterUpdateParentDraw(update <font color=blue>func</font>() DUError) DUError
+
+    }
+    enum AssociationType << (T, #FF7700) >>  {
+    }
+    enum GadgetType << (T, #FF7700) >>  {
+    }
+
+
+
+    interface Container  {
+        + Insert(c Component) DUError
+        + Remove(c Component) DUError
+        + Search(p Point) (Component, DUError)
+        + GetAll() []Component
+        + Len() (int, DUError)
+
+    }
+    interface Graph  {
+        + FindStartEnd(st *Gadget, en *Gadget) ([]*Association, DUError)
+        + FindStart(st *Gadget) ([]*Association, DUError)
+        + FindEnd(en *Gadget) ([]*Association, DUError)
+        + FindEither(g *Gadget) ([]*Association, DUError)
+        + Update(a *Association, oldSt *Gadget, oldEn *Gadget) DUError
+        + Insert(a *Association) DUError
+        + Remove(a *Association) DUError
+        + RemoveGadget(g *Gadget) ([]*Association, DUError)
+
+    }
+    class containerMap << (S,Aquamarine) >> {
+        - compMap <font color=blue>map</font>[Component]bool
+
+        + Insert(c Component) DUError
+        + Remove(c Component) DUError
+        + Search(p Point) (Component, DUError)
+        + GetAll() []Component
+        + Len() (int, DUError)
+
+    }
+    class graphMap << (S,Aquamarine) >> {
+        - assMap <font color=blue>map</font>[*Gadget]<font color=blue>map</font>[*Gadget][]*Association
+
+        + FindStartEnd(st *Gadget, en *Gadget) ([]*Association, DUError)
+        + FindStart(st *Gadget) ([]*Association, DUError)
+        + FindEnd(en *Gadget) ([]*Association, DUError)
+        + FindEither(g *Gadget) ([]*Association, DUError)
+        + Update(a *Association, oldSt *Gadget, oldEn *Gadget) DUError
+        + Insert(a *Association) DUError
+        + Remove(a *Association) DUError
+        + RemoveGadget(g *Gadget) ([]*Association, DUError)
+
+    }
+
+"Container" <|.. "containerMap"
+"Graph" <|.. "graphMap"
+
+    class AssAttribute << (S,Aquamarine) >> {
+        + Content string
+        + FontSize int
+        + FontStyle int
+        + FontFile string
+        + Ratio float64
+
+    }
+    class Association << (S,Aquamarine) >> {
+        + AssType int
+        + Layer int
+        + StartX int
+        + StartY int
+        + EndX int
+        + EndY int
+        + Attributes []AssAttribute
+
+    }
+    class Attribute << (S,Aquamarine) >> {
+        + Content string
+        + Height int
+        + Width int
+        + FontSize int
+        + FontStyle int
+        + FontFile string
+
+    }
+
+    class Gadget << (S,Aquamarine) >> {
+        + GadgetType int
+        + X int
+        + Y int
+        + Layer int
+        + Height int
+        + Width int
+        + Color int
+        + Attributes [][]Attribute
+
+    }
+
+
+
+
+    class UMLDiagram << (S,Aquamarine) >> {
+        - name string
+        - diagramType DiagramType
+        - lastModified Time
+        - startPoint Point
+        - backgroundColor Color
+        - componentsContainer Container
+        - componentsGraph Graph
+        - componentsSelected <font color=blue>map</font>[Component]bool
+        - notifyDrawUpdate <font color=blue>func</font>() DUError
+        - drawData Diagram
+
+        - removeGadget(gad *Gadget) DUError
+        - validatePoint(point Point) DUError
+        - removeAssociation(a *Association) DUError
+        - updateDrawData() DUError
+
+        + GetName() string
+        + GetDiagramType() DiagramType
+        + GetLastModified() Time
+        + AddGadget(gadgetType GadgetType, point Point) DUError
+        + StartAddAssociation(point Point) DUError
+        + EndAddAssociation(assType AssociationType, endPoint Point) DUError
+        + RemoveSelectedComponents() DUError
+        + SelectComponent(point Point) DUError
+        + UnselectComponent(point Point) DUError
+        + UnselectAllComponents() DUError
+        + GetDrawData() Diagram
+        + RegisterNotifyDrawUpdate(update <font color=blue>func</font>() DUError) DUError
+
+    }
+    enum DiagramType << (T, #FF7700) >>  {
+    }
+
+
+    class UMLProject << (S,Aquamarine) >> {
+        - ctx Context
+        - name string
+        - lastModified Time
+        - currentDiagram *UMLDiagram
+        - availableDiagrams <font color=blue>map</font>[string]bool
+        - activeDiagrams <font color=blue>map</font>[string]*UMLDiagram
+        - runFrontend bool
+
+        + Startup(ctx Context) 
+        + GetName() string
+        + GetLastModified() Time
+        + GetCurrentDiagramName() string
+        + GetAvailableDiagramsNames() []string
+        + GetActiveDiagramsNames() []string
+        + SelectDiagram(diagramName string) DUError
+        + CreateEmptyUMLDiagram(diagramType DiagramType, diagramName string) DUError
+        + CloseDiagram(diagramName string) DUError
+        + DeleteDiagram(diagramName string) DUError
+        + AddGadget(gadgetType GadgetType, point Point) DUError
+        + StartAddAssociation(point Point) DUError
+        + EndAddAssociation(associationType AssociationType, point Point) DUError
+        + RemoveSelectedComponents() DUError
+        + GetDrawData() Diagram
+        + InvalidateCanvas() DUError
+
+    }
+
+
+    class Color << (S,Aquamarine) >> {
+        + R uint8
+
+        + ToHex() int
+
+    }
+
+
+UMLProject *- UMLDiagram
+
+UMLDiagram ..> DiagramType
+UMLDiagram ..> Color
+UMLDiagram *- Container
+UMLDiagram *- Graph
+
+Container *- Component
+
+Component <|.. Gadget
+Component <|.. Association
+
+Attribute <|.. AssAttribute
+Attribute -> Textstyle
+
+Gadget *- Attribute
+Gadget -> GadgetType
+
+Association *- AssAttribute
+Association -> AssociationType
+
+Graph -> Association
+Graph -> Gadget
+
+
+
+
+
+
+
+@enduml
