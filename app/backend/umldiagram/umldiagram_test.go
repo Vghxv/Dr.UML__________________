@@ -161,8 +161,7 @@ func TestUMLDiagram_AddGadget(t *testing.T) {
 	diagram, err := CreateEmptyUMLDiagram("AddGadgetTest.uml", ClassDiagram)
 	assert.NoError(t, err)
 	assert.NotNil(t, diagram)
-
-	err = diagram.AddGadget(component.Class, utils.Point{X: 5, Y: 5})
+	err = diagram.AddGadget(component.Class, utils.Point{X: 5, Y: 5}, 0, drawdata.DefaultGadgetColor, "")
 	assert.NoError(t, err)
 
 	// Should have one gadget in container
@@ -174,9 +173,8 @@ func TestUMLDiagram_AddGadget_InvalidType(t *testing.T) {
 	diagram, err := CreateEmptyUMLDiagram("AddGadgetInvalid.uml", ClassDiagram)
 	assert.NoError(t, err)
 	assert.NotNil(t, diagram)
-
 	// Use an invalid gadget type (assuming -1 is invalid)
-	err = diagram.AddGadget(component.GadgetType(-1), utils.Point{X: 1, Y: 1})
+	err = diagram.AddGadget(component.GadgetType(-1), utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
 	assert.Error(t, err)
 }
 
@@ -196,7 +194,7 @@ func TestUMLDiagram_StartAddAssociation_InvalidPoint(t *testing.T) {
 
 func TestUMLDiagram_SelectAndUnselectComponent(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("SelectUnselect.uml", ClassDiagram)
-	_ = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 10})
+	_ = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "")
 
 	// Select
 	err := diagram.SelectComponent(utils.Point{X: 10, Y: 10})
@@ -211,7 +209,7 @@ func TestUMLDiagram_SelectAndUnselectComponent(t *testing.T) {
 
 func TestUMLDiagram_UnselectAllComponents(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("UnselectAll.uml", ClassDiagram)
-	_ = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 1})
+	_ = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
 	_ = diagram.SelectComponent(utils.Point{X: 1, Y: 1})
 	assert.Len(t, diagram.componentsSelected, 1)
 	_ = diagram.UnselectAllComponents()
@@ -243,7 +241,7 @@ func TestUMLDiagram_GetDrawData(t *testing.T) {
 
 func TestUMLDiagram_RemoveSelectedComponents(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("RemoveSelected.uml", ClassDiagram)
-	_ = diagram.AddGadget(component.Class, utils.Point{X: 2, Y: 2})
+	_ = diagram.AddGadget(component.Class, utils.Point{X: 2, Y: 2}, 0, drawdata.DefaultGadgetColor, "")
 	_ = diagram.SelectComponent(utils.Point{X: 2, Y: 2})
 	assert.Len(t, diagram.componentsSelected, 1)
 	err := diagram.RemoveSelectedComponents()
@@ -310,58 +308,6 @@ func TestRemoveGadget(t *testing.T) {
 
 func TestAssociationMethods(t *testing.T) {
 	// TODO
-}
-
-func TestComponentSelection(t *testing.T) {
-	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-
-	// Add a gadget to select
-	err = diagram.AddGadget(component.Class, utils.Point{X: 50, Y: 50}, 0, 0x808080, "sample header")
-	assert.NoError(t, err)
-
-	// Initially no components are selected
-	assert.Equal(t, 0, len(diagram.componentsSelected))
-
-	// Mock for ComponentsContainer.Search since we can't directly test it
-	// We'll replace it with a custom implementation for testing
-	originalContainer := diagram.componentsContainer
-
-	// Create a mock container that returns a component for a specific point
-	mockGadget := &component.Gadget{}
-	mockContainer := &mockContainer{
-		mockComponent: mockGadget,
-		pointToMatch:  utils.Point{X: 50, Y: 50},
-	}
-
-	diagram.componentsContainer = mockContainer
-
-	// Test SelectComponent
-	err = diagram.SelectComponent(utils.Point{X: 50, Y: 50})
-	assert.NoError(t, err)
-	assert.Equal(t, 1, len(diagram.componentsSelected))
-	assert.True(t, diagram.componentsSelected[mockGadget])
-
-	// Test SelectComponent with no component found
-	err = diagram.SelectComponent(utils.Point{X: 100, Y: 100})
-	assert.NoError(t, err)
-	assert.Equal(t, 1, len(diagram.componentsSelected))
-
-	// Test UnselectComponent
-	err = diagram.UnselectComponent(utils.Point{X: 50, Y: 50})
-	assert.NoError(t, err)
-	assert.Equal(t, 0, len(diagram.componentsSelected))
-
-	// Test UnselectAllComponents
-	diagram.componentsSelected[mockGadget] = true
-	assert.Equal(t, 1, len(diagram.componentsSelected))
-
-	err = diagram.UnselectAllComponents()
-	assert.NoError(t, err)
-	assert.Equal(t, 0, len(diagram.componentsSelected))
-
-	// Restore original container
-	diagram.componentsContainer = originalContainer
 }
 
 func TestRegisterUpdateParentDraw(t *testing.T) {

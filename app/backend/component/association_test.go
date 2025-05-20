@@ -231,8 +231,8 @@ func Test_Association_Cover(t *testing.T) {
 }
 
 func Test_Association_UpdateDrawData(t *testing.T) {
-	g1, _ := NewGadget(Class, utils.Point{X: 0, Y: 0})
-	g2, _ := NewGadget(Class, utils.Point{X: 10, Y: 10})
+	g1, _ := NewGadget(Class, utils.Point{X: 0, Y: 0}, 0, 0xFF00FF, "sample header")
+	g2, _ := NewGadget(Class, utils.Point{X: 10, Y: 10}, 0, 0xFF00FF, "sample header")
 	ass := &Association{
 		parents:         [2]*Gadget{g1, g2},
 		startPointRatio: [2]float64{0, 0},

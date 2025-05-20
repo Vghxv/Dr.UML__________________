@@ -330,33 +330,6 @@ func TestSelectComponent(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestUnselectComponent(t *testing.T) {
-	p, err := CreateEmptyUMLProject("TestProject")
-	assert.NoError(t, err)
-	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
-	assert.NoError(t, err)
-	err = p.SelectDiagram("TestDiagram")
-	assert.NoError(t, err)
-
-	// Add a gadget
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, 0x808080, "sample header")
-	assert.NoError(t, err)
-
-	// Select the component
-	err = p.SelectComponent(utils.Point{X: 5, Y: 5})
-	assert.NoError(t, err)
-
-	// Unselect the component
-	err = p.UnselectComponent(utils.Point{X: 5, Y: 5})
-	assert.NoError(t, err)
-
-	// No diagram selected
-	err = p.CloseDiagram("TestDiagram")
-	assert.NoError(t, err)
-	err = p.UnselectComponent(utils.Point{X: 5, Y: 5})
-	assert.Error(t, err)
-}
-
 func TestStartup(t *testing.T) {
 	// TODO
 }

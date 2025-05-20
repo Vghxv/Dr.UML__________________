@@ -286,7 +286,7 @@ func (ud *UMLDiagram) AddAttributeToGadget(content string, section int) duerror.
 	}
 	for c := range ud.componentsSelected {
 		if g, ok := c.(*component.Gadget); ok {
-			if err := g.AddAttribute(content, section); err != nil {
+			if err := g.AddAttribute(section, content); err != nil {
 				return err
 			}
 		}
