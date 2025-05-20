@@ -11,8 +11,8 @@ import (
 )
 
 // testing purpose
-var gadgetDefaultAtts = map[GadgetType]([][]string){
-	Class: [][]string{
+var gadgetDefaultAtts = map[GadgetType][][]string{
+	Class: {
 		{"UMLProject"},
 		{"id: String", "name: String", "lastModified: Date"},
 		{"GetAvailableDiagrams(): List<String>", "GetLastOpenedDiagrams(): List<String>", "SelectDiagram(diagramName: String): DUError", "CreateDiagram(diagramName: String): DUError"},
@@ -108,7 +108,8 @@ func TestSetPoint(t *testing.T) {
 	assert.Equal(t, utils.Point{X: 2, Y: 2}, g.GetPoint())
 
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.SetPoint(utils.Point{X: 3, Y: 3}))
 	assert.Equal(t, utils.Point{X: 3, Y: 3}, g.GetPoint())
 	assert.Equal(t, 1, mp.Times)
@@ -120,7 +121,8 @@ func TestSetLayer(t *testing.T) {
 	assert.Equal(t, 1, g.GetLayer())
 
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.SetLayer(2))
 	assert.Equal(t, 2, g.GetLayer())
 	assert.Equal(t, 1, mp.Times)
@@ -132,7 +134,8 @@ func TestSetColor(t *testing.T) {
 	assert.Equal(t, utils.FromHex(0xFF0000), g.GetColor())
 
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.SetColor("#00FF00"))
 	assert.Equal(t, utils.FromHex(0x00FF00), g.GetColor())
 	assert.Equal(t, 1, mp.Times)
@@ -157,7 +160,8 @@ func TestSetAttrContent(t *testing.T) {
 
 	// Test with parent draw update
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.SetAttrContent(0, 0, "updated again"))
 	assert.Equal(t, 1, mp.Times)
 }
@@ -180,7 +184,8 @@ func TestSetAttrSize(t *testing.T) {
 
 	// Test with parent draw update
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.SetAttrSize(0, 0, 18))
 	assert.Equal(t, 1, mp.Times)
 }
@@ -206,7 +211,8 @@ func TestSetAttrStyle(t *testing.T) {
 
 	// Test with parent draw update
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Bold|attribute.Underline)))
 	assert.Equal(t, 1, mp.Times)
 }
@@ -272,7 +278,8 @@ func TestAddAttribute(t *testing.T) {
 
 	// Test with parent draw update
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.AddAttribute(0, "test with parent"))
 	assert.Equal(t, 1, mp.Times)
 
@@ -311,7 +318,8 @@ func TestRemoveAttribute(t *testing.T) {
 
 	// Test with parent draw update
 	mp := mockParent{}
-	g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
+	assert.NoError(t, err)
 	assert.NoError(t, g.RemoveAttribute(1, 0)) // Remove the attribute we added to section 1
 	assert.Equal(t, 1, mp.Times)
 }
