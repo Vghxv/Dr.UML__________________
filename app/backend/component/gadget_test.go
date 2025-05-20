@@ -339,7 +339,7 @@ func TestGetDrawData(t *testing.T) {
 	assert.Equal(t, 1, gadgetData.X)
 	assert.Equal(t, 1, gadgetData.Y)
 	assert.Equal(t, 0, gadgetData.Layer)
-	assert.Equal(t, drawdata.DefaultGadgetColor, gadgetData.ColorHexStr)
+	assert.Equal(t, drawdata.DefaultGadgetColor, gadgetData.Color)
 
 	// Verify attributes
 	assert.Equal(t, len(g.attributes), len(gadgetData.Attributes))
@@ -361,7 +361,7 @@ func TestGetDrawData(t *testing.T) {
 	assert.Equal(t, 2, updatedGadgetData.X)
 	assert.Equal(t, 2, updatedGadgetData.Y)
 	assert.Equal(t, 1, updatedGadgetData.Layer)
-	assert.Equal(t, "#FF0000", updatedGadgetData.ColorHexStr)
+	assert.Equal(t, "#FF0000", updatedGadgetData.Color)
 }
 
 func TestRegisterUpdateParentDraw(t *testing.T) {
