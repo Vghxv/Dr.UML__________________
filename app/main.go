@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 
+	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/umlproject"
 	"github.com/wailsapp/wails/v2"
@@ -32,6 +33,7 @@ func main() {
 		},
 		EnumBind: []interface{}{
 			umldiagram.AllDiagramTypes,
+			component.AllGadgetTypes,
 		},
 	})
 
