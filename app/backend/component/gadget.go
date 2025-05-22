@@ -40,20 +40,6 @@ func validateGadgetType(input GadgetType) duerror.DUError {
 	return nil
 }
 
-func validateSection(section, numSections int) duerror.DUError {
-	if section < 0 || section >= numSections {
-		return duerror.NewInvalidArgumentError("section out of range")
-	}
-	return nil
-}
-
-func validateIndex(index, numItems int) duerror.DUError {
-	if index < 0 || index >= numItems {
-		return duerror.NewInvalidArgumentError("index out of range")
-	}
-	return nil
-}
-
 // Constructor
 func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr string, header string) (*Gadget, duerror.DUError) {
 	if err := validateGadgetType(gadgetType); err != nil {
@@ -130,15 +116,16 @@ func (g *Gadget) SetLayer(layer int) duerror.DUError {
 }
 
 func (g *Gadget) SetColor(colorHexStr string) duerror.DUError {
+	g.color = colorHexStr
 	g.drawData.Color = colorHexStr
 	return g.updateParentDraw()
 }
 
 func (g *Gadget) SetAttrContent(section int, index int, content string) duerror.DUError {
-	if err := validateSection(section, len(g.attributes)); err != nil {
+	if err := g.validateSection(section); err != nil {
 		return err
 	}
-	if err := validateIndex(index, len(g.attributes[section])); err != nil {
+	if err := g.validateIndex(index, len(g.attributes[section])); err != nil {
 		return err
 	}
 	if err := g.attributes[section][index].SetContent(content); err != nil {
@@ -148,10 +135,10 @@ func (g *Gadget) SetAttrContent(section int, index int, content string) duerror.
 }
 
 func (g *Gadget) SetAttrSize(section int, index int, size int) duerror.DUError {
-	if err := validateSection(section, len(g.attributes)); err != nil {
+	if err := g.validateSection(section); err != nil {
 		return err
 	}
-	if err := validateIndex(index, len(g.attributes[section])); err != nil {
+	if err := g.validateIndex(index, len(g.attributes[section])); err != nil {
 		return err
 	}
 	if err := g.attributes[section][index].SetSize(size); err != nil {
@@ -161,10 +148,10 @@ func (g *Gadget) SetAttrSize(section int, index int, size int) duerror.DUError {
 }
 
 func (g *Gadget) SetAttrStyle(section int, index int, style int) duerror.DUError {
-	if err := validateSection(section, len(g.attributes)); err != nil {
+	if err := g.validateSection(section); err != nil {
 		return err
 	}
-	if err := validateIndex(index, len(g.attributes[section])); err != nil {
+	if err := g.validateIndex(index, section); err != nil {
 		return err
 	}
 	if err := g.attributes[section][index].SetStyle(attribute.Textstyle(style)); err != nil {
@@ -186,7 +173,7 @@ func (g *Gadget) Cover(p utils.Point) (bool, duerror.DUError) {
 }
 
 func (g *Gadget) AddAttribute(section int, content string) duerror.DUError {
-	if err := validateSection(section, len(g.attributes)); err != nil {
+	if err := g.validateSection(section); err != nil {
 		return err
 	}
 	att, err := attribute.NewAttribute(content)
@@ -201,14 +188,27 @@ func (g *Gadget) AddAttribute(section int, content string) duerror.DUError {
 }
 
 func (g *Gadget) RemoveAttribute(section int, index int) duerror.DUError {
-	if err := validateSection(section, len(g.attributes)); err != nil {
+	if err := g.validateSection(section); err != nil {
 		return err
 	}
-	if err := validateIndex(index, len(g.attributes[section])); err != nil {
+	if err := g.validateIndex(index, section); err != nil {
 		return err
 	}
 	g.attributes[section] = append(g.attributes[section][:index], g.attributes[section][index+1:]...)
 	return g.updateDrawData()
+}
+func (g *Gadget) validateSection(section int) duerror.DUError {
+	if section < 0 || section >= len(g.attributes) {
+		return duerror.NewInvalidArgumentError("section out of range")
+	}
+	return nil
+}
+
+func (g *Gadget) validateIndex(index, section int) duerror.DUError {
+	if index < 0 || index >= len(g.attributes[section]) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
+	return nil
 }
 
 // Draw

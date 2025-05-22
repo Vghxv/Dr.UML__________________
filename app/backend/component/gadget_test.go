@@ -1,6 +1,7 @@
 package component
 
 import (
+	"fmt"
 	"testing"
 
 	"Dr.uml/backend/component/attribute"
@@ -378,23 +379,25 @@ func TestRegisterUpdateParentDraw(t *testing.T) {
 }
 
 func TestValidateSection(t *testing.T) {
+	// Create a gadget for testing validation methods
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
+
 	tests := []struct {
-		name        string
-		section     int
-		numSections int
-		hasError    bool
+		name     string
+		section  int
+		hasError bool
 	}{
-		{"ValidSection", 0, 3, false},
-		{"ValidSectionMiddle", 1, 3, false},
-		{"ValidSectionLast", 2, 3, false},
-		{"NegativeSection", -1, 3, true},
-		{"SectionEqualToNumSections", 3, 3, true},
-		{"SectionGreaterThanNumSections", 4, 3, true},
+		{"ValidSection", 0, false},
+		{"ValidSectionMiddle", 1, false},
+		{"ValidSectionLast", 2, false},
+		{"NegativeSection", -1, true},
+		{"SectionEqualToNumSections", len(g.attributes), true},
+		{"SectionGreaterThanNumSections", len(g.attributes) + 1, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateSection(tt.section, tt.numSections)
+			err := g.validateSection(tt.section)
 			if tt.hasError {
 				assert.Error(t, err)
 				assert.IsType(t, duerror.NewInvalidArgumentError(""), err)
@@ -406,28 +409,38 @@ func TestValidateSection(t *testing.T) {
 }
 
 func TestValidateIndex(t *testing.T) {
-	tests := []struct {
-		name     string
-		index    int
-		numItems int
-		hasError bool
-	}{
-		{"ValidIndex", 0, 3, false},
-		{"ValidIndexMiddle", 1, 3, false},
-		{"ValidIndexLast", 2, 3, false},
-		{"NegativeIndex", -1, 3, true},
-		{"IndexEqualToNumItems", 3, 3, true},
-		{"IndexGreaterThanNumItems", 4, 3, true},
-	}
+	// Create a gadget for testing validation methods
+	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := validateIndex(tt.index, tt.numItems)
-			if tt.hasError {
-				assert.Error(t, err)
-				assert.IsType(t, duerror.NewInvalidArgumentError(""), err)
-			} else {
-				assert.NoError(t, err)
+	// Test for each section
+	for section, attrLen := range g.GetAttributesLen() {
+		sectionName := fmt.Sprintf("Section%d", section)
+
+		t.Run(sectionName, func(t *testing.T) {
+			tests := []struct {
+				name     string
+				index    int
+				hasError bool
+			}{
+				{"ValidFirstIndex", 0, false},
+				{"ValidMiddleIndex", attrLen / 2, false},
+				{"ValidLastIndex", attrLen - 1, false},
+				{"NegativeIndex", -1, true},
+				{"IndexEqualToCount", attrLen, true},
+				{"IndexGreaterThanCount", attrLen + 1, true},
+			}
+
+			for _, tt := range tests {
+				testName := fmt.Sprintf("%s_%s", sectionName, tt.name)
+				t.Run(testName, func(t *testing.T) {
+					err := g.validateIndex(tt.index, section)
+					if tt.hasError {
+						assert.Error(t, err)
+						assert.IsType(t, duerror.NewInvalidArgumentError(""), err)
+					} else {
+						assert.NoError(t, err)
+					}
+				})
 			}
 		})
 	}
