@@ -125,7 +125,7 @@ func (g *Gadget) SetAttrContent(section int, index int, content string) duerror.
 	if err := g.validateSection(section); err != nil {
 		return err
 	}
-	if err := g.validateIndex(index, len(g.attributes[section])); err != nil {
+	if err := g.validateIndex(index, section); err != nil {
 		return err
 	}
 	if err := g.attributes[section][index].SetContent(content); err != nil {
@@ -138,7 +138,7 @@ func (g *Gadget) SetAttrSize(section int, index int, size int) duerror.DUError {
 	if err := g.validateSection(section); err != nil {
 		return err
 	}
-	if err := g.validateIndex(index, len(g.attributes[section])); err != nil {
+	if err := g.validateIndex(index, section); err != nil {
 		return err
 	}
 	if err := g.attributes[section][index].SetSize(size); err != nil {
