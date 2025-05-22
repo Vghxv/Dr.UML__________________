@@ -27,6 +27,7 @@ type Gadget struct {
 	layer            int
 	attributes       [][]*attribute.Attribute // Gadget has multiple sections, each section has multiple attributes
 	color            string
+	IsSelected       bool
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
@@ -110,6 +111,9 @@ func (g *Gadget) GetAttributesLen() []int {
 	}
 	return lengths
 }
+func (g *Gadget) GetIsSelected() bool {
+	return g.IsSelected
+}
 
 // Setter
 func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
@@ -166,6 +170,11 @@ func (g *Gadget) SetAttrStyle(section int, index int, style int) duerror.DUError
 	if err := g.attributes[section][index].SetStyle(attribute.Textstyle(style)); err != nil {
 		return err
 	}
+	return g.updateDrawData()
+}
+func (g *Gadget) SetIsSelected(isSelected bool) duerror.DUError {
+	g.IsSelected = isSelected
+	g.drawData.IsSelected = isSelected
 	return g.updateDrawData()
 }
 

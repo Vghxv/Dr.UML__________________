@@ -275,8 +275,12 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 	}
 	// if is in componentsSelected remove it, else add it
 	if _, ok := ud.componentsSelected[c]; ok {
+		gadget := c.(*component.Gadget)
+		gadget.SetIsSelected(false)
 		delete(ud.componentsSelected, c)
 	} else {
+		gadget := c.(*component.Gadget)
+		gadget.SetIsSelected(true)
 		ud.componentsSelected[c] = true
 	}
 	//ud.componentsSelected[c] = true
@@ -411,12 +415,6 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 		}
 		switch c.(type) {
 		case *component.Gadget:
-			// check if this gadget is in componentsSelected
-			if _, ok := ud.componentsSelected[c]; ok {
-				gadget := cDrawData.(drawdata.Gadget)
-				gadget.IsSelected = true
-				gs = append(gs, gadget)
-			}
 			gs = append(gs, cDrawData.(drawdata.Gadget))
 		case *component.Association:
 			as = append(as, cDrawData.(drawdata.Association))
