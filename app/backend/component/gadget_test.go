@@ -25,7 +25,7 @@ func newEmptyGadget(gadgetType GadgetType, point utils.Point) *Gadget {
 		gadgetType: gadgetType,
 		point:      point,
 		layer:      0,
-		color:      utils.FromHexString(drawdata.DefaultGadgetColor),
+		color:      drawdata.DefaultGadgetColor,
 	}
 
 	// Initialize attributes using gadgetDefaultAtts
@@ -86,7 +86,7 @@ func TestGetLayer(t *testing.T) {
 
 func TestGetColor(t *testing.T) {
 	g := newEmptyGadget(Class, utils.Point{X: 1, Y: 1})
-	assert.Equal(t, utils.FromHexString(drawdata.DefaultGadgetColor), g.GetColor())
+	assert.Equal(t, drawdata.DefaultGadgetColor, g.GetColor())
 }
 
 func TestGetGadgetType(t *testing.T) {
@@ -133,11 +133,11 @@ func TestSetColor(t *testing.T) {
 	mp := mockParent{}
 	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
 	assert.NoError(t, g.SetColor("#FF0000"))
-	assert.Equal(t, utils.FromHexString("#FF0000"), g.GetColor())
+	assert.Equal(t, "#FF0000", g.GetColor())
 
 	assert.NoError(t, err)
 	assert.NoError(t, g.SetColor("#00FF00"))
-	assert.Equal(t, utils.FromHexString("#00FF00"), g.GetColor())
+	assert.Equal(t, "#00FF00", g.GetColor())
 	assert.Equal(t, 2, mp.Times)
 }
 

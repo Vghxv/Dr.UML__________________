@@ -40,7 +40,7 @@ type UMLDiagram struct {
 	diagramType     DiagramType // e.g., "Class", "UseCase", "Sequence"
 	lastModified    time.Time
 	startPoint      utils.Point // for dragging and linking ass
-	backgroundColor utils.Color
+	backgroundColor string
 
 	componentsContainer components.Container
 	componentsSelected  map[component.Component]bool
@@ -64,7 +64,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 		diagramType:         dt,
 		lastModified:        time.Now(),
 		startPoint:          utils.Point{X: 0, Y: 0},
-		backgroundColor:     utils.FromHexString(drawdata.DefaultDiagramColor), // Default white background
+		backgroundColor:     drawdata.DefaultDiagramColor, // Default white background
 		componentsContainer: components.NewContainerMap(),
 		associations:        make(map[*component.Gadget][2][]*component.Association),
 		componentsSelected:  make(map[component.Component]bool),

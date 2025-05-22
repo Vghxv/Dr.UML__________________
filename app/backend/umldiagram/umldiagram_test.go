@@ -80,7 +80,7 @@ func TestCreateEmptyDiagram(t *testing.T) {
 				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
 				// New assertions
-				assert.Equal(t, utils.Color{R: 255, G: 255, B: 255}, diagram.backgroundColor)
+				assert.Equal(t, "#FFFFFF", diagram.backgroundColor)
 				assert.NotNil(t, diagram.componentsContainer)
 			}
 		})

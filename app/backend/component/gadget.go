@@ -26,12 +26,12 @@ type Gadget struct {
 	point            utils.Point
 	layer            int
 	attributes       [][]*attribute.Attribute // Gadget has multiple sections, each section has multiple attributes
-	color            utils.Color
+	color            string
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
 }
 
-// Other methods
+// Other functions
 func validateGadgetType(input GadgetType) duerror.DUError {
 	if !(input&supportedGadgetType == input && input != 0) {
 		return duerror.NewInvalidArgumentError("gadget type is not supported")
@@ -62,7 +62,7 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr 
 		gadgetType: gadgetType,
 		point:      point,
 		layer:      layer,
-		color:      utils.FromHexString(colorHexStr),
+		color:      colorHexStr,
 	}
 
 	// Init attributes with three sections
@@ -95,7 +95,7 @@ func (g *Gadget) GetLayer() int {
 	return g.layer
 }
 
-func (g *Gadget) GetColor() utils.Color {
+func (g *Gadget) GetColor() string {
 	return g.color
 }
 
@@ -126,9 +126,7 @@ func (g *Gadget) SetLayer(layer int) duerror.DUError {
 }
 
 func (g *Gadget) SetColor(colorHexStr string) duerror.DUError {
-	parsedColor := utils.FromHexString(colorHexStr)
-	g.color = parsedColor
-	g.drawData.Color = parsedColor.ToHexString()
+	g.drawData.Color = colorHexStr
 	return g.updateParentDraw()
 }
 
@@ -233,7 +231,7 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Layer = g.layer
 	g.drawData.Height = height
 	g.drawData.Width = width
-	g.drawData.Color = g.color.ToHexString()
+	g.drawData.Color = g.color
 	g.drawData.Attributes = atts
 
 	if g.updateParentDraw == nil {
