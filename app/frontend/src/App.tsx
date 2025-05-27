@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
 
 import {
+    AddAttributeToGadget,
     GetCurrentDiagramName,
     GetDrawData,
     SetAttrContentGadget,
@@ -112,6 +113,19 @@ const App: React.FC = () => {
         ).catch((error) => {
                 console.error(`${errorPrefix}:`, error);
             }
+        );
+    };
+
+    const handleAddAttributeToGadget = (section: number, content: string) => {
+        if (!selectedGadget || !backendData || !backendData.gadgets) return;
+
+        console.log(`Adding attribute to section ${section} with content ${content}`);
+
+        setSingleValue(
+            (val) => AddAttributeToGadget(section, val),
+            content,
+            "Attribute added",
+            "Error adding attribute"
         );
     };
 
@@ -263,6 +277,7 @@ const App: React.FC = () => {
                 <GadgetPropertiesPanel
                     selectedGadget={selectedGadget}
                     updateGadgetProperty={handleUpdateGadgetProperty}
+                    addAttributeToGadget={handleAddAttributeToGadget}
                 />
             )}
         </div>

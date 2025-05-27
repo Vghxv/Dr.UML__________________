@@ -4,9 +4,10 @@ import {GadgetProps} from "../utils/Props";
 interface GadgetPropertiesPanelProps {
     selectedGadget: GadgetProps | null;
     updateGadgetProperty: (property: string, value: any) => void;
+    addAttributeToGadget: (section: number, content: string) => void;
 }
 
-const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({selectedGadget, updateGadgetProperty}) => {
+const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({selectedGadget, updateGadgetProperty, addAttributeToGadget}) => {
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | HTMLSelectElement | null }>({});
 
@@ -76,7 +77,25 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({selectedGa
             <h4 className="text-lg font-medium text-gray-800 mb-3">Attributes</h4>
             {selectedGadget.attributes.map((attrGroup, groupIndex) => (
                 <div key={`group-${groupIndex}`} className="mb-5">
-                    <h5 className="text-md font-medium text-gray-700 mb-2">Group {groupIndex + 1}</h5>
+                    <div className="flex justify-between items-center mb-2">
+                        <h5 className="text-md font-medium text-gray-700">Group {groupIndex + 1}</h5>
+                        {groupIndex === 1 && (
+                            <button 
+                                className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                onClick={() => addAttributeToGadget(groupIndex, "sample attribute")}
+                            >
+                                Add
+                            </button>
+                        )}
+                        {groupIndex === 2 && (
+                            <button 
+                                className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                onClick={() => addAttributeToGadget(groupIndex, "sample method")}
+                            >
+                                Add
+                            </button>
+                        )}
+                    </div>
                     {attrGroup.map((attr, attrIndex) => (
                         <div key={`attr-${groupIndex}-${attrIndex}`} className="mb-4 p-3 border border-gray-300 rounded-md bg-white">
                             <div className="mb-3">
