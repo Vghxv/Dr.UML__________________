@@ -236,8 +236,8 @@ const App: React.FC = () => {
     }, []);
 
     return (
-        <div>
-            <h1>Dr.UML</h1>
+        <div className="h-screen mx-auto px-4 bg-neutral-700">
+            <h1 className="text-3xl text-center font-bold text-white mb-4">Dr.UML</h1>
             <Toolbar
                 onGetDiagramName={handleGetDiagramName}
                 onShowPopup={() => setShowPopup(true)}

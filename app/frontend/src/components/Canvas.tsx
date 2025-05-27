@@ -1,23 +1,23 @@
-import React, { useEffect, useRef } from 'react';
-import { CanvasProps, GadgetProps } from '../utils/Props';
-import { createGadget } from '../utils/createGadget';
-import { createAss } from '../utils/createAssociation';
-import { useCanvasMouseEvents } from '../hooks/useCanvasMouseEvents';
-import { useSelection } from '../hooks/useSelection';
+import React, {useEffect, useRef, useCallback} from 'react';
+import {CanvasProps, GadgetProps} from '../utils/Props';
+import {createGadget} from '../utils/createGadget';
+import {createAss} from '../utils/createAssociation';
+import {useCanvasMouseEvents} from '../hooks/useCanvasMouseEvents';
+import {useSelection} from '../hooks/useSelection';
 
 const DrawingCanvas: React.FC<{
     backendData: CanvasProps | null,
     reloadBackendData?: () => void,
     onSelectionChange?: (selectedGadget: GadgetProps | null, selectedGadgetCount: number) => void
 }> = ({
-    backendData,
-    reloadBackendData,
-    onSelectionChange
-}) => {
+          backendData,
+          reloadBackendData,
+          onSelectionChange
+      }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { selectedGadgetCount, selectedGadget } = useSelection(backendData?.gadgets);
+    const {selectedGadgetCount, selectedGadget} = useSelection(backendData?.gadgets);
 
-    const redrawCanvas = () => {
+    const redrawCanvas = useCallback(() => {
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
@@ -35,19 +35,44 @@ const DrawingCanvas: React.FC<{
                 });
             }
         }
-    };
+    }, [backendData]);
+
+    const resizeCanvas = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const parent = canvas.parentElement;
+            if (parent) {
+                canvas.width = parent.clientWidth;
+                canvas.height = parent.clientHeight;
+                redrawCanvas();
+            }
+        }
+    }, [canvasRef, redrawCanvas]);
 
     useEffect(() => {
         redrawCanvas();
-    }, [backendData]);
+    }, [redrawCanvas]); // Only depend on redrawCanvas, which already depends on backendData
 
     useEffect(() => {
         if (onSelectionChange) {
             onSelectionChange(selectedGadget, selectedGadgetCount);
         }
     }, [selectedGadget, selectedGadgetCount, onSelectionChange]);
+    useEffect(() => {
+        resizeCanvas();
+    }, [resizeCanvas]); // Use resizeCanvas, which already includes redrawCanvas
 
-    const { handleMouseDown, handleMouseMove, handleMouseUp } = useCanvasMouseEvents(
+    // Add a resize event listener to handle viewport changes
+    useEffect(() => {
+        window.addEventListener('resize', resizeCanvas);
+
+        // Clean up the event listener on a component unmount
+        return () => {
+            window.removeEventListener('resize', resizeCanvas);
+        };
+    }, [resizeCanvas]); // Only depend on resizeCanvas, which includes necessary dependencies
+
+    const {handleMouseDown, handleMouseMove, handleMouseUp} = useCanvasMouseEvents(
         canvasRef,
         () => {
             if (reloadBackendData) {
@@ -58,24 +83,15 @@ const DrawingCanvas: React.FC<{
 
 
     return (
-        <div style={{position: 'relative', display: 'flex'}}>
+        // <div className="relative flex">
             <canvas
                 ref={canvasRef}
-                style={{
-                    border: '2px solid #444',
-                    borderRadius: '8px',
-                    backgroundColor: '#1e1e1e',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)',
-                    margin: '20px auto',
-                    position: 'relative',
-                }}
-                width="1200"
-                height="700"
+                className="border-2 border-neutral-600 rounded-lg bg-neutral-900 shadow-lg w-full h-[calc(100vh-170px)] m-0 relative"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
             />
-        </div>
+        // </div>
     );
 };
 

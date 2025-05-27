@@ -1,4 +1,4 @@
-import { RefObject } from "react";
+import React, { RefObject } from "react";
 import { ToPoint } from "../utils/wailsBridge";
 import { SelectComponent } from "../../wailsjs/go/umlproject/UMLProject";
 
@@ -7,9 +7,18 @@ export function useCanvasMouseEvents(
     onSelect: () => void
 ) {
     const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        const x = Math.round(event.clientX - (rect?.left || 0));
-        const y = Math.round(event.clientY - (rect?.top || 0));
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        // Calculate the scaling factor between the CSS size and the canvas's internal size
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        // Apply the scaling to get the correct coordinates in the canvas's coordinate system
+        const x = Math.round((event.clientX - rect.left) * scaleX);
+        const y = Math.round((event.clientY - rect.top) * scaleY);
+
         SelectComponent(ToPoint(x, y))
             .then(() => {
                 onSelect();

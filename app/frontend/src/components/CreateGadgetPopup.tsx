@@ -44,181 +44,74 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClo
     if (!isOpen) return null;
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 50
-        }}>
-            <div style={{
-                backgroundColor: 'white',
-                borderRadius: '1rem',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                padding: '1.5rem',
-                width: '100%',
-                maxWidth: '28rem'
-            }}>
-                <h2 style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 600,
-                    textAlign: 'center',
-                    marginBottom: '1.5rem',
-                    color: '#2d3748'
-                }}>Create Gadget</h2>
-                <form onSubmit={handleSubmit} style={{marginBottom: '1rem'}}>
-                    <div style={{marginBottom: '1rem'}}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                            color: '#4a5568',
-                            marginBottom: '0.25rem'
-                        }}>Gadget type</label>
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+                <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Create Gadget</h2>
+                <form onSubmit={handleSubmit} className="mb-4">
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Gadget type</label>
                         <select
                             name="gtype"
                             value={formData.gtype}
                             onChange={handleChange}
-                            style={{
-                                width: '100%',
-                                border: '1px solid #d2d6dc',
-                                borderRadius: '0.5rem',
-                                padding: '0.5rem'
-                            }}
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black"
                         >
                             <option value={component.GadgetType.Class}>Class</option>
                         </select>
                     </div>
-                    <div style={{marginBottom: '1rem'}}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                            color: '#4a5568',
-                            marginBottom: '0.25rem'
-                        }}>Name</label>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                         <input
                             type="text"
                             name="header"
                             value={formData.header}
                             onChange={handleChange}
-                            style={{
-                                width: '100%',
-                                border: '1px solid #d2d6dc',
-                                borderRadius: '0.5rem',
-                                padding: '0.5rem'
-                            }}
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black"
                         />
                     </div>
-                    <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        marginBottom: '1rem'
-                    }}>
-                        <div style={{flex: 1}}>
-                            <label style={{
-                                display: 'block',
-                                fontSize: '0.875rem',
-                                fontWeight: 500,
-                                color: '#4a5568',
-                                marginBottom: '0.25rem'
-                            }}>X</label>
+                    <div className="flex gap-4 mb-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">X</label>
                             <input
                                 type="number"
                                 name="x"
                                 value={formData.x}
                                 onChange={handleChange}
-                                style={{
-                                    width: '100%',
-                                    border: '1px solid #d2d6dc',
-                                    borderRadius: '0.5rem',
-                                    padding: '0.5rem'
-                                }}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black"
                             />
                         </div>
-                        <div style={{flex: 1}}>
-                            <label style={{
-                                display: 'block',
-                                fontSize: '0.875rem',
-                                fontWeight: 500,
-                                color: '#4a5568',
-                                marginBottom: '0.25rem'
-                            }}>Y</label>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Y</label>
                             <input
                                 type="number"
                                 name="y"
                                 value={formData.y}
                                 onChange={handleChange}
-                                style={{
-                                    width: '100%',
-                                    border: '1px solid #d2d6dc',
-                                    borderRadius: '0.5rem',
-                                    padding: '0.5rem'
-                                }}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-black"
                             />
                         </div>
                     </div>
-                    <div style={{marginBottom: '1rem'}}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                            color: '#4a5568',
-                            marginBottom: '0.25rem'
-                        }}>Color</label>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
                         <input
                             type="color"
                             name="color"
                             value={formData.color}
                             onChange={handleChange}
-                            style={{
-                                width: '100%',
-                                height: '2.5rem',
-                                padding: '0.25rem'
-                            }}
+                            className="w-full h-10 p-1 rounded border border-gray-300 text-black"
                         />
                     </div>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: '0.75rem',
-                        paddingTop: '1rem'
-                    }}>
+                    <div className="flex justify-end gap-3 pt-4">
                         <button
                             type="button"
                             onClick={onClose}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                borderRadius: '0.5rem',
-                                backgroundColor: '#d1d5db',
-                                color: '#1f2937',
-                                border: 'none',
-                                cursor: 'pointer'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#9ca3af'}
-                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#d1d5db'}
+                            className="px-4 py-2 rounded-lg bg-gray-300 text-gray-800 hover:bg-gray-400 transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            style={{
-                                padding: '0.5rem 1rem',
-                                borderRadius: '0.5rem',
-                                backgroundColor: '#eab308',
-                                color: 'white',
-                                fontWeight: 600,
-                                border: 'none',
-                                cursor: 'pointer'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#ca8a04'}
-                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#eab308'}
+                            className="px-4 py-2 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-colors cursor-pointer"
                         >
                             Create
                         </button>
