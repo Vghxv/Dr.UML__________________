@@ -4,20 +4,22 @@ import { createGadget } from '../utils/createGadget';
 import { createAss } from '../utils/createAssociation';
 import { useCanvasMouseEvents } from '../hooks/useCanvasMouseEvents';
 import { useSelection } from '../hooks/useSelection';
-import GadgetPropertiesPanel from './GadgetPropertiesPanel';
-import {ToPoint} from '../utils/wailsBridge'
 import {
     SelectComponent,
-    SetColorGadget,
-    SetPointGadget,
-    SetSetLayerGadget,
-    SetAttrContentGadget,
-    SetAttrSizeGadget,
-    SetAttrStyleGadget,
     GetDrawData
 } from "../../wailsjs/go/umlproject/UMLProject";
 
-const DrawingCanvas: React.FC<{ backendData: CanvasProps | null, reloadBackendData?: () => void }> = ({backendData, reloadBackendData}) => {
+const DrawingCanvas: React.FC<{
+    backendData: CanvasProps | null,
+    reloadBackendData?: () => void,
+    onUpdateGadgetProperty?: (property: string, value: any) => void,
+    onSelectionChange?: (selectedGadget: GadgetProps | null, selectedGadgetCount: number) => void
+}> = ({
+    backendData,
+    reloadBackendData,
+    onUpdateGadgetProperty,
+    onSelectionChange
+}) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { selectedGadgetCount, selectedGadget } = useSelection(backendData?.gadgets);
 
@@ -45,6 +47,12 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null, reloadBackendDa
         redrawCanvas();
     }, [backendData]);
 
+    useEffect(() => {
+        if (onSelectionChange) {
+            onSelectionChange(selectedGadget, selectedGadgetCount);
+        }
+    }, [selectedGadget, selectedGadgetCount, onSelectionChange]);
+
     const { handleMouseDown, handleMouseMove, handleMouseUp } = useCanvasMouseEvents(
         canvasRef,
         () => {
@@ -54,97 +62,6 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null, reloadBackendDa
         }
     );
 
-    const updateGadgetProperty = (property: string, value: any) => {
-        if (!selectedGadget || !backendData || !backendData.gadgets) return;
-
-        // Handle nested properties like attributes[0][0].content
-        if (property.includes('.')) {
-            const [parentProp, childProp] = property.split('.');
-            if (parentProp.startsWith('attributes')) {
-                // Parse indices from string like 'attributes[0][0]'
-                const matches = parentProp.match(/attributes(\d+):(\d+)/);
-                if (matches && matches.length === 3) {
-                    const i = parseInt(matches[1]);
-                    const j = parseInt(matches[2]);
-
-                    // console.log(i, j, childProp);
-                    if (childProp === 'content') {
-                        SetAttrContentGadget(i, j, value).then(
-                            () => {
-                                console.log("Gadget content changed");
-                            }
-                        ).catch((error) => {
-                                console.error("Error changing gadget content:", error);
-                            }
-                        );
-                    }
-                    if(childProp === 'fontSize') {
-                        SetAttrSizeGadget(i, j, value).then(
-                            () => {
-                                console.log("Gadget fontSize changed");
-                            }
-                        ).catch((error) => {
-                                console.error("Error changing gadget fontSize:", error);
-                            }
-                        );
-                    }
-                    if(childProp === 'fontStyle') {
-                        SetAttrStyleGadget(i, j, value).then(
-                            () => {
-                                console.log("Gadget fontStyle changed");
-                            }
-                        ).catch((error) => {
-                                console.error("Error changing gadget fontStyle:", error);
-                            }
-                        );
-                    }
-                }
-            }
-        } else {
-            if (property === "x") {
-                SetPointGadget(ToPoint(value, selectedGadget.y)).then(
-                    () => {
-                        console.log("Gadget moved");
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
-                );
-            }
-            if (property === "y") {
-                SetPointGadget(ToPoint(selectedGadget.x, value)).then(
-                    () => {
-                        console.log("Gadget moved");
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
-                );
-            }
-            if (property === "layer") {
-                SetSetLayerGadget(value).then(
-                    () => {
-                        console.log("layer changed");
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
-                );
-            }
-            if (property === "color") {
-                SetColorGadget(value).then(
-                    () => {
-                        console.log("color changed");
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
-                );
-            }
-        }
-
-        redrawCanvas();
-    };
 
     return (
         <div style={{position: 'relative', display: 'flex'}}>
@@ -158,18 +75,12 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null, reloadBackendDa
                     margin: '20px auto',
                     position: 'relative',
                 }}
-                width="1024"
-                height="768"
+                width="1200"
+                height="700"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
             />
-            {selectedGadgetCount === 1 && (
-                <GadgetPropertiesPanel
-                    selectedGadget={selectedGadget}
-                    updateGadgetProperty={updateGadgetProperty}
-                />
-            )}
         </div>
     );
 };
