@@ -31,7 +31,7 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClo
         e.preventDefault();
         const {gtype, x, y, layer, color, header} = formData;
         onCreate({gtype, position: {x, y}, layer, color: color, header});
-        AddGadget(gtype, ToPoint(x, y), layer, color, "sample header").then(
+        AddGadget(gtype, ToPoint(x, y), layer, color, header).then(
             (res) => {
                 console.log(res)
             },
