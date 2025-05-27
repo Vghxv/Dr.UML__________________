@@ -83,26 +83,9 @@ const App: React.FC = () => {
         apiFunction(value).then(
             () => {
                 console.log(successMessage);
-                loadCanvasData();
-            }
-        ).catch((error) => {
-                console.error(`${errorPrefix}:`, error);
-            }
-        );
-    };
-
-    // Helper function to handle setting a value with two parameters
-    const setDoubleValue = (
-        apiFunction: (param1: any, param2: any) => Promise<any>,
-        param1: any,
-        param2: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(param1, param2).then(
-            () => {
-                console.log(successMessage);
-                loadCanvasData();
+                loadCanvasData().then(
+                    r => console.log("Loaded canvas data:", r)
+                )
             }
         ).catch((error) => {
                 console.error(`${errorPrefix}:`, error);
