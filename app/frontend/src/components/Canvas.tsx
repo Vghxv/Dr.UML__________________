@@ -37,9 +37,6 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null, reloadBackendDa
                     const ass = createAss("Association", association, backendData.margin);
                     ass.draw(ctx, backendData.margin, backendData.lineWidth);
                 });
-
-                // 更新選取狀態（確保每次都用最新 gadgets）
-                // updateSelection(backendData?.gadgets);
             }
         }
     };
@@ -146,20 +143,6 @@ const DrawingCanvas: React.FC<{ backendData: CanvasProps | null, reloadBackendDa
             }
         }
 
-        // updatedGadgets[gadgetIndex] = updatedGadget;
-        // updatedBackendData.gadgets = updatedGadgets;
-
-        // Here you would typically call an API to update the backend
-        // For now, we'll just redraw the canvas with the updated data
-        // This is a placeholder for actual backend update logic
-        // console.log('Updated gadget:', updatedGadget);
-
-        // Update the selected gadget state
-        // setSelectedGadget(updatedGadget);
-
-        // Redraw canvas with updated data
-        // In a real implementation, you would update the backendData through proper channels
-        // This is just for demonstration
         redrawCanvas();
     };
 
