@@ -2,24 +2,22 @@ import React, {useEffect, useState} from "react";
 import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
 
 import {
-    AddGadget,
     GetCurrentDiagramName,
     GetDrawData,
-    SetColorGadget,
-    SetPointGadget,
-    SetSetLayerGadget,
     SetAttrContentGadget,
     SetAttrSizeGadget,
-    SetAttrStyleGadget
+    SetAttrStyleGadget,
+    SetColorGadget,
+    SetPointGadget,
+    SetSetLayerGadget
 } from "../wailsjs/go/umlproject/UMLProject";
-import { mockAssociation, mockSelfAssociation, mockHorizontalAssociation, mockVerticalAssociation, mockSelfAssociationLeft, mockSelfAssociationUp} from "./assets/mock/ass";
+import {mockSelfAssociationUp} from "./assets/mock/ass";
 
 import {CanvasProps, GadgetProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
 // import mockData from './assets/mock/gadget';
 import {GadgetPopup} from "./components/CreateGadgetPopup";
 import Toolbar from "./components/Toolbar";
-import { createAss } from "./utils/createAssociation";
 import GadgetPropertiesPanel from "./components/GadgetPropertiesPanel";
 
 const App: React.FC = () => {
@@ -38,13 +36,11 @@ const App: React.FC = () => {
         }
     };
 
-    // 新增 addAss handler
     const handleAddAss = async () => {
-        // 直接將 mockAssociation 加入 backendData.Association
         setBackendData(prev => {
             if (!prev) return prev;
             const newAss = prev.Association ? [...prev.Association, mockSelfAssociationUp] : [mockSelfAssociationUp];
-            return { ...prev, Association: newAss };
+            return {...prev, Association: newAss};
         });
     };
 
@@ -77,6 +73,64 @@ const App: React.FC = () => {
         setSelectedGadget(gadget);
         setSelectedGadgetCount(count);
     };
+    // Helper function to handle setting a single value with a promise
+    const setSingleValue = (
+        apiFunction: (value: any) => Promise<any>,
+        value: any,
+        successMessage: string,
+        errorPrefix: string
+    ) => {
+        apiFunction(value).then(
+            () => {
+                console.log(successMessage);
+                loadCanvasData();
+            }
+        ).catch((error) => {
+                console.error(`${errorPrefix}:`, error);
+            }
+        );
+    };
+
+    // Helper function to handle setting a value with two parameters
+    const setDoubleValue = (
+        apiFunction: (param1: any, param2: any) => Promise<any>,
+        param1: any,
+        param2: any,
+        successMessage: string,
+        errorPrefix: string
+    ) => {
+        apiFunction(param1, param2).then(
+            () => {
+                console.log(successMessage);
+                loadCanvasData();
+            }
+        ).catch((error) => {
+                console.error(`${errorPrefix}:`, error);
+            }
+        );
+    };
+
+    // Helper function to handle setting a value with three parameters
+    const setTripleValue = (
+        apiFunction: (param1: any, param2: any, param3: any) => Promise<any>,
+        param1: any,
+        param2: any,
+        param3: any,
+        successMessage: string,
+        errorPrefix: string
+    ) => {
+        apiFunction(param1, param2, param3).then(
+            () => {
+                console.log(successMessage);
+                loadCanvasData().then(
+                    r => console.log("Loaded canvas data:", r)
+                )
+            }
+        ).catch((error) => {
+                console.error(`${errorPrefix}:`, error);
+            }
+        );
+    };
 
     const handleUpdateGadgetProperty = (property: string, value: any) => {
         if (!selectedGadget || !backendData || !backendData.gadgets) return;
@@ -93,85 +147,63 @@ const App: React.FC = () => {
                     const i = parseInt(matches[1]);
                     const j = parseInt(matches[2]);
 
-                    // console.log(i, j, childProp);
                     if (childProp === 'content') {
-                        SetAttrContentGadget(i, j, value).then(
-                            () => {
-                                console.log("Gadget content changed");
-                                loadCanvasData();
-                            }
-                        ).catch((error) => {
-                                console.error("Error changing gadget content:", error);
-                            }
+                        setTripleValue(
+                            SetAttrContentGadget,
+                            i, j, value,
+                            "Gadget content changed",
+                            "Error editing gadget content"
                         );
                     }
-                    if(childProp === 'fontSize') {
-                        SetAttrSizeGadget(i, j, value).then(
-                            () => {
-                                console.log("Gadget fontSize changed");
-                                loadCanvasData();
-                            }
-                        ).catch((error) => {
-                                console.error("Error changing gadget fontSize:", error);
-                            }
+                    if (childProp === 'fontSize') {
+                        setTripleValue(
+                            SetAttrSizeGadget,
+                            i, j, value,
+                            "Gadget fontSize changed",
+                            "Error editing gadget fontSize"
                         );
                     }
-                    if(childProp === 'fontStyle') {
-                        SetAttrStyleGadget(i, j, value).then(
-                            () => {
-                                console.log("Gadget fontStyle changed");
-                                loadCanvasData();
-                            }
-                        ).catch((error) => {
-                                console.error("Error changing gadget fontStyle:", error);
-                            }
+                    if (childProp === 'fontStyle') {
+                        setTripleValue(
+                            SetAttrStyleGadget,
+                            i, j, value,
+                            "Gadget fontStyle changed",
+                            "Error editing gadget fontStyle"
                         );
                     }
                 }
             }
         } else {
             if (property === "x") {
-                SetPointGadget(ToPoint(value, selectedGadget.y)).then(
-                    () => {
-                        console.log("Gadget moved");
-                        loadCanvasData();
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
+                setSingleValue(
+                    (val) => SetPointGadget(ToPoint(val, selectedGadget.y)),
+                    value,
+                    "Gadget moved",
+                    "Error editing gadget"
                 );
             }
             if (property === "y") {
-                SetPointGadget(ToPoint(selectedGadget.x, value)).then(
-                    () => {
-                        console.log("Gadget moved");
-                        loadCanvasData();
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
+                setSingleValue(
+                    (val) => SetPointGadget(ToPoint(selectedGadget.x, val)),
+                    value,
+                    "Gadget moved",
+                    "Error editing gadget"
                 );
             }
             if (property === "layer") {
-                SetSetLayerGadget(value).then(
-                    () => {
-                        console.log("layer changed");
-                        loadCanvasData();
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
+                setSingleValue(
+                    SetSetLayerGadget,
+                    value,
+                    "layer changed",
+                    "Error editing gadget"
                 );
             }
             if (property === "color") {
-                SetColorGadget(value).then(
-                    () => {
-                        console.log("color changed");
-                        loadCanvasData();
-                    }
-                ).catch((error) => {
-                        console.error("Error moving gadget:", error);
-                    }
+                setSingleValue(
+                    SetColorGadget,
+                    value,
+                    "color changed",
+                    "Error editing gadget"
                 );
             }
         }
@@ -222,7 +254,7 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <h1 style={{fontFamily: "Inkfree"}}>Dr.UML</h1>
+            <h1>Dr.UML</h1>
             <Toolbar
                 onGetDiagramName={handleGetDiagramName}
                 onShowPopup={() => setShowPopup(true)}
@@ -243,7 +275,6 @@ const App: React.FC = () => {
                 backendData={backendData}
                 reloadBackendData={loadCanvasData}
                 onSelectionChange={handleSelectionChange}
-                onUpdateGadgetProperty={handleUpdateGadgetProperty}
             />
             {selectedGadgetCount === 1 && (
                 <GadgetPropertiesPanel

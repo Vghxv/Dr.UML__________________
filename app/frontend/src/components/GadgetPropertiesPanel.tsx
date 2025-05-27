@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { GadgetProps } from "../utils/Props";
+import React, {useEffect, useRef, useState} from "react";
+import {GadgetProps} from "../utils/Props";
 
 interface GadgetPropertiesPanelProps {
     selectedGadget: GadgetProps | null;
@@ -8,7 +8,7 @@ interface GadgetPropertiesPanelProps {
 
 const TEXT_COLOR = 'black';
 
-const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({ selectedGadget, updateGadgetProperty }) => {
+const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({selectedGadget, updateGadgetProperty}) => {
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | HTMLSelectElement | null }>({});
 
@@ -97,7 +97,8 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({ selectedG
                             borderRadius: '5px'
                         }}>
                             <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Content:</label>
+                                <label
+                                    style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Content:</label>
                                 <input
                                     type="text"
                                     value={attr.content}
@@ -109,7 +110,8 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({ selectedG
                             </div>
 
                             <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Font Size:</label>
+                                <label style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Font
+                                    Size:</label>
                                 <input
                                     type="number"
                                     value={attr.fontSize}
@@ -121,7 +123,8 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({ selectedG
                             </div>
 
                             <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Font Style:</label>
+                                <label style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Font
+                                    Style:</label>
                                 <select
                                     value={attr.fontStyle}
                                     ref={(el) => inputRefs.current[`attributes${groupIndex}:${attrIndex}.fontStyle`] = el}
@@ -137,7 +140,8 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({ selectedG
                             </div>
 
                             <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Font File:</label>
+                                <label style={{display: 'block', marginBottom: '5px', color: TEXT_COLOR}}>Font
+                                    File:</label>
                                 <select
                                     value={attr.fontFile}
                                     ref={(el) => inputRefs.current[`attributes${groupIndex}:${attrIndex}.fontFile`] = el}

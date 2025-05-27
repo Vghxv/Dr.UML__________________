@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { GadgetProps } from "../utils/Props";
+import {useMemo} from "react";
+import {GadgetProps} from "../utils/Props";
 
 export function useSelection(gadgets: GadgetProps[] | undefined) {
     const selectedGadgets = useMemo(
