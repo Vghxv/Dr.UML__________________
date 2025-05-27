@@ -33,8 +33,8 @@ const TopMenu: React.FC = () => {
                 boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)', // Subtle shadow for depth
             }}
         >
-            <h1 style={{ margin: 0, fontSize: '18px' }}>Dr.UML</h1>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <h1 style={{margin: 0, fontSize: '18px'}}>Dr.UML</h1>
+            <div style={{display: 'flex', gap: '10px'}}>
                 <button
                     onClick={handleOpenProject}
                     style={{

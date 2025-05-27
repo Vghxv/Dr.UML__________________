@@ -45,8 +45,8 @@ const ChatRoom: React.FC = () => {
             style={{
                 display: 'flex',
                 flexDirection: 'column',
-                height: '400px', // 固定高度
-                width: '300px', // 可選：給個寬度比較好看
+                height: '400px',
+                width: '300px',
                 border: '1px solid #ddd',
                 borderRadius: '8px',
                 overflow: 'hidden',

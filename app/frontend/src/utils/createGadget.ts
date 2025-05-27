@@ -1,4 +1,4 @@
-import { GadgetProps } from "./Props";
+import {GadgetProps} from "./Props";
 
 
 class ClassElement {

@@ -4,20 +4,14 @@ import { createGadget } from '../utils/createGadget';
 import { createAss } from '../utils/createAssociation';
 import { useCanvasMouseEvents } from '../hooks/useCanvasMouseEvents';
 import { useSelection } from '../hooks/useSelection';
-import {
-    SelectComponent,
-    GetDrawData
-} from "../../wailsjs/go/umlproject/UMLProject";
 
 const DrawingCanvas: React.FC<{
     backendData: CanvasProps | null,
     reloadBackendData?: () => void,
-    onUpdateGadgetProperty?: (property: string, value: any) => void,
     onSelectionChange?: (selectedGadget: GadgetProps | null, selectedGadgetCount: number) => void
 }> = ({
     backendData,
     reloadBackendData,
-    onUpdateGadgetProperty,
     onSelectionChange
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);

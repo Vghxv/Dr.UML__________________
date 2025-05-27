@@ -1,5 +1,5 @@
-import { EventsOn, EventsOff } from "../../wailsjs/runtime";
-import { utils } from "../../wailsjs/go/models";
+import {EventsOff, EventsOn} from "../../wailsjs/runtime";
+import {utils} from "../../wailsjs/go/models";
 
 export function ToPoint(x: number, y: number) {
     return new utils.Point({

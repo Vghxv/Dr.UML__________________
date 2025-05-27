@@ -8,11 +8,11 @@ interface ToolbarProps {
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
-    onGetDiagramName,
-    onShowPopup,
-    onAddAss,
-    diagramName
-}) => (
+                                             onGetDiagramName,
+                                             onShowPopup,
+                                             onAddAss,
+                                             diagramName
+                                         }) => (
     <div
         style={{
             display: 'flex',

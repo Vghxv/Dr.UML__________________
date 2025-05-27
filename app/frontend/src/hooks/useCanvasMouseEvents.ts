@@ -20,11 +20,11 @@ export function useCanvasMouseEvents(
     };
 
     const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        // 可擴充 hover 效果
+        // TODO: hovering
     };
 
     const handleMouseUp = () => {
-        // 可擴充拖曳等功能
+        // TODO
     };
 
     return {

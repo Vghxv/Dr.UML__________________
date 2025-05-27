@@ -1,4 +1,4 @@
-import { AssociationProps } from "./Props";
+import {AssociationProps} from "./Props";
 
 class AssociationElement {
     public assProps: AssociationProps;
@@ -11,8 +11,7 @@ class AssociationElement {
 
         if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
             this.drawNormalAss(ctx, margin, lineWidth);
-        }
-        else{
+        } else {
             this.drawSelfAss(ctx, margin, lineWidth);
         }
 
@@ -46,7 +45,7 @@ class AssociationElement {
     }
 
     drawSelfAss(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
-        const { startX, startY, endX, endY, deltaX, deltaY } = this.assProps;
+        const {startX, startY, endX, endY, deltaX, deltaY} = this.assProps;
 
         const p0x = startX, p0y = startY;
         const p1x = startX + deltaX, p1y = startY + deltaY;
@@ -63,7 +62,7 @@ class AssociationElement {
         ctx.stroke();
     }
 
-    drawArrow(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number){
+    drawArrow(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
         let fromX, fromY, toX, toY;
 
         if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
@@ -104,7 +103,6 @@ class AssociationElement {
         ctx.stroke();
     }
 }
-
 
 
 export function createAss(type: string, config: AssociationProps, margin: number) {

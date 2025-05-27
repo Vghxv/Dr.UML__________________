@@ -21,7 +21,10 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClo
     });
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const {name, value} = e.target;
-        setFormData({...formData, [name]: name === "x" || name === "y" || name === "layer" || name === "gtype" ? parseInt(value) : value});
+        setFormData({
+            ...formData,
+            [name]: name === "x" || name === "y" || name === "layer" || name === "gtype" ? parseInt(value) : value
+        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
