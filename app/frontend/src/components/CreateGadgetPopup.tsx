@@ -16,7 +16,7 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClo
         x: 0,
         y: 0,
         layer: 0,
-        color: "#0000FF",
+        color: "#80e8ff",
         header: "sample header",
     });
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
