@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useCallback} from 'react';
-import {CanvasProps, GadgetProps} from '../utils/Props';
+import {AssociationProps, CanvasProps, GadgetProps} from '../utils/Props';
 import {createGadget} from '../utils/createGadget';
 import {createAss} from '../utils/createAssociation';
 import {useCanvasMouseEvents} from '../hooks/useCanvasMouseEvents';
@@ -8,11 +8,15 @@ import {useSelection} from '../hooks/useSelection';
 const DrawingCanvas: React.FC<{
     backendData: CanvasProps | null,
     reloadBackendData?: () => void,
-    onSelectionChange?: (selectedGadget: GadgetProps | null, selectedGadgetCount: number) => void
+    onSelectionChange?: (selectedGadget: GadgetProps | null, selectedGadgetCount: number) => void,
+    onCanvasClick?: (point: {x: number, y: number}) => void,
+    isAddingAssociation?: boolean
 }> = ({
           backendData,
           reloadBackendData,
-          onSelectionChange
+          onSelectionChange,
+          onCanvasClick,
+          isAddingAssociation
       }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const {selectedGadgetCount, selectedGadget} = useSelection(backendData?.gadgets);
@@ -29,7 +33,7 @@ const DrawingCanvas: React.FC<{
                     gad.draw(ctx, backendData.margin, backendData.lineWidth);
                 });
 
-                backendData?.Association?.forEach((association) => {
+                backendData?.associations?.forEach((association: AssociationProps) => {
                     const ass = createAss("Association", association, backendData.margin);
                     ass.draw(ctx, backendData.margin, backendData.lineWidth);
                 });
@@ -72,26 +76,28 @@ const DrawingCanvas: React.FC<{
         };
     }, [resizeCanvas]); // Only depend on resizeCanvas, which includes necessary dependencies
 
+    // 使用 useCanvasMouseEvents 處理所有 mouse event
     const {handleMouseDown, handleMouseMove, handleMouseUp} = useCanvasMouseEvents(
         canvasRef,
         () => {
             if (reloadBackendData) {
                 reloadBackendData();
             }
+        },
+        { 
+            onCanvasClick, 
+            isAddingAssociation 
         }
     );
 
-
     return (
-        // <div className="relative flex">
-            <canvas
-                ref={canvasRef}
-                className="border-2 border-neutral-600 rounded-lg bg-neutral-900 shadow-lg w-full h-[calc(100vh-170px)] m-0 relative"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-            />
-        // </div>
+        <canvas
+            ref={canvasRef}
+            className="border-2 border-neutral-600 rounded-lg bg-neutral-900 shadow-lg w-full h-[calc(100vh-170px)] m-0 relative"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+        />
     );
 };
 

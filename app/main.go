@@ -34,6 +34,7 @@ func main() {
 		EnumBind: []interface{}{
 			umldiagram.AllDiagramTypes,
 			component.AllGadgetTypes,
+			component.AllAssociationTypes,
 		},
 	})
 
