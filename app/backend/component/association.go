@@ -19,6 +19,16 @@ const (
 	supportedAssociationType = Extension | Implementation | Composition | Dependency
 )
 
+var AllAssociationTypes = []struct {
+	Value  AssociationType
+	TSName string
+}{
+	{Extension, "Extension"},
+	{Implementation, "Implementation"},
+	{Composition, "Composition"},
+	{Dependency, "Dependency"},
+}
+
 type Association struct {
 	assType          AssociationType
 	layer            int
