@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Dr.uml/backend/component/attribute"
 	"embed"
 
 	"Dr.uml/backend/component"
@@ -35,6 +36,7 @@ func main() {
 			umldiagram.AllDiagramTypes,
 			component.AllGadgetTypes,
 			component.AllAssociationTypes,
+			attribute.AllTextstyleTypes,
 		},
 	})
 
