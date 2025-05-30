@@ -5,12 +5,13 @@ import {
     AddAttributeToGadget,
     GetCurrentDiagramName,
     GetDrawData,
-    SetAttrContentGadget,
-    SetAttrSizeGadget,
-    SetAttrStyleGadget,
-    SetColorGadget,
-    SetPointGadget,
-    SetSetLayerGadget
+    SetAttrContentComp,
+    SetAttrFontComp,
+    SetAttrSizeComp,
+    SetAttrStyleComp,
+    SetColorComp,
+    SetPointComp,
+    SetSetLayerComp
 } from "../wailsjs/go/umlproject/UMLProject";
 import {mockSelfAssociationUp} from "./assets/mock/ass";
 
@@ -194,7 +195,7 @@ const App: React.FC = () => {
 
                     if (childProp === 'content') {
                         setTripleValue(
-                            SetAttrContentGadget,
+                            SetAttrContentComp,
                             i, j, value,
                             "Gadget content changed",
                             "Error editing gadget content"
@@ -202,7 +203,7 @@ const App: React.FC = () => {
                     }
                     if (childProp === 'fontSize') {
                         setTripleValue(
-                            SetAttrSizeGadget,
+                            SetAttrSizeComp,
                             i, j, value,
                             "Gadget fontSize changed",
                             "Error editing gadget fontSize"
@@ -211,7 +212,7 @@ const App: React.FC = () => {
                     // new stuff
                     if (childProp === 'fontStyleB') {
                         setTripleValue(
-                            SetAttrStyleGadget,
+                            SetAttrStyleComp,
                             i, j, value,
                             "Gadget font style (bold) changed",
                             "Error editing gadget font style (bold)"
@@ -219,7 +220,7 @@ const App: React.FC = () => {
                     }
                     if (childProp === 'fontStyleI') {
                         setTripleValue(
-                            SetAttrStyleGadget,
+                            SetAttrStyleComp,
                             i, j, value,
                             "Gadget font style (italic) changed",
                             "Error editing gadget font style (italic)"
@@ -227,7 +228,7 @@ const App: React.FC = () => {
                     }
                     if (childProp === 'fontStyleU') {
                         setTripleValue(
-                            SetAttrStyleGadget,
+                            SetAttrStyleComp,
                             i, j, value,
                             "Gadget font style (underline) changed",
                             "Error editing gadget font style (underline)"
@@ -239,7 +240,7 @@ const App: React.FC = () => {
         } else {
             if (property === "x") {
                 setSingleValue(
-                    (val) => SetPointGadget(ToPoint(val, selectedGadget.y)),
+                    (val) => SetPointComp(ToPoint(val, selectedGadget.y)),
                     value,
                     "Gadget moved",
                     "Error editing gadget"
@@ -247,7 +248,7 @@ const App: React.FC = () => {
             }
             if (property === "y") {
                 setSingleValue(
-                    (val) => SetPointGadget(ToPoint(selectedGadget.x, val)),
+                    (val) => SetPointComp(ToPoint(selectedGadget.x, val)),
                     value,
                     "Gadget moved",
                     "Error editing gadget"
@@ -255,7 +256,7 @@ const App: React.FC = () => {
             }
             if (property === "layer") {
                 setSingleValue(
-                    SetSetLayerGadget,
+                    SetSetLayerComp,
                     value,
                     "layer changed",
                     "Error editing gadget"
@@ -263,7 +264,7 @@ const App: React.FC = () => {
             }
             if (property === "color") {
                 setSingleValue(
-                    SetColorGadget,
+                    SetColorComp,
                     value,
                     "color changed",
                     "Error editing gadget"
