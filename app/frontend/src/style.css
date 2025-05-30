@@ -4,3 +4,8 @@
     font-family: "Inkfree";
     src:url("assets/fonts/Inkfree.woff2")format("woff2");
 }
+
+@font-face {
+    font-family: "Arial";
+    src:url("assets/fonts/Arial.woff2")format("woff2");
+}

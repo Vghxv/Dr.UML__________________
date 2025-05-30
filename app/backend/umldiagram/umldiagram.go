@@ -179,6 +179,19 @@ func (ud *UMLDiagram) SetAttrStyleComp(section int, index int, style int) duerro
 	}
 }
 
+func (ud *UMLDiagram) SetAttrFontComp(section int, index int, fontFile string) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetAttrFontFile(section, index, fontFile)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
 // Methods
 func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, colorHexStr string, header string) duerror.DUError {
 	g, err := component.NewGadget(gadgetType, point, layer, colorHexStr, header)

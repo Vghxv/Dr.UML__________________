@@ -138,6 +138,17 @@ func (p *UMLProject) SetAttrStyleComp(section int, index int, style int) duerror
 	return nil
 }
 
+func (p *UMLProject) SetAttrFontComp(section int, index int, font string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrFontComp(section, index, font); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
 // methods
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx

@@ -234,7 +234,14 @@ const App: React.FC = () => {
                             "Error editing gadget font style (underline)"
                         );
                     }
-                    // new stuff ends
+                    if (childProp === 'fontFile') {
+                        setTripleValue(
+                            SetAttrFontComp,
+                            i, j, value,
+                            "Gadget font changed",
+                            "Error editing gadget font"
+                        );
+                    }
                 }
             }
         } else {
