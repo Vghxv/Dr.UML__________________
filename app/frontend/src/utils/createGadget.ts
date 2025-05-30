@@ -14,8 +14,6 @@ class ClassElement {
 
         const headerLen = props.attributes?.[0]?.length || 0;
         const attributesLen = props.attributes.length > 1 ? props.attributes[1]?.length || 0 : 0;
-        const methodsLen = props.attributes.length > 2 ? props.attributes[2]?.length || 0 : 0;
-        console.log(`Header: ${headerLen}, Attributes: ${attributesLen}, Methods: ${methodsLen}`);
 
         const calculateSectionHeight = (sectionIndex: number, sectionLen: number): number => {
             let height = 0;
@@ -54,16 +52,16 @@ class ClassElement {
         ctx.strokeStyle = "black";
         ctx.lineWidth = lineWidth;
         ctx.stroke();
-        // ctx.font = "12px Georgia";
         const drawText = (sectionIndex: number, yOffset: number) => {
             yOffset += margin;
             if (Array.isArray(this.gadgetProps.attributes[sectionIndex])) {
                 this.gadgetProps.attributes[sectionIndex].forEach((attr: any) => {
                     if (attr && typeof attr.content === "string") {
-                        yOffset += attr.height / 2;
+                        yOffset += Math.round(attr.height);
                         ctx.font = `${attr.fontSize}px ${attr.fontFile}`;
+                        ctx.textBaseline = "bottom"
                         ctx.fillText(attr.content, this.gadgetProps.x + margin, yOffset);
-                        yOffset += attr.height / 2 + margin;
+                        yOffset += margin;
                     }
                 });
             }
