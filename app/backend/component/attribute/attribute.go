@@ -120,7 +120,7 @@ func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
 	if err := utils.ValidateFilePath(fontFile); err != nil {
 		return err
 	}
-	att.fontFile = fontFile
+	att.fontFile = os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/" + fontFile + ".ttf"
 	return att.updateDrawData()
 }
 
