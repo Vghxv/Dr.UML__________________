@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {GadgetProps} from "../utils/Props";
+import {attribute} from "../../wailsjs/go/models";
 
 interface GadgetPropertiesPanelProps {
     selectedGadget: GadgetProps | null;
@@ -132,18 +133,68 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
 
                             <div className="mb-3">
                                 <label className="block mb-1 text-sm font-medium text-gray-700">Font Style:</label>
-                                <select
-                                    value={attr.fontStyle}
-                                    ref={(el) => inputRefs.current[`attributes${groupIndex}:${attrIndex}.fontStyle`] = el}
-                                    onFocus={() => setFocusedInput(`attributes${groupIndex}:${attrIndex}.fontStyle`)}
-                                    onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyle`, parseInt(e.target.value))}
-                                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                >
-                                    <option value={0}>Normal</option>
-                                    <option value={1}>Italic</option>
-                                    <option value={2}>Bold</option>
-                                    <option value={3}>Bold Italic</option>
-                                </select>
+                                <div className="flex space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const isBold = (attr.fontStyle & attribute.Textstyle.Bold) !== 0;
+                                            let newStyle = attr.fontStyle;
+                                            if (isBold) {
+                                                newStyle &= ~attribute.Textstyle.Bold; // Remove bold bit
+                                            } else {
+                                                newStyle |= attribute.Textstyle.Bold; // Add bold bit
+                                            }
+                                            updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleB`, newStyle);
+                                        }}
+                                        className={`px-3 py-2 border rounded-md ${
+                                            (attr.fontStyle & attribute.Textstyle.Bold) !== 0 
+                                            ? 'bg-blue-500 text-white' 
+                                            : 'bg-white text-gray-700 border-gray-300'
+                                        } hover:bg-blue-600 hover:text-white font-bold`}
+                                    >
+                                        B
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const isItalic = (attr.fontStyle & attribute.Textstyle.Italic) !== 0;
+                                            let newStyle = attr.fontStyle;
+                                            if (isItalic) {
+                                                newStyle &= ~attribute.Textstyle.Italic; // Remove italic bit
+                                            } else {
+                                                newStyle |= attribute.Textstyle.Italic; // Add italic bit
+                                            }
+                                            updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleI`, newStyle);
+                                        }}
+                                        className={`px-3 py-2 border rounded-md ${
+                                            (attr.fontStyle & attribute.Textstyle.Italic) !== 0 
+                                            ? 'bg-blue-500 text-white' 
+                                            : 'bg-white text-gray-700 border-gray-300'
+                                        } hover:bg-blue-600 hover:text-white italic`}
+                                    >
+                                        I
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
+                                            let newStyle = attr.fontStyle;
+                                            if (isUnderline) {
+                                                newStyle &= ~attribute.Textstyle.Underline; // Remove underline bit
+                                            } else {
+                                                newStyle |= attribute.Textstyle.Underline; // Add underline bit
+                                            }
+                                            updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleU`, newStyle);
+                                        }}
+                                        className={`px-3 py-2 border rounded-md ${
+                                            (attr.fontStyle & attribute.Textstyle.Underline) !== 0 
+                                            ? 'bg-blue-500 text-white' 
+                                            : 'bg-white text-gray-700 border-gray-300'
+                                        } hover:bg-blue-600 hover:text-white underline`}
+                                    >
+                                        U
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="mb-3">
