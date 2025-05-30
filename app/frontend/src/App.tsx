@@ -160,14 +160,31 @@ const App: React.FC = () => {
                             "Error editing gadget fontSize"
                         );
                     }
-                    if (childProp === 'fontStyle') {
+                    if (childProp === 'fontStyleB') {
                         setTripleValue(
                             SetAttrStyleGadget,
                             i, j, value,
-                            "Gadget fontStyle changed",
-                            "Error editing gadget fontStyle"
+                            "Gadget font style (bold) changed",
+                            "Error editing gadget font style (bold)"
                         );
                     }
+                    if (childProp === 'fontStyleI') {
+                        setTripleValue(
+                            SetAttrStyleGadget,
+                            i, j, value,
+                            "Gadget font style (italic) changed",
+                            "Error editing gadget font style (italic)"
+                        );
+                    }
+                    if (childProp === 'fontStyleU') {
+                        setTripleValue(
+                            SetAttrStyleGadget,
+                            i, j, value,
+                            "Gadget font style (underline) changed",
+                            "Error editing gadget font style (underline)"
+                        );
+                    }
+
                 }
             }
         } else {

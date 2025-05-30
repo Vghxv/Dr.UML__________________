@@ -1,4 +1,5 @@
 import {GadgetProps} from "./Props";
+import {attribute} from "../../wailsjs/go/models";
 
 
 class ClassElement {
@@ -57,11 +58,20 @@ class ClassElement {
             if (Array.isArray(this.gadgetProps.attributes[sectionIndex])) {
                 this.gadgetProps.attributes[sectionIndex].forEach((attr: any) => {
                     if (attr && typeof attr.content === "string") {
-                        yOffset += Math.round(attr.height);
-                        ctx.font = `${attr.fontSize}px ${attr.fontFile}`;
-                        ctx.textBaseline = "bottom"
+                        yOffset += Math.round(attr.height / 2);
+                        const boldString = (attr.fontStyle & attribute.Textstyle.Bold) !== 0 ? "bold " : "";
+                        const italicString = (attr.fontStyle & attribute.Textstyle.Italic) !== 0 ? "italic " : "";
+                        const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
+
+                        ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
+                        ctx.textBaseline = "middle"
                         ctx.fillText(attr.content, this.gadgetProps.x + margin, yOffset);
-                        yOffset += margin;
+                        yOffset += Math.round(attr.height / 2) ;
+                        if (isUnderline) {
+                            const underlineHeight = 2;
+                            ctx.fillRect(this.gadgetProps.x + margin, yOffset - Math.round(attr.height * 0.2) , attr.width, underlineHeight);
+                        }
+                        yOffset += + margin;
                     }
                 });
             }
