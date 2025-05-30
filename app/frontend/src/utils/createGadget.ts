@@ -91,7 +91,7 @@ class ClassElement {
     }
 }
 
-export function createGadget(type: string, config: GadgetProps, margin: number) {
+export function createGad(type: string, config: GadgetProps, margin: number) {
     switch (type) {
         case "Class": {
             return new ClassElement(config, margin);
