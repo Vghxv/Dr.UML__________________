@@ -5,6 +5,8 @@ import (
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 // Attribute represents a configurable textual element with content, size, and style properties expressed as Textstyle.
@@ -28,6 +30,16 @@ func NewAttribute(content string) (*Attribute, duerror.DUError) {
 		return nil, err
 	}
 	return att, nil
+}
+
+func (att *Attribute) getFontFileBase() string {
+	// Extract the base filename with extension
+	baseWithExt := filepath.Base(att.fontFile)
+
+	// Extract the filename without extension
+	base := strings.TrimSuffix(baseWithExt, filepath.Ext(baseWithExt))
+
+	return base
 }
 
 // GetContent retrieves the content of the Attribute as a string along with an error if applicable.
@@ -168,7 +180,7 @@ func (att *Attribute) updateDrawData() duerror.DUError {
 	att.drawData.Width = width
 	att.drawData.FontSize = att.size
 	att.drawData.FontStyle = int(att.style)
-	att.drawData.FontFile = att.fontFile
+	att.drawData.FontFile = att.getFontFileBase()
 
 	if att.updateParentDraw == nil {
 		return nil

@@ -3,7 +3,7 @@ package drawdata
 const (
 	DefaultAttributeFontSize  = 12
 	DefaultAttributeFontStyle = 0
-	DefaultAttributeFontFile  = "/assets/Inkfree.ttf"
+	DefaultAttributeFontFile  = "/frontend/src/assets/fonts/Inkfree.ttf"
 )
 
 type Attribute struct {

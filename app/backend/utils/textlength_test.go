@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Dr.uml/backend/drawdata"
 	"os"
 	"testing"
 )
@@ -19,16 +20,16 @@ func Test_GetTextSize(t *testing.T) {
 			name:           "correct",
 			str:            "Hello, World!",
 			size:           12,
-			fontFile:       os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf",
-			expectedHeight: 22,
-			expectedWidth:  81,
+			fontFile:       os.Getenv("APP_ROOT") + drawdata.DefaultAttributeFontFile,
+			expectedHeight: 15,
+			expectedWidth:  58,
 			hasError:       false,
 		},
 		{
 			name:           "size invalid",
 			str:            "Hello, World!",
 			size:           0,
-			fontFile:       os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf",
+			fontFile:       os.Getenv("APP_ROOT") + drawdata.DefaultAttributeFontFile,
 			expectedHeight: 0,
 			expectedWidth:  0,
 			hasError:       true,
