@@ -8,10 +8,10 @@ interface GadgetPropertiesPanelProps {
 }
 
 const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
-                                                                         selectedGadget,
-                                                                         updateGadgetProperty,
-                                                                         addAttributeToGadget
-                                                                     }) => {
+        selectedGadget,
+        updateGadgetProperty,
+        addAttributeToGadget
+    }) => {
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | HTMLSelectElement | null }>({});
 

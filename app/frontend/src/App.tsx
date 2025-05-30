@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
 import {mockSelfAssociationUp} from "./assets/mock/ass";
 
-import {CanvasProps, GadgetProps} from "./utils/Props";
+import {CanvasProps, GadgetProps, AssociationProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
 import {GadgetPopup} from "./components/CreateGadgetPopup";
 import Toolbar from "./components/Toolbar";
@@ -11,15 +11,19 @@ import {GetCurrentDiagramName} from "../wailsjs/go/umlproject/UMLProject";
 import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
 import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
 import {StartAddAssociation, EndAddAssociation} from "../wailsjs/go/umlproject/UMLProject";
-import { component } from "../wailsjs/go/models";
+import AssociationPopup from "./components/AssociationPopup";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [selectedGadget, setSelectedGadget] = useState<GadgetProps | null>(null);
+    const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
+    const [selectedComponentType, setSelectedComponentType] = useState<"gadget" | "association" | null>(null);
     const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
     const [isAddingAssociation, setIsAddingAssociation] = useState(false);
+    const [showAssPopup, setShowAssPopup] = useState(false);
     const [assStartPoint, setAssStartPoint] = useState<{x: number, y: number} | null>(null);
+    const [assEndPoint, setAssEndPoint] = useState<{x: number, y: number} | null>(null);
 
     const {backendData, setBackendData, reloadBackendData} = useBackendCanvasData();
 
@@ -41,23 +45,39 @@ const App: React.FC = () => {
     const handleAddAss = () => {
         setIsAddingAssociation(true);
         setAssStartPoint(null);
+        setAssEndPoint(null);
+        setShowAssPopup(false);
     };
 
     // Canvas 點擊事件的 callback
     const handleCanvasClick = async (point: {x: number, y: number}) => {
         if (isAddingAssociation) {
             if (!assStartPoint) {
-                // 第一次點擊，設為起點
                 setAssStartPoint(point);
-                await StartAddAssociation(ToPoint(point.x, point.y));
-            } else {
-                // 第二次點擊，設為終點並創建 Association
-                await EndAddAssociation(component.AssociationType.Dependency, ToPoint(point.x, point.y));
-                setIsAddingAssociation(false);
-                setAssStartPoint(null);
-                reloadBackendData();
+            } else if (!assEndPoint) {
+                setAssEndPoint(point);
+                setShowAssPopup(true);
             }
         }
+    };
+
+    const handleAssPopupAdd = async (assType: number) => {
+        if (assStartPoint && assEndPoint) {
+            await StartAddAssociation(ToPoint(assStartPoint.x, assStartPoint.y));
+            await EndAddAssociation(assType, ToPoint(assEndPoint.x, assEndPoint.y));
+            setIsAddingAssociation(false);
+            setAssStartPoint(null);
+            setAssEndPoint(null);
+            setShowAssPopup(false);
+            reloadBackendData();
+        }
+    };
+
+    const handleAssPopupClose = () => {
+        setIsAddingAssociation(false);
+        setAssStartPoint(null);
+        setAssEndPoint(null);
+        setShowAssPopup(false);
     };
 
     const handleSelectionChange = (gadget: GadgetProps | null, count: number) => {
@@ -91,11 +111,21 @@ const App: React.FC = () => {
                 onCanvasClick={handleCanvasClick}
                 isAddingAssociation={isAddingAssociation}
             />
+            {showAssPopup && assStartPoint && assEndPoint && (
+                <AssociationPopup
+                    isOpen={showAssPopup}
+                    startPoint={assStartPoint}
+                    endPoint={assEndPoint}
+                    onAdd={handleAssPopupAdd}
+                    onClose={handleAssPopupClose}
+                />
+            )}
             {selectedGadgetCount === 1 && (
                 <GadgetPropertiesPanel
                     selectedGadget={selectedGadget}
                     updateGadgetProperty={handleUpdateGadgetProperty}
                     addAttributeToGadget={handleAddAttributeToGadget}
+                    // 可加上 updateAssociationProperty, addAttributeToAssociation
                 />
             )}
         </div>
