@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useCallback} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {AssociationProps, CanvasProps, GadgetProps} from '../utils/Props';
-import {createGadget} from '../utils/createGadget';
+import {createGad} from '../utils/createGadget';
 import {createAss} from '../utils/createAssociation';
 import {useCanvasMouseEvents} from '../hooks/useCanvasMouseEvents';
 import {useSelection} from '../hooks/useSelection';
@@ -9,7 +9,7 @@ const DrawingCanvas: React.FC<{
     backendData: CanvasProps | null,
     reloadBackendData?: () => void,
     onSelectionChange?: (selectedGadget: GadgetProps | null, selectedGadgetCount: number) => void,
-    onCanvasClick?: (point: {x: number, y: number}) => void,
+    onCanvasClick?: (point: { x: number, y: number }) => void,
     isAddingAssociation?: boolean
 }> = ({
           backendData,
@@ -29,7 +29,7 @@ const DrawingCanvas: React.FC<{
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 backendData?.gadgets?.forEach((gadget: GadgetProps) => {
-                    const gad = createGadget("Class", gadget, backendData.margin);
+                    const gad = createGad("Class", gadget, backendData.margin);
                     gad.draw(ctx, backendData.margin, backendData.lineWidth);
                 });
 
@@ -84,9 +84,9 @@ const DrawingCanvas: React.FC<{
                 reloadBackendData();
             }
         },
-        { 
-            onCanvasClick, 
-            isAddingAssociation 
+        {
+            onCanvasClick,
+            isAddingAssociation
         }
     );
 
