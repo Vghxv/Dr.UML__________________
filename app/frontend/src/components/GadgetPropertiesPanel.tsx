@@ -2,6 +2,28 @@ import React, {useEffect, useRef, useState} from "react";
 import {GadgetProps} from "../utils/Props";
 import {attribute} from "../../wailsjs/go/models";
 
+// Define type for font files
+type FontFile = {
+    default: string;
+};
+
+// Import all .woff2 font files from the assets/fonts directory
+let fontFiles: Record<string, FontFile>;
+
+
+fontFiles = import.meta.glob<FontFile>('../assets/fonts/*.woff2', {eager: true});
+
+// Extract font names from file paths
+const getFontOptions = () => {
+    return Object.keys(fontFiles).map(path => {
+        // Extract the filename from the path (handle both / and \ separators)
+        const filename = path.split(/[/\\]/).pop() || '';
+        // Remove the .woff2 extension to get the font name
+
+        return filename.replace('.woff2', '');
+    });
+};
+
 interface GadgetPropertiesPanelProps {
     selectedGadget: GadgetProps | null;
     updateGadgetProperty: (property: string, value: any) => void;
@@ -147,9 +169,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                             updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleB`, newStyle);
                                         }}
                                         className={`px-3 py-2 border rounded-md ${
-                                            (attr.fontStyle & attribute.Textstyle.Bold) !== 0 
-                                            ? 'bg-blue-500 text-white' 
-                                            : 'bg-white text-gray-700 border-gray-300'
+                                            (attr.fontStyle & attribute.Textstyle.Bold) !== 0
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-white text-gray-700 border-gray-300'
                                         } hover:bg-blue-600 hover:text-white font-bold`}
                                     >
                                         B
@@ -167,9 +189,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                             updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleI`, newStyle);
                                         }}
                                         className={`px-3 py-2 border rounded-md ${
-                                            (attr.fontStyle & attribute.Textstyle.Italic) !== 0 
-                                            ? 'bg-blue-500 text-white' 
-                                            : 'bg-white text-gray-700 border-gray-300'
+                                            (attr.fontStyle & attribute.Textstyle.Italic) !== 0
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-white text-gray-700 border-gray-300'
                                         } hover:bg-blue-600 hover:text-white italic`}
                                     >
                                         I
@@ -187,9 +209,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                             updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleU`, newStyle);
                                         }}
                                         className={`px-3 py-2 border rounded-md ${
-                                            (attr.fontStyle & attribute.Textstyle.Underline) !== 0 
-                                            ? 'bg-blue-500 text-white' 
-                                            : 'bg-white text-gray-700 border-gray-300'
+                                            (attr.fontStyle & attribute.Textstyle.Underline) !== 0
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-white text-gray-700 border-gray-300'
                                         } hover:bg-blue-600 hover:text-white underline`}
                                     >
                                         U
@@ -206,12 +228,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                     onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontFile`, e.target.value)}
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 >
-                                    <option value="Arial">Arial</option>
-                                    <option value="Helvetica">Helvetica</option>
-                                    <option value="Times New Roman">Times New Roman</option>
-                                    <option value="Courier New">Courier New</option>
-                                    <option value="Georgia">Georgia</option>
-                                    <option value="Verdana">Verdana</option>
+                                    {getFontOptions().map((fontName) => (
+                                        <option key={fontName} value={fontName}>{fontName}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
