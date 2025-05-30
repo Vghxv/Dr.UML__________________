@@ -95,7 +95,7 @@ func (ud *UMLDiagram) GetLastModified() time.Time {
 }
 
 // Setters
-func (ud *UMLDiagram) SetPointGadget(point utils.Point) duerror.DUError {
+func (ud *UMLDiagram) SetPointComp(point utils.Point) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (ud *UMLDiagram) SetPointGadget(point utils.Point) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetSetLayerGadget(layer int) duerror.DUError {
+func (ud *UMLDiagram) SetSetLayerComp(layer int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (ud *UMLDiagram) SetSetLayerGadget(layer int) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetColorGadget(colorHexStr string) duerror.DUError {
+func (ud *UMLDiagram) SetColorComp(colorHexStr string) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (ud *UMLDiagram) SetColorGadget(colorHexStr string) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
+func (ud *UMLDiagram) SetAttrContentComp(section int, index int, content string) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -150,7 +150,8 @@ func (ud *UMLDiagram) SetAttrContentGadget(section int, index int, content strin
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
 }
-func (ud *UMLDiagram) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
+
+func (ud *UMLDiagram) SetAttrSizeComp(section int, index int, size int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -163,7 +164,8 @@ func (ud *UMLDiagram) SetAttrSizeGadget(section int, index int, size int) duerro
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
 }
-func (ud *UMLDiagram) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
+
+func (ud *UMLDiagram) SetAttrStyleComp(section int, index int, style int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
