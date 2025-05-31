@@ -1,11 +1,12 @@
-import {AssociationProps} from "./Props";
+import { AssociationProps } from "./Props";
 
 // Association type constants
-const ASS_TYPE_DEPENDENCY = 0;
-const ASS_TYPE_COMPOSITION = 1;
-const ASS_TYPE_EXTENSION = 2;
-const ASS_TYPE_IMPLEMENTATION = 3;
-
+enum ASS_TYPE {
+    ASS_TYPE_EXTENSION = 1,
+    ASS_TYPE_IMPLEMENTATION = 2,
+    ASS_TYPE_COMPOSITION = 4,
+    ASS_TYPE_DEPENDENCY = 8,
+}
 class AssociationElement {
     public assProps: AssociationProps;
 
@@ -16,20 +17,20 @@ class AssociationElement {
     draw(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
         // 根據 assType 決定畫法
         switch (this.assProps.assType) {
-            case ASS_TYPE_DEPENDENCY:
+            case ASS_TYPE.ASS_TYPE_DEPENDENCY:
                 this.drawLine(ctx, margin, lineWidth, true); // 虛線
                 this.drawArrow(ctx, margin, lineWidth, false); // 普通箭頭
                 break;
-            case ASS_TYPE_COMPOSITION:
+            case ASS_TYPE.ASS_TYPE_COMPOSITION:
                 this.drawLine(ctx, margin, lineWidth, false); // 實線
                 this.drawDiamond(ctx, margin, lineWidth, true); // 實心菱形
                 this.drawArrow(ctx, margin, lineWidth, false); // 普通箭頭
                 break;
-            case ASS_TYPE_EXTENSION:
+            case ASS_TYPE.ASS_TYPE_EXTENSION:
                 this.drawLine(ctx, margin, lineWidth, false); // 實線
                 this.drawArrow(ctx, margin, lineWidth, true); // 空心三角
                 break;
-            case ASS_TYPE_IMPLEMENTATION:
+            case ASS_TYPE.ASS_TYPE_IMPLEMENTATION:
                 this.drawLine(ctx, margin, lineWidth, true); // 虛線
                 this.drawArrow(ctx, margin, lineWidth, true); // 空心三角
                 break;
@@ -63,7 +64,7 @@ class AssociationElement {
             ctx.save();
             ctx.beginPath();
             if (dashed) ctx.setLineDash([8, 6]);
-            const {startX, startY, endX, endY, deltaX, deltaY} = this.assProps;
+            const { startX, startY, endX, endY, deltaX, deltaY } = this.assProps;
             ctx.moveTo(startX, startY);
             ctx.lineTo(startX + deltaX, startY + deltaY);
             ctx.lineTo(endX + deltaX, endY + deltaY);
@@ -78,7 +79,7 @@ class AssociationElement {
 
     drawDiamond(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number, filled: boolean) {
         // 菱形在起點
-        const {startX, startY, endX, endY} = this.assProps;
+        const { startX, startY, endX, endY } = this.assProps;
         const dx = endX - startX;
         const dy = endY - startY;
         const len = Math.sqrt(dx * dx + dy * dy);
@@ -87,10 +88,10 @@ class AssociationElement {
         const unitY = dy / len;
         const size = 18;
         // 四個點
-        const p0 = {x: startX, y: startY};
-        const p1 = {x: startX + unitX * size / 2 - unitY * size / 3, y: startY + unitY * size / 2 + unitX * size / 3};
-        const p2 = {x: startX + unitX * size, y: startY + unitY * size};
-        const p3 = {x: startX + unitX * size / 2 + unitY * size / 3, y: startY + unitY * size / 2 - unitX * size / 3};
+        const p0 = { x: startX, y: startY };
+        const p1 = { x: startX + unitX * size / 2 - unitY * size / 3, y: startY + unitY * size / 2 + unitX * size / 3 };
+        const p2 = { x: startX + unitX * size, y: startY + unitY * size };
+        const p3 = { x: startX + unitX * size / 2 + unitY * size / 3, y: startY + unitY * size / 2 - unitX * size / 3 };
 
         ctx.save();
         ctx.beginPath();
@@ -181,7 +182,7 @@ class AssociationElement {
     }
 
     drawSelfAss(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
-        const {startX, startY, endX, endY, deltaX, deltaY} = this.assProps;
+        const { startX, startY, endX, endY, deltaX, deltaY } = this.assProps;
         const p0x = startX, p0y = startY;
         const p1x = startX + deltaX, p1y = startY + deltaY;
         const p2x = endX + deltaX, p2y = endY + deltaY;
