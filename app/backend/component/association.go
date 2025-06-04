@@ -36,9 +36,9 @@ type Association struct {
 	parents          [2]*Gadget
 	drawdata         drawdata.Association
 	updateParentDraw func() duerror.DUError
-
-	startPointRatio [2]float64
-	endPointRatio   [2]float64
+	IsSelected       bool
+	startPointRatio  [2]float64
+	endPointRatio    [2]float64
 }
 
 // Constructor
@@ -142,6 +142,10 @@ func (this *Association) GetStartRatio() [2]float64 {
 
 func (this *Association) GetEndRatio() [2]float64 {
 	return this.endPointRatio
+}
+
+func (this *Association) GetIsSelected() bool {
+	return this.IsSelected
 }
 
 // Setters

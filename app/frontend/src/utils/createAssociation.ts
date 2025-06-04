@@ -45,6 +45,7 @@ class AssociationElement {
         }
         // Draw label text(s) if present
         this.drawText(ctx, margin);
+
     }
 
     drawLine(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number, dashed: boolean) {
@@ -58,6 +59,17 @@ class AssociationElement {
             ctx.lineWidth = lineWidth;
             ctx.stroke();
             ctx.setLineDash([]);
+            // isSelected: draw orange highlight
+            if (this.assProps.isSelected) {
+                ctx.beginPath();
+                ctx.setLineDash([5, 3]);
+                ctx.moveTo(this.assProps.startX, this.assProps.startY);
+                ctx.lineTo(this.assProps.endX, this.assProps.endY);
+                ctx.strokeStyle = "#FFA500";
+                ctx.lineWidth = lineWidth * 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
             ctx.restore();
         } else {
             // Self association
@@ -73,6 +85,19 @@ class AssociationElement {
             ctx.lineWidth = lineWidth;
             ctx.stroke();
             ctx.setLineDash([]);
+            // isSelected: draw orange highlight
+            if (this.assProps.isSelected) {
+                ctx.beginPath();
+                ctx.setLineDash([5, 3]);
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(startX + deltaX, startY + deltaY);
+                ctx.lineTo(endX + deltaX, endY + deltaY);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = "#FFA500";
+                ctx.lineWidth = lineWidth * 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
             ctx.restore();
         }
     }
@@ -155,6 +180,19 @@ class AssociationElement {
             ctx.fill();
             ctx.stroke();
         }
+        // isSelected: draw orange border for arrow
+        if (this.assProps.isSelected) {
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(leftX, leftY);
+            ctx.lineTo(rightX, rightY);
+            ctx.closePath();
+            ctx.setLineDash([5, 3]);
+            ctx.lineWidth = lineWidth * 2;
+            ctx.strokeStyle = "#FFA500";
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
         ctx.restore();
     }
 
@@ -199,10 +237,12 @@ class AssociationElement {
 }
 
 export function createAss(type: string, config: AssociationProps, margin: number) {
+    // 根據 type 產生對應 Association 物件，未來可擴充更多類型
     switch (type) {
         case "Association": {
             return new AssociationElement(config, margin);
         }
+        // 可在此擴充更多 Association 類型
         default:
             throw new Error(`Unknown association type: ${type}`);
     }

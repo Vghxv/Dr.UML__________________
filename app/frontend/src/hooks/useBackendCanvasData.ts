@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { offBackendEvent, onBackendEvent } from "../utils/wailsBridge";
 import { GetDrawData } from "../../wailsjs/go/umlproject/UMLProject";
 import { CanvasProps } from "../utils/Props";
+import { mockAssociation } from "../assets/mock/ass";
 
 export function useBackendCanvasData() {
     const [backendData, setBackendData] = useState<CanvasProps | null>(null);
@@ -33,15 +34,13 @@ export function useBackendCanvasData() {
                     endY: association.endY,
                     deltaX: association.deltaX,
                     deltaY: association.deltaY,
-                    attributes: association.attributes.map(attr => ({
-                        content: attr.content,
-                        fontSize: attr.fontSize,
-                        fontStyle: attr.fontStyle,
-                        fontFile: attr.fontFile,
-                        ratio: attr.ratio
-                    }))
+                    isSelected: association.isSelected,
+                    attributes: association.attributes
                 }))
             };
+            if (!canvasData.associations || canvasData.associations.length === 0) {
+                canvasData.associations = [mockAssociation];
+            }
             setBackendData(canvasData);
         } catch (error) {
             console.error("Error loading canvas data:", error);

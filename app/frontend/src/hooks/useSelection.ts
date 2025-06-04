@@ -1,17 +1,17 @@
 import {useMemo} from "react";
-import {GadgetProps} from "../utils/Props";
+import {AssociationProps, GadgetProps} from "../utils/Props";
 
-export function useSelection(gadgets: GadgetProps[] | undefined) {
-    const selectedGadgets = useMemo(
-        () => (gadgets ? gadgets.filter(g => g.isSelected) : []),
-        [gadgets]
+export function useSelection(componenets: (GadgetProps | AssociationProps)[] | undefined) {
+    const selectedComponents = useMemo(
+        () => (componenets ? componenets.filter(g => g.isSelected) : []),
+        [componenets]
     );
-    const selectedGadget = selectedGadgets.length === 1 ? selectedGadgets[0] : null;
-    const selectedGadgetCount = selectedGadgets.length;
+    const selectedComponent = selectedComponents.length === 1 ? selectedComponents[0] : null;
+    const selectedComponentCount = selectedComponents.length;
 
     return {
-        selectedGadgetCount,
-        selectedGadget,
-        selectedGadgets
+        selectedComponentCount,
+        selectedComponent,
+        selectedComponents
     };
 }

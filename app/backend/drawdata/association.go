@@ -9,5 +9,6 @@ type Association struct {
 	EndY       int            `json:"endY"`
 	DeltaX     int            `json:"deltaX"`
 	DeltaY     int            `json:"deltaY"`
+	IsSelected bool           `json:"isSelected"`
 	Attributes []AssAttribute `json:"attributes"`
 }

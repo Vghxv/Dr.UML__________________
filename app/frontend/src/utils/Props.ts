@@ -25,7 +25,7 @@ export interface GadgetProps {
     }[][];
 }
 
-export interface AssociationProps {
+export interface AssociationProps  {
     assType: number;
     layer: number;
     startX: number;
@@ -34,6 +34,7 @@ export interface AssociationProps {
     endY: number;
     deltaX: number;
     deltaY: number;
+    isSelected: boolean;
     attributes: {
         content: string;
         fontSize: number;
