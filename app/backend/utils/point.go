@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math"
 
 	"Dr.uml/backend/utils/duerror"
@@ -9,6 +10,16 @@ import (
 type Point struct {
 	X int
 	Y int
+}
+
+// FromString Accepts only strings of format "<X>, <Y>" as input.
+func FromString(str string) (Point, duerror.DUError) {
+	var x, y int
+	_, err := fmt.Sscanf(str, "%d, %d", &x, &y)
+	if err != nil {
+		return Point{}, duerror.NewInvalidArgumentError("Invalid point format: " + str)
+	}
+	return Point{X: x, Y: y}, nil
 }
 
 func (p Point) Magnitude() (float64, duerror.DUError) {

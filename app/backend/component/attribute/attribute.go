@@ -17,6 +17,10 @@ type Attribute struct {
 	updateParentDraw func() duerror.DUError
 }
 
+func NewAttribute(content string, size int, style Textstyle, fontFile string) (*Attribute, duerror.DUError) {
+
+}
+
 func NewAttribute(content string) (*Attribute, duerror.DUError) {
 	att := &Attribute{
 		content:  content,

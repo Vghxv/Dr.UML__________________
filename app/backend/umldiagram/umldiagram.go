@@ -1,6 +1,7 @@
 package umldiagram
 
 import (
+	"fmt"
 	"slices"
 	"time"
 
@@ -77,8 +78,20 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 }
 
 func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, duerror.DUError) {
-	// TODO
-	return nil, nil
+	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype>>1)) // Shift right to remove the filetype bit
+	if err != nil {
+		return nil, err
+	}
+
+	dp, err := dia.loadGadgets(file.Gadgets)
+	if err != nil {
+		return nil, duerror.NewCorruptedFile(fmt.Sprintf(err.Error()+"from %s", filename))
+	}
+
+	if err = dia.updateDrawData(); err != nil {
+		return nil, err
+	}
+	return dia, nil
 }
 
 // Getters
@@ -387,6 +400,60 @@ func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUErro
 func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
 	if point.X < 0 || point.Y < 0 {
 		return duerror.NewInvalidArgumentError("point coordinates must be non-negative")
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.Gadget, duerror.DUError) {
+	var dp map[int]*component.Gadget
+
+	// Load Gadgets
+	for index, savedGadget := range gadgets {
+		point, err := utils.FromString(savedGadget.Point)
+		if err != nil {
+			return nil, duerror.NewCorruptedFile(
+				fmt.Sprintf("Error when parsing the point of %d-th gadget", index),
+			)
+		}
+		gadget, err := component.NewGadget(
+			component.GadgetType(savedGadget.GadgetType),
+			point,
+			savedGadget.Layer,
+			savedGadget.Color,
+			"",
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, attribute := range savedGadget.Attributes {
+			gadget.AddAttribute()
+		}
+
+		// Code below suffers from #89. If anything is being added, put 'em above.
+		// Stuff done by UD.AddGadget.
+		// Replace these shitty code with it when it won't cause a series of useless overhead.
+		if err = gadget.RegisterUpdateParentDraw(ud.updateDrawData); err != nil {
+			return nil, err
+		}
+		if err = ud.componentsContainer.Insert(gadget); err != nil {
+			return nil, err
+		}
+		ud.associations[gadget] = [2][]*component.Association{{}, {}}
+
+		dp[index] = gadget
+	}
+
+	return dp, nil
+}
+
+func (ud *UMLDiagram) LoadAsses(asses []utils.SavedAss, dp map[int]*component.Gadget) duerror.DUError {
+
+	for index, ass := range asses {
+		parents := make([]*component.Gadget, 2)
+		parents[0] = dp[ass.Parents[0]]
+		parents[1] = dp[ass.Parents[1]]
+
 	}
 	return nil
 }
