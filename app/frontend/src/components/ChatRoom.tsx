@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import ChatMessage from './ChatMessage';
 
 interface Message {
@@ -17,7 +17,7 @@ const ChatRoom: React.FC = () => {
         const interval = setInterval(() => {
             setMessages((prev) => [
                 ...prev,
-                {id: prev.length + 1, user: 'Server', text: 'Hello from the server!'},
+                { id: prev.length + 1, user: 'Server', text: 'Hello from the server!' },
             ]);
         }, 5000);
 
@@ -28,7 +28,7 @@ const ChatRoom: React.FC = () => {
         if (input.trim()) {
             setMessages((prev) => [
                 ...prev,
-                {id: prev.length + 1, user: username, text: input},
+                { id: prev.length + 1, user: username, text: input },
             ]);
             setInput('');
         }
@@ -62,7 +62,7 @@ const ChatRoom: React.FC = () => {
                 }}
             >
                 {messages.map((message) => (
-                    <ChatMessage key={message.id} user={message.user} text={message.text}/>
+                    <ChatMessage key={message.id} user={message.user} text={message.text} />
                 ))}
             </div>
 

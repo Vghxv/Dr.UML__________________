@@ -31,13 +31,15 @@ func TestCreateEmptyDiagram(t *testing.T) {
 			name:        "ValidUseCaseDiagram",
 			inputName:   "test2.uml",
 			diagramType: UseCaseDiagram,
-			expectError: false,
+			expectError: true,
+			errorMsg:    "Invalid diagram type",
 		},
 		{
 			name:        "ValidSequenceDiagram",
 			inputName:   "test3.uml",
 			diagramType: SequenceDiagram,
-			expectError: false,
+			expectError: true,
+			errorMsg:    "Invalid diagram type",
 		},
 		{
 			name:        "InvalidDiagramType",
@@ -78,11 +80,19 @@ func TestCreateEmptyDiagram(t *testing.T) {
 				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
 				// New assertions
-				assert.Equal(t, utils.Color{R: 255, G: 255, B: 255}, diagram.backgroundColor)
+				assert.Equal(t, "#FFFFFF", diagram.backgroundColor)
 				assert.NotNil(t, diagram.componentsContainer)
 			}
 		})
 	}
+}
+
+func TestLoadExistUMLDiagram(t *testing.T) {
+	diagram, err := LoadExistUMLDiagram("existing.uml")
+	assert.NoError(t, err)
+	assert.NotNil(t, diagram)
+	assert.Equal(t, "existing.uml", diagram.GetName())
+	assert.Equal(t, DiagramType(ClassDiagram), diagram.GetDiagramType())
 }
 
 func TestCheckDiagramType(t *testing.T) {
@@ -99,12 +109,12 @@ func TestCheckDiagramType(t *testing.T) {
 		{
 			name:        "UseCaseDiagram",
 			diagramType: UseCaseDiagram,
-			expected:    true,
+			expected:    false,
 		},
 		{
 			name:        "SequenceDiagram",
 			diagramType: SequenceDiagram,
-			expected:    true,
+			expected:    false,
 		},
 		{
 			name:        "InvalidDiagram",
@@ -131,17 +141,29 @@ func TestUMLDiagramGetters(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, diagram)
 
+	// Test GetName
 	assert.Equal(t, "TestDiagram", diagram.GetName())
 
-	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20})
+	// Test GetDiagramType
+	assert.Equal(t, DiagramType(ClassDiagram), diagram.GetDiagramType())
+
+	// Test GetLastModified
+	assert.WithinDuration(t, time.Now(), diagram.GetLastModified(), time.Second)
+
+	// Test GetDrawData
+	drawData := diagram.GetDrawData()
+	assert.Equal(t, drawdata.Margin, drawData.Margin)
+	assert.Equal(t, drawdata.LineWidth, drawData.LineWidth)
+	assert.Equal(t, drawdata.DefaultDiagramColor, drawData.Color)
+
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
 	assert.NoError(t, err)
 }
 func TestUMLDiagram_AddGadget(t *testing.T) {
 	diagram, err := CreateEmptyUMLDiagram("AddGadgetTest.uml", ClassDiagram)
 	assert.NoError(t, err)
 	assert.NotNil(t, diagram)
-
-	err = diagram.AddGadget(component.Class, utils.Point{X: 5, Y: 5})
+	err = diagram.AddGadget(component.Class, utils.Point{X: 5, Y: 5}, 0, drawdata.DefaultGadgetColor, "")
 	assert.NoError(t, err)
 
 	// Should have one gadget in container
@@ -153,9 +175,8 @@ func TestUMLDiagram_AddGadget_InvalidType(t *testing.T) {
 	diagram, err := CreateEmptyUMLDiagram("AddGadgetInvalid.uml", ClassDiagram)
 	assert.NoError(t, err)
 	assert.NotNil(t, diagram)
-
 	// Use an invalid gadget type (assuming -1 is invalid)
-	err = diagram.AddGadget(component.GadgetType(-1), utils.Point{X: 1, Y: 1})
+	err = diagram.AddGadget(component.GadgetType(-1), utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
 	assert.Error(t, err)
 }
 
@@ -175,7 +196,7 @@ func TestUMLDiagram_StartAddAssociation_InvalidPoint(t *testing.T) {
 
 func TestUMLDiagram_SelectAndUnselectComponent(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("SelectUnselect.uml", ClassDiagram)
-	_ = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 10})
+	_ = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "")
 
 	// Select
 	err := diagram.SelectComponent(utils.Point{X: 10, Y: 10})
@@ -190,27 +211,27 @@ func TestUMLDiagram_SelectAndUnselectComponent(t *testing.T) {
 
 func TestUMLDiagram_UnselectAllComponents(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("UnselectAll.uml", ClassDiagram)
-	_ = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 1})
+	_ = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
 	_ = diagram.SelectComponent(utils.Point{X: 1, Y: 1})
 	assert.Len(t, diagram.componentsSelected, 1)
 	_ = diagram.UnselectAllComponents()
 	assert.Len(t, diagram.componentsSelected, 0)
 }
 
-func TestUMLDiagram_RegisterNotifyDrawUpdate(t *testing.T) {
-	diagram, _ := CreateEmptyUMLDiagram("NotifyDrawUpdate.uml", ClassDiagram)
-	err := diagram.RegisterNotifyDrawUpdate(nil)
-	assert.Error(t, err)
+// func TestUMLDiagram_RegisterNotifyDrawUpdate(t *testing.T) {
+// 	diagram, _ := CreateEmptyUMLDiagram("NotifyDrawUpdate.uml", ClassDiagram)
+// 	err := diagram.RegisterNotifyDrawUpdate(nil)
+// 	assert.Error(t, err)
 
-	called := false
-	err = diagram.RegisterNotifyDrawUpdate(func() duerror.DUError {
-		called = true
-		return nil
-	})
-	assert.NoError(t, err)
-	_ = diagram.updateDrawData()
-	assert.True(t, called)
-}
+// 	called := false
+// 	err = diagram.RegisterNotifyDrawUpdate(func() duerror.DUError {
+// 		called = true
+// 		return nil
+// 	})
+// 	assert.NoError(t, err)
+// 	_ = diagram.updateDrawData()
+// 	assert.True(t, called)
+// }
 
 func TestUMLDiagram_GetDrawData(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("GetDrawData.uml", ClassDiagram)
@@ -222,7 +243,7 @@ func TestUMLDiagram_GetDrawData(t *testing.T) {
 
 func TestUMLDiagram_RemoveSelectedComponents(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("RemoveSelected.uml", ClassDiagram)
-	_ = diagram.AddGadget(component.Class, utils.Point{X: 2, Y: 2})
+	_ = diagram.AddGadget(component.Class, utils.Point{X: 2, Y: 2}, 0, drawdata.DefaultGadgetColor, "")
 	_ = diagram.SelectComponent(utils.Point{X: 2, Y: 2})
 	assert.Len(t, diagram.componentsSelected, 1)
 	err := diagram.RemoveSelectedComponents()
@@ -247,4 +268,187 @@ func TestUMLDiagram_EndAddAssociation_InvalidPoint(t *testing.T) {
 
 func TestUMLDiagram_LoadExistUMLDiagram(t *testing.T) {
 	// TODO
+}
+
+func TestValidatePoint(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+
+	// Valid point
+	err = diagram.validatePoint(utils.Point{X: 10, Y: 20})
+	assert.NoError(t, err)
+
+	// Negative X
+	err = diagram.validatePoint(utils.Point{X: -5, Y: 20})
+	assert.Error(t, err)
+	assert.Equal(t, "point coordinates must be non-negative", err.Error())
+
+	// Negative Y
+	err = diagram.validatePoint(utils.Point{X: 10, Y: -5})
+	assert.Error(t, err)
+	assert.Equal(t, "point coordinates must be non-negative", err.Error())
+
+	// Both negative
+	err = diagram.validatePoint(utils.Point{X: -10, Y: -10})
+	assert.Error(t, err)
+	assert.Equal(t, "point coordinates must be non-negative", err.Error())
+}
+
+func TestAddGadget(t *testing.T) {
+	// TODO
+}
+
+func TestRemoveGadget(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+
+	// This is a placeholder test since removeGadget is currently a no-op
+	gad := &component.Gadget{}
+	err = diagram.removeGadget(gad)
+	assert.NoError(t, err)
+}
+
+func TestAssociationMethods(t *testing.T) {
+	// TODO
+}
+
+func TestRegisterUpdateParentDraw(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+
+	// Try to register nil function
+	err = diagram.RegisterUpdateParentDraw(nil)
+	assert.Error(t, err)
+	assert.Equal(t, "update function cannot be nil", err.Error())
+
+	// Register valid function
+	updateCalled := false
+	updateFunc := func() duerror.DUError {
+		updateCalled = true
+		return nil
+	}
+
+	err = diagram.RegisterUpdateParentDraw(updateFunc)
+	assert.NoError(t, err)
+
+	// Test that the function gets called through updateDrawData
+	err = diagram.updateDrawData()
+	assert.NoError(t, err)
+	assert.True(t, updateCalled)
+}
+
+func TestUpdateDrawData(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+
+	// Add a gadget
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
+	assert.NoError(t, err)
+
+	// Check that drawData contains the gadget
+	assert.Equal(t, 1, len(diagram.drawData.Gadgets))
+
+	// Manual update of drawData
+	err = diagram.updateDrawData()
+	assert.NoError(t, err)
+
+	// Test with a registered update function
+	updateCalled := false
+	updateFunc := func() duerror.DUError {
+		updateCalled = true
+		return nil
+	}
+
+	err = diagram.RegisterUpdateParentDraw(updateFunc)
+	assert.NoError(t, err)
+
+	err = diagram.updateDrawData()
+	assert.NoError(t, err)
+	assert.True(t, updateCalled)
+}
+
+func TestAddAttributeToGadget(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+
+	// Try to add an attribute with no selected components
+	err = diagram.AddAttributeToGadget(0, "attribute")
+	assert.Error(t, err)
+	assert.Equal(t, "can only operate on one component", err.Error())
+
+	// Add a gadget to the diagram
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
+	assert.NoError(t, err)
+
+	// Get the gadget from the container
+	components := diagram.componentsContainer.GetAll()
+	assert.Equal(t, 1, len(components))
+
+	gadget, ok := components[0].(*component.Gadget)
+	assert.True(t, ok)
+
+	// Select the gadget
+	diagram.componentsSelected[gadget] = true
+
+	// Add attribute
+	err = diagram.AddAttributeToGadget(0, "NewAttribute")
+	assert.NoError(t, err)
+
+	// Test with multiple selected components
+	// First clear the selection
+	err = diagram.UnselectAllComponents()
+	assert.NoError(t, err)
+
+	// Add a second gadget
+	err = diagram.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "sample header 2")
+	assert.NoError(t, err)
+
+	// Get all gadgets
+	components = diagram.componentsContainer.GetAll()
+	assert.Equal(t, 2, len(components))
+
+	// Select both gadgets
+	for _, comp := range components {
+		diagram.componentsSelected[comp] = true
+	}
+
+	// Try to add attribute with multiple gadgets selected
+	err = diagram.AddAttributeToGadget(0, "attribute")
+	assert.Error(t, err)
+	assert.Equal(t, "can only operate on one component", err.Error())
+}
+
+// Mock container for testing selection methods
+type mockContainer struct {
+	mockComponent component.Component
+	pointToMatch  utils.Point
+}
+
+func (m *mockContainer) Insert(c component.Component) duerror.DUError {
+	return nil
+}
+
+func (m *mockContainer) Remove(c component.Component) duerror.DUError {
+	return nil
+}
+
+func (m *mockContainer) Search(p utils.Point) (component.Component, duerror.DUError) {
+	if p.X == m.pointToMatch.X && p.Y == m.pointToMatch.Y {
+		return m.mockComponent, nil
+	}
+	return nil, nil
+}
+
+func (m *mockContainer) GetAll() []component.Component {
+	if m.mockComponent != nil {
+		return []component.Component{m.mockComponent}
+	}
+	return []component.Component{}
+}
+
+func (m *mockContainer) Len() (int, duerror.DUError) {
+	if m.mockComponent != nil {
+		return 1, nil
+	}
+	return 0, nil
 }

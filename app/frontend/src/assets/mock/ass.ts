@@ -1,0 +1,149 @@
+import { AssociationProps } from "../../utils/Props";
+
+export const mockAssociation: AssociationProps = {
+    assType: 1,
+    layer: 0,
+    startX: 100,
+    startY: 100,
+    endX: 500,
+    endY: 500,
+    deltaX: 0,
+    deltaY: 0,
+    attributes: [
+        {
+            content: "1",
+            fontSize: 14,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.1
+        },
+        {
+            content: "0..*",
+            fontSize: 14,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.9
+        },
+        {
+            content: "Order",
+            fontSize: 16,
+            fontStyle: 1,
+            fontFile: "Arial",
+            ratio: 0.5
+        }
+    ]
+};
+
+export const mockSelfAssociation: AssociationProps = {
+    assType: 1,
+    layer: 0,
+    startX: 400,
+    startY: 400,
+    endX: 400,
+    endY: 600,
+    deltaX: 100,
+    deltaY: 100,
+    attributes: [
+        {
+            content: "self",
+            fontSize: 14,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.5
+        }
+    ]
+};
+
+export const mockHorizontalAssociation: AssociationProps = {
+    assType: 1,
+    layer: 0,
+    startX: 100,
+    startY: 200,
+    endX: 500,
+    endY: 200,
+    deltaX: 0,
+    deltaY: 0,
+    attributes: [
+        {
+            content: "left",
+            fontSize: 12,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.2
+        },
+        {
+            content: "right",
+            fontSize: 12,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.8
+        }
+    ]
+};
+
+export const mockVerticalAssociation: AssociationProps = {
+    assType: 1,
+    layer: 0,
+    startX: 300,
+    startY: 100,
+    endX: 300,
+    endY: 400,
+    deltaX: 0,
+    deltaY: 0,
+    attributes: [
+        {
+            content: "top",
+            fontSize: 12,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.1
+        },
+        {
+            content: "bottom",
+            fontSize: 12,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.9
+        }
+    ]
+};
+
+export const mockSelfAssociationLeft: AssociationProps = {
+    assType: 1,
+    layer: 0,
+    startX: 600,
+    startY: 300,
+    endX: 600,
+    endY: 500,
+    deltaX: -100,
+    deltaY: 0,
+    attributes: [
+        {
+            content: "self-left",
+            fontSize: 14,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.5
+        }
+    ]
+};
+
+export const mockSelfAssociationUp: AssociationProps = {
+    assType: 1,
+    layer: 0,
+    startX: 800,
+    startY: 600,
+    endX: 1000,
+    endY: 600,
+    deltaX: 0,
+    deltaY: -100,
+    attributes: [
+        {
+            content: "self-up",
+            fontSize: 14,
+            fontStyle: 0,
+            fontFile: "Arial",
+            ratio: 0.5
+        }
+    ]
+};

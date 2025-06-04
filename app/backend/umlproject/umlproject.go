@@ -43,16 +43,6 @@ func LoadExistUMLProject(fileName string) (*UMLProject, duerror.DUError) {
 	return nil, nil
 }
 
-// Other functions
-func (p *UMLProject) Startup(ctx context.Context) {
-	p.ctx = ctx
-	// should not AddNewDiagram and SelectDiagram here
-	// TODO: Remove this
-	p.runFrontend = true
-	p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "new class diagram")
-	p.SelectDiagram("new class diagram")
-}
-
 // Getter
 func (p *UMLProject) GetName() string {
 	return p.name
@@ -81,8 +71,83 @@ func (p *UMLProject) GetActiveDiagramsNames() []string {
 	return activeNames
 }
 
-// Other methods
-// SelectDiagram makes a diagram to be the current diagram, loads it if not loaded yet
+// Setter
+func (p *UMLProject) SetPointGadget(point utils.Point) duerror.DUError {
+
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetPointGadget(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetSetLayerGadget(layer int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetSetLayerGadget(layer); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetColorGadget(colorHexStr string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetColorGadget(colorHexStr); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrContentGadget(section, index, content); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrSizeGadget(section, index, size); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrStyleGadget(section, index, style); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+// methods
+func (p *UMLProject) Startup(ctx context.Context) {
+	p.ctx = ctx
+	// TODO: Remove this bcz can't handle error here
+	p.runFrontend = true
+	p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "new class diagram")
+	p.SelectDiagram("new class diagram")
+}
+
 func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 	if _, ok := p.availableDiagrams[diagramName]; !ok {
 		return duerror.NewInvalidArgumentError("Diagram not found")
@@ -95,7 +160,9 @@ func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 		p.activeDiagrams[diagramName] = diagram
 	}
 	p.currentDiagram = p.activeDiagrams[diagramName]
-	return nil
+	// TODO: when multiple diagrams exists, unregister the old one
+
+	return p.currentDiagram.RegisterUpdateParentDraw(p.InvalidateCanvas)
 }
 
 func (p *UMLProject) CreateEmptyUMLDiagram(diagramType umldiagram.DiagramType, diagramName string) duerror.DUError {
@@ -129,15 +196,15 @@ func (p *UMLProject) DeleteDiagram(diagramName string) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point) duerror.DUError {
+func (p *UMLProject) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, colorHexStr string, header string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.AddGadget(gadgetType, point); err != nil {
+	if err := p.currentDiagram.AddGadget(gadgetType, point, layer, colorHexStr, header); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
-	return p.InvalidateCanvas()
+	return nil
 }
 
 func (p *UMLProject) StartAddAssociation(point utils.Point) duerror.DUError {
@@ -155,7 +222,7 @@ func (p *UMLProject) EndAddAssociation(associationType component.AssociationType
 		return err
 	}
 	p.lastModified = time.Now()
-	return p.InvalidateCanvas()
+	return nil
 }
 
 func (p *UMLProject) RemoveSelectedComponents() duerror.DUError {
@@ -169,7 +236,40 @@ func (p *UMLProject) RemoveSelectedComponents() duerror.DUError {
 	return nil
 }
 
-// Draw
+func (p *UMLProject) AddAttributeToGadget(section int, content string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.AddAttributeToGadget(section, content); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) RemoveAttributeFromGadget(section int, index int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.RemoveAttributeFromGadget(section, index); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SelectComponent(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SelectComponent(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+// draw
 func (p *UMLProject) GetDrawData() drawdata.Diagram {
 	if p.currentDiagram == nil {
 		return drawdata.Diagram{}
@@ -185,8 +285,6 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	// p.notifyDrawUpdate(p.currentDiagram.GetName())
-	// log.Println("InvalidateCanvas")
 	runtime.EventsEmit(p.ctx, "backend-event", p.GetDrawData())
 	return nil
 }

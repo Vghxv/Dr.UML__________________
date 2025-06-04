@@ -1,153 +1,94 @@
-import { shapes, dia } from "@joint/core";
-import { GadgetProps } from "../components/Gadget";
+import { GadgetProps } from "./Props";
 
-export interface BackendGadgetProps {
-    gadgetType: string;
-    x: number;
-    y: number;
-    layer: number;
-    height: number;
-    width: number;
-    color: string;
-    attributes: {
-        content: string;
-        height: number;
-        width: number;
-        fontSize: number;
-        fontStyle: number;
-        fontFile: string;
-    }[][];
-}
 
-class UMLClass extends shapes.standard.Rectangle {
-    constructor(options: GadgetProps) {
-        super({
-            position: { x: options.x, y: options.y },
-            size: { width: options.width, height: options.height },
-            attrs: {
-                header: {
-                    x: 0,
-                    y: 0,
-                    width: options.width,
-                    height: 30,
-                    fill: options.color || "#2ECC71",
-                    stroke: "#000000",
-                },
-                headerLabel: {
-                    ref: "header",
-                    refX: "50%",
-                    refY: "50%",
-                    textAnchor: "middle",
-                    yAlignment: "middle",
-                    text: options.header || "Class Name",
-                    fill: "#FFFFFF",
-                    fontWeight: "bold",
-                    fontFamily: options.header_atrributes.fontFile || "normal",
-                    fontSize: options.header_atrributes.fontSize || 12,
-                },
-                attributes: {
-                    x: 0,
-                    y: 30,
-                    width: options.width,
-                    height: options.height / 2,
-                    fill: "#ECF0F1",
-                    stroke: "#000000",
-                },
-                attributesLabel: {
-                    ref: "attributes",
-                    refX: 5,
-                    refY: 5,
-                    textAnchor: "left",
-                    yAlignment: "top",
-                    text: options.attributes
-                        .map(attr => attr.content)
-                        .join("\n") || "Attributes",
-                    fill: "#333333",
-                    fontFamily: options.attributes[0]?.fontFile || "normal",
-                    fontSize: options.attributes[0]?.fontSize || 12,
-                },
-                methods: {
-                    x: 0,
-                    y: 30 + options.height / 2,
-                    width: options.width,
-                    height: options.height / 2,
-                    fill: "#ECF0F1",
-                    stroke: "#000000",
-                },
-                methodsLabel: {
-                    ref: "methods",
-                    refX: 5,
-                    refY: 5,
-                    textAnchor: "left",
-                    yAlignment: "top",
-                    text: options.methods
-                        .map(method => method.content)
-                        .join("\n") || "Methods",
-                    fill: "#333333",
-                    fontFamily: options.methods[0]?.fontFile || "normal",
-                    fontSize: options.methods[0]?.fontSize || 12,
-                },
-            },
-            markup: [
-                { tagName: "rect", selector: "header", attributes: {} },
-                { tagName: "text", selector: "headerLabel", attributes: {} },
-                { tagName: "rect", selector: "attributes", attributes: {} },
-                { tagName: "text", selector: "attributesLabel", attributes: {} },
-                { tagName: "rect", selector: "methods", attributes: {} },
-                { tagName: "text", selector: "methodsLabel", attributes: {} },
-            ],
-            z: options.layer,
-        });
+class ClassElement {
+    public gadgetProps: GadgetProps;
+    public len: number;
+    public headerHeight: number;
+    public attributesHeight: number;
+    public colorHexStr: string;
+
+    constructor(props: GadgetProps, margin: number) {
+        this.gadgetProps = props;
+        this.len = props.attributes.length;
+
+        const headerLen = props.attributes?.[0]?.length || 0;
+        const attributesLen = props.attributes.length > 1 ? props.attributes[1]?.length || 0 : 0;
+        const methodsLen = props.attributes.length > 2 ? props.attributes[2]?.length || 0 : 0;
+        console.log(`Header: ${headerLen}, Attributes: ${attributesLen}, Methods: ${methodsLen}`);
+
+        const calculateSectionHeight = (sectionIndex: number, sectionLen: number): number => {
+            let height = 0;
+
+            if (Array.isArray(props.attributes[sectionIndex])) {
+                props.attributes[sectionIndex].forEach((attr: any) => {
+                    if (attr && typeof attr.height === "number" && !isNaN(attr.height)) {
+                        height += attr.height;
+                    }
+                });
+            }
+
+            return height + margin * (sectionLen + 1);
+        };
+
+        this.headerHeight = calculateSectionHeight(0, headerLen);
+        this.attributesHeight = calculateSectionHeight(1, attributesLen);
+        this.colorHexStr = props.color;
+    }
+
+    draw(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
+        ctx.beginPath();
+        ctx.fillStyle = this.colorHexStr;
+        ctx.fillRect(this.gadgetProps.x, this.gadgetProps.y, this.gadgetProps.width, this.headerHeight);
+        ctx.fillStyle = "white";
+        ctx.fillRect(this.gadgetProps.x, this.gadgetProps.y + this.headerHeight, this.gadgetProps.width, this.gadgetProps.height - this.headerHeight);
+        ctx.fillStyle = "black";
+        ctx.strokeRect(this.gadgetProps.x, this.gadgetProps.y, this.gadgetProps.width, this.gadgetProps.height);
+
+        ctx.moveTo(this.gadgetProps.x, this.gadgetProps.y + this.headerHeight);
+        ctx.lineTo(this.gadgetProps.x + this.gadgetProps.width, this.gadgetProps.y + this.headerHeight);
+
+        ctx.moveTo(this.gadgetProps.x, this.gadgetProps.y + this.headerHeight + this.attributesHeight);
+        ctx.lineTo(this.gadgetProps.x + this.gadgetProps.width, this.gadgetProps.y + this.headerHeight + this.attributesHeight);
+
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+        // ctx.font = "12px Georgia";
+        const drawText = (sectionIndex: number, yOffset: number) => {
+            yOffset += margin;
+            if (Array.isArray(this.gadgetProps.attributes[sectionIndex])) {
+                this.gadgetProps.attributes[sectionIndex].forEach((attr: any) => {
+                    if (attr && typeof attr.content === "string") {
+                        yOffset += attr.height / 2;
+                        ctx.font = `${attr.fontSize}px ${attr.fontFile}`;
+                        ctx.fillText(attr.content, this.gadgetProps.x + margin, yOffset);
+                        yOffset += attr.height / 2 + margin;
+                    }
+                });
+            }
+        }
+        drawText(0, this.gadgetProps.y);
+        drawText(1, this.gadgetProps.y + this.headerHeight);
+        drawText(2, this.gadgetProps.y + this.headerHeight + this.attributesHeight);
+        if (this.gadgetProps.isSelected) {
+            ctx.setLineDash([5, 3]);
+            ctx.strokeStyle = '#FFA500';
+            ctx.lineWidth = lineWidth * 2;
+            ctx.strokeRect(this.gadgetProps.x, this.gadgetProps.y, this.gadgetProps.width, this.gadgetProps.height);
+            ctx.setLineDash([]);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = lineWidth;
+        }
     }
 }
 
-export function createGadget(type: string, config: GadgetProps): dia.Element {
-  switch (type) {
-    case "Class": {
-      return new UMLClass(config);
+export function createGadget(type: string, config: GadgetProps, margin: number) {
+    switch (type) {
+        case "Class": {
+            return new ClassElement(config, margin);
+        }
+        default:
+            throw new Error(`Unknown gadget type: ${type}`);
     }
-    default:
-      throw new Error(`Unknown gadget type: ${type}`);
-  }
-}
-
-// Parse backend gadget JSON and convert it to a dia.Element
-export function parseBackendGadget(gadgetData: BackendGadgetProps): dia.Element {
-    console.log("Before Parse gadget:", gadgetData);
-    const gadget = createGadget("Class", {
-        gadgetType: gadgetData.gadgetType,
-        x: gadgetData.x,
-        y: gadgetData.y,
-        layer: gadgetData.layer,
-        height: gadgetData.height,
-        width: gadgetData.width,
-        color: gadgetData.color,
-        header: gadgetData.attributes[0][0].content,
-        header_atrributes: {
-            content: gadgetData.attributes[0][0].content,
-            height: gadgetData.attributes[0][0].height,
-            width: gadgetData.attributes[0][0].width,
-            fontSize: gadgetData.attributes[0][0].fontSize,
-            fontStyle: gadgetData.attributes[0][0].fontStyle,
-            fontFile: gadgetData.attributes[0][0].fontFile,
-        },
-        attributes: gadgetData.attributes[1].map(attr => ({
-            content: attr.content,
-            height: attr.height,
-            width: attr.width,
-            fontSize: attr.fontSize,
-            fontStyle: attr.fontStyle,
-            fontFile: attr.fontFile,
-        })),
-        methods: gadgetData.attributes[2].map(method => ({
-            content: method.content,
-            height: method.height,
-            width: method.width,
-            fontSize: method.fontSize,
-            fontStyle: method.fontStyle,
-            fontFile: method.fontFile,
-        })),
-    });
-    console.log("Parsed gadget:", gadget);
-    return gadget;
 }

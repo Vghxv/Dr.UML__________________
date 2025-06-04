@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 
+	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/umlproject"
 	"github.com/wailsapp/wails/v2"
@@ -20,8 +21,8 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "Dr.uml",
-		Width:  1024,
-		Height: 768,
+		Width:  1500,
+		Height: 1000,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
@@ -32,6 +33,7 @@ func main() {
 		},
 		EnumBind: []interface{}{
 			umldiagram.AllDiagramTypes,
+			component.AllGadgetTypes,
 		},
 	})
 

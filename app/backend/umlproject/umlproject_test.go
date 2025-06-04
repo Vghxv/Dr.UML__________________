@@ -1,6 +1,7 @@
 package umlproject
 
 import (
+	"Dr.uml/backend/drawdata"
 	"testing"
 	"time"
 
@@ -183,7 +184,7 @@ func TestDeleteDiagram(t *testing.T) {
 	// TODO
 }
 
-func AddGadget(t *testing.T) {
+func TestAddGadget(t *testing.T) {
 	p, err := CreateEmptyUMLProject("TestProject")
 	assert.NoError(t, err)
 	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
@@ -192,17 +193,17 @@ func AddGadget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// success
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
 	assert.NoError(t, err)
 
 	// invalid gadget type
-	err = p.AddGadget(component.GadgetType(-1), utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.GadgetType(3), utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
 	assert.Error(t, err)
 
 	// no diagram selected
 	err = p.CloseDiagram("TestDiagram")
 	assert.NoError(t, err)
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
 	assert.Error(t, err)
 }
 
@@ -231,11 +232,32 @@ func TestStartAddAssociation(t *testing.T) {
 }
 
 func TestEndAddAssociation(t *testing.T) {
-	// TODO: diagram.EndAddAssociation WIP
+	// TODO
 }
 
 func TestRemoveSelectedComponents(t *testing.T) {
-	// TODO: diagram.RemoveSelectedComponents WIP
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add and select a component
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 5, Y: 5})
+	assert.NoError(t, err)
+
+	// Remove selected components
+	err = p.RemoveSelectedComponents()
+	assert.NoError(t, err)
+
+	// No diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.RemoveSelectedComponents()
+	assert.Error(t, err)
 }
 
 func TestGetDrawData(t *testing.T) {
@@ -245,8 +267,9 @@ func TestGetDrawData(t *testing.T) {
 	assert.NoError(t, err)
 	err = p.SelectDiagram("TestDiagram")
 	assert.NoError(t, err)
-	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0})
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
 
+	assert.NoError(t, err)
 	// success
 	data := p.GetDrawData()
 	assert.Len(t, data.Gadgets, 1)
@@ -256,4 +279,69 @@ func TestGetDrawData(t *testing.T) {
 	assert.NoError(t, err)
 	data = p.GetDrawData()
 	assert.Empty(t, data)
+}
+
+func TestAddAttributeToGadget(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
+	assert.NoError(t, err)
+
+	// Select the gadget
+	err = p.SelectComponent(utils.Point{X: 5, Y: 5})
+	assert.NoError(t, err)
+
+	// Add attribute to the gadget
+	err = p.AddAttributeToGadget(1, "newAttribute")
+	assert.NoError(t, err)
+
+	// No diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.AddAttributeToGadget(1, "newAttribute")
+	assert.Error(t, err)
+}
+
+func TestSelectComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
+	assert.NoError(t, err)
+
+	// Select the component
+	err = p.SelectComponent(utils.Point{X: 5, Y: 5})
+	assert.NoError(t, err)
+
+	// No diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 5, Y: 5})
+	assert.Error(t, err)
+}
+
+func TestStartup(t *testing.T) {
+	// TODO
+}
+
+func TestInvalidateCanvas(t *testing.T) {
+	// TODO
+}
+
+func TestLoadExistUMLProject(t *testing.T) {
+	// Test the function (currently returns nil, nil)
+	p, err := LoadExistUMLProject("TestProject")
+	assert.Nil(t, p)
+	assert.Nil(t, err)
 }
