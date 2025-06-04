@@ -17,16 +17,25 @@ type Attribute struct {
 	updateParentDraw func() duerror.DUError
 }
 
-func NewAttribute(content string, size int, style Textstyle, fontFile string) (*Attribute, duerror.DUError) {
-
-}
-
 func NewAttribute(content string) (*Attribute, duerror.DUError) {
 	att := &Attribute{
 		content:  content,
 		size:     drawdata.DefaultAttributeFontSize,
 		style:    drawdata.DefaultAttributeFontStyle,
 		fontFile: os.Getenv("APP_ROOT") + drawdata.DefaultAttributeFontFile,
+	}
+	if err := att.updateDrawData(); err != nil {
+		return nil, err
+	}
+	return att, nil
+}
+
+func NewAttributeButTakesEverything(content string, size int, style Textstyle, fontFile string) (*Attribute, duerror.DUError) {
+	att := &Attribute{
+		content:  content,
+		size:     size,
+		style:    style,
+		fontFile: fontFile,
 	}
 	if err := att.updateDrawData(); err != nil {
 		return nil, err

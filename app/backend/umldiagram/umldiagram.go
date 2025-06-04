@@ -1,6 +1,7 @@
 package umldiagram
 
 import (
+	"Dr.uml/backend/component/attribute"
 	"fmt"
 	"slices"
 	"time"
@@ -426,7 +427,19 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 			return nil, err
 		}
 
-		for _, attribute := range savedGadget.Attributes {
+		for i, savedAtt := range savedGadget.Attributes {
+			attribute, err := attribute.NewAttributeButTakesEverything(
+				savedAtt.Content,
+				savedAtt.Size,
+				attribute.Textstyle(savedAtt.Style),
+				savedAtt.FontFile,
+			)
+			if err != nil {
+				return nil, duerror.NewCorruptedFile(fmt.Sprintf(
+					"Error on parsing %d-th attribute of %d gadget.  Detail: %s",
+					i, index, err.Error()),
+				)
+			}
 			gadget.AddAttribute()
 		}
 
