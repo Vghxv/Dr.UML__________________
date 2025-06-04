@@ -310,18 +310,17 @@ func (p *UMLProject) OpenDiagram(filename string) duerror.DUError {
 
 	decoder := json5.NewDecoder(file)
 	var savedFileData utils.SavedFile
-	{
-	}
+
 	if err := decoder.Decode(&savedFileData); err != nil {
 		return duerror.NewInvalidArgumentError(fmt.Sprintf("Failed to decode file %s.\n Error: %s", filename, err.Error()))
 	}
 	switch savedFileData.Filetype {
 	case utils.FiletypeDiagram:
-		dia, err := umldiagram.LoadExistUMLDiagram(savedFileData)
+		_, err := umldiagram.LoadExistUMLDiagram(filename, savedFileData)
 		if err != nil {
 			return err
 		}
-		p.availableDiagrams
+		// p.availableDiagrams
 		break
 	case utils.FiletypeSubmodule:
 

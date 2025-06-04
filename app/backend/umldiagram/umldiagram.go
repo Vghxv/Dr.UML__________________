@@ -44,7 +44,7 @@ type UMLDiagram struct {
 
 	componentsContainer components.Container
 	componentsSelected  map[component.Component]bool
-	associations        map[*component.Gadget]([2][]*component.Association)
+	associations        map[*component.Gadget][2][]*component.Association
 
 	updateParentDraw func() duerror.DUError
 	drawData         drawdata.Diagram
@@ -76,9 +76,9 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 	}, nil
 }
 
-func LoadExistUMLDiagram(name utils.SavedFile) (*UMLDiagram, duerror.DUError) {
+func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, duerror.DUError) {
 	// TODO
-	return CreateEmptyUMLDiagram(name, ClassDiagram)
+	return nil, nil
 }
 
 // Getters
@@ -283,7 +283,7 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 		gadget.SetIsSelected(true)
 		ud.componentsSelected[c] = true
 	}
-	//ud.componentsSelected[c] = true
+	// ud.componentsSelected[c] = true
 	return ud.updateDrawData()
 }
 

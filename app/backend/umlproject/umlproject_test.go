@@ -2,6 +2,7 @@ package umlproject
 
 import (
 	"Dr.uml/backend/drawdata"
+	"os"
 	"testing"
 	"time"
 
@@ -349,6 +350,8 @@ func TestLoadExistUMLProject(t *testing.T) {
 func TestOpenDiagram(t *testing.T) {
 	proj, err := CreateEmptyUMLProject("fuck")
 	assert.NoError(t, err)
-	err = proj.OpenDiagram("/home/df/GolfsjklandProjects/Quiddity/app/backend/example.json5")
+	root, ok := os.LookupEnv("APP_ROOT")
+	assert.True(t, ok)
+	err = proj.OpenDiagram(root + "/backend/example.json5")
 	assert.NoError(t, err)
 }
