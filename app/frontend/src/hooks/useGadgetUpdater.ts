@@ -1,12 +1,12 @@
 import {
     AddAttributeToGadget,
-    SetAttrContentComp,
-    SetAttrFontComp,
-    SetAttrSizeComp,
-    SetAttrStyleComp,
-    SetColorComp,
-    SetPointComp,
-    SetSetLayerComp
+    SetAttrContentComponent,
+    SetAttrFontComponent,
+    SetAttrSizeComponent,
+    SetAttrStyleComponent,
+    SetColorComponent,
+    SetPointComponent,
+    SetLayerComponent
 } from "../../wailsjs/go/umlproject/UMLProject";
 import {ToPoint} from "../utils/wailsBridge";
 import {CanvasProps, GadgetProps} from "../utils/Props";
@@ -73,7 +73,7 @@ export function useGadgetUpdater(
                     const j = parseInt(matches[2]);
                     if (childProp === 'content') {
                         setTripleValue(
-                            SetAttrContentComp,
+                            SetAttrContentComponent,
                             i, j, value,
                             "Gadget content changed",
                             "Error editing gadget content"
@@ -81,7 +81,7 @@ export function useGadgetUpdater(
                     }
                     if (childProp === 'fontSize') {
                         setTripleValue(
-                            SetAttrSizeComp,
+                            SetAttrSizeComponent,
                             i, j, value,
                             "Gadget fontSize changed",
                             "Error editing gadget fontSize"
@@ -89,7 +89,7 @@ export function useGadgetUpdater(
                     }
                     if (childProp === 'fontStyleB') {
                         setTripleValue(
-                            SetAttrStyleComp,
+                            SetAttrStyleComponent,
                             i, j, value,
                             "Gadget font style (bold) changed",
                             "Error editing gadget font style (bold)"
@@ -97,7 +97,7 @@ export function useGadgetUpdater(
                     }
                     if (childProp === 'fontStyleI') {
                         setTripleValue(
-                            SetAttrStyleComp,
+                            SetAttrStyleComponent,
                             i, j, value,
                             "Gadget font style (italic) changed",
                             "Error editing gadget font style (italic)"
@@ -105,7 +105,7 @@ export function useGadgetUpdater(
                     }
                     if (childProp === 'fontStyleU') {
                         setTripleValue(
-                            SetAttrStyleComp,
+                            SetAttrStyleComponent,
                             i, j, value,
                             "Gadget font style (underline) changed",
                             "Error editing gadget font style (underline)"
@@ -113,7 +113,7 @@ export function useGadgetUpdater(
                     }
                     if (childProp === 'fontFile') {
                         setTripleValue(
-                            SetAttrFontComp,
+                            SetAttrFontComponent,
                             i, j, value,
                             "Gadget font changed",
                             "Error editing gadget font"
@@ -124,7 +124,7 @@ export function useGadgetUpdater(
         } else {
             if (property === "x") {
                 setSingleValue(
-                    (val) => SetPointComp(ToPoint(val, selectedGadget.y)),
+                    (val) => SetPointComponent(ToPoint(val, selectedGadget.y)),
                     value,
                     "Gadget moved",
                     "Error editing gadget"
@@ -132,7 +132,7 @@ export function useGadgetUpdater(
             }
             if (property === "y") {
                 setSingleValue(
-                    (val) => SetPointComp(ToPoint(selectedGadget.x, val)),
+                    (val) => SetPointComponent(ToPoint(selectedGadget.x, val)),
                     value,
                     "Gadget moved",
                     "Error editing gadget"
@@ -140,7 +140,7 @@ export function useGadgetUpdater(
             }
             if (property === "layer") {
                 setSingleValue(
-                    SetSetLayerComp,
+                    SetLayerComponent,
                     value,
                     "layer changed",
                     "Error editing gadget"
@@ -148,7 +148,7 @@ export function useGadgetUpdater(
             }
             if (property === "color") {
                 setSingleValue(
-                    SetColorComp,
+                    SetColorComponent,
                     value,
                     "color changed",
                     "Error editing gadget"

@@ -72,7 +72,7 @@ func (p *UMLProject) GetActiveDiagramsNames() []string {
 }
 
 // Setter
-func (p *UMLProject) SetPointComp(point utils.Point) duerror.DUError {
+func (p *UMLProject) SetPointComponent(point utils.Point) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
@@ -83,7 +83,7 @@ func (p *UMLProject) SetPointComp(point utils.Point) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) SetLayerComp(layer int) duerror.DUError {
+func (p *UMLProject) SetLayerComponent(layer int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
@@ -94,7 +94,7 @@ func (p *UMLProject) SetLayerComp(layer int) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) SetColorComp(colorHexStr string) duerror.DUError {
+func (p *UMLProject) SetColorComponent(colorHexStr string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
@@ -105,7 +105,7 @@ func (p *UMLProject) SetColorComp(colorHexStr string) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) SetAttrContentComp(section int, index int, content string) duerror.DUError {
+func (p *UMLProject) SetAttrContentComponent(section int, index int, content string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
@@ -116,7 +116,7 @@ func (p *UMLProject) SetAttrContentComp(section int, index int, content string) 
 	return nil
 }
 
-func (p *UMLProject) SetAttrSizeComp(section int, index int, size int) duerror.DUError {
+func (p *UMLProject) SetAttrSizeComponent(section int, index int, size int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
@@ -127,7 +127,7 @@ func (p *UMLProject) SetAttrSizeComp(section int, index int, size int) duerror.D
 	return nil
 }
 
-func (p *UMLProject) SetAttrStyleComp(section int, index int, style int) duerror.DUError {
+func (p *UMLProject) SetAttrStyleComponent(section int, index int, style int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
@@ -138,7 +138,7 @@ func (p *UMLProject) SetAttrStyleComp(section int, index int, style int) duerror
 	return nil
 }
 
-func (p *UMLProject) SetAttrFontComp(section int, index int, font string) duerror.DUError {
+func (p *UMLProject) SetAttrFontComponent(section int, index int, font string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
