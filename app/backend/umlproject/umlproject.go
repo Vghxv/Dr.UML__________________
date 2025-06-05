@@ -76,7 +76,7 @@ func (p *UMLProject) SetPointComp(point utils.Point) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetPointComp(point); err != nil {
+	if err := p.currentDiagram.SetPointComponent(point); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -87,7 +87,7 @@ func (p *UMLProject) SetLayerComp(layer int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetLayerComp(layer); err != nil {
+	if err := p.currentDiagram.SetLayerComponent(layer); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -98,7 +98,7 @@ func (p *UMLProject) SetColorComp(colorHexStr string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetColorComp(colorHexStr); err != nil {
+	if err := p.currentDiagram.SetColorComponent(colorHexStr); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -109,7 +109,7 @@ func (p *UMLProject) SetAttrContentComp(section int, index int, content string) 
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetAttrContentComp(section, index, content); err != nil {
+	if err := p.currentDiagram.SetAttrContentComponent(section, index, content); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -120,7 +120,7 @@ func (p *UMLProject) SetAttrSizeComp(section int, index int, size int) duerror.D
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetAttrSizeComp(section, index, size); err != nil {
+	if err := p.currentDiagram.SetAttrSizeComponent(section, index, size); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -131,7 +131,7 @@ func (p *UMLProject) SetAttrStyleComp(section int, index int, style int) duerror
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetAttrStyleComp(section, index, style); err != nil {
+	if err := p.currentDiagram.SetAttrStyleComponent(section, index, style); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
@@ -142,7 +142,7 @@ func (p *UMLProject) SetAttrFontComp(section int, index int, font string) duerro
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetAttrFontComp(section, index, font); err != nil {
+	if err := p.currentDiagram.SetAttrFontComponent(section, index, font); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()

@@ -95,7 +95,7 @@ func (ud *UMLDiagram) GetLastModified() time.Time {
 }
 
 // Setters
-func (ud *UMLDiagram) SetPointComp(point utils.Point) duerror.DUError {
+func (ud *UMLDiagram) SetPointComponent(point utils.Point) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (ud *UMLDiagram) SetPointComp(point utils.Point) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetLayerComp(layer int) duerror.DUError {
+func (ud *UMLDiagram) SetLayerComponent(layer int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (ud *UMLDiagram) SetLayerComp(layer int) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetColorComp(colorHexStr string) duerror.DUError {
+func (ud *UMLDiagram) SetColorComponent(colorHexStr string) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (ud *UMLDiagram) SetColorComp(colorHexStr string) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetAttrContentComp(section int, index int, content string) duerror.DUError {
+func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content string) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -151,7 +151,7 @@ func (ud *UMLDiagram) SetAttrContentComp(section int, index int, content string)
 	}
 }
 
-func (ud *UMLDiagram) SetAttrSizeComp(section int, index int, size int) duerror.DUError {
+func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -165,7 +165,7 @@ func (ud *UMLDiagram) SetAttrSizeComp(section int, index int, size int) duerror.
 	}
 }
 
-func (ud *UMLDiagram) SetAttrStyleComp(section int, index int, style int) duerror.DUError {
+func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -179,7 +179,7 @@ func (ud *UMLDiagram) SetAttrStyleComp(section int, index int, style int) duerro
 	}
 }
 
-func (ud *UMLDiagram) SetAttrFontComp(section int, index int, fontFile string) duerror.DUError {
+func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile string) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
