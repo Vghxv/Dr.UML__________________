@@ -35,6 +35,7 @@ type Association struct {
 	attributes       []*attribute.AssAttribute
 	parents          [2]*Gadget
 	drawdata         drawdata.Association
+	isSelected       bool
 	updateParentDraw func() duerror.DUError
 
 	startPointRatio [2]float64
@@ -210,6 +211,12 @@ func (this *Association) SetEndPoint(point utils.Point) duerror.DUError {
 	return this.updateDrawData()
 }
 
+func (this *Association) SetIsSelect(value bool) duerror.DUError {
+	this.isSelected = value
+	this.drawdata.IsSelected = value
+	return this.updateParentDraw()
+}
+
 // Other methods
 func (this *Association) AddAttribute(attribute *attribute.AssAttribute) duerror.DUError {
 	if attribute == nil {
@@ -299,7 +306,7 @@ func (this *Association) updateDrawData() duerror.DUError {
 	this.drawdata.StartY = startPoint.Y
 	this.drawdata.EndX = endPoint.X
 	this.drawdata.EndY = endPoint.Y
-
+	this.drawdata.IsSelected = this.isSelected
 	this.drawdata.AssType = int(this.assType)
 	this.drawdata.Attributes = make([]drawdata.AssAttribute, len(this.attributes))
 

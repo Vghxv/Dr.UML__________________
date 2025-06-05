@@ -118,6 +118,8 @@ func (ud *UMLDiagram) SetLayerComponent(layer int) duerror.DUError {
 	switch g := c.(type) {
 	case *component.Gadget:
 		return g.SetLayer(layer)
+	case *component.Association:
+		return g.SetLayer(layer)
 	default:
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
@@ -288,15 +290,21 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 	if c == nil {
 		return nil
 	}
-	// if is in componentsSelected remove it, else add it
-	if _, ok := ud.componentsSelected[c]; ok {
-		gadget := c.(*component.Gadget)
-		gadget.SetIsSelected(false)
-		delete(ud.componentsSelected, c)
-	} else {
-		gadget := c.(*component.Gadget)
-		gadget.SetIsSelected(true)
-		ud.componentsSelected[c] = true
+	if _, ok := ud.componentsSelected[c]; !ok {
+		switch c := c.(type) {
+		case *component.Gadget:
+			err := c.SetIsSelected(true)
+			if err != nil {
+				return err
+			}
+			ud.componentsSelected[c] = true
+		case *component.Association:
+			err := c.SetIsSelect(true)
+			if err != nil {
+				return err
+			}
+			ud.componentsSelected[c] = true
+		}
 	}
 	//ud.componentsSelected[c] = true
 	return ud.updateDrawData()
