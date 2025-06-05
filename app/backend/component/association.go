@@ -211,7 +211,7 @@ func (ass *Association) SetEndPoint(point utils.Point) duerror.DUError {
 	return ass.updateDrawData()
 }
 
-func (ass *Association) SetIsSelect(value bool) duerror.DUError {
+func (ass *Association) SetIsSelected(value bool) duerror.DUError {
 	ass.isSelected = value
 	ass.drawdata.IsSelected = value
 	return ass.updateParentDraw()

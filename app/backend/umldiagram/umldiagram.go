@@ -289,7 +289,7 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 	}
 	if c == nil {
 		ud.UnselectAllComponents()
-		return nil
+		return ud.updateDrawData()
 	}
 	if _, ok := ud.componentsSelected[c]; !ok {
 		switch c := c.(type) {
@@ -300,7 +300,7 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 			}
 			ud.componentsSelected[c] = true
 		case *component.Association:
-			err := c.SetIsSelect(true)
+			err := c.SetIsSelected(true)
 			if err != nil {
 				return err
 			}
@@ -324,6 +324,10 @@ func (ud *UMLDiagram) UnselectComponent(point utils.Point) duerror.DUError {
 }
 
 func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
+	for c := range ud.componentsSelected {
+		c.SetIsSelected(false)
+	}
+	// Clear the selected components map
 	ud.componentsSelected = make(map[component.Component]bool)
 	return nil
 }
