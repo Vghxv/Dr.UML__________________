@@ -58,20 +58,18 @@ class ClassElement {
             if (Array.isArray(this.gadgetProps.attributes[sectionIndex])) {
                 this.gadgetProps.attributes[sectionIndex].forEach((attr: any) => {
                     if (attr && typeof attr.content === "string") {
-                        yOffset += Math.round(attr.height / 2);
                         const boldString = (attr.fontStyle & attribute.Textstyle.Bold) !== 0 ? "bold " : "";
                         const italicString = (attr.fontStyle & attribute.Textstyle.Italic) !== 0 ? "italic " : "";
                         const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
-
                         ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
-                        ctx.textBaseline = "middle"
+                        ctx.textBaseline = "hanging"
                         ctx.fillText(attr.content, this.gadgetProps.x + margin, yOffset);
-                        yOffset += Math.round(attr.height / 2) ;
+                        yOffset += Math.round(attr.height) ;
                         if (isUnderline) {
                             const underlineHeight = 2;
                             ctx.fillRect(this.gadgetProps.x + margin, yOffset - Math.round(attr.height * 0.2) , attr.width, underlineHeight);
                         }
-                        yOffset += + margin;
+                        yOffset += margin;
                     }
                 });
             }
