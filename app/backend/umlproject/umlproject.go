@@ -83,11 +83,11 @@ func (p *UMLProject) SetPointComp(point utils.Point) duerror.DUError {
 	return nil
 }
 
-func (p *UMLProject) SetSetLayerComp(layer int) duerror.DUError {
+func (p *UMLProject) SetLayerComp(layer int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetSetLayerComp(layer); err != nil {
+	if err := p.currentDiagram.SetLayerComp(layer); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()

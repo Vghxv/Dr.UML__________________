@@ -109,7 +109,7 @@ func (ud *UMLDiagram) SetPointComp(point utils.Point) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetSetLayerComp(layer int) duerror.DUError {
+func (ud *UMLDiagram) SetLayerComp(layer int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err

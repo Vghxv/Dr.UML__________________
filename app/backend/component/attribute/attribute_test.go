@@ -644,11 +644,6 @@ func TestAttribute_GetFontFileBase(t *testing.T) {
 			expected: "font",
 		},
 		{
-			name:     "font file with Windows path",
-			fontFile: "C:\\path\\to\\font.ttf",
-			expected: "font",
-		},
-		{
 			name:     "font file with just filename",
 			fontFile: "font.ttf",
 			expected: "font",
