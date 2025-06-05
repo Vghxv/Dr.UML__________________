@@ -6,7 +6,7 @@ interface Message {
     user: string;
     text: string;
 }
-// TODO: integrate with to App
+// TODO: integrate into App
 
 const ChatRoom: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
