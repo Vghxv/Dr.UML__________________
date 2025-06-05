@@ -1,5 +1,6 @@
 import {
     AddAttributeToGadget,
+    RemoveAttributeFromGadget,
     SetAttrContentComponent,
     SetAttrFontComponent,
     SetAttrSizeComponent,
@@ -24,6 +25,24 @@ export function useGadgetUpdater(
         errorPrefix: string
     ) => {
         apiFunction(value).then(
+            () => {
+                console.log(successMessage);
+                reloadBackendData();
+            }
+        ).catch((error) => {
+            console.error(`${errorPrefix}:`, error);
+        });
+    };
+
+    // Helper function to handle setting a value with two parameters
+    const setDoubleValue = (
+        apiFunction: (param1: any, param2: any) => Promise<any>,
+        param1: any,
+        param2: any,
+        successMessage: string,
+        errorPrefix: string
+    ) => {
+        apiFunction(param1, param2).then(
             () => {
                 console.log(successMessage);
                 reloadBackendData();
@@ -117,6 +136,14 @@ export function useGadgetUpdater(
                             i, j, value,
                             "Gadget font changed",
                             "Error editing gadget font"
+                        );
+                    }
+                    if (childProp === 'delete') {
+                        setDoubleValue(
+                            RemoveAttributeFromGadget,
+                            i, j,
+                            "Attribute deleted",
+                            "Error deleting attribute"
                         );
                     }
                 }

@@ -2,23 +2,18 @@ import React, {useEffect, useRef, useState} from "react";
 import {GadgetProps} from "../utils/Props";
 import {attribute} from "../../wailsjs/go/models";
 
-// Define type for font files
 type FontFile = {
     default: string;
 };
 
-// Import all .woff2 font files from the assets/fonts directory
 let fontFiles: Record<string, FontFile>;
 
 
 fontFiles = import.meta.glob<FontFile>('../assets/fonts/*.woff2', {eager: true});
 
-// Extract font names from file paths
 const getFontOptions = () => {
     return Object.keys(fontFiles).map(path => {
-        // Extract the filename from the path (handle both / and \ separators)
         const filename = path.split(/[/\\]/).pop() || '';
-        // Remove the .woff2 extension to get the font name
 
         return filename.replace('.woff2', '');
     });
@@ -233,6 +228,19 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                     ))}
                                 </select>
                             </div>
+
+                            {/* Delete button - only show for attributes and methods sections (not class name) */}
+                            {groupIndex > 0 && (
+                                <div className="flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.delete`, true)}
+                                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
