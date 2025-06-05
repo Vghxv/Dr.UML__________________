@@ -288,6 +288,7 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 		return err
 	}
 	if c == nil {
+		ud.UnselectAllComponents()
 		return nil
 	}
 	if _, ok := ud.componentsSelected[c]; !ok {
