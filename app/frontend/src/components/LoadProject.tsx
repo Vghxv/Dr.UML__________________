@@ -30,14 +30,22 @@ const LoadProject: React.FC<LoadProjectProps> = ({ onProjectLoaded }) => {
                 if (!file) {
                     setIsLoading(false);
                     return;
-                }
-
-                try {
+                }                try {
                     // Read file content
                     const fileContent = await file.text();
                     
-                    // Parse JSON5 format (assuming it's valid JSON for now)
-                    const projectData: ProjectData = JSON.parse(fileContent);
+                    // Parse JSON5 format (treating as JSON for now)
+                    // Remove any trailing commas and clean up the format
+                    const cleanedContent = fileContent
+                        .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+                        .replace(/([{,]\s*)(\w+):/g, '$1"$2":'); // Quote unquoted keys
+                    
+                    const projectData: ProjectData = JSON.parse(cleanedContent);
+                    
+                    // Validate the project data structure
+                    if (!projectData.ProjectName || !Array.isArray(projectData.diagrams)) {
+                        throw new Error('Invalid project file format');
+                    }
                     
                     // TODO: Call backend API to load the project
                     // For now, we'll simulate a successful load
