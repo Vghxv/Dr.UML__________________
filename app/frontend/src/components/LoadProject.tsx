@@ -30,7 +30,9 @@ const LoadProject: React.FC<LoadProjectProps> = ({ onProjectLoaded }) => {
                 if (!file) {
                     setIsLoading(false);
                     return;
-                }                try {
+                }
+
+                try {
                     // Read file content
                     const fileContent = await file.text();
                     
@@ -60,6 +62,28 @@ const LoadProject: React.FC<LoadProjectProps> = ({ onProjectLoaded }) => {
                     setIsLoading(false);
                 }
             };
+
+            // Handle when user cancels the dialog (clicks cancel or presses escape)
+            input.oncancel = () => {
+                setIsLoading(false);
+            };
+
+            // Also handle when the dialog closes without a file being selected
+            // This catches cases where the user clicks outside the dialog or uses escape
+            const handleFocusBack = () => {
+                setTimeout(() => {
+                    if (!input.files || input.files.length === 0) {
+                        setIsLoading(false);
+                    }
+                }, 100);
+            };
+
+            window.addEventListener('focus', handleFocusBack);
+            
+            // Clean up event listener after a reasonable timeout
+            setTimeout(() => {
+                window.removeEventListener('focus', handleFocusBack);
+            }, 5000); // Remove after 5 seconds to prevent memory leaks
 
             // Trigger file dialog
             input.click();
