@@ -52,6 +52,32 @@ const App: React.FC = () => {
         reloadBackendData
     );
 
+    // Handle project loading from LoadProject component
+    const handleProjectLoaded = (loadedProjectData: ProjectData) => {
+        setProjectData(loadedProjectData);
+        setCurrentView('diagrams');
+    };
+
+    // Handle diagram selection from DiagramPage component
+    const handleDiagramSelected = (diagramData: any) => {
+        console.log('Diagram data received:', diagramData);
+        setCurrentView('editor');
+        // Here you could set the diagram data to the backend or state as needed
+        reloadBackendData();
+    };
+
+    // Handle going back to LoadProject
+    const handleBackToLoad = () => {
+        setCurrentView('load');
+        setProjectData(null);
+        setDiagramName(null);
+    };
+
+    // Handle going back to DiagramPage
+    const handleBackToDiagrams = () => {
+        setCurrentView('diagrams');
+    };
+
     const handleGetDiagramName = async () => {
         try {
             const name = await GetCurrentDiagramName();
@@ -112,9 +138,43 @@ const App: React.FC = () => {
         setCanvasBackgroundColor(color);
     };
 
+    // Render different views based on current state
+    if (currentView === 'load') {
+        return <LoadProject onProjectLoaded={handleProjectLoaded} />;
+    }
+
+    if (currentView === 'diagrams' && projectData) {
+        return (
+            <DiagramPage 
+                projectData={projectData}
+                onBack={handleBackToLoad}
+                onDiagramSelected={handleDiagramSelected}
+            />
+        );
+    }
+
+    // Editor view (current main application)
     return (
         <div className="h-screen mx-auto px-4 bg-neutral-700">
-            <h1 className="text-3xl text-center font-bold text-white mb-4">Dr.UML</h1>
+            <div className="flex items-center justify-between mb-4">
+                <h1 className="text-3xl text-center font-bold text-white">Dr.UML</h1>
+                {projectData && (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleBackToDiagrams}
+                            className="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-1 rounded text-sm transition-colors"
+                        >
+                            Back to Diagrams
+                        </button>
+                        <button
+                            onClick={handleBackToLoad}
+                            className="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-1 rounded text-sm transition-colors"
+                        >
+                            Load Different Project
+                        </button>
+                    </div>
+                )}
+            </div>
             <Toolbar
                 onGetDiagramName={handleGetDiagramName}
                 onShowPopup={() => setShowPopup(true)}

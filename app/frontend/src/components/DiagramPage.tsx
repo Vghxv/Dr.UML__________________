@@ -9,9 +9,10 @@ interface ProjectData {
 interface DiagramPageProps {
     projectData: ProjectData;
     onBack: () => void;
+    onDiagramSelected: (diagramData: any) => void;
 }
 
-const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack }) => {
+const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack, onDiagramSelected }) => {
     const [selectedDiagram, setSelectedDiagram] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -45,11 +46,10 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack }) => {
                 ],
                 associations: []
             };
+              console.log('Loaded diagram data:', mockDiagramData);
             
-            console.log('Loaded diagram data:', mockDiagramData);
-            
-            // TODO: Here you would typically navigate to the main editor or update the app state
-            // with the loaded diagram data
+            // Call the callback to switch to editor view
+            onDiagramSelected(mockDiagramData);
             
         } catch (err) {
             console.error('Error loading diagram:', err);
@@ -86,12 +86,15 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack }) => {
                     <div className="bg-red-600 text-white p-3 rounded mb-4">
                         {error}
                     </div>
-                )}
-
-                <div className="bg-neutral-800 rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                        Available Diagrams ({projectData.diagrams.length})
-                    </h3>
+                )}                <div className="bg-neutral-800 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-semibold text-white">
+                            Available Diagrams ({projectData.diagrams.length})
+                        </h3>
+                        <div className="text-sm text-neutral-400">
+                            Click on a diagram to load it
+                        </div>
+                    </div>
                     
                     {projectData.diagrams.length === 0 ? (
                         <div className="text-neutral-400 text-center py-8">
