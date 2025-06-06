@@ -17,9 +17,18 @@ import { useBackendCanvasData } from "./hooks/useBackendCanvasData";
 import { useGadgetUpdater } from "./hooks/useGadgetUpdater";
 import { useAssociationUpdater } from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
+import LoadProject from "./components/LoadProject";
+import DiagramPage from "./components/DiagramPage";
+
+interface ProjectData {
+    ProjectName: string;
+    diagrams: string[];
+}
 import { useCallback } from "react";
 
 const App: React.FC = () => {
+    const [currentView, setCurrentView] = useState<'load' | 'diagrams' | 'editor'>('load');
+    const [projectData, setProjectData] = useState<ProjectData | null>(null);
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
