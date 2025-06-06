@@ -16,8 +16,17 @@ import GadgetPropertiesPanel from "./components/GadgetPropertiesPanel";
 import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
 import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
 import AssociationPopup from "./components/AssociationPopup";
+import LoadProject from "./components/LoadProject";
+import DiagramPage from "./components/DiagramPage";
+
+interface ProjectData {
+    ProjectName: string;
+    diagrams: string[];
+}
 
 const App: React.FC = () => {
+    const [currentView, setCurrentView] = useState<'load' | 'diagrams' | 'editor'>('load');
+    const [projectData, setProjectData] = useState<ProjectData | null>(null);
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [selectedGadget, setSelectedGadget] = useState<GadgetProps | null>(null);
