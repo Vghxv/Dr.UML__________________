@@ -149,6 +149,28 @@ func (p *UMLProject) SetAttrFontComponent(section int, index int, font string) d
 	return nil
 }
 
+func (p *UMLProject) SetParentStartAssociation(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetParentStartAssociation(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetParentEndAssociation(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetParentEndAssociation(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
 // methods
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx

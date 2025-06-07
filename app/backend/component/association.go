@@ -172,27 +172,11 @@ func (ass *Association) SetLayer(layer int) duerror.DUError {
 }
 
 func (ass *Association) SetParentStart(gadget *Gadget, point utils.Point) duerror.DUError {
-	// TODO: make sure update diagram's associations too
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
 	ass.parents[0] = gadget
-	return ass.SetStartPoint(point)
-}
 
-func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
-	// TODO: make sure update diagram's associations too
-	if gadget == nil {
-		return duerror.NewInvalidArgumentError("gadget is nil")
-	}
-	ass.parents[1] = gadget
-	return ass.SetEndPoint(point)
-}
-
-func (ass *Association) SetStartPoint(point utils.Point) duerror.DUError {
-	if ass.parents[0] == nil {
-		return duerror.NewInvalidArgumentError("parent is nil")
-	}
 	gdd := ass.parents[0].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")
@@ -202,10 +186,12 @@ func (ass *Association) SetStartPoint(point utils.Point) duerror.DUError {
 	return ass.updateDrawData()
 }
 
-func (ass *Association) SetEndPoint(point utils.Point) duerror.DUError {
-	if ass.parents[1] == nil {
-		return duerror.NewInvalidArgumentError("parent is nil")
+func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
+	if gadget == nil {
+		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
+	ass.parents[1] = gadget
+
 	gdd := ass.parents[1].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")

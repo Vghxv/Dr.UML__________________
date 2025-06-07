@@ -194,6 +194,92 @@ func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile stri
 	}
 }
 
+func (ud *UMLDiagram) SetParentStartAssociation(point utils.Point) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch a := c.(type) {
+	case *component.Association:
+		stNew, err := ud.componentsContainer.SearchGadget(point)
+		if err != nil {
+			return err
+		}
+		if stNew == nil {
+			return duerror.NewInvalidArgumentError("point does not contain a gadget")
+		}
+
+		// update association
+		stOld := a.GetParentStart()
+		if err = a.SetParentStart(stNew, point); err != nil {
+			return err
+		}
+
+		// update ud.associations map
+		if _, ok := ud.associations[stOld]; ok {
+			list := ud.associations[stOld][0]
+			index := slices.Index(list, a)
+			if index >= 0 {
+				list = slices.Delete(list, index, index+1)
+			}
+			ud.associations[stOld] = [2][]*component.Association{list, ud.associations[stOld][1]}
+		}
+		if _, ok := ud.associations[stNew]; ok {
+			list := ud.associations[stNew][0]
+			list = append(list, a)
+			ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
+		}
+		return nil
+
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+}
+
+func (ud *UMLDiagram) SetParentEndAssociation(point utils.Point) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch a := c.(type) {
+	case *component.Association:
+		enNew, err := ud.componentsContainer.SearchGadget(point)
+		if err != nil {
+			return err
+		}
+		if enNew == nil {
+			return duerror.NewInvalidArgumentError("point does not contain a gadget")
+		}
+
+		// update association
+		enOld := a.GetParentEnd()
+		if err = a.SetParentEnd(enNew, point); err != nil {
+			return err
+		}
+
+		// update ud.associations map
+		if _, ok := ud.associations[enOld]; ok {
+			list := ud.associations[enOld][1]
+			index := slices.Index(list, a)
+			if index >= 0 {
+				list = slices.Delete(list, index, index+1)
+			}
+			ud.associations[enOld] = [2][]*component.Association{ud.associations[enOld][0], list}
+		}
+		if _, ok := ud.associations[enNew]; ok {
+			list := ud.associations[enNew][1]
+			list = append(list, a)
+			ud.associations[enNew] = [2][]*component.Association{ud.associations[enNew][0], list}
+		}
+		return nil
+
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+}
+
 // Methods
 func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, colorHexStr string, header string) duerror.DUError {
 	g, err := component.NewGadget(gadgetType, point, layer, colorHexStr, header)

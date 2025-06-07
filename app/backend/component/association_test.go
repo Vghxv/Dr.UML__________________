@@ -98,22 +98,28 @@ func Test_Association_Setters(t *testing.T) {
 	})
 
 	t.Run("SetParentStart", func(t *testing.T) {
-		err := ass.SetParentStart(gadget, utils.Point{})
+		newStPoint := utils.Point{X: 2, Y: 2}
+		newSt := newEmptyGadget(Class, newStPoint)
+
+		err := ass.SetParentStart(newSt, newStPoint)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		if ass.GetParentStart() != gadget {
-			t.Errorf("expected %v, got %v", gadget, ass.GetParentStart())
+		if ass.GetParentStart() != newSt {
+			t.Errorf("expected %v, got %v", newSt, ass.GetParentStart())
 		}
 	})
 
 	t.Run("SetParentEnd", func(t *testing.T) {
-		err := ass.SetParentEnd(gadget, utils.Point{X: 1, Y: 1})
+		newEnPoint := utils.Point{X: 4, Y: 4}
+		newEn := newEmptyGadget(Class, newEnPoint)
+
+		err := ass.SetParentEnd(newEn, newEnPoint)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		if ass.GetParentEnd() != gadget {
-			t.Errorf("expected %v, got %v", gadget, ass.GetParentEnd())
+		if ass.GetParentEnd() != newEn {
+			t.Errorf("expected %v, got %v", newEn, ass.GetParentEnd())
 		}
 	})
 }
