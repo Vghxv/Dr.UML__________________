@@ -745,3 +745,22 @@ func TestNewAttributeButTakesEverything(t *testing.T) {
 	assert.Equal(t, expectedStyle, att.style)
 	assert.Equal(t, expectedFontFile, att.fontFile)
 }
+
+func TestToSavedAttribute(t *testing.T) {
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := Textstyle(Bold | Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+
+	att := &Attribute{
+		content:  expectedContent,
+		size:     expectedSize,
+		style:    expectedStyle,
+		fontFile: expectedFontFile,
+	}
+	savedAtt := ToSavedAttribute(att)
+	assert.Equal(t, expectedContent, savedAtt.Content)
+	assert.Equal(t, expectedSize, savedAtt.Size)
+	assert.Equal(t, int(expectedStyle), savedAtt.Style)
+	assert.Equal(t, expectedFontFile, savedAtt.FontFile)
+}

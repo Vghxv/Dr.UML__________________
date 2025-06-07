@@ -43,6 +43,15 @@ func FromSavedAttribute(savedAtt utils.SavedAtt) (*Attribute, duerror.DUError) {
 	return att, nil
 }
 
+func ToSavedAttribute(att *Attribute) utils.SavedAtt {
+	return utils.SavedAtt{
+		Content:  att.content,
+		Size:     att.size,
+		Style:    int(att.style),
+		FontFile: att.fontFile,
+	}
+}
+
 // GetContent retrieves the content of the Attribute as a string along with an error if applicable.
 func (att *Attribute) GetContent() string {
 	return att.content
