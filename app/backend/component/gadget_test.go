@@ -477,3 +477,53 @@ func TestAddBuiltAttribute(t *testing.T) {
 	assert.Equal(t, expectedFontFile, addedAtt.GetFontFile())
 
 }
+
+func TestGadget_ToSavedGadget(t *testing.T) {
+	expectedType := Class
+	expectedPoint := utils.Point{X: 114514, Y: 1919810}
+	expectedLayer := 69
+	expectedColor := "#FF5733"
+
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+
+	att, err := attribute.FromSavedAttribute(utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	},
+	)
+	assert.NoError(t, err)
+
+	gad := &Gadget{
+		gadgetType: expectedType,
+		point:      expectedPoint,
+		layer:      expectedLayer,
+		color:      expectedColor,
+	}
+
+	gad.attributes = make([][]*attribute.Attribute, 3)
+	gad.attributes[0] = []*attribute.Attribute{att}
+	gad.attributes[1] = []*attribute.Attribute{att}
+	gad.attributes[2] = []*attribute.Attribute{att}
+
+	savedGadget := gad.ToSavedGadget()
+
+	assert.Equal(t, int(expectedType), savedGadget.GadgetType)
+	assert.Equal(t, expectedPoint.String(), savedGadget.Point)
+	assert.Equal(t, expectedLayer, savedGadget.Layer)
+	assert.Equal(t, expectedColor, savedGadget.Color)
+	assert.Equal(t, 3, len(savedGadget.Attributes))
+
+	for index, savedAtt := range savedGadget.Attributes {
+		assert.Equal(t, expectedContent, savedAtt.Content)
+		assert.Equal(t, expectedSize, savedAtt.Size)
+		assert.Equal(t, int(expectedStyle), savedAtt.Style)
+		assert.Equal(t, expectedFontFile, savedAtt.FontFile)
+		assert.Equal(t, 0.3*float64(index), savedAtt.Ratio)
+	}
+
+}

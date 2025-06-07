@@ -96,6 +96,23 @@ func FromSavedGadget(savedGadget utils.SavedGad) (*Gadget, duerror.DUError) {
 	return gadget, nil
 }
 
+func (g *Gadget) ToSavedGadget() utils.SavedGad {
+	gad := utils.SavedGad{
+		GadgetType: int(g.gadgetType),
+		Point:      g.point.String(),
+		Layer:      g.layer,
+		Color:      g.color,
+		Attributes: make([]utils.SavedAtt, 0, len(g.attributes)),
+	}
+	for section, atts := range g.attributes {
+		for _, att := range atts {
+			gad.Attributes = append(gad.Attributes, attribute.ToSavedAttribute(att))
+			gad.Attributes[len(gad.Attributes)-1].Ratio = 0.3 * float64(section)
+		}
+	}
+	return gad
+}
+
 // Getter
 func (g *Gadget) GetPoint() utils.Point {
 	return g.point
