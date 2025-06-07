@@ -125,6 +125,10 @@ func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
 	return att.updateDrawData()
 }
 
+func (att *Attribute) GetFontFile() string {
+	return att.fontFile
+}
+
 // IsBold checks if the bold style is applied to the attribute and returns a boolean along with an error if any occurs.
 func (att *Attribute) IsBold() bool {
 	return att.style&Bold != 0

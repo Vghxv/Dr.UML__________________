@@ -83,6 +83,9 @@ func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, du
 	if err != nil {
 		return nil, err
 	}
+	if (file.Filetype&utils.SupportedFiletypes != file.Filetype) && int(file.Filetype) != 0 {
+		return nil, duerror.NewCorruptedFile(fmt.Sprintf("Unsupported filetype: %d", file.Filetype))
+	}
 
 	dp, err := dia.loadGadgets(file.Gadgets)
 	if err != nil {
@@ -410,6 +413,9 @@ func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
 }
 
 func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes []utils.SavedAtt) (duerror.DUError, int) {
+	if gadget == nil {
+		return duerror.NewInvalidArgumentError("UR loading attributes to a nil gadget"), 0
+	}
 	for index, savedAtt := range attributes {
 		newAtt, err := attribute.NewAttributeButTakesEverything(
 			savedAtt.Content,
@@ -429,7 +435,7 @@ func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes 
 }
 
 func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.Gadget, duerror.DUError) {
-	var dp map[int]*component.Gadget
+	dp := make(map[int]*component.Gadget)
 
 	// Load Gadgets
 	for index, savedGadget := range gadgets {
@@ -468,6 +474,10 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 		ud.associations[gadget] = [2][]*component.Association{{}, {}}
 
 		dp[index] = gadget
+	}
+
+	if err := ud.updateDrawData(); err != nil {
+		return nil, err
 	}
 
 	return dp, nil

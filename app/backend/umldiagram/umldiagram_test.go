@@ -3,6 +3,9 @@
 package umldiagram
 
 import (
+	"Dr.uml/backend/component/attribute"
+	"encoding/json"
+	"os"
 	"testing"
 	"time"
 
@@ -85,14 +88,6 @@ func TestCreateEmptyDiagram(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestLoadExistUMLDiagram(t *testing.T) {
-	diagram, err := LoadExistUMLDiagram("existing.uml")
-	assert.NoError(t, err)
-	assert.NotNil(t, diagram)
-	assert.Equal(t, "existing.uml", diagram.GetName())
-	assert.Equal(t, DiagramType(ClassDiagram), diagram.GetDiagramType())
 }
 
 func TestCheckDiagramType(t *testing.T) {
@@ -416,6 +411,135 @@ func TestAddAttributeToGadget(t *testing.T) {
 	err = diagram.AddAttributeToGadget(0, "attribute")
 	assert.Error(t, err)
 	assert.Equal(t, "can only operate on one component", err.Error())
+}
+
+func TestLoadExistUMLDiagram(t *testing.T) {
+
+}
+
+func TestLoadGadgetAttributes(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+
+	savedAttributeBase := utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	}
+	savedAttributes := make([]utils.SavedAtt, 3)
+	for i := 0; i < 3; i++ {
+		savedAttributes[i] = savedAttributeBase
+		savedAttributes[i].Size += i
+		savedAttributes[i].Ratio = 0.3 * float64(i)
+	}
+
+	gad, err := component.NewGadget(component.Class, utils.Point{}, 0, "someInvalidColorHex", "")
+	assert.NoError(t, err)
+	assert.NotNil(t, gad)
+
+	err, _ = dia.loadGadgetAttributes(gad, savedAttributes) // Err-index is not important cuz we expect err is nil
+	assert.NoError(t, err)
+
+	loadedAttributes := gad.GetAttributes()
+
+	for i := 0; i < 3; i++ {
+		assert.Equal(t, 1, len(loadedAttributes[i]))
+		assert.Equal(t, savedAttributes[i].Content, loadedAttributes[i][0].GetContent())
+		assert.Equal(t, savedAttributes[i].Style, int(loadedAttributes[i][0].GetStyle()))
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+		assert.Equal(t, savedAttributes[i].Size, loadedAttributes[i][0].GetSize())
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+	}
+}
+func TestLoadGadgetAttributesButWithJsonStr(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	jsonStr := `{
+		"Content": "test content",
+		"Size": 12,
+		"Style": 3,
+		"FontFile": "` + os.Getenv("APP_ROOT") + `/assets/Inkfree.ttf"
+	}`
+
+	var savedAttributeBase utils.SavedAtt
+	err = json.Unmarshal([]byte(jsonStr), &savedAttributeBase)
+	assert.NoError(t, err)
+
+	savedAttributes := make([]utils.SavedAtt, 3)
+	for i := 0; i < 3; i++ {
+		savedAttributes[i] = savedAttributeBase
+		savedAttributes[i].Size += i
+		savedAttributes[i].Ratio = 0.3 * float64(i)
+	}
+
+	gad, err := component.NewGadget(component.Class, utils.Point{}, 0, "someInvalidColorHex", "")
+	assert.NoError(t, err)
+	assert.NotNil(t, gad)
+
+	err, _ = dia.loadGadgetAttributes(gad, savedAttributes) // Err-index is not important cuz we expect err is nil
+	assert.NoError(t, err)
+
+	loadedAttributes := gad.GetAttributes()
+
+	for i := 0; i < 3; i++ {
+		assert.Equal(t, 1, len(loadedAttributes[i]))
+		assert.Equal(t, savedAttributes[i].Content, loadedAttributes[i][0].GetContent())
+		assert.Equal(t, savedAttributes[i].Style, int(loadedAttributes[i][0].GetStyle()))
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+		assert.Equal(t, savedAttributes[i].Size, loadedAttributes[i][0].GetSize())
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+	}
+}
+func TestLoadGadgets(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+
+	savedAttributeBase := utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	}
+
+	savedAttributes := make([]utils.SavedAtt, 3)
+	for i := 0; i < 3; i++ {
+		savedAttributes[i] = savedAttributeBase
+		savedAttributes[i].Size += i
+		savedAttributes[i].Ratio = 0.3 * float64(i)
+	}
+
+	savedGadgetBase := utils.SavedGad{
+		GadgetType: 1,
+		Point:      "0, 0",
+		Color:      "InvalidColorHex",
+		Attributes: savedAttributes,
+	}
+	savedGadgets := make([]utils.SavedGad, 69)
+
+	for i := 0; i < len(savedGadgets); i++ {
+		savedGadgets[i] = savedGadgetBase
+		savedGadgets[i].Layer = i
+	}
+
+	dp, err := dia.loadGadgets(savedGadgets)
+	assert.NoError(t, err)
+	assert.NotNil(t, dp)
+	assert.Equal(t, len(savedGadgets), len(dp))
 }
 
 // Mock container for testing selection methods

@@ -97,8 +97,13 @@ func (g *Gadget) GetAttributesLen() []int {
 	}
 	return lengths
 }
+
 func (g *Gadget) GetIsSelected() bool {
 	return g.IsSelected
+}
+
+func (g *Gadget) GetAttributes() [][]*attribute.Attribute {
+	return g.attributes
 }
 
 // Setter

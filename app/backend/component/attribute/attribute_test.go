@@ -1,6 +1,8 @@
 package attribute
 
 import (
+	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 
 	"Dr.uml/backend/drawdata"
@@ -720,4 +722,19 @@ func TestAttribute_updateDrawData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewAttributeButTakesEverything(t *testing.T) {
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := Textstyle(Bold | Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+
+	att, err := NewAttributeButTakesEverything(expectedContent, expectedSize, expectedStyle, expectedFontFile)
+	assert.NoError(t, err)
+	assert.NotNil(t, att)
+	assert.Equal(t, "test content", att.content)
+	assert.Equal(t, 12, att.size)
+	assert.Equal(t, expectedStyle, att.style)
+	assert.Equal(t, expectedFontFile, att.fontFile)
 }

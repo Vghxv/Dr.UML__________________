@@ -2,6 +2,7 @@ package component
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"Dr.uml/backend/component/attribute"
@@ -444,4 +445,29 @@ func TestValidateIndex(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAddBuiltAttribute(t *testing.T) {
+	gad, err := NewGadget(Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
+	assert.NoError(t, err)
+
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+
+	att, err := attribute.NewAttributeButTakesEverything(expectedContent, expectedSize, expectedStyle, expectedFontFile)
+	assert.NoError(t, err)
+	err = gad.AddBuiltAttribute(0, att)
+	assert.NoError(t, err)
+
+	// Verify the attribute was added
+	assert.Equal(t, 1, len(gad.attributes[0]))
+
+	addedAtt := gad.attributes[0][0]
+	assert.Equal(t, expectedContent, addedAtt.GetContent())
+	assert.Equal(t, expectedSize, addedAtt.GetSize())
+	assert.Equal(t, expectedStyle, addedAtt.GetStyle())
+	assert.Equal(t, expectedFontFile, addedAtt.GetFontFile())
+
 }
