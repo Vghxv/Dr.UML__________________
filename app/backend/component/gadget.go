@@ -187,14 +187,22 @@ func (g *Gadget) AddAttribute(section int, content string) duerror.DUError {
 	return g.updateDrawData()
 }
 
-func (g *Gadget) AddBuiltAttribute(section int, att attribute.Attribute) duerror.DUError {
+func (g *Gadget) AddBuiltAttribute(section int, att *attribute.Attribute) duerror.DUError {
+	if att == nil {
+		return duerror.NewInvalidArgumentError("The passed attribute is nil")
+	}
 	if err := g.validateSection(section); err != nil {
 		return err
 	}
 	if err := att.RegisterUpdateParentDraw(g.updateDrawData); err != nil {
 		return err
 	}
+	g.attributes[section] = append(g.attributes[section], att)
+	if err := g.updateDrawData(); err != nil {
+		return err
+	}
 
+	return nil
 }
 
 func (g *Gadget) RemoveAttribute(section int, index int) duerror.DUError {

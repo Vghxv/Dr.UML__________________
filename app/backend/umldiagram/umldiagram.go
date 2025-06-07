@@ -89,6 +89,10 @@ func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, du
 		return nil, duerror.NewCorruptedFile(fmt.Sprintf(err.Error()+"from %s", filename))
 	}
 
+	if err = dia.LoadAsses(file.Associations, dp); err != nil {
+		return nil, err
+	}
+
 	if err = dia.updateDrawData(); err != nil {
 		return nil, err
 	}
@@ -405,6 +409,25 @@ func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
 	return nil
 }
 
+func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes []utils.SavedAtt) (duerror.DUError, int) {
+	for index, savedAtt := range attributes {
+		newAtt, err := attribute.NewAttributeButTakesEverything(
+			savedAtt.Content,
+			savedAtt.Size,
+			attribute.Textstyle(savedAtt.Style),
+			savedAtt.FontFile,
+		)
+		if err != nil {
+			return err, index
+		}
+
+		if err = gadget.AddBuiltAttribute(int(savedAtt.Ratio/0.3), newAtt); err != nil {
+			return err, index
+		}
+	}
+	return nil, 0
+}
+
 func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.Gadget, duerror.DUError) {
 	var dp map[int]*component.Gadget
 
@@ -426,21 +449,11 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 		if err != nil {
 			return nil, err
 		}
-
-		for i, savedAtt := range savedGadget.Attributes {
-			attribute, err := attribute.NewAttributeButTakesEverything(
-				savedAtt.Content,
-				savedAtt.Size,
-				attribute.Textstyle(savedAtt.Style),
-				savedAtt.FontFile,
+		if err, errIndex := ud.loadGadgetAttributes(gadget, savedGadget.Attributes); err != nil {
+			return nil, duerror.NewCorruptedFile(fmt.Sprintf(
+				"Error on parsing %d-th attribute of %d gadget.  Detail: %s",
+				errIndex, index, err.Error()),
 			)
-			if err != nil {
-				return nil, duerror.NewCorruptedFile(fmt.Sprintf(
-					"Error on parsing %d-th attribute of %d gadget.  Detail: %s",
-					i, index, err.Error()),
-				)
-			}
-			gadget.AddAttribute()
 		}
 
 		// Code below suffers from #89. If anything is being added, put 'em above.
@@ -462,12 +475,12 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 
 func (ud *UMLDiagram) LoadAsses(asses []utils.SavedAss, dp map[int]*component.Gadget) duerror.DUError {
 
-	for index, ass := range asses {
+	for _, ass := range asses {
 		parents := make([]*component.Gadget, 2)
 		parents[0] = dp[ass.Parents[0]]
 		parents[1] = dp[ass.Parents[1]]
-
 	}
+
 	return nil
 }
 
