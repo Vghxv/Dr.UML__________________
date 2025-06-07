@@ -22,6 +22,10 @@ func FromString(str string) (Point, duerror.DUError) {
 	return Point{X: x, Y: y}, nil
 }
 
+func (p Point) String() string {
+	return fmt.Sprintf("%d, %d", p.X, p.Y)
+}
+
 func (p Point) Magnitude() (float64, duerror.DUError) {
 	return math.Sqrt(float64(p.X*p.X + p.Y*p.Y)), nil
 }

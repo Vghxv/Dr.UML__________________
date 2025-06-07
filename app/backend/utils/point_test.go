@@ -137,3 +137,33 @@ func Test_SubPoints(t *testing.T) {
 		})
 	}
 }
+
+func TestPointStringConversation(t *testing.T) {
+	strings := []string{
+		"0, 0",
+		"1, 2",
+		"-1, -2",
+		"100, 200",
+		"0, -1",
+	}
+	for _, str := range strings {
+		point, err := FromString(str)
+		if err != nil {
+			t.Errorf("FromString(%s) returned error: %v", str, err)
+			continue
+		}
+		if point.String() != str {
+			t.Errorf("FromString(%s) = %s, want %s", str, point.String(), str)
+		}
+
+		pointStr := point.String()
+		newPoint, err := FromString(pointStr)
+		if err != nil {
+			t.Errorf("FromString(%s) returned error: %v", pointStr, err)
+			continue
+		}
+		if !EqualPoints(point, newPoint) {
+			t.Errorf("FromString(%s) = %v, want %v", pointStr, newPoint, point)
+		}
+	}
+}
