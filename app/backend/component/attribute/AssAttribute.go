@@ -2,6 +2,7 @@ package attribute
 
 import (
 	"Dr.uml/backend/drawdata"
+	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
 
@@ -24,6 +25,24 @@ func NewAssAttribute(ratio float64) (*AssAttribute, duerror.DUError) {
 	}
 	att.UpdateDrawData()
 	return att, nil
+}
+
+func FromSavedAssAttributes(savedAssAtt utils.SavedAtt) (*AssAttribute, duerror.DUError) {
+	ass := &AssAttribute{
+		Attribute: Attribute{
+			content:  savedAssAtt.Content,
+			size:     savedAssAtt.Size,
+			style:    Textstyle(savedAssAtt.Style),
+			fontFile: savedAssAtt.FontFile,
+		},
+		ratio: savedAssAtt.Ratio,
+	}
+
+	if err := ass.updateDrawData(); err != nil {
+		return nil, err
+	}
+
+	return ass, nil
 }
 
 // GetRatio retrieves the ratio value of the AssAttribute

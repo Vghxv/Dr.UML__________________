@@ -467,6 +467,22 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 	return dp, nil
 }
 
+func (ud *UMLDiagram) loadAssAttributes(ass *component.Association, attributes []utils.SavedAtt) (duerror.DUError, int) {
+	if ass == nil {
+		return duerror.NewInvalidArgumentError("UR loading attributes to a nil ass"), 0
+	}
+	for index, savedAtt := range attributes {
+		newAtt, err := attribute.FromSavedAssAttributes(savedAtt)
+		if err != nil {
+			return err, index
+		}
+		if err = ass.AddAttribute(newAtt); err != nil {
+			return err, index
+		}
+	}
+	return nil, 0
+}
+
 func (ud *UMLDiagram) LoadAsses(asses []utils.SavedAss, dp map[int]*component.Gadget) duerror.DUError {
 	for index, ass := range asses {
 		parents := [2]*component.Gadget{dp[ass.Parents[0]], dp[ass.Parents[1]]}

@@ -592,6 +592,63 @@ func TestUMLDiagram_LoadAsses(t *testing.T) {
 	}
 }
 
+func TestUMLDiagram_loadAssAttributes(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	var parents = [2]*component.Gadget{nil, nil}
+	for i := 0; i < 2; i++ {
+		parents[i], err = component.NewGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, "InvalidColorHex", "")
+		assert.NoError(t, err)
+	}
+
+	ass, err := component.NewAssociation(parents, component.AssociationType(1), utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1})
+	assert.NoError(t, err)
+	assert.NotNil(t, ass)
+
+	// Prepare attributes
+
+	expectedContent := "test"
+	expectedStyle := int(attribute.Bold)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedRatio := 0.69
+
+	savedAttBase := utils.SavedAtt{
+		Content:  expectedContent,
+		Style:    expectedStyle,
+		FontFile: expectedFontFile,
+		Ratio:    expectedRatio,
+	}
+
+	attributes := make([]utils.SavedAtt, 2)
+	for i := 0; i < len(attributes); i++ {
+		attributes[i] = savedAttBase
+		attributes[i].Size = i + 1
+	}
+
+	// Should succeed
+	errRet, idx := dia.loadAssAttributes(ass, attributes)
+	assert.NoError(t, errRet)
+	assert.Equal(t, 0, idx)
+
+	atts, err := ass.GetAttributes()
+	assert.NoError(t, err)
+
+	for i, att := range atts {
+		assert.Equal(t, expectedContent, att.GetContent())
+		assert.Equal(t, expectedStyle, int(att.GetStyle()))
+		assert.Equal(t, expectedRatio, att.GetRatio())
+		assert.Equal(t, expectedFontFile, att.GetFontFile())
+		assert.Equal(t, i+1, att.GetSize())
+	}
+
+	// Should fail with nil association
+	errRet, idx = dia.loadAssAttributes(nil, attributes)
+	assert.Error(t, errRet)
+	assert.Equal(t, 0, idx)
+}
+
 // Mock container for testing selection methods
 type mockContainer struct {
 	mockComponent component.Component
