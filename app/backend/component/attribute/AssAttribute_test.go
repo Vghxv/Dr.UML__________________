@@ -1,6 +1,8 @@
 package attribute
 
 import (
+	"Dr.uml/backend/drawdata"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"Dr.uml/backend/utils/duerror"
@@ -143,4 +145,28 @@ func TestNewAssAttribute(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAssAttribute_ToSavedAssAttribute(t *testing.T) {
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := Bold
+	expectedFontFile := "test.ttf"
+	expectedRatio := 0.5
+	att := &AssAttribute{
+		Attribute: Attribute{content: expectedContent,
+			size:     expectedSize,
+			style:    Textstyle(expectedStyle),
+			fontFile: expectedFontFile,
+		},
+		ratio: expectedRatio,
+		assDD: drawdata.AssAttribute{},
+	}
+
+	savedAtt := att.ToSavedAssAttribute()
+	assert.Equal(t, expectedContent, savedAtt.Content)
+	assert.Equal(t, expectedSize, savedAtt.Size)
+	assert.Equal(t, expectedStyle, savedAtt.Style)
+	assert.Equal(t, expectedFontFile, savedAtt.FontFile)
+	assert.Equal(t, expectedRatio, savedAtt.Ratio)
 }

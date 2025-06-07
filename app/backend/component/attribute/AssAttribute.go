@@ -45,6 +45,16 @@ func FromSavedAssAttributes(savedAssAtt utils.SavedAtt) (*AssAttribute, duerror.
 	return ass, nil
 }
 
+func (att *AssAttribute) ToSavedAssAttribute() utils.SavedAtt {
+	return utils.SavedAtt{
+		Content:  att.content,
+		Size:     att.size,
+		Style:    int(att.style),
+		FontFile: att.fontFile,
+		Ratio:    att.ratio,
+	}
+}
+
 // GetRatio retrieves the ratio value of the AssAttribute
 func (att *AssAttribute) GetRatio() float64 {
 	return att.ratio
