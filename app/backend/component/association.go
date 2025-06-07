@@ -208,24 +208,14 @@ func (ass *Association) SetIsSelected(value bool) duerror.DUError {
 }
 
 // Other methods
-func (ass *Association) AddAttribute(attribute *attribute.AssAttribute) duerror.DUError {
-	if attribute == nil {
-		return duerror.NewInvalidArgumentError("attribute is nil")
-	}
-	attribute.RegisterUpdateParentDraw(ass.updateDrawData)
-	ass.attributes = append(ass.attributes, attribute)
-	// cuz ass is the heaviest part
-	return ass.updateDrawData()
-}
-
 func (ass *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 	if ass.parents[0] == nil || ass.parents[1] == nil {
 		return false, duerror.NewInvalidArgumentError("parents are nil")
 	}
 
-	st := utils.Point{ass.drawdata.StartX, ass.drawdata.StartY}
-	en := utils.Point{ass.drawdata.EndX, ass.drawdata.EndY}
-	delta := utils.Point{ass.drawdata.DeltaX, ass.drawdata.DeltaY}
+	st := utils.Point{X: ass.drawdata.StartX, Y: ass.drawdata.StartY}
+	en := utils.Point{X: ass.drawdata.EndX, Y: ass.drawdata.EndY}
+	delta := utils.Point{X: ass.drawdata.DeltaX, Y: ass.drawdata.DeltaY}
 	stDelta := utils.AddPoints(st, delta)
 	enDelta := utils.AddPoints(en, delta)
 
@@ -233,6 +223,16 @@ func (ass *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 	return dist(stDelta, enDelta, p) <= threshold ||
 		dist(st, stDelta, p) <= threshold ||
 		dist(en, enDelta, p) <= threshold, nil
+}
+
+func (ass *Association) AddAttribute(ratio float64, content string) duerror.DUError {
+	att, err := attribute.NewAssAttribute(ratio, content)
+	if err != nil {
+		return err
+	}
+	att.RegisterUpdateParentDraw(ass.updateDrawData)
+	ass.attributes = append(ass.attributes, att)
+	return ass.updateDrawData()
 }
 
 func (ass *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
@@ -304,7 +304,7 @@ func (ass *Association) updateDrawData() duerror.DUError {
 		if att == nil {
 			return duerror.NewInvalidArgumentError("attribute is nil")
 		}
-		ass.drawdata.Attributes[i] = att.GetAssDD()
+		ass.drawdata.Attributes[i] = att.GetDrawData()
 	}
 	if ass.updateParentDraw == nil {
 		return nil

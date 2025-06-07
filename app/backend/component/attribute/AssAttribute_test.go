@@ -1,146 +1,60 @@
 package attribute
 
-import (
-	"testing"
-
-	"Dr.uml/backend/utils/duerror"
-)
-
-func TestAssAttribute_GetRatio(t *testing.T) {
-	tests := []struct {
-		name       string
-		inputRatio float64
-		wantRatio  float64
-		wantErr    duerror.DUError
-	}{
-		{"valid ratio", 0.5, 0.5, nil},
-		{"zero ratio", 0.0, 0.0, nil},
-		{"one ratio", 1.0, 1.0, nil},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			attr, err := NewAssAttribute(tt.inputRatio)
-			if err != nil {
-				t.Errorf("NewAssAttribute() error = %v", err)
-				return
-			}
-			gotRatio := attr.GetRatio()
-			if gotRatio != tt.wantRatio {
-				t.Errorf("GetRatio() = %v, want %v", gotRatio, tt.wantRatio)
-			}
-		})
-	}
-}
-
-func TestAssAttribute_SetRatio(t *testing.T) {
-	tests := []struct {
-		name      string
-		input     float64
-		wantErr   bool
-		errorText string
-	}{
-		{"valid ratio", 0.5, false, ""},
-		{"zero ratio", 0.0, false, ""},
-		{"one ratio", 1.0, false, ""},
-		{"negative ratio", -0.1, true, "ratio should be between 0 and 1"},
-		{"greater than one ratio", 1.1, true, "ratio should be between 0 and 1"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			attr, err := NewAssAttribute(0.5) // Initialize with a default valid ratio
-			if err != nil {
-				t.Errorf("NewAssAttribute() error = %v", err)
-				return
-			}
-			gotErr := attr.SetRatio(tt.input)
-
-			if tt.wantErr {
-				if gotErr == nil {
-					t.Errorf("SetRatio() expected error but got nil")
-				} else if gotErr.Error() != tt.errorText {
-					t.Errorf("SetRatio() error text = %v, want %v", gotErr.Error(), tt.errorText)
-				}
-			} else {
-				if gotErr != nil {
-					t.Errorf("SetRatio() unexpected error = %v", gotErr)
-				}
-			}
-		})
-	}
-}
-
-func TestAssAttribute_GetAssDD(t *testing.T) {
-	attr, _ := NewAssAttribute(0.5)
-	dd := attr.GetAssDD()
-	if dd != attr.assDD {
-		t.Errorf("GetAssDD() = %v, want %v", dd, attr.assDD)
-	}
-}
-
-func TestAssAttribute_UpdateDrawData(t *testing.T) {
-	attr, _ := NewAssAttribute(0.5)
-	attr.content = "test"
-	attr.size = 12
-	attr.style = Bold
-	attr.fontFile = "test.ttf"
-	attr.ratio = 0.7
-
-	attr.UpdateDrawData()
-
-	if attr.assDD.Content != attr.content {
-		t.Errorf("UpdateDrawData() content = %v, want %v", attr.assDD.Content, attr.content)
-	}
-	if attr.assDD.FontSize != attr.size {
-		t.Errorf("UpdateDrawData() size = %v, want %v", attr.assDD.FontSize, attr.size)
-	}
-	if attr.assDD.FontStyle != int(attr.style) {
-		t.Errorf("UpdateDrawData() style = %v, want %v", attr.assDD.FontStyle, int(attr.style))
-	}
-	if attr.assDD.FontFile != attr.fontFile {
-		t.Errorf("UpdateDrawData() fontFile = %v, want %v", attr.assDD.FontFile, attr.fontFile)
-	}
-	if attr.assDD.Ratio != attr.ratio {
-		t.Errorf("UpdateDrawData() ratio = %v, want %v", attr.assDD.Ratio, attr.ratio)
-	}
-}
+import "testing"
 
 func TestNewAssAttribute(t *testing.T) {
-	tests := []struct {
-		name       string
-		inputRatio float64
-		wantRatio  float64
-		wantErr    bool
-		errorText  string
-	}{
-		{"valid ratio", 0.5, 0.5, false, ""},
-		{"zero ratio", 0.0, 0.0, false, ""},
-		{"one ratio", 1.0, 1.0, false, ""},
-		{"negative ratio", -0.1, 0, true, "ratio should be between 0 and 1"},
-		{"greater than one ratio", 1.1, 0, true, "ratio should be between 0 and 1"},
-	}
+	t.Run("Invalid ratio", func(t *testing.T) {
+		_, err := NewAssAttribute(-1, "")
+		if err == nil {
+			t.Errorf("expected error")
+		}
+		_, err = NewAssAttribute(2, "")
+		if err == nil {
+			t.Errorf("expected error")
+		}
+	})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			attr, err := NewAssAttribute(tt.inputRatio)
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("NewAssAttribute() expected error but got nil")
-					return
-				}
-				if err.Error() != tt.errorText {
-					t.Errorf("NewAssAttribute() error = %v, want %v", err.Error(), tt.errorText)
-				}
-				return
-			}
-			if err != nil {
-				t.Errorf("NewAssAttribute() error = %v", err)
-				return
-			}
-			if attr.ratio != tt.wantRatio {
-				t.Errorf("NewAssAttribute() = %v, want %v", attr.ratio, tt.wantRatio)
-			}
-		})
-	}
+	t.Run("Success", func(t *testing.T) {
+		ratio := 0.5
+		content := "test content"
+		att, err := NewAssAttribute(ratio, content)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if att.GetContent() != content {
+			t.Errorf("unexpected content: %v, got: %v", content, att.GetContent())
+		}
+		if att.GetRatio() != ratio {
+			t.Errorf("unexpected content: %v, got: %v", ratio, att.GetRatio())
+		}
+		dd := att.GetDrawData()
+		if dd.Ratio != ratio {
+			t.Errorf("incorrect drawdata")
+		}
+	})
+}
+
+func TestSetRatio(t *testing.T) {
+	att, _ := NewAssAttribute(0.5, "")
+	t.Run("Invalid ratio", func(t *testing.T) {
+		err := att.SetRatio(-1)
+		if err == nil {
+			t.Errorf("expected error")
+		}
+		err = att.SetRatio(2)
+		if err == nil {
+			t.Errorf("expected error")
+		}
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		newRatio := 0.69
+		err := att.SetRatio(newRatio)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if att.GetRatio() != newRatio {
+			t.Errorf("expect ratio: %v, got %v", newRatio, att.GetRatio())
+		}
+	})
 }

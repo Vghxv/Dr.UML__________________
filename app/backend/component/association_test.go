@@ -125,29 +125,30 @@ func Test_Association_Setters(t *testing.T) {
 }
 
 func Test_Association_AddAttribute(t *testing.T) {
-	att := &attribute.AssAttribute{}
-	gadget := newEmptyGadget(Class, utils.Point{X: 0, Y: 0})
-	ass := &Association{
-		assType:         Extension,
-		parents:         [2]*Gadget{gadget, gadget},
-		startPointRatio: [2]float64{0, 0},
-		endPointRatio:   [2]float64{1, 1},
-	}
+	stPoint := utils.Point{X: 0, Y: 0}
+	enPoint := utils.Point{X: 200, Y: 200}
+	stGadget, _ := NewGadget(Class, stPoint, 0, drawdata.DefaultGadgetColor, "")
+	enGadget, _ := NewGadget(Class, enPoint, 0, drawdata.DefaultGadgetColor, "")
+	ass, _ := NewAssociation([2]*Gadget{stGadget, enGadget}, Extension, stPoint, enPoint)
 
-	t.Run("Add valid attribute", func(t *testing.T) {
-		err := ass.AddAttribute(att)
+	ratio := 0.5
+	content := "test attribute"
+	var att *attribute.AssAttribute
+	t.Run("Add Attribute", func(t *testing.T) {
+		err := ass.AddAttribute(ratio, content)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
 		if len(ass.attributes) != 1 {
-			t.Errorf("expected 1 attribute, got %v", len(ass.attributes))
+			t.Errorf("ass.attributes does not change")
 		}
-	})
 
-	t.Run("Add nil attribute", func(t *testing.T) {
-		err := ass.AddAttribute(nil)
-		if err == nil {
-			t.Errorf("expected error, got nil")
+		att = ass.attributes[0]
+		if att.GetContent() != content {
+			t.Errorf("unexpected content %v, got %v", content, att.GetContent())
+		}
+		if att.GetRatio() != ratio {
+			t.Errorf("unexpected ratio %v, got %v", ratio, att.GetRatio())
 		}
 	})
 }
