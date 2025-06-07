@@ -24,7 +24,7 @@ func TestContainerMap_Insert(t *testing.T) {
 	err := cm.Insert(c)
 	assert.NoError(t, err)
 
-	l, err := cm.Len()
+	l := cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 1)
 
@@ -42,7 +42,7 @@ func TestContainerMap_Remove(t *testing.T) {
 	err := cm.Remove(c)
 	assert.NoError(t, err)
 
-	l, err := cm.Len()
+	l := cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 0)
 
@@ -50,7 +50,7 @@ func TestContainerMap_Remove(t *testing.T) {
 	err = cm.Remove(c)
 	assert.NoError(t, err)
 
-	l, err = cm.Len()
+	l = cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 0)
 }
@@ -61,35 +61,35 @@ func TestContainerMap_Len(t *testing.T) {
 	c2 := mocks.NewMockComponent(ctrl)
 	cm := NewContainerMap()
 
-	l, err := cm.Len()
+	l := cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 0)
 
 	cm.Insert(c1)
-	l, err = cm.Len()
+	l = cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 1)
 
 	cm.Insert(c2)
-	l, err = cm.Len()
+	l = cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 2)
 
 	// insert things that are already in the map
 	cm.Insert(c1)
 	cm.Insert(c2)
-	l, err = cm.Len()
+	l = cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 2)
 
 	// remove
 	cm.Remove(c1)
-	l, err = cm.Len()
+	l = cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 1)
 
 	cm.Remove(c2)
-	l, err = cm.Len()
+	l = cm.Len()
 	assert.NoError(t, err)
 	assert.Equal(t, l, 0)
 }

@@ -649,6 +649,36 @@ func TestUMLDiagram_loadAssAttributes(t *testing.T) {
 	assert.Equal(t, 0, idx)
 }
 
+func TestUMLDiagram_SaveToFile(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("SaveToFileTest.uml", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, diagram)
+
+	// Add two gadgets
+	err = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 2}, 0, drawdata.DefaultGadgetColor, "Header1")
+	assert.NoError(t, err)
+	err = diagram.AddGadget(component.Class, utils.Point{X: 3, Y: 4}, 1, drawdata.DefaultGadgetColor, "Header2")
+	assert.NoError(t, err)
+
+	// Add an association between the two gadgets
+	gadgets := diagram.componentsContainer.GetAll()
+	assert.Len(t, gadgets, 2)
+	gad1, ok1 := gadgets[0].(*component.Gadget)
+	gad2, ok2 := gadgets[1].(*component.Gadget)
+	assert.True(t, ok1)
+	assert.True(t, ok2)
+	ass, err := component.NewAssociation([2]*component.Gadget{gad1, gad2}, component.AssociationType(1), utils.Point{X: 1, Y: 2}, utils.Point{X: 3, Y: 4})
+	assert.NoError(t, err)
+	err = diagram.componentsContainer.Insert(ass)
+	assert.NoError(t, err)
+	diagram.associations[gad1] = [2][]*component.Association{{ass}, {}}
+	diagram.associations[gad2] = [2][]*component.Association{{}, {ass}}
+
+	// Save to file
+	_, err = diagram.SaveToFile("SaveToFileTest.uml")
+	assert.NoError(t, err)
+}
+
 // Mock container for testing selection methods
 type mockContainer struct {
 	mockComponent component.Component

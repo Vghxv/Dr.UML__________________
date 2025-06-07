@@ -1,14 +1,12 @@
 package utils
 
-type fileType int
-
 const (
-	FiletypeDiagram    fileType = 0b0001
-	FiletypeSubmodule  fileType = 0b0010
-	ClassDiagram                = 0b0011
-	UseCaseDiagram              = 0b101
-	SequenceDiagram             = 0b1001
-	SupportedFiletypes          = FiletypeDiagram | FiletypeSubmodule | ClassDiagram | UseCaseDiagram | SequenceDiagram
+	FiletypeDiagram    = 0b0001
+	FiletypeSubmodule  = 0b0010
+	ClassDiagram       = 0b0011
+	UseCaseDiagram     = 0b101
+	SequenceDiagram    = 0b1001
+	SupportedFiletypes = FiletypeDiagram | FiletypeSubmodule | ClassDiagram | UseCaseDiagram | SequenceDiagram
 )
 
 type SavedAtt struct {
@@ -37,7 +35,7 @@ type SavedAss struct {
 }
 
 type SavedFile struct {
-	Filetype     fileType   `json:"filetype"`
+	Filetype     int        `json:"filetype"`
 	LastEdit     string     `json:"lastEdit"`
 	Gadgets      []SavedGad `json:"Gadgets"`
 	Associations []SavedAss `json:"Associations"`

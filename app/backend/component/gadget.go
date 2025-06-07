@@ -96,6 +96,7 @@ func FromSavedGadget(savedGadget utils.SavedGad) (*Gadget, duerror.DUError) {
 	return gadget, nil
 }
 
+// ToSavedGadget export the Gadget and its attributes to a SavedGadget struct.
 func (g *Gadget) ToSavedGadget() utils.SavedGad {
 	gad := utils.SavedGad{
 		GadgetType: int(g.gadgetType),

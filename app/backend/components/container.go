@@ -12,5 +12,5 @@ type Container interface {
 	Search(p utils.Point) (component.Component, duerror.DUError)
 	SearchGadget(p utils.Point) (*component.Gadget, duerror.DUError)
 	GetAll() []component.Component
-	Len() (int, duerror.DUError)
+	Len() int
 }

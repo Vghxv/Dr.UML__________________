@@ -48,6 +48,10 @@ type UMLDiagram struct {
 	componentsSelected  map[component.Component]bool
 	associations        map[*component.Gadget][2][]*component.Association
 
+	filename string    // for saving and loading
+	lastEdit time.Time // for saving and loading
+	lastSave time.Time // for saving and loading
+
 	updateParentDraw func() duerror.DUError
 	drawData         drawdata.Diagram
 }
@@ -99,6 +103,9 @@ func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, du
 	if err = dia.updateDrawData(); err != nil {
 		return nil, err
 	}
+
+	dia.filename = filename
+
 	return dia, nil
 }
 
@@ -524,6 +531,66 @@ func (ud *UMLDiagram) LoadAsses(asses []utils.SavedAss, dp map[int]*component.Ga
 	}
 
 	return nil
+}
+func (ud *UMLDiagram) collectGadgets(res *utils.SavedFile) (map[*component.Gadget]int, duerror.DUError) {
+	dp := make(map[*component.Gadget]int, ud.componentsContainer.Len())
+	cnt := 0
+	for _, comp := range ud.componentsContainer.GetAll() {
+		switch comp.(type) {
+		case *component.Gadget:
+			if _, ok := dp[comp.(*component.Gadget)]; !ok {
+				dp[comp.(*component.Gadget)] = cnt
+				res.Gadgets = append(res.Gadgets, comp.(*component.Gadget).ToSavedGadget())
+				cnt++
+			}
+		default:
+			continue
+		}
+	}
+	return dp, nil
+}
+
+func (ud *UMLDiagram) collectAssociations(dp map[*component.Gadget]int, res *utils.SavedFile) duerror.DUError {
+	for comp, index := range dp {
+		for _, ass := range ud.associations[comp][0] {
+			milkBuyer := ass.GetParentEnd()
+			milkBuyerIndex, ok := dp[milkBuyer]
+			if !ok {
+				return duerror.NewParsingError("SecondParent not found")
+			}
+			res.Associations = append(res.Associations, ass.ToSavedAssociation(
+				[2]int{
+					index, milkBuyerIndex,
+				}))
+		}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedFile, duerror.DUError) {
+	if filename != ud.filename {
+		ud.filename = filename
+	}
+
+	res := &utils.SavedFile{
+		Filetype:     utils.FiletypeDiagram | int(ud.diagramType),
+		LastEdit:     "",
+		Gadgets:      nil,
+		Associations: nil,
+	}
+
+	dp, err := ud.collectGadgets(res)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := ud.collectAssociations(dp, res); err != nil {
+		return nil, err
+	}
+	ud.lastSave = time.Now()
+	res.LastEdit = ud.lastSave.Format(time.RFC3339)
+
+	return res, nil
 }
 
 // draw
