@@ -247,7 +247,7 @@ func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPo
 
 	// create association
 	parents := [2]*component.Gadget{stGad, enGad}
-	a, err := component.NewAssociation(parents, component.AssociationType(assType), stPoint, endPoint)
+	a, err := component.NewAssociation(parents, assType, stPoint, endPoint)
 	if err != nil {
 		return err
 	}
@@ -468,11 +468,15 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 }
 
 func (ud *UMLDiagram) LoadAsses(asses []utils.SavedAss, dp map[int]*component.Gadget) duerror.DUError {
-
-	for _, ass := range asses {
-		parents := make([]*component.Gadget, 2)
-		parents[0] = dp[ass.Parents[0]]
-		parents[1] = dp[ass.Parents[1]]
+	for index, ass := range asses {
+		parents := [2]*component.Gadget{dp[ass.Parents[0]], dp[ass.Parents[1]]}
+		newAss, err := component.FromSavedAssociation(ass, parents)
+		if err != nil {
+			return duerror.NewCorruptedFile(fmt.Sprintf("Error on creating %d-th association: %s", index, err.Error()))
+		}
+		if err = ud.componentsContainer.Insert(newAss); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -57,6 +57,26 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 	return a, nil
 }
 
+func FromSavedAssociation(saved utils.SavedAss, parents [2]*Gadget) (*Association, duerror.DUError) {
+	if parents[0] == nil || parents[1] == nil {
+		return nil, duerror.NewInvalidArgumentError("At least one of the parent is nil")
+	}
+	startPoint, err := utils.FromString(saved.StartPoint)
+	if err != nil {
+		return nil, duerror.NewInvalidArgumentError("invalid start point: " + saved.StartPoint)
+	}
+	endPoint, err := utils.FromString(saved.EndPoint)
+	if err != nil {
+		return nil, duerror.NewInvalidArgumentError("invalid end point: " + saved.EndPoint)
+	}
+	ass, err := NewAssociation(parents, AssociationType(saved.AssType), startPoint, endPoint)
+	if err != nil {
+		return nil, duerror.NewInvalidArgumentError("failed to create association: " + err.Error())
+	}
+
+	return ass, nil
+}
+
 // other function
 func snapToEdge(rec utils.Point, width int, height int, ratio [2]float64) utils.Point {
 	// snap a point onto the edge of a rectangle, the point is float {xRatio, yRatio}

@@ -31,6 +31,8 @@ type SavedAss struct {
 	AssType    int      `json:"assType"`
 	Layer      int      `json:"layer"`
 	Parents    []int    `json:"parents"`
+	StartPoint string   `json:"startPoint"`
+	EndPoint   string   `json:"endPoint"`
 	Attributes SavedAtt `json:"attributes"`
 }
 
