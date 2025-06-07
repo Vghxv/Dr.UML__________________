@@ -417,12 +417,7 @@ func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes 
 		return duerror.NewInvalidArgumentError("UR loading attributes to a nil gadget"), 0
 	}
 	for index, savedAtt := range attributes {
-		newAtt, err := attribute.NewAttributeButTakesEverything(
-			savedAtt.Content,
-			savedAtt.Size,
-			attribute.Textstyle(savedAtt.Style),
-			savedAtt.FontFile,
-		)
+		newAtt, err := attribute.FromSavedAttribute(savedAtt)
 		if err != nil {
 			return err, index
 		}
@@ -439,22 +434,11 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 
 	// Load Gadgets
 	for index, savedGadget := range gadgets {
-		point, err := utils.FromString(savedGadget.Point)
-		if err != nil {
-			return nil, duerror.NewCorruptedFile(
-				fmt.Sprintf("Error when parsing the point of %d-th gadget", index),
-			)
-		}
-		gadget, err := component.NewGadget(
-			component.GadgetType(savedGadget.GadgetType),
-			point,
-			savedGadget.Layer,
-			savedGadget.Color,
-			"",
-		)
+		gadget, err := component.FromSavedGadget(savedGadget)
 		if err != nil {
 			return nil, err
 		}
+
 		if err, errIndex := ud.loadGadgetAttributes(gadget, savedGadget.Attributes); err != nil {
 			return nil, duerror.NewCorruptedFile(fmt.Sprintf(
 				"Error on parsing %d-th attribute of %d gadget.  Detail: %s",

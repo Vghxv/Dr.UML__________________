@@ -5,6 +5,7 @@ import (
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
+	"fmt"
 )
 
 type GadgetType int
@@ -71,6 +72,28 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr 
 		return nil, err
 	}
 	return &g, nil
+}
+
+func FromSavedGadget(savedGadget utils.SavedGad) (*Gadget, duerror.DUError) {
+	point, err := utils.FromString(savedGadget.Point)
+	if err != nil {
+		return nil, duerror.NewCorruptedFile(
+			fmt.Sprintf("Error when parsing the point of gadget"),
+		)
+	}
+	gadget, err := NewGadget(
+		GadgetType(savedGadget.GadgetType),
+		point,
+		savedGadget.Layer,
+		savedGadget.Color,
+		"",
+	)
+	if err != nil {
+		return nil, duerror.NewCorruptedFile(
+			fmt.Sprintf("Error when creating gadget from saved data: %v", err),
+		)
+	}
+	return gadget, nil
 }
 
 // Getter

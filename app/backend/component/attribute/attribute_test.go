@@ -1,6 +1,7 @@
 package attribute
 
 import (
+	"Dr.uml/backend/utils"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -730,7 +731,13 @@ func TestNewAttributeButTakesEverything(t *testing.T) {
 	expectedStyle := Textstyle(Bold | Italic)
 	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
 
-	att, err := NewAttributeButTakesEverything(expectedContent, expectedSize, expectedStyle, expectedFontFile)
+	att, err := FromSavedAttribute(utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	},
+	)
 	assert.NoError(t, err)
 	assert.NotNil(t, att)
 	assert.Equal(t, "test content", att.content)

@@ -30,12 +30,12 @@ func NewAttribute(content string) (*Attribute, duerror.DUError) {
 	return att, nil
 }
 
-func NewAttributeButTakesEverything(content string, size int, style Textstyle, fontFile string) (*Attribute, duerror.DUError) {
+func FromSavedAttribute(savedAtt utils.SavedAtt) (*Attribute, duerror.DUError) {
 	att := &Attribute{
-		content:  content,
-		size:     size,
-		style:    style,
-		fontFile: fontFile,
+		content:  savedAtt.Content,
+		size:     savedAtt.Size,
+		style:    Textstyle(savedAtt.Style),
+		fontFile: savedAtt.FontFile,
 	}
 	if err := att.updateDrawData(); err != nil {
 		return nil, err

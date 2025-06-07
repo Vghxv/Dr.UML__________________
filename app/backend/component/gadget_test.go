@@ -456,7 +456,13 @@ func TestAddBuiltAttribute(t *testing.T) {
 	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
 	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
 
-	att, err := attribute.NewAttributeButTakesEverything(expectedContent, expectedSize, expectedStyle, expectedFontFile)
+	att, err := attribute.FromSavedAttribute(utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	},
+	)
 	assert.NoError(t, err)
 	err = gad.AddBuiltAttribute(0, att)
 	assert.NoError(t, err)
