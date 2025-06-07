@@ -12,6 +12,7 @@ type Component interface {
 	Cover(p utils.Point) (bool, duerror.DUError)
 	GetLayer() int
 	SetLayer(layer int) duerror.DUError
+	SetIsSelected(isSelected bool) duerror.DUError
 	GetDrawData() any
 	RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError
 }

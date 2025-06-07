@@ -72,67 +72,77 @@ func (p *UMLProject) GetActiveDiagramsNames() []string {
 }
 
 // Setter
-func (p *UMLProject) SetPointGadget(point utils.Point) duerror.DUError {
-
+func (p *UMLProject) SetPointComponent(point utils.Point) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetPointGadget(point); err != nil {
+	if err := p.currentDiagram.SetPointComponent(point); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
 	return nil
 }
 
-func (p *UMLProject) SetSetLayerGadget(layer int) duerror.DUError {
+func (p *UMLProject) SetLayerComponent(layer int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetSetLayerGadget(layer); err != nil {
+	if err := p.currentDiagram.SetLayerComponent(layer); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
 	return nil
 }
 
-func (p *UMLProject) SetColorGadget(colorHexStr string) duerror.DUError {
+func (p *UMLProject) SetColorComponent(colorHexStr string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetColorGadget(colorHexStr); err != nil {
+	if err := p.currentDiagram.SetColorComponent(colorHexStr); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
 	return nil
 }
 
-func (p *UMLProject) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
+func (p *UMLProject) SetAttrContentComponent(section int, index int, content string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetAttrContentGadget(section, index, content); err != nil {
+	if err := p.currentDiagram.SetAttrContentComponent(section, index, content); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
 	return nil
 }
 
-func (p *UMLProject) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
+func (p *UMLProject) SetAttrSizeComponent(section int, index int, size int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetAttrSizeGadget(section, index, size); err != nil {
+	if err := p.currentDiagram.SetAttrSizeComponent(section, index, size); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
 	return nil
 }
 
-func (p *UMLProject) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
+func (p *UMLProject) SetAttrStyleComponent(section int, index int, style int) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
-	if err := p.currentDiagram.SetAttrStyleGadget(section, index, style); err != nil {
+	if err := p.currentDiagram.SetAttrStyleComponent(section, index, style); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetAttrFontComponent(section int, index int, font string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrFontComponent(section, index, font); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()

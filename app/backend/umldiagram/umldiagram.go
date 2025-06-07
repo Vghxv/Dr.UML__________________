@@ -95,7 +95,7 @@ func (ud *UMLDiagram) GetLastModified() time.Time {
 }
 
 // Setters
-func (ud *UMLDiagram) SetPointGadget(point utils.Point) duerror.DUError {
+func (ud *UMLDiagram) SetPointComponent(point utils.Point) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (ud *UMLDiagram) SetPointGadget(point utils.Point) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetSetLayerGadget(layer int) duerror.DUError {
+func (ud *UMLDiagram) SetLayerComponent(layer int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -118,12 +118,14 @@ func (ud *UMLDiagram) SetSetLayerGadget(layer int) duerror.DUError {
 	switch g := c.(type) {
 	case *component.Gadget:
 		return g.SetLayer(layer)
+	case *component.Association:
+		return g.SetLayer(layer)
 	default:
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
 }
 
-func (ud *UMLDiagram) SetColorGadget(colorHexStr string) duerror.DUError {
+func (ud *UMLDiagram) SetColorComponent(colorHexStr string) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -137,7 +139,7 @@ func (ud *UMLDiagram) SetColorGadget(colorHexStr string) duerror.DUError {
 	}
 }
 
-func (ud *UMLDiagram) SetAttrContentGadget(section int, index int, content string) duerror.DUError {
+func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content string) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -150,7 +152,8 @@ func (ud *UMLDiagram) SetAttrContentGadget(section int, index int, content strin
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
 }
-func (ud *UMLDiagram) SetAttrSizeGadget(section int, index int, size int) duerror.DUError {
+
+func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -163,7 +166,8 @@ func (ud *UMLDiagram) SetAttrSizeGadget(section int, index int, size int) duerro
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
 }
-func (ud *UMLDiagram) SetAttrStyleGadget(section int, index int, style int) duerror.DUError {
+
+func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -172,6 +176,19 @@ func (ud *UMLDiagram) SetAttrStyleGadget(section int, index int, style int) duer
 	switch g := c.(type) {
 	case *component.Gadget:
 		return g.SetAttrStyle(section, index, style)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile string) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+	switch g := c.(type) {
+	case *component.Gadget:
+		return g.SetAttrFontFile(section, index, fontFile)
 	default:
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
@@ -271,17 +288,24 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 		return err
 	}
 	if c == nil {
-		return nil
+		ud.UnselectAllComponents()
+		return ud.updateDrawData()
 	}
-	// if is in componentsSelected remove it, else add it
-	if _, ok := ud.componentsSelected[c]; ok {
-		gadget := c.(*component.Gadget)
-		gadget.SetIsSelected(false)
-		delete(ud.componentsSelected, c)
-	} else {
-		gadget := c.(*component.Gadget)
-		gadget.SetIsSelected(true)
-		ud.componentsSelected[c] = true
+	if _, ok := ud.componentsSelected[c]; !ok {
+		switch c := c.(type) {
+		case *component.Gadget:
+			err := c.SetIsSelected(true)
+			if err != nil {
+				return err
+			}
+			ud.componentsSelected[c] = true
+		case *component.Association:
+			err := c.SetIsSelected(true)
+			if err != nil {
+				return err
+			}
+			ud.componentsSelected[c] = true
+		}
 	}
 	//ud.componentsSelected[c] = true
 	return ud.updateDrawData()
@@ -300,6 +324,10 @@ func (ud *UMLDiagram) UnselectComponent(point utils.Point) duerror.DUError {
 }
 
 func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
+	for c := range ud.componentsSelected {
+		c.SetIsSelected(false)
+	}
+	// Clear the selected components map
 	ud.componentsSelected = make(map[component.Component]bool)
 	return nil
 }
