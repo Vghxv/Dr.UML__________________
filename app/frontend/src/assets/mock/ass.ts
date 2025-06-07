@@ -9,7 +9,7 @@ export const mockAssociation: AssociationProps = {
     endY: 500,
     deltaX: 0,
     deltaY: 0,
-    isSelected: false,
+    isSelected: true,
     attributes: [
         {
             content: "1",
