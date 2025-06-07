@@ -20,7 +20,11 @@ const DrawingCanvas: React.FC<{
           isAddingAssociation
       }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const {selectedComponentCount, selectedComponent} = useSelection(backendData?.gadgets);
+    const allComponents = [
+        ...(backendData?.gadgets ?? []),
+        ...(backendData?.associations ?? [])
+    ];
+    const {selectedComponentCount, selectedComponent} = useSelection(allComponents);
 
     const redrawCanvas = useCallback(() => {
         const canvas = canvasRef.current;

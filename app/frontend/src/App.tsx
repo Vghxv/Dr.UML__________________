@@ -12,7 +12,7 @@ import {AssociationProps, CanvasProps, GadgetProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
 import {GadgetPopup} from "./components/CreateGadgetPopup";
 import Toolbar from "./components/Toolbar";
-import GadgetPropertiesPanel from "./components/GadgetPropertiesPanel";
+import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
 import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
 import AssociationPopup from "./components/AssociationPopup";
@@ -123,12 +123,11 @@ const App: React.FC = () => {
                     onClose={handleAssPopupClose}
                 />
             )}
-            {selectedGadgetCount === 1 && (
-                <GadgetPropertiesPanel
+            {selectedComponent && (
+                <ComponentPropertiesPanel
                     selectedComponent={selectedComponent}
-                    updateGadgetProperty={handleUpdateGadgetProperty}
-                    addAttributeToGadget={handleAddAttributeToGadget}
-                    // 可加上 updateAssociationProperty, addAttributeToAssociation
+                    updateComponentProperty={handleUpdateGadgetProperty}
+                    addAttributeToComponent={handleAddAttributeToGadget}
                 />
             )}
         </div>
