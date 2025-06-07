@@ -92,6 +92,20 @@ func (mr *MockComponentMockRecorder) RegisterUpdateParentDraw(update interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUpdateParentDraw", reflect.TypeOf((*MockComponent)(nil).RegisterUpdateParentDraw), update)
 }
 
+// SetIsSelected mocks base method.
+func (m *MockComponent) SetIsSelected(isSelected bool) duerror.DUError {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetIsSelected", isSelected)
+	ret0, _ := ret[0].(duerror.DUError)
+	return ret0
+}
+
+// SetIsSelected indicates an expected call of SetIsSelected.
+func (mr *MockComponentMockRecorder) SetIsSelected(isSelected interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetIsSelected", reflect.TypeOf((*MockComponent)(nil).SetIsSelected), isSelected)
+}
+
 // SetLayer mocks base method.
 func (m *MockComponent) SetLayer(layer int) duerror.DUError {
 	m.ctrl.T.Helper()

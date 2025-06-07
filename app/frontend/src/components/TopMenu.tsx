@@ -1,4 +1,5 @@
 import React from 'react';
+// TODO: integrate with to App
 
 const TopMenu: React.FC = () => {
     const handleOpenProject = () => {
@@ -22,68 +23,30 @@ const TopMenu: React.FC = () => {
     };
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 20px',
-                backgroundColor: '#333', // Dark background for the menu
-                color: '#fff', // White text for contrast
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)', // Subtle shadow for depth
-            }}
-        >
-            <h1 style={{ margin: 0, fontSize: '18px' }}>Dr.UML</h1>
-            <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="flex items-center justify-between px-5 py-2.5 bg-gray-800 text-white shadow-md">
+            <h1 className="text-lg font-semibold m-0">Dr.UML</h1>
+            <div className="flex gap-2.5">
                 <button
                     onClick={handleOpenProject}
-                    style={{
-                        backgroundColor: '#4CAF50', // Green button
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded cursor-pointer transition-colors"
                 >
                     Open Project
                 </button>
                 <button
                     onClick={handleSave}
-                    style={{
-                        backgroundColor: '#2196F3', // Blue button
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded cursor-pointer transition-colors"
                 >
                     Save
                 </button>
                 <button
                     onClick={handleExport}
-                    style={{
-                        backgroundColor: '#FF9800', // Orange button
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                    }}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded cursor-pointer transition-colors"
                 >
                     Export
                 </button>
                 <button
                     onClick={handleValidate}
-                    style={{
-                        backgroundColor: '#f44336', // Red button
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded cursor-pointer transition-colors"
                 >
                     Validate
                 </button>

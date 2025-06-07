@@ -1,4 +1,5 @@
-import { GadgetProps } from "./Props";
+import {GadgetProps} from "./Props";
+import {attribute} from "../../wailsjs/go/models";
 
 
 class ClassElement {
@@ -14,8 +15,6 @@ class ClassElement {
 
         const headerLen = props.attributes?.[0]?.length || 0;
         const attributesLen = props.attributes.length > 1 ? props.attributes[1]?.length || 0 : 0;
-        const methodsLen = props.attributes.length > 2 ? props.attributes[2]?.length || 0 : 0;
-        console.log(`Header: ${headerLen}, Attributes: ${attributesLen}, Methods: ${methodsLen}`);
 
         const calculateSectionHeight = (sectionIndex: number, sectionLen: number): number => {
             let height = 0;
@@ -54,16 +53,23 @@ class ClassElement {
         ctx.strokeStyle = "black";
         ctx.lineWidth = lineWidth;
         ctx.stroke();
-        // ctx.font = "12px Georgia";
         const drawText = (sectionIndex: number, yOffset: number) => {
             yOffset += margin;
             if (Array.isArray(this.gadgetProps.attributes[sectionIndex])) {
                 this.gadgetProps.attributes[sectionIndex].forEach((attr: any) => {
                     if (attr && typeof attr.content === "string") {
-                        yOffset += attr.height / 2;
-                        ctx.font = `${attr.fontSize}px ${attr.fontFile}`;
+                        const boldString = (attr.fontStyle & attribute.Textstyle.Bold) !== 0 ? "bold " : "";
+                        const italicString = (attr.fontStyle & attribute.Textstyle.Italic) !== 0 ? "italic " : "";
+                        const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
+                        ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
+                        ctx.textBaseline = "hanging"
                         ctx.fillText(attr.content, this.gadgetProps.x + margin, yOffset);
-                        yOffset += attr.height / 2 + margin;
+                        yOffset += Math.round(attr.height) ;
+                        if (isUnderline) {
+                            const underlineHeight = 2;
+                            ctx.fillRect(this.gadgetProps.x + margin, yOffset - Math.round(attr.height * 0.2) , attr.width, underlineHeight);
+                        }
+                        yOffset += margin;
                     }
                 });
             }
@@ -83,7 +89,7 @@ class ClassElement {
     }
 }
 
-export function createGadget(type: string, config: GadgetProps, margin: number) {
+export function createGad(type: string, config: GadgetProps, margin: number) {
     switch (type) {
         case "Class": {
             return new ClassElement(config, margin);

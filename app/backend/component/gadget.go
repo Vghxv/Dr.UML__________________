@@ -204,9 +204,23 @@ func (g *Gadget) SetAttrStyle(section int, index int, style int) duerror.DUError
 	}
 	return g.updateDrawData()
 }
+
 func (g *Gadget) SetIsSelected(isSelected bool) duerror.DUError {
 	g.IsSelected = isSelected
 	g.drawData.IsSelected = isSelected
+	return g.updateDrawData()
+}
+
+func (g *Gadget) SetAttrFontFile(section int, index int, fontFile string) duerror.DUError {
+	if err := g.validateSection(section); err != nil {
+		return err
+	}
+	if err := g.validateIndex(index, section); err != nil {
+		return err
+	}
+	if err := g.attributes[section][index].SetFontFile(fontFile); err != nil {
+		return err
+	}
 	return g.updateDrawData()
 }
 

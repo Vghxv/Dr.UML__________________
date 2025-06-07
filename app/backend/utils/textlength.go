@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Dr.uml/backend/drawdata"
 	"os"
 
 	"Dr.uml/backend/utils/duerror"
@@ -22,11 +23,11 @@ func loadFont(file string) (*opentype.Font, duerror.DUError) {
 }
 
 func GetTextSize(str string, size int, fontFile string) (int, int, duerror.DUError) {
-	defaultFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	defaultFontFile := os.Getenv("APP_ROOT") + drawdata.DefaultAttributeFontFile
 	if fontFile == "" {
 		fontFile = defaultFontFile
 	}
-	dpi := 100
+	dpi := 72
 	if size <= 0 {
 		return 0, 0, duerror.NewInvalidArgumentError("size must be greater than 0")
 	}

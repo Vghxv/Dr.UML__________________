@@ -19,12 +19,23 @@ const (
 	supportedAssociationType = Extension | Implementation | Composition | Dependency
 )
 
+var AllAssociationTypes = []struct {
+	Value  AssociationType
+	TSName string
+}{
+	{Extension, "Extension"},
+	{Implementation, "Implementation"},
+	{Composition, "Composition"},
+	{Dependency, "Dependency"},
+}
+
 type Association struct {
 	assType          AssociationType
 	layer            int
 	attributes       []*attribute.AssAttribute
 	parents          [2]*Gadget
 	drawdata         drawdata.Association
+	isSelected       bool
 	updateParentDraw func() duerror.DUError
 
 	startPointRatio [2]float64
@@ -118,127 +129,133 @@ func dist(st utils.Point, en utils.Point, p utils.Point) float64 {
 }
 
 // Getters
-func (this *Association) GetAssType() AssociationType {
-	return this.assType
+func (ass *Association) GetAssType() AssociationType {
+	return ass.assType
 }
 
-func (this *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUError) {
-	// TODO: should not do this
-	if len(this.attributes) == 0 {
+func (ass *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUError) {
+	// TODO: should not do ass
+	if len(ass.attributes) == 0 {
 		return nil, duerror.NewInvalidArgumentError("no attributes found")
 	}
-	return this.attributes, nil
+	return ass.attributes, nil
 }
 
-func (this *Association) GetDrawData() any {
-	return this.drawdata
+func (ass *Association) GetDrawData() any {
+	return ass.drawdata
 }
 
-func (this *Association) GetLayer() int {
-	return this.layer
+func (ass *Association) GetLayer() int {
+	return ass.layer
 }
 
-func (this *Association) GetParentEnd() *Gadget {
-	return this.parents[1]
+func (ass *Association) GetParentEnd() *Gadget {
+	return ass.parents[1]
 }
 
-func (this *Association) GetParentStart() *Gadget {
-	return this.parents[0]
+func (ass *Association) GetParentStart() *Gadget {
+	return ass.parents[0]
 }
 
-func (this *Association) GetStartRatio() [2]float64 {
-	return this.startPointRatio
+func (ass *Association) GetStartRatio() [2]float64 {
+	return ass.startPointRatio
 }
 
-func (this *Association) GetEndRatio() [2]float64 {
-	return this.endPointRatio
+func (ass *Association) GetEndRatio() [2]float64 {
+	return ass.endPointRatio
 }
 
 // Setters
-func (this *Association) SetAssType(assType AssociationType) duerror.DUError {
+func (ass *Association) SetAssType(assType AssociationType) duerror.DUError {
 	if assType&supportedAssociationType != assType || assType == 0 {
 		return duerror.NewInvalidArgumentError("unsupported association type")
 	}
-	this.assType = assType
-	this.drawdata.AssType = int(assType)
-	if this.updateParentDraw == nil {
+	ass.assType = assType
+	ass.drawdata.AssType = int(assType)
+	if ass.updateParentDraw == nil {
 		return nil
 	}
-	return this.updateParentDraw()
+	return ass.updateParentDraw()
 }
 
-func (this *Association) SetLayer(layer int) duerror.DUError {
-	this.layer = layer
-	this.drawdata.Layer = layer
-	if this.updateParentDraw == nil {
+func (ass *Association) SetLayer(layer int) duerror.DUError {
+	ass.layer = layer
+	ass.drawdata.Layer = layer
+	if ass.updateParentDraw == nil {
 		return nil
 	}
-	return this.updateParentDraw()
+	return ass.updateParentDraw()
 }
 
-func (this *Association) SetParentStart(gadget *Gadget, point utils.Point) duerror.DUError {
+func (ass *Association) SetParentStart(gadget *Gadget, point utils.Point) duerror.DUError {
 	// TODO: make sure update diagram's associations too
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
-	this.parents[0] = gadget
-	return this.SetStartPoint(point)
+	ass.parents[0] = gadget
+	return ass.SetStartPoint(point)
 }
 
-func (this *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
+func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
 	// TODO: make sure update diagram's associations too
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
-	this.parents[1] = gadget
-	return this.SetEndPoint(point)
+	ass.parents[1] = gadget
+	return ass.SetEndPoint(point)
 }
 
-func (this *Association) SetStartPoint(point utils.Point) duerror.DUError {
-	if this.parents[0] == nil {
+func (ass *Association) SetStartPoint(point utils.Point) duerror.DUError {
+	if ass.parents[0] == nil {
 		return duerror.NewInvalidArgumentError("parent is nil")
 	}
-	gdd := this.parents[0].GetDrawData().(drawdata.Gadget)
+	gdd := ass.parents[0].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")
 	}
-	this.startPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
-	this.startPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
-	return this.updateDrawData()
+	ass.startPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
+	ass.startPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
+	return ass.updateDrawData()
 }
 
-func (this *Association) SetEndPoint(point utils.Point) duerror.DUError {
-	if this.parents[1] == nil {
+func (ass *Association) SetEndPoint(point utils.Point) duerror.DUError {
+	if ass.parents[1] == nil {
 		return duerror.NewInvalidArgumentError("parent is nil")
 	}
-	gdd := this.parents[1].GetDrawData().(drawdata.Gadget)
+	gdd := ass.parents[1].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")
 	}
-	this.endPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
-	this.endPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
-	return this.updateDrawData()
+	ass.endPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
+	ass.endPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetIsSelected(value bool) duerror.DUError {
+	ass.isSelected = value
+	ass.drawdata.IsSelected = value
+	return ass.updateParentDraw()
 }
 
 // Other methods
-func (this *Association) AddAttribute(attribute *attribute.AssAttribute) duerror.DUError {
+func (ass *Association) AddAttribute(attribute *attribute.AssAttribute) duerror.DUError {
 	if attribute == nil {
 		return duerror.NewInvalidArgumentError("attribute is nil")
 	}
-	attribute.RegisterUpdateParentDraw(this.updateDrawData)
-	this.attributes = append(this.attributes, attribute)
-	// cuz this is the heaviest part
-	return this.updateDrawData()
+	attribute.RegisterUpdateParentDraw(ass.updateDrawData)
+	ass.attributes = append(ass.attributes, attribute)
+	// cuz ass is the heaviest part
+	return ass.updateDrawData()
 }
 
-func (this *Association) Cover(p utils.Point) (bool, duerror.DUError) {
-	if this.parents[0] == nil || this.parents[1] == nil {
+func (ass *Association) Cover(p utils.Point) (bool, duerror.DUError) {
+	if ass.parents[0] == nil || ass.parents[1] == nil {
 		return false, duerror.NewInvalidArgumentError("parents are nil")
 	}
 
-	st := utils.Point{this.drawdata.StartX, this.drawdata.StartY}
-	en := utils.Point{this.drawdata.EndX, this.drawdata.EndY}
-	delta := utils.Point{this.drawdata.DeltaX, this.drawdata.DeltaY}
+	st := utils.Point{ass.drawdata.StartX, ass.drawdata.StartY}
+	en := utils.Point{ass.drawdata.EndX, ass.drawdata.EndY}
+	delta := utils.Point{ass.drawdata.DeltaX, ass.drawdata.DeltaY}
 	stDelta := utils.AddPoints(st, delta)
 	enDelta := utils.AddPoints(en, delta)
 
@@ -248,55 +265,55 @@ func (this *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 		dist(en, enDelta, p) <= threshold, nil
 }
 
-func (this *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
-	if index < 0 || index >= len(this.attributes) {
+func (ass *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
+	if index < 0 || index >= len(ass.attributes) {
 		return duerror.NewInvalidArgumentError("index out of range")
 	}
-	return this.attributes[index].SetRatio(ratio)
+	return ass.attributes[index].SetRatio(ratio)
 }
 
-func (this *Association) RemoveAttribute(index int) duerror.DUError {
-	if index < 0 || index >= len(this.attributes) {
+func (ass *Association) RemoveAttribute(index int) duerror.DUError {
+	if index < 0 || index >= len(ass.attributes) {
 		return duerror.NewInvalidArgumentError("index out of range")
 	}
-	this.attributes = append(this.attributes[:index], this.attributes[index+1:]...)
-	return this.updateDrawData()
+	ass.attributes = append(ass.attributes[:index], ass.attributes[index+1:]...)
+	return ass.updateDrawData()
 }
 
-func (this *Association) updateDrawData() duerror.DUError {
-	if this == nil || this.parents[0] == nil || this.parents[1] == nil {
+func (ass *Association) updateDrawData() duerror.DUError {
+	if ass == nil || ass.parents[0] == nil || ass.parents[1] == nil {
 		return duerror.NewInvalidArgumentError("association or parents are nil")
 	}
 
-	this.drawdata.DeltaX = 0
-	this.drawdata.DeltaY = 0
+	ass.drawdata.DeltaX = 0
+	ass.drawdata.DeltaY = 0
 	var startPoint, endPoint utils.Point
-	if this.parents[0] != this.parents[1] {
+	if ass.parents[0] != ass.parents[1] {
 		// diff parents: start and end both snap to edges of their parents
-		stGdd := this.parents[0].GetDrawData().(drawdata.Gadget)
-		startPoint = snapToEdge(utils.Point{X: stGdd.X, Y: stGdd.Y}, stGdd.Width, stGdd.Height, this.startPointRatio)
-		enGdd := this.parents[1].GetDrawData().(drawdata.Gadget)
-		endPoint = snapToEdge(utils.Point{X: enGdd.X, Y: enGdd.Y}, enGdd.Width, enGdd.Height, this.endPointRatio)
+		stGdd := ass.parents[0].GetDrawData().(drawdata.Gadget)
+		startPoint = snapToEdge(utils.Point{X: stGdd.X, Y: stGdd.Y}, stGdd.Width, stGdd.Height, ass.startPointRatio)
+		enGdd := ass.parents[1].GetDrawData().(drawdata.Gadget)
+		endPoint = snapToEdge(utils.Point{X: enGdd.X, Y: enGdd.Y}, enGdd.Width, enGdd.Height, ass.endPointRatio)
 	} else {
 		// same parents: choose a side closest to the start point, and calculate delta
-		gdd := this.parents[0].GetDrawData().(drawdata.Gadget)
-		startPoint = snapToEdge(utils.Point{X: gdd.X, Y: gdd.Y}, gdd.Width, gdd.Height, this.startPointRatio)
+		gdd := ass.parents[0].GetDrawData().(drawdata.Gadget)
+		startPoint = snapToEdge(utils.Point{X: gdd.X, Y: gdd.Y}, gdd.Width, gdd.Height, ass.startPointRatio)
 		endPoint.X, endPoint.Y = startPoint.X, startPoint.Y
 		if startPoint.X == gdd.X || startPoint.X == gdd.X+gdd.Width {
 			// left / right
-			endPoint.Y = gdd.Y + int(float64(gdd.Height)*this.endPointRatio[1])
-			this.drawdata.DeltaX = utils.AbsInt(startPoint.Y-endPoint.Y) / 2
+			endPoint.Y = gdd.Y + int(float64(gdd.Height)*ass.endPointRatio[1])
+			ass.drawdata.DeltaX = utils.AbsInt(startPoint.Y-endPoint.Y) / 2
 			if startPoint.X == gdd.X {
 				// left, deltaX is negative
-				this.drawdata.DeltaX = -this.drawdata.DeltaX
+				ass.drawdata.DeltaX = -ass.drawdata.DeltaX
 			}
 		} else if startPoint.Y == gdd.Y || startPoint.Y == gdd.Y+gdd.Height {
-			endPoint.X = gdd.X + int(float64(gdd.Width)*this.endPointRatio[0])
+			endPoint.X = gdd.X + int(float64(gdd.Width)*ass.endPointRatio[0])
 			// up / bottom
-			this.drawdata.DeltaY = utils.AbsInt(startPoint.X-endPoint.X) / 2
+			ass.drawdata.DeltaY = utils.AbsInt(startPoint.X-endPoint.X) / 2
 			if startPoint.Y == gdd.Y {
 				// up, deltaY is negative
-				this.drawdata.DeltaY = -this.drawdata.DeltaY
+				ass.drawdata.DeltaY = -ass.drawdata.DeltaY
 			}
 		}
 	}
@@ -305,30 +322,30 @@ func (this *Association) updateDrawData() duerror.DUError {
 		return duerror.NewInvalidArgumentError("start and end points are the same")
 	}
 
-	this.drawdata.StartX = startPoint.X
-	this.drawdata.StartY = startPoint.Y
-	this.drawdata.EndX = endPoint.X
-	this.drawdata.EndY = endPoint.Y
+	ass.drawdata.StartX = startPoint.X
+	ass.drawdata.StartY = startPoint.Y
+	ass.drawdata.EndX = endPoint.X
+	ass.drawdata.EndY = endPoint.Y
+	ass.drawdata.IsSelected = ass.isSelected
+	ass.drawdata.AssType = int(ass.assType)
+	ass.drawdata.Attributes = make([]drawdata.AssAttribute, len(ass.attributes))
 
-	this.drawdata.AssType = int(this.assType)
-	this.drawdata.Attributes = make([]drawdata.AssAttribute, len(this.attributes))
-
-	for i, att := range this.attributes {
+	for i, att := range ass.attributes {
 		if att == nil {
 			return duerror.NewInvalidArgumentError("attribute is nil")
 		}
-		this.drawdata.Attributes[i] = att.GetAssDD()
+		ass.drawdata.Attributes[i] = att.GetAssDD()
 	}
-	if this.updateParentDraw == nil {
+	if ass.updateParentDraw == nil {
 		return nil
 	}
-	return this.updateParentDraw()
+	return ass.updateParentDraw()
 }
 
-func (this *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+func (ass *Association) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
 	if update == nil {
 		return duerror.NewInvalidArgumentError("update function is nil")
 	}
-	this.updateParentDraw = update
+	ass.updateParentDraw = update
 	return nil
 }

@@ -625,6 +625,47 @@ func TestAttribute_UpdateDrawData(t *testing.T) {
 	}
 }
 
+func TestAttribute_GetFontFileBase(t *testing.T) {
+	tests := []struct {
+		name     string
+		fontFile string
+		expected string
+	}{
+		{
+			name:     "standard font file",
+			fontFile: "path/to/font.ttf",
+			expected: "font",
+		},
+		{
+			name:     "font file with multiple dots",
+			fontFile: "path/to/font.name.ttf",
+			expected: "font.name",
+		},
+		{
+			name:     "font file with no extension",
+			fontFile: "path/to/font",
+			expected: "font",
+		},
+		{
+			name:     "font file with just filename",
+			fontFile: "font.ttf",
+			expected: "font",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			att := &Attribute{
+				fontFile: tt.fontFile,
+			}
+			result := att.getFontFileBase()
+			if result != tt.expected {
+				t.Errorf("getFontFileBase() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestAttribute_updateDrawData(t *testing.T) {
 	tests := []struct {
 		name          string
