@@ -38,6 +38,9 @@ type Association struct {
 	isSelected       bool
 	updateParentDraw func() duerror.DUError
 
+	start utils.Point
+	end   utils.Point
+
 	startPointRatio [2]float64
 	endPointRatio   [2]float64
 }
@@ -55,6 +58,8 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 	a := &Association{
 		assType: assType,
 		parents: [2]*Gadget{parents[0], parents[1]},
+		start:   stPoint,
+		end:     enPoint,
 		startPointRatio: [2]float64{
 			float64(stPoint.X-stGdd.X) / float64(stGdd.Width),
 			float64(stPoint.Y-stGdd.Y) / float64(stGdd.Height)},
@@ -86,6 +91,23 @@ func FromSavedAssociation(saved utils.SavedAss, parents [2]*Gadget) (*Associatio
 	}
 
 	return ass, nil
+}
+
+func (ass *Association) ToSavedAssociation(parents [2]int) utils.SavedAss {
+	savedAss := utils.SavedAss{
+		AssType:    int(ass.assType),
+		Layer:      ass.layer,
+		StartPoint: ass.start.String(),
+		EndPoint:   ass.end.String(),
+		Attributes: make([]utils.SavedAtt, 0, len(ass.attributes)),
+	}
+	savedAss.Parents = []int{parents[0], parents[1]}
+
+	for _, att := range ass.attributes {
+		savedAss.Attributes = append(savedAss.Attributes, att.ToSavedAssAttribute())
+	}
+
+	return savedAss
 }
 
 // other function

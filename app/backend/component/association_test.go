@@ -267,3 +267,39 @@ func Test_Association_RegisterUpdateParentDraw(t *testing.T) {
 		}
 	})
 }
+
+func Test_Association_ToSavedAssociation(t *testing.T) {
+	gadget := newEmptyGadget(Class, utils.Point{X: 1, Y: 2})
+	ass := &Association{
+		assType: Extension,
+		layer:   3,
+		parents: [2]*Gadget{gadget, gadget},
+		start:   utils.Point{X: 1, Y: 2},
+		end:     utils.Point{X: 3, Y: 4},
+		attributes: []*attribute.AssAttribute{
+			{
+				// Fill with minimal fields if needed
+			},
+		},
+	}
+	parents := [2]int{10, 20}
+	saved := ass.ToSavedAssociation(parents)
+	if saved.AssType != int(Extension) {
+		t.Errorf("expected AssType %v, got %v", Extension, saved.AssType)
+	}
+	if saved.Layer != 3 {
+		t.Errorf("expected Layer 3, got %v", saved.Layer)
+	}
+	if saved.StartPoint != ass.start.String() {
+		t.Errorf("expected StartPoint %v, got %v", ass.start.String(), saved.StartPoint)
+	}
+	if saved.EndPoint != ass.end.String() {
+		t.Errorf("expected EndPoint %v, got %v", ass.end.String(), saved.EndPoint)
+	}
+	if len(saved.Parents) != 2 || saved.Parents[0] != 10 || saved.Parents[1] != 20 {
+		t.Errorf("expected Parents [10 20], got %v", saved.Parents)
+	}
+	if len(saved.Attributes) != 1 {
+		t.Errorf("expected 1 attribute, got %v", len(saved.Attributes))
+	}
+}
