@@ -121,6 +121,10 @@ func (ass *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUEr
 	return ass.attributes, nil
 }
 
+func (ass *Association) GetAttributesLen() int {
+	return len(ass.attributes)
+}
+
 func (ass *Association) GetDrawData() any {
 	return ass.drawdata
 }
@@ -145,11 +149,17 @@ func (ass *Association) GetEndRatio() [2]float64 {
 	return ass.endPointRatio
 }
 
-func (this *Association) GetIsSelected() bool {
-	return this.IsSelected
+func (ass *Association) GetIsSelected() bool {
+	return ass.isSelected
 }
 
 // Setters
+func (ass *Association) SetIsSelected(value bool) duerror.DUError {
+	ass.isSelected = value
+	ass.drawdata.IsSelected = value
+	return ass.updateParentDraw()
+}
+
 func (ass *Association) SetAssType(assType AssociationType) duerror.DUError {
 	if assType&supportedAssociationType != assType || assType == 0 {
 		return duerror.NewInvalidArgumentError("unsupported association type")
@@ -201,10 +211,54 @@ func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.
 	return ass.updateDrawData()
 }
 
-func (ass *Association) SetIsSelected(value bool) duerror.DUError {
-	ass.isSelected = value
-	ass.drawdata.IsSelected = value
-	return ass.updateParentDraw()
+func (ass *Association) SetAttrContent(index int, content string) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetContent(content); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetSize(size); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetStyle(attribute.Textstyle(style)); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetFontFile(fontFile); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetRatio(ratio); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
 }
 
 // Other methods
@@ -317,5 +371,12 @@ func (ass *Association) RegisterUpdateParentDraw(update func() duerror.DUError) 
 		return duerror.NewInvalidArgumentError("update function is nil")
 	}
 	ass.updateParentDraw = update
+	return nil
+}
+
+func (ass *Association) validateIndex(index int) duerror.DUError {
+	if index < 0 || index >= len(ass.attributes) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
 	return nil
 }

@@ -145,11 +145,13 @@ func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content st
 		return err
 	}
 
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrContent(section, index, content)
+		return c.SetAttrContent(section, index, content)
+	case *component.Association:
+		return c.SetAttrContent(index, content)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
 }
 
@@ -159,11 +161,13 @@ func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) due
 		return err
 	}
 
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrSize(section, index, size)
+		return c.SetAttrSize(section, index, size)
+	case *component.Association:
+		return c.SetAttrSize(index, size)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
 }
 
@@ -173,11 +177,13 @@ func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) d
 		return err
 	}
 
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrStyle(section, index, style)
+		return c.SetAttrStyle(section, index, style)
+	case *component.Association:
+		return c.SetAttrStyle(index, style)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
 }
 
@@ -186,15 +192,31 @@ func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile stri
 	if err != nil {
 		return err
 	}
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrFontFile(section, index, fontFile)
+		return c.SetAttrFontFile(section, index, fontFile)
+	case *component.Association:
+		return c.SetAttrFontFile(index, fontFile)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
 }
 
-func (ud *UMLDiagram) SetParentStartAssociation(point utils.Point) duerror.DUError {
+func (ud *UMLDiagram) SetAttrRatioComponent(section int, index int, ratio float64) duerror.DUError {
+	// section arg is not used, just to keep similar signature
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+	switch c := c.(type) {
+	case *component.Association:
+		return c.SetAttrRatio(index, ratio)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+}
+
+func (ud *UMLDiagram) SetParentStartComponent(point utils.Point) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -237,7 +259,7 @@ func (ud *UMLDiagram) SetParentStartAssociation(point utils.Point) duerror.DUErr
 	}
 }
 
-func (ud *UMLDiagram) SetParentEndAssociation(point utils.Point) duerror.DUError {
+func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
 	c, err := ud.getSelectedComponent()
 	if err != nil {
 		return err
@@ -443,6 +465,34 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 		return g.RemoveAttribute(section, index)
 	default:
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch ass := c.(type) {
+	case *component.Association:
+		return ass.AddAttribute(ratio, content)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+}
+
+func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch ass := c.(type) {
+	case *component.Association:
+		return ass.RemoveAttribute(index)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
 }
 

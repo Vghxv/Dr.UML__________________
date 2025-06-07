@@ -370,7 +370,7 @@ func TestAssociationMethods(t *testing.T) {
 		}
 	})
 
-	t.Run("SetParentStartAssociation", func(t *testing.T) {
+	t.Run("SetParentStartComponent", func(t *testing.T) {
 		if a == nil {
 			t.Errorf("add association fail")
 		}
@@ -387,7 +387,7 @@ func TestAssociationMethods(t *testing.T) {
 			t.Errorf("can not select added association")
 		}
 
-		err := diagram.SetParentStartAssociation(gadgetPoint2)
+		err := diagram.SetParentStartComponent(gadgetPoint2)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -404,7 +404,7 @@ func TestAssociationMethods(t *testing.T) {
 		}
 	})
 
-	t.Run("SetParentEndAssociation", func(t *testing.T) {
+	t.Run("SetParentEndComponent", func(t *testing.T) {
 		if a == nil {
 			t.Errorf("add association fail")
 		}
@@ -421,7 +421,7 @@ func TestAssociationMethods(t *testing.T) {
 			t.Errorf("can not select added association")
 		}
 
-		err := diagram.SetParentEndAssociation(gadgetPoint3)
+		err := diagram.SetParentEndComponent(gadgetPoint3)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -543,6 +543,22 @@ func TestAddAttributeToGadget(t *testing.T) {
 	err = diagram.AddAttributeToGadget(0, "attribute")
 	assert.Error(t, err)
 	assert.Equal(t, "can only operate on one component", err.Error())
+}
+
+func TestAddAttributeToAssociation(t *testing.T) {
+	// TODO
+}
+
+func TestRemoveAttributeFromAssociation(t *testing.T) {
+	// TODO
+}
+
+func TestAttributeSettersGadget(t *testing.T) {
+	// TODO
+}
+
+func TestAttributeSettersAssociation(t *testing.T) {
+	// TODO
 }
 
 // Mock container for testing selection methods

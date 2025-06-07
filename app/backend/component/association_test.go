@@ -274,3 +274,11 @@ func Test_Association_RegisterUpdateParentDraw(t *testing.T) {
 		}
 	})
 }
+
+func Test_Association_Selected(t *testing.T) {
+	// TODO
+}
+
+func Test_Association_Attribute(t *testing.T) {
+	// TODO
+}
