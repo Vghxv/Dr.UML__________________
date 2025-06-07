@@ -454,7 +454,7 @@ func TestAddBuiltAttribute(t *testing.T) {
 	expectedContent := "test content"
 	expectedSize := 12
 	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
 
 	att, err := attribute.FromSavedAttribute(utils.SavedAtt{
 		Content:  expectedContent,
@@ -487,7 +487,7 @@ func TestGadget_ToSavedGadget(t *testing.T) {
 	expectedContent := "test content"
 	expectedSize := 12
 	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
 
 	att, err := attribute.FromSavedAttribute(utils.SavedAtt{
 		Content:  expectedContent,
