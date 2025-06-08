@@ -541,7 +541,14 @@ func TestCloseProject(t *testing.T) {
 	assert.FileExists(t, tmpFile.Name())
 	content, err := os.ReadFile(tmpFile.Name())
 	assert.NoError(t, err)
-	expectedContent := "{\n  \"diagrams\": [\n    \"TestDiagram\"\n  ]\n}"
-	assert.Equal(t, expectedContent, string(content), "Project content should match after close")
+	expectedContent := `{
+		"diagrams": [
+			"TestDiagram"
+		]
+	}`
+	var expectedData, actualData map[string]interface{}
+	assert.NoError(t, json.Unmarshal([]byte(expectedContent), &expectedData), "Failed to unmarshal expected JSON")
+	assert.NoError(t, json.Unmarshal(content, &actualData), "Failed to unmarshal actual JSON")
+	assert.Equal(t, expectedData, actualData, "Project content should match after close")
 	assert.NoError(t, err)
 }
