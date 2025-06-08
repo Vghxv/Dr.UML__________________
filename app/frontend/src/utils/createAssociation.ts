@@ -1,5 +1,5 @@
-import {AssociationProps} from "./Props";
-
+import { AssociationProps } from "./Props";
+import { attribute } from "../../wailsjs/go/models";
 // Association type constants
 enum ASS_TYPE {
     ASS_TYPE_EXTENSION = 1,
@@ -199,12 +199,20 @@ class AssociationElement {
     drawText(ctx: CanvasRenderingContext2D, margin: number) {
         if (Array.isArray(this.assProps.attributes)) {
             this.assProps.attributes.forEach(attr => {
-                if (attr) {
+                if (attr && typeof attr.content === "string") {
                     const x = this.assProps.startX + (this.assProps.endX - this.assProps.startX) * (attr.ratio ?? 0.5);
                     const y = this.assProps.startY + (this.assProps.endY - this.assProps.startY) * (attr.ratio ?? 0.5);
-                    ctx.font = `${attr.fontSize || 12}px ${attr.fontFile || "Arial"}`;
+                    const boldString = (attr.fontStyle & attribute.Textstyle.Bold) !== 0 ? "bold " : "";
+                    const italicString = (attr.fontStyle & attribute.Textstyle.Italic) !== 0 ? "italic " : "";
+                    const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
+                    ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
+
                     ctx.fillStyle = "black";
                     ctx.fillText(attr.content, x + margin, y);
+                    if (isUnderline) {
+                        const underlineHeight = 2;
+                        ctx.fillRect(x + margin, y + Math.round(attr.fontSize * 0.2), ctx.measureText(attr.content).width, underlineHeight);
+                    }
                 }
             });
         }
@@ -220,7 +228,7 @@ class AssociationElement {
     }
 
     drawSelfAss(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
-        const {startX, startY, endX, endY, deltaX, deltaY} = this.assProps;
+        const { startX, startY, endX, endY, deltaX, deltaY } = this.assProps;
         const p0x = startX, p0y = startY;
         const p1x = startX + deltaX, p1y = startY + deltaY;
         const p2x = endX + deltaX, p2y = endY + deltaY;

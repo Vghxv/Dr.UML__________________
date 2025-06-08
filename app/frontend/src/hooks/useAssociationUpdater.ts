@@ -5,7 +5,8 @@ import {
     SetAttrSizeComponent,
     SetAttrStyleComponent,
     SetAttrFontComponent,
-    SetLayerComponent
+    SetLayerComponent,
+    SetAttrRatioComponent
 } from "../../wailsjs/go/umlproject/UMLProject";
 import { CanvasProps, AssociationProps } from "../utils/Props";
 import { createSetSingleValue, createSetDoubleValue, createSetTripleValue } from "./updater";
@@ -73,8 +74,12 @@ export function useAssociationUpdater(
                         );
                     }
                     if (childProp === 'ratio') {
-                        // Note: ratio might not have a generic component function, keeping the association-specific approach
-                        console.warn("Ratio setting for associations not yet implemented with generic functions");
+                        setTripleValue(
+                            SetAttrRatioComponent,
+                            0, index, value,  // section is ignored for associations
+                            "Association attribute ratio changed",
+                            "Error editing association attribute ratio"
+                        );
                     }
                     if (childProp === 'delete') {
                         setSingleValue(
