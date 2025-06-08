@@ -8,66 +8,20 @@ import {
     SetLayerComponent
 } from "../../wailsjs/go/umlproject/UMLProject";
 import {CanvasProps, AssociationProps} from "../utils/Props";
+import { createSetSingleValue, createSetDoubleValue, createSetTripleValue } from "./updater";
 
 export function useAssociationUpdater(
     selectedAssociation: AssociationProps | null,
     backendData: CanvasProps | null,
     reloadBackendData: () => void
 ) {
-    // Helper function to handle setting a single value with a promise
-    const setSingleValue = (
-        apiFunction: (value: any) => Promise<any>,
-        value: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(value).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
-
-    // Helper function to handle setting a value with two parameters
-    const setDoubleValue = (
-        apiFunction: (param1: any, param2: any) => Promise<any>,
-        param1: any,
-        param2: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(param1, param2).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };    // Helper function to handle setting a value with three parameters (componentId, index, value)
-    const setTripleValue = (
-        apiFunction: (param1: any, param2: any, param3: any) => Promise<any>,
-        param1: any,
-        param2: any,
-        param3: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(param1, param2, param3).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
+    // Create bound helper functions using factory functions
+    const setSingleValue = createSetSingleValue(reloadBackendData);
+    const setDoubleValue = createSetDoubleValue(reloadBackendData);
+    const setTripleValue = createSetTripleValue(reloadBackendData);
 
     const handleAddAttributeToAssociation = (ratio: number, content: string) => {
-        if (!selectedAssociation || !backendData) return;
+        if (!selectedAssociation || !backendData || !backendData.associations) return;
         setDoubleValue(
             AddAttributeToAssociation,
             ratio, content,
@@ -77,14 +31,16 @@ export function useAssociationUpdater(
     };
 
     const handleUpdateAssociationProperty = (property: string, value: any) => {
-        if (!selectedAssociation || !backendData) return;
+
+        if (!selectedAssociation || !backendData || !backendData.associations) return;
         
         if (property.includes('.')) {
             const [parentProp, childProp] = property.split('.');
             if (parentProp.startsWith('attributes')) {
                 const matches = parentProp.match(/attributes:(\d+)/);
                 if (matches && matches.length === 2) {
-                    const index = parseInt(matches[1]);                    if (childProp === 'content') {
+                    const index = parseInt(matches[1]);                    
+                    if (childProp === 'content') {
                         setTripleValue(
                             SetAttrContentComponent,
                             0, index, value,  // section is ignored for associations
@@ -130,7 +86,7 @@ export function useAssociationUpdater(
                     }
                 }
             }
-        } else {            // Handle direct properties like layer, etc.
+        } else {
             if (property === "layer") {
                 setSingleValue(
                     SetLayerComponent,

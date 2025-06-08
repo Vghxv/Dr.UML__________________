@@ -11,65 +11,17 @@ import {
 } from "../../wailsjs/go/umlproject/UMLProject";
 import {ToPoint} from "../utils/wailsBridge";
 import {CanvasProps, GadgetProps} from "../utils/Props";
-
+import { createSetSingleValue, createSetDoubleValue, createSetTripleValue } from "./updater";
 export function useGadgetUpdater(
     selectedGadget: GadgetProps | null,
     backendData: CanvasProps | null,
     reloadBackendData: () => void
 ) {
-    // Helper function to handle setting a single value with a promise
-    const setSingleValue = (
-        apiFunction: (value: any) => Promise<any>,
-        value: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(value).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
-
-    // Helper function to handle setting a value with two parameters
-    const setDoubleValue = (
-        apiFunction: (param1: any, param2: any) => Promise<any>,
-        param1: any,
-        param2: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(param1, param2).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
-
-    // Helper function to handle setting a value with three parameters
-    const setTripleValue = (
-        apiFunction: (param1: any, param2: any, param3: any) => Promise<any>,
-        param1: any,
-        param2: any,
-        param3: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(param1, param2, param3).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
+    // Create bound helper functions using factory functions
+    const setSingleValue = createSetSingleValue(reloadBackendData);
+    const setDoubleValue = createSetDoubleValue(reloadBackendData);
+    const setTripleValue = createSetTripleValue(reloadBackendData);
+   
 
     const handleAddAttributeToGadget = (section: number, content: string) => {
         if (!selectedGadget || !backendData || !backendData.gadgets) return;
