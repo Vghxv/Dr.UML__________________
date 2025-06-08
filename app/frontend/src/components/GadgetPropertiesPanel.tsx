@@ -213,7 +213,7 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                 </select>
                             </div>
 
-                                                                {/* Delete button - only show for attributes and methods sections (not class name) */}
+                            {/* Delete button - only show for attributes and methods sections (not class name) */}
                             {groupIndex > 0 && (
                                 <div className="flex justify-end">
                                     <button

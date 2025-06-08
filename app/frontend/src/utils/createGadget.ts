@@ -1,5 +1,7 @@
 import {GadgetProps} from "./Props";
 import {attribute} from "../../wailsjs/go/models";
+import {GadgetProps} from "./Props";
+import {attribute} from "../../wailsjs/go/models";
 
 
 class ClassElement {
@@ -89,6 +91,7 @@ class ClassElement {
     }
 }
 
+export function createGad(type: string, config: GadgetProps, margin: number) {
 export function createGad(type: string, config: GadgetProps, margin: number) {
     switch (type) {
         case "Class": {

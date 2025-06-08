@@ -149,6 +149,10 @@ func (this *Association) GetIsSelected() bool {
 	return this.IsSelected
 }
 
+func (this *Association) GetIsSelected() bool {
+	return this.IsSelected
+}
+
 // Setters
 func (ass *Association) SetAssType(assType AssociationType) duerror.DUError {
 	if assType&supportedAssociationType != assType || assType == 0 {
