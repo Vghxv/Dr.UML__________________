@@ -350,6 +350,9 @@ func (p *UMLProject) OpenDiagram(filename string) duerror.DUError {
 	return nil
 }
 
+// SaveDiagram saves the current diagram to a file.
+// Caution: Different from other methods, the parameter `filename` is used as the file name to save the diagram
+// instead of selecting from the available diagrams.
 func (p *UMLProject) SaveDiagram(filename string) duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
