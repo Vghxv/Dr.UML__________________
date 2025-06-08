@@ -443,7 +443,7 @@ func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
 }
 
 func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes []utils.SavedAtt) (duerror.DUError, int) {
-	const SectionCount = 3 // A gadget has 3 sections: header, attributes, methods. Saving sections in SavedAtt.Ratio
+	const SectionBound = 0.3 // A gadget has 3 sections: header, attributes, methods. Saving sections in SavedAtt.Ratio
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("Cannot load attributes to a nil gadget"), 0
 	}
@@ -453,7 +453,7 @@ func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes 
 			return err, index
 		}
 
-		if err = gadget.AddBuiltAttribute(int(savedAtt.Ratio*SectionCount), newAtt); err != nil {
+		if err = gadget.AddBuiltAttribute(int(savedAtt.Ratio/SectionBound), newAtt); err != nil {
 			return err, index
 		}
 	}
