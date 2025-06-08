@@ -1,92 +1,90 @@
 {
-  // The filetype field should be either "submodule" or "diagram" though IDK what's the difference rn
-  filetype: 3,
-  lastEdit: "2025-06-08T03:50:06+08:00",
-  Gadgets: [
+  "filetype": 3,
+  "lastEdit": "2025-06-08T17:50:56+08:00",
+  "Gadgets": [
     {
-      GadgetType: 0x01,
-      point: "6, 9",
-      layer: 87,
-      color: "0xFF0000",
-      attributes: [
+      "GadgetType": 1,
+      "point": "6, 9",
+      "layer": 87,
+      "Color": "0xFF0000",
+      "attributes": [
         {
-          content: "Why am I doing this?",
-          size: 8787,
-          style: 0x01,
-          fontFile: "",
-          ratio: 0.38
+          "content": "Why am I doing this?",
+          "size": 8787,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.3
         },
         {
-          content: "Why am I doing this?",
-          size: 8787,
-          style: 0x01,
-          fontFile: "",
-          ratio: 0.66
-        }
-      ],
-    },
-    {
-      GadgetType: 0x01,
-      point: "6, 9",
-      layer: 87,
-      color: "0xFF0000",
-      attributes: [
-        {
-          content: "Why am I doing this?",
-          size: 8787,
-          style: 0x01,
-          fontFile: "",
-          ratio: 0.38
-        },
-        {
-          content: "Why am I doing this?",
-          size: 8787,
-          style: 0x01,
-          fontFile: "",
-          ratio: 0.38
-        }
-      ],
-    }
-  ],
-  Associations: [
-    {
-      assType: 0x04,
-      layer: -1,
-      parents: [
-        0,
-        1
-      ],
-      startPoint: "6, 9",
-      endPoint: "6, 29",
-      attributes: [
-        {
-          contnet: "This is gonna be bad",
-          size: 87,
-          style: 0x07,
-          fontFile: "",
-          ratio: 0.38,
+          "content": "Why am I doing this?",
+          "size": 8787,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.6
         }
       ]
     },
     {
-      assType: 0x04,
-      layer: -2311,
-      parents: [
+      "GadgetType": 1,
+      "point": "6, 9",
+      "layer": 87,
+      "Color": "0xFF0000",
+      "attributes": [
+        {
+          "content": "Why am I doing this?",
+          "size": 8787,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.3
+        },
+        {
+          "content": "Why am I doing this?",
+          "size": 8787,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.3
+        }
+      ]
+    }
+  ],
+  "Associations": [
+    {
+      "assType": 4,
+      "layer": -1,
+      "parents": [
+        0,
+        1
+      ],
+      "startPoint": "6, 9",
+      "endPoint": "6, 29",
+      "attributes": [
+        {
+          "content": "",
+          "size": 87,
+          "style": 7,
+          "fontFile": "",
+          "ratio": 0.38
+        }
+      ]
+    },
+    {
+      "assType": 4,
+      "layer": -2311,
+      "parents": [
         0,
         0
       ],
-      startPoint: "6, 9",
-      endPoint: "6, 29",
-      attributes: [
+      "startPoint": "6, 9",
+      "endPoint": "6, 29",
+      "attributes": [
         {
-          contnet: "This is gonna be bad",
-          size: 87,
-          style: 0x07,
-          fontFile: "",
-          ratio: 0.38,
+          "content": "",
+          "size": 87,
+          "style": 7,
+          "fontFile": "",
+          "ratio": 0.38
         }
       ]
     }
   ]
 }
-
