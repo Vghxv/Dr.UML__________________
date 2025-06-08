@@ -1,57 +1,51 @@
 import React from 'react';
-// TODO: integrate with to App
 
-const TopMenu: React.FC = () => {
-    const handleOpenProject = () => {
-        // Logic to open a project
-        console.log('Open Project clicked');
-    };
+interface TopMenuProps {
+    onOpenProject: () => void;
+    onSave: () => void;
+    onExport: () => void;
+    onValidate: () => void;
+}
 
-    const handleSave = () => {
-        // Logic to save the current project
-        console.log('Save clicked');
-    };
-
-    const handleExport = () => {
-        // Logic to export the project
-        console.log('Export clicked');
-    };
-
-    const handleValidate = () => {
-        // Logic to validate the UML diagram
-        console.log('Validate clicked');
-    };
-
+const TopMenu: React.FC<TopMenuProps> = ({ onOpenProject, onSave, onExport, onValidate }) => {
     return (
-        <div className="flex items-center justify-between px-5 py-2.5 bg-gray-800 text-white shadow-md">
-            <h1 className="text-lg font-semibold m-0">Dr.UML</h1>
-            <div className="flex gap-2.5">
-                <button
-                    onClick={handleOpenProject}
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded cursor-pointer transition-colors"
-                >
-                    Open Project
-                </button>
-                <button
-                    onClick={handleSave}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded cursor-pointer transition-colors"
-                >
-                    Save
-                </button>
-                <button
-                    onClick={handleExport}
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded cursor-pointer transition-colors"
-                >
-                    Export
-                </button>
-                <button
-                    onClick={handleValidate}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded cursor-pointer transition-colors"
-                >
-                    Validate
-                </button>
+        <header className="w-full shadow-lg bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white sticky top-0 z-50">
+            <div className="flex items-center justify-between px-8 py-3">
+                <div className="flex items-center gap-3">
+                    {/* <img src="/favicon.ico" alt="Dr.UML Logo" className="w-8 h-8 rounded shadow-md" /> */}
+                    <span className="text-2xl font-extrabold tracking-wider drop-shadow-lg select-none">Dr.UML</span>
+                </div>
+                <nav className="flex items-center gap-2.5">
+                    <button
+                        onClick={onOpenProject}
+                        className="flex items-center gap-1 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white px-4 py-2 rounded-lg shadow transition-all duration-150 font-semibold border border-green-400 hover:scale-105"
+                    >
+                        Open
+                    </button>
+                    <span className="w-px h-6 bg-white/30 mx-1" />
+                    <button
+                        onClick={onSave}
+                        className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition-all duration-150 font-semibold border border-blue-400 hover:scale-105"
+                    >
+                        Save
+                    </button>
+                    <span className="w-px h-6 bg-white/30 mx-1" />
+                    <button
+                        onClick={onExport}
+                        className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white px-4 py-2 rounded-lg shadow transition-all duration-150 font-semibold border border-orange-400 hover:scale-105"
+                    >
+                        Export
+                    </button>
+                    <span className="w-px h-6 bg-white/30 mx-1" />
+                    <button
+                        onClick={onValidate}
+                        className="flex items-center gap-1 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white px-4 py-2 rounded-lg shadow transition-all duration-150 font-semibold border border-red-400 hover:scale-105"
+                    >
+                        Validate
+                    </button>
+                </nav>
             </div>
-        </div>
+        </header>
     );
 };
 
