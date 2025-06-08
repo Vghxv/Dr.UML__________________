@@ -237,7 +237,6 @@ class AssociationElement {
 }
 
 export function createAss(type: string, config: AssociationProps, margin: number) {
-    // 根據 type 產生對應 Association 物件，未來可擴充更多類型
     switch (type) {
         case "Association": {
             return new AssociationElement(config, margin);
