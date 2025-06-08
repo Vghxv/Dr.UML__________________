@@ -355,3 +355,29 @@ func TestOpenDiagram(t *testing.T) {
 	err = proj.OpenDiagram(root + "/backend/example.json5")
 	assert.NoError(t, err)
 }
+
+func TestSaveDiagram(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	root, ok := os.LookupEnv("APP_ROOT")
+	assert.True(t, ok)
+	err = p.OpenDiagram(root + "/backend/example.json5")
+	assert.NoError(t, err)
+
+	diagramName := "umlproject_save_test_.json"
+
+	// Save to a temp file
+	tmpFile, err := os.Create(diagramName)
+	assert.NoError(t, err)
+	// defer os.Remove(tmpFile.Name())
+	tmpFile.Close()
+
+	err = p.SaveDiagram(tmpFile.Name())
+	assert.NoError(t, err)
+
+	// No diagram selected
+	err = p.CloseDiagram(diagramName)
+	assert.NoError(t, err)
+	err = p.SaveDiagram(tmpFile.Name())
+	assert.Error(t, err)
+}

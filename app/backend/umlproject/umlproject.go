@@ -1,21 +1,20 @@
 package umlproject
 
 import (
-	"context"
-	"fmt"
-	"maps"
-	"os"
-	"slices"
-	"time"
-
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
-
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/titanous/json5"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"maps"
+	"os"
+	"slices"
+	"time"
 )
 
 type UMLProject struct {
@@ -193,7 +192,7 @@ func (p *UMLProject) CreateEmptyUMLDiagram(diagramType umldiagram.DiagramType, d
 }
 
 func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
-	// TODO: save file?
+
 	if _, ok := p.activeDiagrams[diagramName]; !ok {
 		return duerror.NewInvalidArgumentError("Diagram not loaded")
 	}
@@ -324,13 +323,21 @@ func (p *UMLProject) OpenDiagram(filename string) duerror.DUError {
 	if err := decoder.Decode(&savedFileData); err != nil {
 		return duerror.NewInvalidArgumentError(fmt.Sprintf("Failed to decode file %s.\n Error: %s", filename, err.Error()))
 	}
+	if savedFileData.Filetype&utils.SupportedFiletypes == 0 {
+		return duerror.NewInvalidArgumentError(fmt.Sprintf("Unsupported file type %d in file %s", savedFileData.Filetype, filename))
+	}
+	savedFileData.Filetype >>= 1 // Remove the first bit, which is used to indicate if the file is a diagram or submodule
 	switch savedFileData.Filetype {
 	case utils.FiletypeDiagram:
-		_, err := umldiagram.LoadExistUMLDiagram(filename, savedFileData)
+		dia, err := umldiagram.LoadExistUMLDiagram(filename, savedFileData)
 		if err != nil {
 			return err
 		}
-		// p.availableDiagrams
+		p.availableDiagrams[filename] = true
+		p.activeDiagrams[filename] = dia
+		p.lastModified = time.Now()
+		p.currentDiagram = dia
+
 		break
 	case utils.FiletypeSubmodule:
 
@@ -340,5 +347,41 @@ func (p *UMLProject) OpenDiagram(filename string) duerror.DUError {
 		return duerror.NewInvalidArgumentError(fmt.Sprintf("Unknown filetype %d", savedFileData.Filetype))
 	}
 
+	return nil
+}
+
+func (p *UMLProject) SaveDiagram(filename string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	originalFilename := p.currentDiagram.GetName()
+	savedFileData, err := p.currentDiagram.SaveToFile(filename)
+	if err != nil {
+		return duerror.NewParsingError(fmt.Sprintf("Failed to export diagram %s.\n Error: %s", filename, err.Error()))
+	}
+	if originalFilename != filename {
+		delete(p.availableDiagrams, originalFilename)
+		delete(p.activeDiagrams, originalFilename)
+		p.availableDiagrams[filename] = true
+		p.activeDiagrams[filename] = p.currentDiagram
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to create file %s.\n Error: %s", p.name, err.Error()))
+	}
+
+	data, err := json.MarshalIndent(savedFileData, "", "  ")
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to marshal data to JSON for file %s.\n Error: %s", p.name, err.Error()))
+	}
+	if _, err := file.Write(data); err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to write data to file %s.\n Error: %s", p.name, err.Error()))
+	}
+	if err := file.Close(); err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to close file %s.\n Error: %s", p.name, err.Error()))
+	}
+
+	p.lastModified = time.Now()
 	return nil
 }
