@@ -9,21 +9,30 @@ import (
 // AssAttribute represents an attribute specific to associations with a ratio property
 type AssAttribute struct {
 	Attribute
-	ratio            float64
-	assDD            drawdata.AssAttribute // not `drawData`
-	updateParentDraw func() duerror.DUError
+	ratio                 float64
+	assDD                 drawdata.AssAttribute
+	updateParentDrawOuter func() duerror.DUError
 }
 
 // NewAssAttribute creates a new AssAttribute instance with the specified ratio
 // It returns an error if the ratio is not between 0 and 1
-func NewAssAttribute(ratio float64) (*AssAttribute, duerror.DUError) {
+func NewAssAttribute(ratio float64, content string) (*AssAttribute, duerror.DUError) {
 	if ratio < 0 || ratio > 1 {
 		return nil, duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
-	att := &AssAttribute{
-		ratio: ratio,
+	tmp, err := NewAttribute(content)
+	if err != nil {
+		return nil, err
 	}
-	att.UpdateDrawData()
+	att := &AssAttribute{
+		Attribute: *tmp,
+		ratio:     ratio,
+	}
+	att.Attribute.RegisterUpdateParentDraw(func() duerror.DUError {
+		att.updateDrawData()
+		return nil
+	})
+	att.updateDrawData()
 	return att, nil
 }
 
@@ -60,40 +69,8 @@ func (att *AssAttribute) GetRatio() float64 {
 	return att.ratio
 }
 
-func (att *AssAttribute) GetAssDD() drawdata.AssAttribute {
+func (att *AssAttribute) GetDrawData() drawdata.AssAttribute {
 	return att.assDD
-}
-
-func (att *AssAttribute) SetContent(content string) duerror.DUError {
-	if err := att.Attribute.SetContent(content); err != nil {
-		return err
-	}
-	att.UpdateDrawData()
-	return nil
-}
-
-func (att *AssAttribute) SetSize(size int) duerror.DUError {
-	if err := att.Attribute.SetSize(size); err != nil {
-		return err
-	}
-	att.UpdateDrawData()
-	return nil
-}
-
-func (att *AssAttribute) SetStyle(style Textstyle) duerror.DUError {
-	if err := att.Attribute.SetStyle(style); err != nil {
-		return err
-	}
-	att.UpdateDrawData()
-	return nil
-}
-
-func (att *AssAttribute) SetFontFile(fontFile string) duerror.DUError {
-	if err := att.Attribute.SetFontFile(fontFile); err != nil {
-		return err
-	}
-	att.UpdateDrawData()
-	return nil
 }
 
 // SetRatio returns an error if the ratio is not between 0 and 1
@@ -103,18 +80,18 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
 	att.ratio = ratio
-	att.UpdateDrawData()
+	att.updateDrawData()
 	return nil
 }
 
-func (att *AssAttribute) UpdateDrawData() {
+func (att *AssAttribute) updateDrawData() {
 	att.assDD.Content = att.content
 	att.assDD.FontSize = att.size
 	att.assDD.FontStyle = int(att.style)
-	att.assDD.FontFile = att.fontFile
+	att.assDD.FontFile = att.getFontFileBase()
 	att.assDD.Ratio = att.ratio
-	if att.updateParentDraw != nil {
-		att.updateParentDraw()
+	if att.updateParentDrawOuter != nil {
+		att.updateParentDrawOuter()
 	}
 }
 
@@ -122,6 +99,6 @@ func (att *AssAttribute) RegisterUpdateParentDraw(update func() duerror.DUError)
 	if update == nil {
 		return duerror.NewInvalidArgumentError("update function is nil")
 	}
-	att.updateParentDraw = update
+	att.updateParentDrawOuter = update
 	return nil
 }

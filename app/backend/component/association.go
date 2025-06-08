@@ -153,6 +153,10 @@ func (ass *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUEr
 	return ass.attributes, nil
 }
 
+func (ass *Association) GetAttributesLen() int {
+	return len(ass.attributes)
+}
+
 func (ass *Association) GetDrawData() any {
 	return ass.drawdata
 }
@@ -177,7 +181,17 @@ func (ass *Association) GetEndRatio() [2]float64 {
 	return ass.endPointRatio
 }
 
+func (ass *Association) GetIsSelected() bool {
+	return ass.isSelected
+}
+
 // Setters
+func (ass *Association) SetIsSelected(value bool) duerror.DUError {
+	ass.isSelected = value
+	ass.drawdata.IsSelected = value
+	return ass.updateParentDraw()
+}
+
 func (ass *Association) SetAssType(assType AssociationType) duerror.DUError {
 	if assType&supportedAssociationType != assType || assType == 0 {
 		return duerror.NewInvalidArgumentError("unsupported association type")
@@ -200,27 +214,11 @@ func (ass *Association) SetLayer(layer int) duerror.DUError {
 }
 
 func (ass *Association) SetParentStart(gadget *Gadget, point utils.Point) duerror.DUError {
-	// TODO: make sure update diagram's associations too
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
 	ass.parents[0] = gadget
-	return ass.SetStartPoint(point)
-}
 
-func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
-	// TODO: make sure update diagram's associations too
-	if gadget == nil {
-		return duerror.NewInvalidArgumentError("gadget is nil")
-	}
-	ass.parents[1] = gadget
-	return ass.SetEndPoint(point)
-}
-
-func (ass *Association) SetStartPoint(point utils.Point) duerror.DUError {
-	if ass.parents[0] == nil {
-		return duerror.NewInvalidArgumentError("parent is nil")
-	}
 	gdd := ass.parents[0].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")
@@ -230,10 +228,12 @@ func (ass *Association) SetStartPoint(point utils.Point) duerror.DUError {
 	return ass.updateDrawData()
 }
 
-func (ass *Association) SetEndPoint(point utils.Point) duerror.DUError {
-	if ass.parents[1] == nil {
-		return duerror.NewInvalidArgumentError("parent is nil")
+func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
+	if gadget == nil {
+		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
+	ass.parents[1] = gadget
+
 	gdd := ass.parents[1].GetDrawData().(drawdata.Gadget)
 	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
 		return duerror.NewInvalidArgumentError("point is out of range")
@@ -243,31 +243,65 @@ func (ass *Association) SetEndPoint(point utils.Point) duerror.DUError {
 	return ass.updateDrawData()
 }
 
-func (ass *Association) SetIsSelected(value bool) duerror.DUError {
-	ass.isSelected = value
-	ass.drawdata.IsSelected = value
-	return ass.updateParentDraw()
-}
-
-// Other methods
-func (ass *Association) AddAttribute(attribute *attribute.AssAttribute) duerror.DUError {
-	if attribute == nil {
-		return duerror.NewInvalidArgumentError("attribute is nil")
+func (ass *Association) SetAttrContent(index int, content string) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
 	}
-	attribute.RegisterUpdateParentDraw(ass.updateDrawData)
-	ass.attributes = append(ass.attributes, attribute)
-	// cuz ass is the heaviest part
+	if err := ass.attributes[index].SetContent(content); err != nil {
+		return err
+	}
 	return ass.updateDrawData()
 }
 
+func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetSize(size); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetStyle(attribute.Textstyle(style)); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetFontFile(fontFile); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
+	if err := ass.validateIndex(index); err != nil {
+		return err
+	}
+	if err := ass.attributes[index].SetRatio(ratio); err != nil {
+		return err
+	}
+	return ass.updateDrawData()
+}
+
+// Other methods
 func (ass *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 	if ass.parents[0] == nil || ass.parents[1] == nil {
 		return false, duerror.NewInvalidArgumentError("parents are nil")
 	}
 
-	st := utils.Point{ass.drawdata.StartX, ass.drawdata.StartY}
-	en := utils.Point{ass.drawdata.EndX, ass.drawdata.EndY}
-	delta := utils.Point{ass.drawdata.DeltaX, ass.drawdata.DeltaY}
+	st := utils.Point{X: ass.drawdata.StartX, Y: ass.drawdata.StartY}
+	en := utils.Point{X: ass.drawdata.EndX, Y: ass.drawdata.EndY}
+	delta := utils.Point{X: ass.drawdata.DeltaX, Y: ass.drawdata.DeltaY}
 	stDelta := utils.AddPoints(st, delta)
 	enDelta := utils.AddPoints(en, delta)
 
@@ -275,6 +309,16 @@ func (ass *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 	return dist(stDelta, enDelta, p) <= threshold ||
 		dist(st, stDelta, p) <= threshold ||
 		dist(en, enDelta, p) <= threshold, nil
+}
+
+func (ass *Association) AddAttribute(ratio float64, content string) duerror.DUError {
+	att, err := attribute.NewAssAttribute(ratio, content)
+	if err != nil {
+		return err
+	}
+	att.RegisterUpdateParentDraw(ass.updateDrawData)
+	ass.attributes = append(ass.attributes, att)
+	return ass.updateDrawData()
 }
 
 func (ass *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
@@ -346,7 +390,7 @@ func (ass *Association) updateDrawData() duerror.DUError {
 		if att == nil {
 			return duerror.NewInvalidArgumentError("attribute is nil")
 		}
-		ass.drawdata.Attributes[i] = att.GetAssDD()
+		ass.drawdata.Attributes[i] = att.GetDrawData()
 	}
 	if ass.updateParentDraw == nil {
 		return nil
@@ -359,5 +403,12 @@ func (ass *Association) RegisterUpdateParentDraw(update func() duerror.DUError) 
 		return duerror.NewInvalidArgumentError("update function is nil")
 	}
 	ass.updateParentDraw = update
+	return nil
+}
+
+func (ass *Association) validateIndex(index int) duerror.DUError {
+	if index < 0 || index >= len(ass.attributes) {
+		return duerror.NewInvalidArgumentError("index out of range")
+	}
 	return nil
 }

@@ -1,9 +1,10 @@
 package attribute
 
 import (
+	"testing"
+
 	"Dr.uml/backend/drawdata"
 	"github.com/stretchr/testify/assert"
-	"testing"
 
 	"Dr.uml/backend/utils/duerror"
 )

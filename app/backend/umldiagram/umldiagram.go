@@ -168,11 +168,13 @@ func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content st
 		return err
 	}
 
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrContent(section, index, content)
+		return c.SetAttrContent(section, index, content)
+	case *component.Association:
+		return c.SetAttrContent(index, content)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
 }
 
@@ -182,11 +184,13 @@ func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) due
 		return err
 	}
 
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrSize(section, index, size)
+		return c.SetAttrSize(section, index, size)
+	case *component.Association:
+		return c.SetAttrSize(index, size)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
 }
 
@@ -196,11 +200,13 @@ func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) d
 		return err
 	}
 
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrStyle(section, index, style)
+		return c.SetAttrStyle(section, index, style)
+	case *component.Association:
+		return c.SetAttrStyle(index, style)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
 }
 
@@ -209,11 +215,113 @@ func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile stri
 	if err != nil {
 		return err
 	}
-	switch g := c.(type) {
+	switch c := c.(type) {
 	case *component.Gadget:
-		return g.SetAttrFontFile(section, index, fontFile)
+		return c.SetAttrFontFile(section, index, fontFile)
+	case *component.Association:
+		return c.SetAttrFontFile(index, fontFile)
 	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("invalid selected component")
+	}
+}
+
+func (ud *UMLDiagram) SetAttrRatioComponent(section int, index int, ratio float64) duerror.DUError {
+	// section arg is not used, just to keep similar signature
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+	switch c := c.(type) {
+	case *component.Association:
+		return c.SetAttrRatio(index, ratio)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+}
+
+func (ud *UMLDiagram) SetParentStartComponent(point utils.Point) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch a := c.(type) {
+	case *component.Association:
+		stNew, err := ud.componentsContainer.SearchGadget(point)
+		if err != nil {
+			return err
+		}
+		if stNew == nil {
+			return duerror.NewInvalidArgumentError("point does not contain a gadget")
+		}
+
+		// update association
+		stOld := a.GetParentStart()
+		if err = a.SetParentStart(stNew, point); err != nil {
+			return err
+		}
+
+		// update ud.associations map
+		if _, ok := ud.associations[stOld]; ok {
+			list := ud.associations[stOld][0]
+			index := slices.Index(list, a)
+			if index >= 0 {
+				list = slices.Delete(list, index, index+1)
+			}
+			ud.associations[stOld] = [2][]*component.Association{list, ud.associations[stOld][1]}
+		}
+		if _, ok := ud.associations[stNew]; ok {
+			list := ud.associations[stNew][0]
+			list = append(list, a)
+			ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
+		}
+		return nil
+
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+}
+
+func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch a := c.(type) {
+	case *component.Association:
+		enNew, err := ud.componentsContainer.SearchGadget(point)
+		if err != nil {
+			return err
+		}
+		if enNew == nil {
+			return duerror.NewInvalidArgumentError("point does not contain a gadget")
+		}
+
+		// update association
+		enOld := a.GetParentEnd()
+		if err = a.SetParentEnd(enNew, point); err != nil {
+			return err
+		}
+
+		// update ud.associations map
+		if _, ok := ud.associations[enOld]; ok {
+			list := ud.associations[enOld][1]
+			index := slices.Index(list, a)
+			if index >= 0 {
+				list = slices.Delete(list, index, index+1)
+			}
+			ud.associations[enOld] = [2][]*component.Association{ud.associations[enOld][0], list}
+		}
+		if _, ok := ud.associations[enNew]; ok {
+			list := ud.associations[enNew][1]
+			list = append(list, a)
+			ud.associations[enNew] = [2][]*component.Association{ud.associations[enNew][0], list}
+		}
+		return nil
+
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
 }
 
@@ -380,6 +488,34 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 		return g.RemoveAttribute(section, index)
 	default:
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	}
+}
+
+func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch ass := c.(type) {
+	case *component.Association:
+		return ass.AddAttribute(ratio, content)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+}
+
+func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+
+	switch ass := c.(type) {
+	case *component.Association:
+		return ass.RemoveAttribute(index)
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
 }
 

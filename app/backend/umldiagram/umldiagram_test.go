@@ -3,12 +3,14 @@
 package umldiagram
 
 import (
-	"Dr.uml/backend/component/attribute"
 	"encoding/json"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
+
+	"Dr.uml/backend/component/attribute"
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/drawdata"
@@ -306,6 +308,132 @@ func TestRemoveGadget(t *testing.T) {
 
 func TestAssociationMethods(t *testing.T) {
 	// TODO
+
+	diagram, _ := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+
+	gadgetPoint0 := utils.Point{X: 0, Y: 0}
+	gadgetPoint1 := utils.Point{X: 0, Y: 200}
+	gadgetPoint2 := utils.Point{X: 200, Y: 0}
+	gadgetPoint3 := utils.Point{X: 200, Y: 200}
+	diagram.AddGadget(component.Class, gadgetPoint0, 0, drawdata.DefaultGadgetColor, "")
+	diagram.AddGadget(component.Class, gadgetPoint1, 0, drawdata.DefaultGadgetColor, "")
+	diagram.AddGadget(component.Class, gadgetPoint2, 0, drawdata.DefaultGadgetColor, "")
+	diagram.AddGadget(component.Class, gadgetPoint3, 0, drawdata.DefaultGadgetColor, "")
+	gad0, _ := diagram.componentsContainer.SearchGadget(gadgetPoint0)
+	gad1, _ := diagram.componentsContainer.SearchGadget(gadgetPoint1)
+	gad2, _ := diagram.componentsContainer.SearchGadget(gadgetPoint2)
+	gad3, _ := diagram.componentsContainer.SearchGadget(gadgetPoint3)
+
+	t.Run("StartAddAssociation", func(t *testing.T) {
+		err := diagram.StartAddAssociation(gadgetPoint0)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+
+	var a *component.Association
+	t.Run("EndAddAssociation", func(t *testing.T) {
+		err := diagram.EndAddAssociation(component.Extension, gadgetPoint1)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		for _, c := range diagram.componentsContainer.GetAll() {
+			switch tmp := c.(type) {
+			case *component.Association:
+				a = tmp
+			}
+			if a != nil {
+				break
+			}
+		}
+		if a == nil {
+			t.Errorf("add association fail")
+		}
+		if a.GetParentStart() != gad0 {
+			t.Errorf("incorrect start parent")
+		}
+		if a.GetParentEnd() != gad1 {
+			t.Errorf("incorrect end parent")
+		}
+
+		stList := diagram.associations[gad0][0]
+		if !slices.Contains(stList, a) {
+			t.Errorf("not in stList of diagram.associations")
+		}
+		enList := diagram.associations[gad1][1]
+		if !slices.Contains(enList, a) {
+			t.Errorf("not in enList of diagram.associations")
+		}
+	})
+
+	t.Run("SetParentStartComponent", func(t *testing.T) {
+		if a == nil {
+			t.Errorf("add association fail")
+		}
+
+		diagram.UnselectAllComponents()
+		dd := a.GetDrawData().(drawdata.Association)
+		midPoint := utils.Point{
+			X: (dd.StartX + dd.EndX) / 2,
+			Y: (dd.StartY + dd.EndY) / 2,
+		}
+		diagram.SelectComponent(midPoint)
+		c, _ := diagram.getSelectedComponent()
+		if a != c.(*component.Association) {
+			t.Errorf("can not select added association")
+		}
+
+		err := diagram.SetParentStartComponent(gadgetPoint2)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != gad2 {
+			t.Errorf("incorrect start parent")
+		}
+		stListOld := diagram.associations[gad0][0]
+		stListNew := diagram.associations[gad2][0]
+		if slices.Contains(stListOld, a) {
+			t.Errorf("updated association in old stList")
+		}
+		if !slices.Contains(stListNew, a) {
+			t.Errorf("updated association not in new stList")
+		}
+	})
+
+	t.Run("SetParentEndComponent", func(t *testing.T) {
+		if a == nil {
+			t.Errorf("add association fail")
+		}
+
+		diagram.UnselectAllComponents()
+		dd := a.GetDrawData().(drawdata.Association)
+		midPoint := utils.Point{
+			X: (dd.StartX + dd.EndX) / 2,
+			Y: (dd.StartY + dd.EndY) / 2,
+		}
+		diagram.SelectComponent(midPoint)
+		c, _ := diagram.getSelectedComponent()
+		if a != c.(*component.Association) {
+			t.Errorf("can not select added association")
+		}
+
+		err := diagram.SetParentEndComponent(gadgetPoint3)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentEnd() != gad3 {
+			t.Errorf("incorrect end parent")
+		}
+		enListOld := diagram.associations[gad1][1]
+		enListNew := diagram.associations[gad3][1]
+		if slices.Contains(enListOld, a) {
+			t.Errorf("updated association in old enList")
+		}
+		if !slices.Contains(enListNew, a) {
+			t.Errorf("updated association not in new enList")
+		}
+	})
 }
 
 func TestRegisterUpdateParentDraw(t *testing.T) {
