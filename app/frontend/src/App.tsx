@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
+import React, { useEffect, useState } from "react";
+import { offBackendEvent, onBackendEvent, ToPoint } from "./utils/wailsBridge";
 
 import {
     EndAddAssociation,
@@ -8,14 +8,14 @@ import {
     StartAddAssociation
 } from "../wailsjs/go/umlproject/UMLProject";
 
-import {AssociationProps, CanvasProps, GadgetProps} from "./utils/Props";
+import { AssociationProps, CanvasProps, GadgetProps } from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
-import {GadgetPopup} from "./components/CreateGadgetPopup";
+import { GadgetPopup } from "./components/CreateGadgetPopup";
 import Toolbar from "./components/Toolbar";
 import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
-import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
-import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
-import {useAssociationUpdater} from "./hooks/useAssociationUpdater";
+import { useBackendCanvasData } from "./hooks/useBackendCanvasData";
+import { useGadgetUpdater } from "./hooks/useGadgetUpdater";
+import { useAssociationUpdater } from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
 
 const App: React.FC = () => {
@@ -28,15 +28,15 @@ const App: React.FC = () => {
     const [assStartPoint, setAssStartPoint] = useState<{ x: number, y: number } | null>(null);
     const [assEndPoint, setAssEndPoint] = useState<{ x: number, y: number } | null>(null);
 
-    const {backendData, reloadBackendData} = useBackendCanvasData();
+    const { backendData, reloadBackendData } = useBackendCanvasData();
 
-    const {handleUpdateGadgetProperty, handleAddAttributeToGadget} = useGadgetUpdater(
+    const { handleUpdateGadgetProperty, handleAddAttributeToGadget } = useGadgetUpdater(
         selectedComponent as GadgetProps | null,
         backendData,
         reloadBackendData
     );
 
-    const {handleUpdateAssociationProperty, handleAddAttributeToAssociation} = useAssociationUpdater(
+    const { handleUpdateAssociationProperty, handleAddAttributeToAssociation } = useAssociationUpdater(
         selectedComponent as AssociationProps | null,
         backendData,
         reloadBackendData
@@ -88,7 +88,7 @@ const App: React.FC = () => {
         setShowAssPopup(false);
     };
 
-    const handleSelectionChange = (component: GadgetProps| AssociationProps | null, count: number) => {
+    const handleSelectionChange = (component: GadgetProps | AssociationProps | null, count: number) => {
         setSelectedComponent(component);
     };
 

@@ -1,13 +1,13 @@
-import React, {useEffect, useRef, useState} from "react";
-import {GadgetProps} from "../utils/Props";
-import {attribute} from "../../wailsjs/go/models";
+import React, { useEffect, useRef, useState } from "react";
+import { GadgetProps } from "../utils/Props";
+import { attribute } from "../../wailsjs/go/models";
 
 type FontFile = {
     default: string;
 };
 
 let fontFiles: Record<string, FontFile>;
-fontFiles = import.meta.glob<FontFile>('../assets/fonts/*.woff2', {eager: true});
+fontFiles = import.meta.glob<FontFile>('../assets/fonts/*.woff2', { eager: true });
 
 const getFontOptions = () => {
     return Object.keys(fontFiles).map(path => {
@@ -23,10 +23,10 @@ interface GadgetPropertiesPanelProps {
 }
 
 const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
-        selectedGadget,
-        updateGadgetProperty,
-        addAttributeToGadget
-    }) => {
+    selectedGadget,
+    updateGadgetProperty,
+    addAttributeToGadget
+}) => {
     return (
         <div className="absolute right-0 top-0 w-[300px] h-full bg-gray-100 p-5 shadow-md overflow-y-auto">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Gadget Properties</h3>
@@ -129,8 +129,8 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                             updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleB`, newStyle);
                                         }}
                                         className={`px-3 py-2 border rounded-md ${(attr.fontStyle & attribute.Textstyle.Bold) !== 0
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-white text-gray-700 border-gray-300'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-white text-gray-700 border-gray-300'
                                             } hover:bg-blue-600 hover:text-white font-bold`}
                                     >
                                         B
@@ -148,8 +148,8 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                             updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleI`, newStyle);
                                         }}
                                         className={`px-3 py-2 border rounded-md ${(attr.fontStyle & attribute.Textstyle.Italic) !== 0
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-white text-gray-700 border-gray-300'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-white text-gray-700 border-gray-300'
                                             } hover:bg-blue-600 hover:text-white italic`}
                                     >
                                         I
@@ -167,8 +167,8 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                             updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontStyleU`, newStyle);
                                         }}
                                         className={`px-3 py-2 border rounded-md ${(attr.fontStyle & attribute.Textstyle.Underline) !== 0
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-white text-gray-700 border-gray-300'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-white text-gray-700 border-gray-300'
                                             } hover:bg-blue-600 hover:text-white underline`}
                                     >
                                         U
