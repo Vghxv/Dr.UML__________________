@@ -1,21 +1,20 @@
 package umlproject
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"maps"
-	"os"
-	"slices"
-	"time"
-
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/titanous/json5"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"maps"
+	"os"
+	"slices"
+	"time"
 )
 
 type UMLProject struct {
@@ -147,17 +146,6 @@ func (p *UMLProject) SetAttrFontComponent(section int, index int, font string) d
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	if err := p.currentDiagram.SetAttrFontComponent(section, index, font); err != nil {
-		return err
-	}
-	p.lastModified = time.Now()
-	return nil
-}
-
-func (p *UMLProject) SetAttrRatioComponent(section int, index int, ratio float64) duerror.DUError {
-	if p.currentDiagram == nil {
-		return duerror.NewInvalidArgumentError("No current diagram selected")
-	}
-	if err := p.currentDiagram.SetAttrRatioComponent(section, index, ratio); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()
