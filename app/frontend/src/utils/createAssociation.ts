@@ -220,7 +220,7 @@ class AssociationElement {
     }
 
     drawSelfAss(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
-        const { startX, startY, endX, endY, deltaX, deltaY } = this.assProps;
+        const {startX, startY, endX, endY, deltaX, deltaY} = this.assProps;
         const p0x = startX, p0y = startY;
         const p1x = startX + deltaX, p1y = startY + deltaY;
         const p2x = endX + deltaX, p2y = endY + deltaY;
