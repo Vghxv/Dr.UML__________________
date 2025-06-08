@@ -425,7 +425,7 @@ func TestLoadGadgetAttributes(t *testing.T) {
 	expectedContent := "test content"
 	expectedSize := 12
 	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
 
 	savedAttributeBase := utils.SavedAtt{
 		Content:  expectedContent,
@@ -467,7 +467,7 @@ func TestLoadGadgetAttributesButWithJsonStr(t *testing.T) {
 		"Content": "test content",
 		"Size": 12,
 		"Style": 3,
-		"FontFile": "` + os.Getenv("APP_ROOT") + `/assets/Inkfree.ttf"
+		"FontFile": "` + os.Getenv("APP_ROOT") + `/frontend/src//assets/fonts/Inkfree.ttf"
 	}`
 
 	var savedAttributeBase utils.SavedAtt
@@ -507,7 +507,7 @@ func TestLoadGadgets(t *testing.T) {
 	expectedContent := "test content"
 	expectedSize := 12
 	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
 
 	savedAttributeBase := utils.SavedAtt{
 		Content:  expectedContent,
@@ -611,7 +611,7 @@ func TestUMLDiagram_loadAssAttributes(t *testing.T) {
 
 	expectedContent := "test"
 	expectedStyle := int(attribute.Bold)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
 	expectedRatio := 0.69
 
 	savedAttBase := utils.SavedAtt{

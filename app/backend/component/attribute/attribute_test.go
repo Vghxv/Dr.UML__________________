@@ -770,7 +770,7 @@ func TestNewAttributeButTakesEverything(t *testing.T) {
 	expectedContent := "test content"
 	expectedSize := 12
 	expectedStyle := Textstyle(Bold | Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
 
 	att, err := FromSavedAttribute(utils.SavedAtt{
 		Content:  expectedContent,
@@ -791,7 +791,7 @@ func TestToSavedAttribute(t *testing.T) {
 	expectedContent := "test content"
 	expectedSize := 12
 	expectedStyle := Textstyle(Bold | Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/assets/Inkfree.ttf"
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
 
 	att := &Attribute{
 		content:  expectedContent,
