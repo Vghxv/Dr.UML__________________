@@ -4,8 +4,8 @@ type CorruptedFile struct {
 	msg string
 }
 
-func NewCorruptedFile(msg string) *FileIOError {
-	return &FileIOError{msg: msg}
+func NewCorruptedFile(msg string) *CorruptedFile {
+	return &CorruptedFile{msg: msg}
 }
 
 func (e *CorruptedFile) Error() string {
