@@ -38,9 +38,9 @@ export function useBackendCanvasData() {
                     attributes: association.attributes
                 }))
             };
-            if (!canvasData.associations || canvasData.associations.length === 0) {
-                canvasData.associations = [mockAssociation];
-            }
+            // if (!canvasData.associations || canvasData.associations.length === 0) {
+            //     canvasData.associations = [mockAssociation];
+            // }
             setBackendData(canvasData);
         } catch (error) {
             console.error("Error loading canvas data:", error);

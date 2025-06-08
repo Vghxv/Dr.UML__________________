@@ -7,24 +7,21 @@ interface ComponentPropertiesPanelProps {
     selectedComponent: GadgetProps | AssociationProps | null;
     updateComponentProperty: (property: string, value: any) => void;
     addAttributeToComponent: (section: number, content: string) => void;
+    addAttributeToAssociation?: (ratio: number, content: string) => void;
 }
 
 const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
     selectedComponent,
     updateComponentProperty,
-    addAttributeToComponent
+    addAttributeToComponent,
+    addAttributeToAssociation
 }) => {
     if (!selectedComponent) return null;
 
-    // Type guard for GadgetProps
-    function isGadgetProps(obj: any): obj is GadgetProps {
-        return obj && Array.isArray(obj.gadgetType);
-    }
-
-    if (isGadgetProps(selectedComponent)) {
+    if ((selectedComponent as GadgetProps).gadgetType !== undefined) {
         return (
             <GadgetPropertiesPanel
-                selectedGadget={selectedComponent}
+                selectedGadget={selectedComponent as GadgetProps}
                 updateGadgetProperty={updateComponentProperty}
                 addAttributeToGadget={addAttributeToComponent}
             />
@@ -32,8 +29,9 @@ const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
     } else {
         return (
             <AssociationPropertiesPanel
-                selectedAssociation={selectedComponent}
+                selectedAssociation={selectedComponent as AssociationProps}
                 updateAssociationProperty={updateComponentProperty}
+                addAttributeToAssociation={addAttributeToAssociation || (() => {})}
             />
         );
     }

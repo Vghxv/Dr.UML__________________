@@ -15,6 +15,7 @@ import Toolbar from "./components/Toolbar";
 import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
 import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
+import {useAssociationUpdater} from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
 
 const App: React.FC = () => {
@@ -35,6 +36,23 @@ const App: React.FC = () => {
         reloadBackendData
     );
 
+    const {handleUpdateAssociationProperty, handleAddAttributeToAssociation} = useAssociationUpdater(
+        selectedComponent as AssociationProps | null,
+        backendData,
+        reloadBackendData
+    );
+
+    // Unified update function that handles both gadgets and associations
+    const handleUpdateComponentProperty = (property: string, value: any) => {
+        if (selectedComponent && (selectedComponent as GadgetProps).gadgetType !== undefined) {
+            // It's a gadget
+            handleUpdateGadgetProperty(property, value);
+        } else {
+            // It's an association
+            handleUpdateAssociationProperty(property, value);
+        }
+    };
+
     const handleGetDiagramName = async () => {
         try {
             const name = await GetCurrentDiagramName();
@@ -45,11 +63,10 @@ const App: React.FC = () => {
     };
 
     const handleAddAss = () => {
-        // setIsAddingAssociation(true);
-        // setAssStartPoint(null);
-        // setAssEndPoint(null);
-        // setShowAssPopup(false);
-        // use mock-data for now
+        setIsAddingAssociation(true);
+        setAssStartPoint(null);
+        setAssEndPoint(null);
+        setShowAssPopup(false);
 
     };
 
@@ -126,8 +143,9 @@ const App: React.FC = () => {
             {selectedComponent && (
                 <ComponentPropertiesPanel
                     selectedComponent={selectedComponent}
-                    updateComponentProperty={handleUpdateGadgetProperty}
+                    updateComponentProperty={handleUpdateComponentProperty}
                     addAttributeToComponent={handleAddAttributeToGadget}
+                    addAttributeToAssociation={handleAddAttributeToAssociation}
                 />
             )}
         </div>

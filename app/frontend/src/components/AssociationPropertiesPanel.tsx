@@ -20,11 +20,13 @@ const getFontOptions = () => {
 interface AssociationPropertiesPanelProps {
     selectedAssociation: AssociationProps;
     updateAssociationProperty: (property: string, value: any) => void;
+    addAttributeToAssociation: (ratio: number, content: string) => void;
 }
 
 const AssociationPropertiesPanel: React.FC<AssociationPropertiesPanelProps> = ({
     selectedAssociation,
-    updateAssociationProperty
+    updateAssociationProperty,
+    addAttributeToAssociation
 }) => {
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const inputRefs = useRef<{ [key: string]: HTMLInputElement | HTMLSelectElement | null }>({});
@@ -121,7 +123,15 @@ const AssociationPropertiesPanel: React.FC<AssociationPropertiesPanelProps> = ({
             </div>
             {/* attributes */}
             <div className="mb-5">
-                <h4 className="text-md font-medium text-gray-700 mb-2">Labels</h4>
+                <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-md font-medium text-gray-700">Labels</h4>
+                    <button
+                        className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                        onClick={() => addAttributeToAssociation(0.5, "sample label")}
+                    >
+                        Add
+                    </button>
+                </div>
                 {selectedAssociation.attributes.map((attr, attrIndex) => (
                     <div key={`attr-${attrIndex}`} className="mb-4 p-3 border border-gray-300 rounded-md bg-white">
                         <div className="mb-3">
