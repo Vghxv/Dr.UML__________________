@@ -1,4 +1,4 @@
-import { AssociationProps } from "./Props";
+import {AssociationProps} from "./Props";
 
 // Association type constants
 enum ASS_TYPE {
