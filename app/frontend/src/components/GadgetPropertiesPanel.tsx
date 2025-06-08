@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { GadgetProps } from "../utils/Props";
 import { attribute } from "../../wailsjs/go/models";
 
-// Define type for font files
 type FontFile = {
     default: string;
 };
