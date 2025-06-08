@@ -448,7 +448,7 @@ func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
 
 func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes []utils.SavedAtt) (duerror.DUError, int) {
 	if gadget == nil {
-		return duerror.NewInvalidArgumentError("UR loading attributes to a nil gadget"), 0
+		return duerror.NewInvalidArgumentError("Cannot load attributes to a nil gadget"), 0
 	}
 	for index, savedAtt := range attributes {
 		newAtt, err := attribute.FromSavedAttribute(savedAtt)
