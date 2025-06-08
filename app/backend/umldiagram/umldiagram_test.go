@@ -6,6 +6,7 @@ import (
 	"Dr.uml/backend/component/attribute"
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
