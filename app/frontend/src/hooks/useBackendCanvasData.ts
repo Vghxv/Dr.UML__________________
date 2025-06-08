@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { offBackendEvent, onBackendEvent } from "../utils/wailsBridge";
 import { GetDrawData } from "../../wailsjs/go/umlproject/UMLProject";
 import { CanvasProps } from "../utils/Props";
-import { mockAssociation } from "../assets/mock/ass";
+// import { mockAssociation } from "../assets/mock/ass";
 
 export function useBackendCanvasData() {
     const [backendData, setBackendData] = useState<CanvasProps | null>(null);
@@ -92,5 +92,5 @@ export function useBackendCanvasData() {
         };
     }, [reloadBackendData]);
 
-    return { backendData, reloadBackendData, setBackendData };
+    return { backendData, reloadBackendData };
 }

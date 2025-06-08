@@ -22,13 +22,13 @@ const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
-    const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
+    // const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
     const [isAddingAssociation, setIsAddingAssociation] = useState(false);
     const [showAssPopup, setShowAssPopup] = useState(false);
     const [assStartPoint, setAssStartPoint] = useState<{ x: number, y: number } | null>(null);
     const [assEndPoint, setAssEndPoint] = useState<{ x: number, y: number } | null>(null);
 
-    const {backendData, setBackendData, reloadBackendData} = useBackendCanvasData();
+    const {backendData, reloadBackendData} = useBackendCanvasData();
 
     const {handleUpdateGadgetProperty, handleAddAttributeToGadget} = useGadgetUpdater(
         selectedComponent as GadgetProps | null,
@@ -43,15 +43,6 @@ const App: React.FC = () => {
     );
 
     // Unified update function that handles both gadgets and associations
-    const handleUpdateComponentProperty = (property: string, value: any) => {
-        if (selectedComponent && (selectedComponent as GadgetProps).gadgetType !== undefined) {
-            // It's a gadget
-            handleUpdateGadgetProperty(property, value);
-        } else {
-            // It's an association
-            handleUpdateAssociationProperty(property, value);
-        }
-    };
 
     const handleGetDiagramName = async () => {
         try {
@@ -102,7 +93,7 @@ const App: React.FC = () => {
 
     const handleSelectionChange = (component: GadgetProps| AssociationProps | null, count: number) => {
         setSelectedComponent(component);
-        setSelectedGadgetCount(count);
+        // setSelectedGadgetCount(count);
     };
 
     return (
@@ -140,11 +131,13 @@ const App: React.FC = () => {
                     onClose={handleAssPopupClose}
                 />
             )}
+            {/* TODO generalize updateProperty and addAttributeToXXX */}
             {selectedComponent && (
                 <ComponentPropertiesPanel
                     selectedComponent={selectedComponent}
-                    updateComponentProperty={handleUpdateComponentProperty}
-                    addAttributeToComponent={handleAddAttributeToGadget}
+                    updateGadgetProperty={handleUpdateGadgetProperty}
+                    updateAssociationProperty={handleUpdateAssociationProperty}
+                    addAttributeToGadget={handleAddAttributeToGadget}
                     addAttributeToAssociation={handleAddAttributeToAssociation}
                 />
             )}

@@ -5,15 +5,17 @@ import AssociationPropertiesPanel from "./AssociationPropertiesPanel";
 
 interface ComponentPropertiesPanelProps {
     selectedComponent: GadgetProps | AssociationProps | null;
-    updateComponentProperty: (property: string, value: any) => void;
-    addAttributeToComponent: (section: number, content: string) => void;
-    addAttributeToAssociation?: (ratio: number, content: string) => void;
+    updateGadgetProperty: (property: string, value: any) => void;
+    updateAssociationProperty: (property: string, value: any) => void;
+    addAttributeToGadget: (section: number, content: string) => void;
+    addAttributeToAssociation: (ratio: number, content: string) => void;
 }
 
 const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
     selectedComponent,
-    updateComponentProperty,
-    addAttributeToComponent,
+    updateGadgetProperty,
+    updateAssociationProperty,
+    addAttributeToGadget,
     addAttributeToAssociation
 }) => {
     if (!selectedComponent) return null;
@@ -22,16 +24,16 @@ const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
         return (
             <GadgetPropertiesPanel
                 selectedGadget={selectedComponent as GadgetProps}
-                updateGadgetProperty={updateComponentProperty}
-                addAttributeToGadget={addAttributeToComponent}
+                updateGadgetProperty={updateGadgetProperty}
+                addAttributeToGadget={addAttributeToGadget}
             />
         );
     } else {
         return (
             <AssociationPropertiesPanel
                 selectedAssociation={selectedComponent as AssociationProps}
-                updateAssociationProperty={updateComponentProperty}
-                addAttributeToAssociation={addAttributeToAssociation || (() => {})}
+                updateAssociationProperty={updateAssociationProperty}
+                addAttributeToAssociation={addAttributeToAssociation}
             />
         );
     }
