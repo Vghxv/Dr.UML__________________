@@ -29,22 +29,24 @@ func NewAssAttribute(ratio float64, content string) (*AssAttribute, duerror.DUEr
 		ratio:     ratio,
 	}
 	att.Attribute.RegisterUpdateParentDraw(func() duerror.DUError {
-		att.updateDrawData()
+		att.UpdateDrawData()
 		return nil
 	})
-	att.updateDrawData()
+	att.UpdateDrawData()
 	return att, nil
 }
 
-func FromSavedAssAttributes(savedAssAtt utils.SavedAtt) (*AssAttribute, duerror.DUError) {
-	ass, err := NewAssAttribute(savedAssAtt.Ratio, savedAssAtt.Content)
-	if err != nil {
-		return nil, err
+func FromSavedAssAttribute(savedAssAtt utils.SavedAtt) (*AssAttribute, duerror.DUError) {
+	ass := &AssAttribute{
+		Attribute: Attribute{
+			content:  savedAssAtt.Content,
+			size:     savedAssAtt.Size,
+			style:    Textstyle(savedAssAtt.Style),
+			fontFile: savedAssAtt.FontFile,
+		},
+		ratio: savedAssAtt.Ratio,
 	}
-	ass.SetSize(savedAssAtt.Size)
-	ass.SetStyle(Textstyle(savedAssAtt.Style))
-	ass.SetFontFile(savedAssAtt.FontFile)
-
+	ass.UpdateDrawData()
 	return ass, nil
 }
 
@@ -74,11 +76,11 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
 	att.ratio = ratio
-	att.updateDrawData()
+	att.UpdateDrawData()
 	return nil
 }
 
-func (att *AssAttribute) updateDrawData() {
+func (att *AssAttribute) UpdateDrawData() {
 	att.assDD.Content = att.content
 	att.assDD.FontSize = att.size
 	att.assDD.FontStyle = int(att.style)
