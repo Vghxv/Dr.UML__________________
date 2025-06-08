@@ -410,7 +410,7 @@ func TestLoadProject(t *testing.T) {
 	err = p.LoadProject(filename)
 	assert.NoError(t, err)
 	assert.Equal(t, filename, p.GetName())
-	assert.Contains(t, p.GetAvailableDiagramsNames(), os.Getenv("APP_ROOT")+"/backend/example.json5")
+	assert.Contains(t, p.GetAvailableDiagramsNames(), "path/to/diagram1.json5")
 }
 
 func TestSaveProject(t *testing.T) {
