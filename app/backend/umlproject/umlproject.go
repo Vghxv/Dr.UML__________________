@@ -1,20 +1,21 @@
 package umlproject
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"maps"
+	"os"
+	"slices"
+	"time"
+
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
-	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/titanous/json5"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"maps"
-	"os"
-	"slices"
-	"time"
 )
 
 type UMLProject struct {
@@ -152,6 +153,39 @@ func (p *UMLProject) SetAttrFontComponent(section int, index int, font string) d
 	return nil
 }
 
+func (p *UMLProject) SetAttrRatioComponent(section int, index int, ratio float64) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAttrRatioComponent(section, index, ratio); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetParentStartComponent(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetParentStartComponent(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) SetParentEndComponent(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetParentEndComponent(point); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
 // methods
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx
@@ -270,6 +304,28 @@ func (p *UMLProject) RemoveAttributeFromGadget(section int, index int) duerror.D
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	if err := p.currentDiagram.RemoveAttributeFromGadget(section, index); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) AddAttributeToAssociation(ratio float64, content string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.AddAttributeToAssociation(ratio, content); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) RemoveAttributeFromAssociation(index int) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.RemoveAttributeFromAssociation(index); err != nil {
 		return err
 	}
 	p.lastModified = time.Now()

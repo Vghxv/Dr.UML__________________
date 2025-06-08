@@ -1,10 +1,11 @@
 package umlproject
 
 import (
-	"Dr.uml/backend/drawdata"
 	"os"
 	"testing"
 	"time"
+
+	"Dr.uml/backend/drawdata"
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
@@ -306,6 +307,34 @@ func TestAddAttributeToGadget(t *testing.T) {
 	assert.NoError(t, err)
 	err = p.AddAttributeToGadget(1, "newAttribute")
 	assert.Error(t, err)
+}
+
+func TestAddAttributeToAssociation(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+	// Start adding an association
+	err = p.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, "sample header")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 200, Y: 200}, 0, drawdata.DefaultGadgetColor, "sample header")
+	assert.NoError(t, err)
+	// Start adding association
+	err = p.StartAddAssociation(utils.Point{X: 1, Y: 1})
+	assert.NoError(t, err)
+	// End adding association
+	err = p.EndAddAssociation(component.Composition, utils.Point{X: 201, Y: 201})
+	assert.NoError(t, err)
+	// Add attribute to the association
+	err = p.SelectComponent(utils.Point{X: 50, Y: 50})
+	assert.NoError(t, err)
+	err = p.AddAttributeToAssociation(0.5, "newAttribute")
+	assert.NoError(t, err)
+	err = p.SetAttrContentComponent(0, 0, "aaaaaaaah")
+	assert.NoError(t, err)
+	assert.Equal(t, "aaaaaaaah", p.GetDrawData().Associations[0].Attributes[0].Content)
 }
 
 func TestSelectComponent(t *testing.T) {
