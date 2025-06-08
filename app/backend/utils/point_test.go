@@ -138,7 +138,7 @@ func Test_SubPoints(t *testing.T) {
 	}
 }
 
-func TestPointStringConversation(t *testing.T) {
+func TestPointStringConversion(t *testing.T) {
 	strings := []string{
 		"0, 0",
 		"1, 2",
