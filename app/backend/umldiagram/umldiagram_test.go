@@ -469,7 +469,7 @@ func TestLoadGadgetAttributesButWithJsonStr(t *testing.T) {
 		"Style": 3,
 		"FontFile": "` + os.Getenv("APP_ROOT") + `/frontend/src//assets/fonts/Inkfree.ttf"
 	}`
-
+	jsonStr = strings.ReplaceAll(jsonStr, "\\", "/")
 	var savedAttributeBase utils.SavedAtt
 	err = json.Unmarshal([]byte(jsonStr), &savedAttributeBase)
 	assert.NoError(t, err)
