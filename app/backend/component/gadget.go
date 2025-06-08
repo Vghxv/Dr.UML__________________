@@ -77,9 +77,7 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr 
 func FromSavedGadget(savedGadget utils.SavedGad) (*Gadget, duerror.DUError) {
 	point, err := utils.FromString(savedGadget.Point)
 	if err != nil {
-		return nil, duerror.NewCorruptedFile(
-			fmt.Sprintf("Error when parsing the point of gadget"),
-		)
+		return nil, err
 	}
 	gadget, err := NewGadget(
 		GadgetType(savedGadget.GadgetType),
