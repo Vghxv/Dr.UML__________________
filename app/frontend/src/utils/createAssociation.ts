@@ -241,7 +241,6 @@ export function createAss(type: string, config: AssociationProps, margin: number
         case "Association": {
             return new AssociationElement(config, margin);
         }
-        // 可在此擴充更多 Association 類型
         default:
             throw new Error(`Unknown association type: ${type}`);
     }
