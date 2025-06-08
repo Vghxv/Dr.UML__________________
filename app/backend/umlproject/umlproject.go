@@ -227,7 +227,7 @@ func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
 		return duerror.NewInvalidArgumentError("Diagram not loaded")
 	}
 	if p.currentDiagram != nil && p.currentDiagram.GetName() == diagramName {
-		if p.currentDiagram.IfUnsavedChangesExist() {
+		if p.currentDiagram.HasUnsavedChanges() {
 			err := p.SaveDiagram(diagramName)
 			if err != nil {
 				return duerror.NewParsingError(fmt.Sprintf("Failed to save diagram %s before closing.\n Error: %s", diagramName, err.Error()))
@@ -496,7 +496,7 @@ func (p *UMLProject) SaveProject(filename string) duerror.DUError {
 		Diagrams: p.GetAvailableDiagramsNames(),
 	}
 	for _, diagram := range p.activeDiagrams {
-		if diagram.IfUnsavedChangesExist() {
+		if diagram.HasUnsavedChanges() {
 			if err := p.SaveDiagram(diagram.GetName()); err != nil {
 				return duerror.NewParsingError(fmt.Sprintf("Failed to save diagram %s before saving project.\n Error: %s", diagram.GetName(), err.Error()))
 			}

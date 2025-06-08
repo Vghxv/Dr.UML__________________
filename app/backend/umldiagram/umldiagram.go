@@ -738,7 +738,7 @@ func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedDiagram, duerror.
 	return res, nil
 }
 
-func (ud *UMLDiagram) IfUnsavedChangesExist() bool {
+func (ud *UMLDiagram) HasUnsavedChanges() bool {
 	return ud.lastModified.After(ud.lastSave)
 }
 
