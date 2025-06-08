@@ -68,6 +68,38 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 	return a, nil
 }
 
+func FromSavedAssociation(saved utils.SavedAss, parents [2]*Gadget) (*Association, duerror.DUError) {
+	if parents[0] == nil || parents[1] == nil {
+		return nil, duerror.NewInvalidArgumentError("At least one of the parent is nil")
+	}
+	ass := &Association{
+		assType:         AssociationType(saved.AssType),
+		layer:           saved.Layer,
+		parents:         parents,
+		startPointRatio: saved.StartPointRatio,
+		endPointRatio:   saved.EndPointRatio,
+	}
+
+	return ass, nil
+}
+
+func (ass *Association) ToSavedAssociation(parents [2]int) utils.SavedAss {
+	savedAss := utils.SavedAss{
+		AssType:         int(ass.assType),
+		Layer:           ass.layer,
+		StartPointRatio: ass.startPointRatio,
+		EndPointRatio:   ass.endPointRatio,
+		Attributes:      make([]utils.SavedAtt, 0, len(ass.attributes)),
+	}
+	savedAss.Parents = []int{parents[0], parents[1]}
+
+	for _, att := range ass.attributes {
+		savedAss.Attributes = append(savedAss.Attributes, att.ToSavedAssAttribute())
+	}
+
+	return savedAss
+}
+
 // other function
 func snapToEdge(rec utils.Point, width int, height int, ratio [2]float64) utils.Point {
 	// snap a point onto the edge of a rectangle, the point is float {xRatio, yRatio}

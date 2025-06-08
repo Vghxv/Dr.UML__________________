@@ -82,6 +82,6 @@ func (cp *containerMap) GetAll() []component.Component {
 	return slices.Collect(maps.Keys(cp.compMap))
 }
 
-func (cp *containerMap) Len() (int, duerror.DUError) {
-	return len(cp.compMap), nil
+func (cp *containerMap) Len() int {
+	return len(cp.compMap)
 }

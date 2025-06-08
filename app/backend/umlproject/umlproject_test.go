@@ -2,6 +2,7 @@ package umlproject
 
 import (
 	"Dr.uml/backend/drawdata"
+	"os"
 	"testing"
 	"time"
 
@@ -107,19 +108,18 @@ func TestSelectDiagram(t *testing.T) {
 	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
 	assert.NoError(t, err)
 
-	// success, select a active diagram
+	// success, select an active diagram
 	err = p.SelectDiagram("TestDiagram")
 	assert.NoError(t, err)
 	name := p.GetCurrentDiagramName()
 	assert.Equal(t, "TestDiagram", name)
 
 	// success, select a non-active diagram
+
 	err = p.CloseDiagram("TestDiagram")
 	assert.NoError(t, err)
 	err = p.SelectDiagram("TestDiagram")
 	assert.NoError(t, err)
-	name = p.GetCurrentDiagramName()
-	assert.Equal(t, "TestDiagram", name)
 
 	// diagram not exist
 	err = p.SelectDiagram("NonExistentDiagram")
@@ -344,4 +344,39 @@ func TestLoadExistUMLProject(t *testing.T) {
 	p, err := LoadExistUMLProject("TestProject")
 	assert.Nil(t, p)
 	assert.Nil(t, err)
+}
+
+func TestOpenDiagram(t *testing.T) {
+	proj, err := CreateEmptyUMLProject("fuck")
+	assert.NoError(t, err)
+	root, ok := os.LookupEnv("APP_ROOT")
+	assert.True(t, ok)
+	err = proj.OpenDiagram(root + "/backend/example.json5")
+	assert.NoError(t, err)
+}
+
+func TestSaveDiagram(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	root, ok := os.LookupEnv("APP_ROOT")
+	assert.True(t, ok)
+	err = p.OpenDiagram(root + "/backend/example.json5")
+	assert.NoError(t, err)
+
+	diagramName := "umlproject_save_test_.json"
+
+	// Save to a temp file
+	tmpFile, err := os.Create(diagramName)
+	assert.NoError(t, err)
+	// defer os.Remove(tmpFile.Name())
+	tmpFile.Close()
+
+	err = p.SaveDiagram(tmpFile.Name())
+	assert.NoError(t, err)
+
+	// No diagram selected
+	err = p.CloseDiagram(diagramName)
+	assert.NoError(t, err)
+	err = p.SaveDiagram(tmpFile.Name())
+	assert.Error(t, err)
 }

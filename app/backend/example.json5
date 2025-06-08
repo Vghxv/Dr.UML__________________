@@ -1,0 +1,102 @@
+{
+  "filetype": 3,
+  "lastEdit": "2025-06-08T17:50:56+08:00",
+  "Gadgets": [
+    {
+      "GadgetType": 1,
+      "point": "6, 9",
+      "layer": 1,
+      "Color": "0xFF0000",
+      "attributes": [
+        {
+          "content": "Why am I doing this?",
+          "size": 11,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.3
+        },
+        {
+          "content": "Why am I doing this?",
+          "size": 11,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.6
+        }
+      ]
+    },
+    {
+      "GadgetType": 1,
+      "point": "10, 100",
+      "layer": 1,
+      "Color": "0x4400ff",
+      "attributes": [
+        {
+          "content": "Why am I doing this?",
+          "size": 11,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.3
+        },
+        {
+          "content": "Why am I doing this?",
+          "size": 11,
+          "style": 1,
+          "fontFile": "",
+          "ratio": 0.3
+        }
+      ]
+    }
+  ],
+  "Associations": [
+    {
+      "assType": 4,
+      "layer": -1,
+      "parents": [
+        0,
+        1
+      ],
+      "startPointRatio": [
+        0.7,
+        0.5
+      ],
+      "endPointRatio": [
+        0.3,
+        0.5
+      ],
+      "attributes": [
+        {
+          "content": "",
+          "size": 1,
+          "style": 7,
+          "fontFile": "",
+          "ratio": 0.38
+        }
+      ]
+    },
+    {
+      "assType": 4,
+      "layer": -12,
+      "parents": [
+        0,
+        0
+      ],
+      "startPointRatio": [
+        0.7,
+        0.5
+      ],
+      "endPointRatio": [
+        1.0,
+        0.6
+      ],
+      "attributes": [
+        {
+          "content": "",
+          "size": 1,
+          "style": 7,
+          "fontFile": "",
+          "ratio": 0.38
+        }
+      ]
+    }
+  ]
+}

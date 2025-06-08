@@ -1,6 +1,9 @@
 package attribute
 
 import (
+	"Dr.uml/backend/utils"
+	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 
 	"Dr.uml/backend/drawdata"
@@ -761,4 +764,44 @@ func TestAttribute_updateDrawData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewAttributeButTakesEverything(t *testing.T) {
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := Textstyle(Bold | Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
+
+	att, err := FromSavedAttribute(utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	},
+	)
+	assert.NoError(t, err)
+	assert.NotNil(t, att)
+	assert.Equal(t, "test content", att.content)
+	assert.Equal(t, 12, att.size)
+	assert.Equal(t, expectedStyle, att.style)
+	assert.Equal(t, expectedFontFile, att.fontFile)
+}
+
+func TestToSavedAttribute(t *testing.T) {
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := Textstyle(Bold | Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
+
+	att := &Attribute{
+		content:  expectedContent,
+		size:     expectedSize,
+		style:    expectedStyle,
+		fontFile: expectedFontFile,
+	}
+	savedAtt := ToSavedAttribute(att)
+	assert.Equal(t, expectedContent, savedAtt.Content)
+	assert.Equal(t, expectedSize, savedAtt.Size)
+	assert.Equal(t, int(expectedStyle), savedAtt.Style)
+	assert.Equal(t, expectedFontFile, savedAtt.FontFile)
 }

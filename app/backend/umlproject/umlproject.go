@@ -1,17 +1,20 @@
 package umlproject
 
 import (
-	"context"
-	"maps"
-	"slices"
-	"time"
-
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/titanous/json5"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"maps"
+	"os"
+	"slices"
+	"time"
 )
 
 type UMLProject struct {
@@ -163,11 +166,10 @@ func (p *UMLProject) SelectDiagram(diagramName string) duerror.DUError {
 		return duerror.NewInvalidArgumentError("Diagram not found")
 	}
 	if _, ok := p.activeDiagrams[diagramName]; !ok {
-		diagram, err := umldiagram.LoadExistUMLDiagram(diagramName)
+		err := p.OpenDiagram(diagramName)
 		if err != nil {
 			return err
 		}
-		p.activeDiagrams[diagramName] = diagram
 	}
 	p.currentDiagram = p.activeDiagrams[diagramName]
 	// TODO: when multiple diagrams exists, unregister the old one
@@ -190,13 +192,19 @@ func (p *UMLProject) CreateEmptyUMLDiagram(diagramType umldiagram.DiagramType, d
 }
 
 func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
-	// TODO: save file?
 	if _, ok := p.activeDiagrams[diagramName]; !ok {
 		return duerror.NewInvalidArgumentError("Diagram not loaded")
 	}
 	if p.currentDiagram != nil && p.currentDiagram.GetName() == diagramName {
+		if p.currentDiagram.IfUnsavedChangesExist() {
+			err := p.SaveDiagram(diagramName)
+			if err != nil {
+				return duerror.NewParsingError(fmt.Sprintf("Failed to save diagram %s before closing.\n Error: %s", diagramName, err.Error()))
+			}
+		}
 		p.currentDiagram = nil
 	}
+
 	delete(p.activeDiagrams, diagramName)
 	return nil
 }
@@ -296,5 +304,89 @@ func (p *UMLProject) InvalidateCanvas() duerror.DUError {
 		return duerror.NewInvalidArgumentError("No current diagram selected")
 	}
 	runtime.EventsEmit(p.ctx, "backend-event", p.GetDrawData())
+	return nil
+}
+
+func (p *UMLProject) OpenDiagram(filename string) duerror.DUError {
+	err := utils.ValidateFilePath(filename)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(filename, os.O_RDONLY, 0644)
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to open file %s.\n Error: %s", filename, err.Error()))
+	}
+	defer file.Close()
+
+	decoder := json5.NewDecoder(file)
+	var savedFileData utils.SavedFile
+
+	if err := decoder.Decode(&savedFileData); err != nil {
+		return duerror.NewInvalidArgumentError(fmt.Sprintf("Failed to decode file %s.\n Error: %s", filename, err.Error()))
+	}
+	if savedFileData.Filetype&utils.SupportedFiletypes == 0 {
+		return duerror.NewInvalidArgumentError(fmt.Sprintf("Unsupported file type %d in file %s", savedFileData.Filetype, filename))
+	}
+	savedFileData.Filetype >>= 1 // Remove the first bit, which is used to indicate if the file is a diagram or submodule
+	switch savedFileData.Filetype {
+	case utils.FiletypeDiagram:
+		dia, err := umldiagram.LoadExistUMLDiagram(filename, savedFileData)
+		if err != nil {
+			return err
+		}
+		p.availableDiagrams[filename] = true
+		p.activeDiagrams[filename] = dia
+		p.lastModified = time.Now()
+		p.currentDiagram = dia
+
+		break
+	case utils.FiletypeSubmodule:
+
+		// TODO
+		break
+	default:
+		return duerror.NewInvalidArgumentError(fmt.Sprintf("Unknown filetype %d", savedFileData.Filetype))
+	}
+
+	return nil
+}
+
+// SaveDiagram saves the current diagram to a file.
+// Caution: Different from other methods, the parameter `filename` is used as the file name to save the diagram
+// instead of selecting from the available diagrams.
+func (p *UMLProject) SaveDiagram(filename string) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	originalFilename := p.currentDiagram.GetName()
+	savedFileData, err := p.currentDiagram.SaveToFile(filename)
+	if err != nil {
+		return duerror.NewParsingError(fmt.Sprintf("Failed to export diagram %s.\n Error: %s", filename, err.Error()))
+	}
+	if originalFilename != filename {
+		delete(p.availableDiagrams, originalFilename)
+		delete(p.activeDiagrams, originalFilename)
+		p.availableDiagrams[filename] = true
+		p.activeDiagrams[filename] = p.currentDiagram
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to create file %s.\n Error: %s", filename, err.Error()))
+	}
+
+	data, err := json.MarshalIndent(savedFileData, "", "  ")
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to marshal data to JSON for file %s.\n Error: %s", filename, err.Error()))
+	}
+	if _, err := file.Write(data); err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to write data to file %s.\n Error: %s", filename, err.Error()))
+	}
+	if err := file.Close(); err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to close file %s.\n Error: %s", filename, err.Error()))
+	}
+
+	p.lastModified = time.Now()
 	return nil
 }

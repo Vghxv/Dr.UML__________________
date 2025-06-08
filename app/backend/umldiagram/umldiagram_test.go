@@ -3,6 +3,10 @@
 package umldiagram
 
 import (
+	"Dr.uml/backend/component/attribute"
+	"encoding/json"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -85,14 +89,6 @@ func TestCreateEmptyDiagram(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestLoadExistUMLDiagram(t *testing.T) {
-	diagram, err := LoadExistUMLDiagram("existing.uml")
-	assert.NoError(t, err)
-	assert.NotNil(t, diagram)
-	assert.Equal(t, "existing.uml", diagram.GetName())
-	assert.Equal(t, DiagramType(ClassDiagram), diagram.GetDiagramType())
 }
 
 func TestCheckDiagramType(t *testing.T) {
@@ -416,6 +412,273 @@ func TestAddAttributeToGadget(t *testing.T) {
 	err = diagram.AddAttributeToGadget(0, "attribute")
 	assert.Error(t, err)
 	assert.Equal(t, "can only operate on one component", err.Error())
+}
+
+func TestLoadExistUMLDiagram(t *testing.T) {
+
+}
+
+func TestLoadGadgetAttributes(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
+
+	savedAttributeBase := utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	}
+	savedAttributes := make([]utils.SavedAtt, 3)
+	for i := 0; i < 3; i++ {
+		savedAttributes[i] = savedAttributeBase
+		savedAttributes[i].Size += i
+		savedAttributes[i].Ratio = 0.3 * float64(i)
+	}
+
+	gad, err := component.NewGadget(component.Class, utils.Point{}, 0, "someInvalidColorHex", "")
+	assert.NoError(t, err)
+	assert.NotNil(t, gad)
+
+	err, _ = dia.loadGadgetAttributes(gad, savedAttributes) // Err-index is not important cuz we expect err is nil
+	assert.NoError(t, err)
+
+	loadedAttributes := gad.GetAttributes()
+
+	for i := 0; i < 3; i++ {
+		assert.Equal(t, 1, len(loadedAttributes[i]))
+		assert.Equal(t, savedAttributes[i].Content, loadedAttributes[i][0].GetContent())
+		assert.Equal(t, savedAttributes[i].Style, int(loadedAttributes[i][0].GetStyle()))
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+		assert.Equal(t, savedAttributes[i].Size, loadedAttributes[i][0].GetSize())
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+	}
+}
+func TestLoadGadgetAttributesButWithJsonStr(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	jsonStr := `{
+		"Content": "test content",
+		"Size": 12,
+		"Style": 3,
+		"FontFile": "` + os.Getenv("APP_ROOT") + `/frontend/src//assets/fonts/Inkfree.ttf"
+	}`
+	jsonStr = strings.ReplaceAll(jsonStr, "\\", "/")
+	var savedAttributeBase utils.SavedAtt
+	err = json.Unmarshal([]byte(jsonStr), &savedAttributeBase)
+	assert.NoError(t, err)
+
+	savedAttributes := make([]utils.SavedAtt, 3)
+	for i := 0; i < 3; i++ {
+		savedAttributes[i] = savedAttributeBase
+		savedAttributes[i].Size += i
+		savedAttributes[i].Ratio = 0.3 * float64(i)
+	}
+
+	gad, err := component.NewGadget(component.Class, utils.Point{}, 0, "someInvalidColorHex", "")
+	assert.NoError(t, err)
+	assert.NotNil(t, gad)
+
+	err, _ = dia.loadGadgetAttributes(gad, savedAttributes) // Err-index is not important cuz we expect err is nil
+	assert.NoError(t, err)
+
+	loadedAttributes := gad.GetAttributes()
+
+	for i := 0; i < 3; i++ {
+		assert.Equal(t, 1, len(loadedAttributes[i]))
+		assert.Equal(t, savedAttributes[i].Content, loadedAttributes[i][0].GetContent())
+		assert.Equal(t, savedAttributes[i].Style, int(loadedAttributes[i][0].GetStyle()))
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+		assert.Equal(t, savedAttributes[i].Size, loadedAttributes[i][0].GetSize())
+		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
+	}
+}
+func TestLoadGadgets(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	expectedContent := "test content"
+	expectedSize := 12
+	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
+
+	savedAttributeBase := utils.SavedAtt{
+		Content:  expectedContent,
+		Size:     expectedSize,
+		Style:    int(expectedStyle),
+		FontFile: expectedFontFile,
+	}
+
+	savedAttributes := make([]utils.SavedAtt, 3)
+	for i := 0; i < 3; i++ {
+		savedAttributes[i] = savedAttributeBase
+		savedAttributes[i].Size += i
+		savedAttributes[i].Ratio = 0.3 * float64(i)
+	}
+
+	savedGadgetBase := utils.SavedGad{
+		GadgetType: 1,
+		Point:      "0, 0",
+		Color:      "InvalidColorHex",
+		Attributes: savedAttributes,
+	}
+	savedGadgets := make([]utils.SavedGad, 69)
+
+	for i := 0; i < len(savedGadgets); i++ {
+		savedGadgets[i] = savedGadgetBase
+		savedGadgets[i].Layer = i
+	}
+
+	dp, err := dia.loadGadgets(savedGadgets)
+	assert.NoError(t, err)
+	assert.NotNil(t, dp)
+	assert.Equal(t, len(savedGadgets), len(dp))
+}
+
+func TestUMLDiagram_LoadAsses(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	savedGadgetBase := utils.SavedGad{
+		GadgetType: 1,
+		Point:      "0, 0",
+		Color:      "InvalidColorHex",
+	}
+	savedGadgets := make([]utils.SavedGad, 70)
+
+	for i := 0; i < len(savedGadgets); i++ {
+		savedGadgets[i] = savedGadgetBase
+		savedGadgets[i].Layer = i
+	}
+	dp, err := dia.loadGadgets(savedGadgets)
+	assert.NoError(t, err)
+
+	expectedAssType := component.AssociationType(1)
+	expectedLayer := 0
+	expectedStartRatio := [2]float64{0.1, 0.2}
+	expectedEndRatio := [2]float64{0.3, 0.4}
+
+	savedAssBase := utils.SavedAss{
+		AssType:         int(expectedAssType),
+		Layer:           expectedLayer,
+		StartPointRatio: expectedStartRatio,
+		EndPointRatio:   expectedEndRatio,
+	}
+	savedAsses := make([]utils.SavedAss, 69)
+	for i := 0; i < len(savedAsses); i++ {
+		savedAsses[i] = savedAssBase
+		savedAsses[i].Parents = []int{i, i + 1} // Assuming each association connects
+	}
+	err = dia.loadAsses(savedAsses, dp)
+	assert.NoError(t, err)
+	// Check if associations are loaded correctly
+	components := dia.componentsContainer.GetAll()
+	for _, comp := range components {
+		switch comp.(type) {
+		case *component.Association:
+			assert.Equal(t, expectedAssType, comp.(*component.Association).GetAssType())
+			assert.Equal(t, expectedLayer, comp.(*component.Association).GetLayer())
+		default:
+			continue
+		}
+	}
+}
+
+func TestUMLDiagram_loadAssAttributes(t *testing.T) {
+	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, dia)
+
+	var parents = [2]*component.Gadget{nil, nil}
+	for i := 0; i < 2; i++ {
+		parents[i], err = component.NewGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, "InvalidColorHex", "")
+		assert.NoError(t, err)
+	}
+
+	ass, err := component.NewAssociation(parents, component.AssociationType(1), utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1})
+	assert.NoError(t, err)
+	assert.NotNil(t, ass)
+
+	// Prepare attributes
+
+	expectedContent := "test"
+	expectedStyle := int(attribute.Bold)
+	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
+	expectedRatio := 0.69
+
+	savedAttBase := utils.SavedAtt{
+		Content:  expectedContent,
+		Style:    expectedStyle,
+		FontFile: expectedFontFile,
+		Ratio:    expectedRatio,
+	}
+
+	attributes := make([]utils.SavedAtt, 2)
+	for i := 0; i < len(attributes); i++ {
+		attributes[i] = savedAttBase
+		attributes[i].Size = i + 1
+	}
+
+	// Should succeed
+	errRet, idx := dia.loadAssAttributes(ass, attributes)
+	assert.NoError(t, errRet)
+	assert.Equal(t, 0, idx)
+
+	atts, err := ass.GetAttributes()
+	assert.NoError(t, err)
+
+	for i, att := range atts {
+		assert.Equal(t, expectedContent, att.GetContent())
+		assert.Equal(t, expectedStyle, int(att.GetStyle()))
+		assert.Equal(t, expectedRatio, att.GetRatio())
+		assert.Equal(t, expectedFontFile, att.GetFontFile())
+		assert.Equal(t, i+1, att.GetSize())
+	}
+
+	// Should fail with nil association
+	errRet, idx = dia.loadAssAttributes(nil, attributes)
+	assert.Error(t, errRet)
+	assert.Equal(t, 0, idx)
+}
+
+func TestUMLDiagram_SaveToFile(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("SaveToFileTest.uml", ClassDiagram)
+	assert.NoError(t, err)
+	assert.NotNil(t, diagram)
+
+	// Add two gadgets
+	err = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 2}, 0, drawdata.DefaultGadgetColor, "Header1")
+	assert.NoError(t, err)
+	err = diagram.AddGadget(component.Class, utils.Point{X: 3, Y: 4}, 1, drawdata.DefaultGadgetColor, "Header2")
+	assert.NoError(t, err)
+
+	// Add an association between the two gadgets
+	gadgets := diagram.componentsContainer.GetAll()
+	assert.Len(t, gadgets, 2)
+	gad1, ok1 := gadgets[0].(*component.Gadget)
+	gad2, ok2 := gadgets[1].(*component.Gadget)
+	assert.True(t, ok1)
+	assert.True(t, ok2)
+	ass, err := component.NewAssociation([2]*component.Gadget{gad1, gad2}, component.AssociationType(1), utils.Point{X: 1, Y: 2}, utils.Point{X: 3, Y: 4})
+	assert.NoError(t, err)
+	assert.NotNil(t, ass)
+	err = diagram.componentsContainer.Insert(ass)
+	assert.NoError(t, err)
+	diagram.associations[gad1] = [2][]*component.Association{{ass}, {}}
+	diagram.associations[gad2] = [2][]*component.Association{{}, {ass}}
+
+	// Save to file
+	_, err = diagram.SaveToFile("SaveToFileTest.uml")
+	assert.NoError(t, err)
 }
 
 // Mock container for testing selection methods

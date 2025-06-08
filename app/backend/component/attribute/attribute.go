@@ -32,6 +32,28 @@ func NewAttribute(content string) (*Attribute, duerror.DUError) {
 	return att, nil
 }
 
+func FromSavedAttribute(savedAtt utils.SavedAtt) (*Attribute, duerror.DUError) {
+	att := &Attribute{
+		content:  savedAtt.Content,
+		size:     savedAtt.Size,
+		style:    Textstyle(savedAtt.Style),
+		fontFile: savedAtt.FontFile,
+	}
+	if err := att.updateDrawData(); err != nil {
+		return nil, err
+	}
+	return att, nil
+}
+
+func ToSavedAttribute(att *Attribute) utils.SavedAtt {
+	return utils.SavedAtt{
+		Content:  att.content,
+		Size:     att.size,
+		Style:    int(att.style),
+		FontFile: att.fontFile,
+	}
+}
+
 func (att *Attribute) getFontFileBase() string {
 	// Extract the base filename with extension
 	baseWithExt := filepath.Base(att.fontFile)
@@ -122,6 +144,10 @@ func (att *Attribute) SetFontFile(fontFile string) duerror.DUError {
 	}
 	att.fontFile = os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/" + fontFile + ".ttf"
 	return att.updateDrawData()
+}
+
+func (att *Attribute) GetFontFile() string {
+	return att.fontFile
 }
 
 // IsBold checks if the bold style is applied to the attribute and returns a boolean along with an error if any occurs.

@@ -5,6 +5,7 @@ import (
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
+	"fmt"
 )
 
 type GadgetType int
@@ -73,6 +74,44 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr 
 	return &g, nil
 }
 
+func FromSavedGadget(savedGadget utils.SavedGad) (*Gadget, duerror.DUError) {
+	point, err := utils.FromString(savedGadget.Point)
+	if err != nil {
+		return nil, err
+	}
+	gadget, err := NewGadget(
+		GadgetType(savedGadget.GadgetType),
+		point,
+		savedGadget.Layer,
+		savedGadget.Color,
+		"",
+	)
+	if err != nil {
+		return nil, duerror.NewCorruptedFile(
+			fmt.Sprintf("Error when creating gadget from saved data: %v", err),
+		)
+	}
+	return gadget, nil
+}
+
+// ToSavedGadget export the Gadget and its attributes to a SavedGadget struct.
+func (g *Gadget) ToSavedGadget() utils.SavedGad {
+	gad := utils.SavedGad{
+		GadgetType: int(g.gadgetType),
+		Point:      g.point.String(),
+		Layer:      g.layer,
+		Color:      g.color,
+		Attributes: make([]utils.SavedAtt, 0, len(g.attributes)),
+	}
+	for section, atts := range g.attributes {
+		for _, att := range atts {
+			gad.Attributes = append(gad.Attributes, attribute.ToSavedAttribute(att))
+			gad.Attributes[len(gad.Attributes)-1].Ratio = 0.3 * float64(section)
+		}
+	}
+	return gad
+}
+
 // Getter
 func (g *Gadget) GetPoint() utils.Point {
 	return g.point
@@ -97,8 +136,13 @@ func (g *Gadget) GetAttributesLen() []int {
 	}
 	return lengths
 }
+
 func (g *Gadget) GetIsSelected() bool {
 	return g.IsSelected
+}
+
+func (g *Gadget) GetAttributes() [][]*attribute.Attribute {
+	return g.attributes
 }
 
 // Setter
@@ -199,6 +243,24 @@ func (g *Gadget) AddAttribute(section int, content string) duerror.DUError {
 	}
 	g.attributes[section] = append(g.attributes[section], att)
 	return g.updateDrawData()
+}
+
+func (g *Gadget) AddBuiltAttribute(section int, att *attribute.Attribute) duerror.DUError {
+	if att == nil {
+		return duerror.NewInvalidArgumentError("The passed attribute is nil")
+	}
+	if err := g.validateSection(section); err != nil {
+		return err
+	}
+	if err := att.RegisterUpdateParentDraw(g.updateDrawData); err != nil {
+		return err
+	}
+	g.attributes[section] = append(g.attributes[section], att)
+	if err := g.updateDrawData(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (g *Gadget) RemoveAttribute(section int, index int) duerror.DUError {
