@@ -8,11 +8,11 @@ import {
     StartAddAssociation
 } from "../wailsjs/go/umlproject/UMLProject";
 
-import {CanvasProps, GadgetProps} from "./utils/Props";
+import {AssociationProps, CanvasProps, GadgetProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
 import {GadgetPopup} from "./components/CreateGadgetPopup";
 import Toolbar from "./components/Toolbar";
-import GadgetPropertiesPanel from "./components/GadgetPropertiesPanel";
+import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
 import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
 import AssociationPopup from "./components/AssociationPopup";
@@ -20,7 +20,7 @@ import AssociationPopup from "./components/AssociationPopup";
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
-    const [selectedGadget, setSelectedGadget] = useState<GadgetProps | null>(null);
+    const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
     const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
     const [isAddingAssociation, setIsAddingAssociation] = useState(false);
     const [showAssPopup, setShowAssPopup] = useState(false);
@@ -30,7 +30,7 @@ const App: React.FC = () => {
     const {backendData, setBackendData, reloadBackendData} = useBackendCanvasData();
 
     const {handleUpdateGadgetProperty, handleAddAttributeToGadget} = useGadgetUpdater(
-        selectedGadget,
+        selectedComponent as GadgetProps | null,
         backendData,
         reloadBackendData
     );
@@ -45,10 +45,12 @@ const App: React.FC = () => {
     };
 
     const handleAddAss = () => {
-        setIsAddingAssociation(true);
-        setAssStartPoint(null);
-        setAssEndPoint(null);
-        setShowAssPopup(false);
+        // setIsAddingAssociation(true);
+        // setAssStartPoint(null);
+        // setAssEndPoint(null);
+        // setShowAssPopup(false);
+        // use mock-data for now
+
     };
 
     const handleCanvasClick = async (point: { x: number, y: number }) => {
@@ -81,8 +83,8 @@ const App: React.FC = () => {
         setShowAssPopup(false);
     };
 
-    const handleSelectionChange = (gadget: GadgetProps | null, count: number) => {
-        setSelectedGadget(gadget);
+    const handleSelectionChange = (component: GadgetProps| AssociationProps | null, count: number) => {
+        setSelectedComponent(component);
         setSelectedGadgetCount(count);
     };
 
@@ -121,12 +123,11 @@ const App: React.FC = () => {
                     onClose={handleAssPopupClose}
                 />
             )}
-            {selectedGadgetCount === 1 && (
-                <GadgetPropertiesPanel
-                    selectedGadget={selectedGadget}
-                    updateGadgetProperty={handleUpdateGadgetProperty}
-                    addAttributeToGadget={handleAddAttributeToGadget}
-                    // 可加上 updateAssociationProperty, addAttributeToAssociation
+            {selectedComponent && (
+                <ComponentPropertiesPanel
+                    selectedComponent={selectedComponent}
+                    updateComponentProperty={handleUpdateGadgetProperty}
+                    addAttributeToComponent={handleAddAttributeToGadget}
                 />
             )}
         </div>
