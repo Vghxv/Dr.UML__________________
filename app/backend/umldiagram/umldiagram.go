@@ -636,7 +636,7 @@ func (ud *UMLDiagram) loadAssAttributes(ass *component.Association, attributes [
 		return duerror.NewInvalidArgumentError("UR loading attributes to a nil ass"), 0
 	}
 	for index, savedAtt := range attributes {
-		newAtt, err := attribute.FromSavedAssAttribute(savedAtt)
+		newAtt, err := attribute.FromSavedAssAttributes(savedAtt)
 		if err != nil {
 			return err, index
 		}
