@@ -85,16 +85,13 @@ func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, du
 	if err != nil {
 		return nil, err
 	}
-	if (file.Filetype&utils.SupportedFiletypes != file.Filetype) && int(file.Filetype) != 0 {
-		return nil, duerror.NewCorruptedFile(fmt.Sprintf("Unsupported filetype: %d", file.Filetype))
-	}
 
 	dp, err := dia.loadGadgets(file.Gadgets)
 	if err != nil {
 		return nil, duerror.NewCorruptedFile(fmt.Sprintf(err.Error()+"from %s", filename))
 	}
 
-	if err = dia.LoadAsses(file.Associations, dp); err != nil {
+	if err = dia.loadAsses(file.Associations, dp); err != nil {
 		return nil, err
 	}
 
@@ -446,6 +443,7 @@ func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
 }
 
 func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes []utils.SavedAtt) (duerror.DUError, int) {
+	const SectionCount = 3 // A gadget has 3 sections: header, attributes, methods. Saving sections in SavedAtt.Ratio
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("Cannot load attributes to a nil gadget"), 0
 	}
@@ -455,7 +453,7 @@ func (ud *UMLDiagram) loadGadgetAttributes(gadget *component.Gadget, attributes 
 			return err, index
 		}
 
-		if err = gadget.AddBuiltAttribute(int(savedAtt.Ratio/0.3), newAtt); err != nil {
+		if err = gadget.AddBuiltAttribute(int(savedAtt.Ratio*SectionCount), newAtt); err != nil {
 			return err, index
 		}
 	}
@@ -493,10 +491,6 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 		dp[index] = gadget
 	}
 
-	if err := ud.updateDrawData(); err != nil {
-		return nil, err
-	}
-
 	return dp, nil
 }
 
@@ -516,7 +510,7 @@ func (ud *UMLDiagram) loadAssAttributes(ass *component.Association, attributes [
 	return nil, 0
 }
 
-func (ud *UMLDiagram) LoadAsses(asses []utils.SavedAss, dp map[int]*component.Gadget) duerror.DUError {
+func (ud *UMLDiagram) loadAsses(asses []utils.SavedAss, dp map[int]*component.Gadget) duerror.DUError {
 	for index, ass := range asses {
 		parents := [2]*component.Gadget{dp[ass.Parents[0]], dp[ass.Parents[1]]}
 		newAss, err := component.FromSavedAssociation(ass, parents)
