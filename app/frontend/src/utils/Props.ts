@@ -25,7 +25,8 @@ export interface GadgetProps {
     }[][];
 }
 
-export interface AssociationProps  {
+export interface AssociationProps {
+
     assType: number;
     layer: number;
     startX: number;
