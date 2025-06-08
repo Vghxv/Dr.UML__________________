@@ -459,7 +459,7 @@ func TestProjectSaveLoadContentEquality(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Save project to a temp file
-	tmpFile, err := os.Create("umlproject_content_test.json")
+	tmpFile, err := os.CreateTemp("", "umlproject_content_test_*.json")
 	assert.NoError(t, err)
 	defer func(name string) {
 		err := os.Remove(name)
