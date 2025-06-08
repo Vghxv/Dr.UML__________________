@@ -1,6 +1,7 @@
 package umlproject
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 	"time"
