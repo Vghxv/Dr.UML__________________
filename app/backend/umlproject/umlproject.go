@@ -521,7 +521,17 @@ func (p *UMLProject) SaveProject(filename string) duerror.DUError {
 	if _, err := file.Write(data); err != nil {
 		return duerror.NewFileIOError(fmt.Sprintf("Failed to write project data to file %s.\n Error: %s", filename, err.Error()))
 	}
-
 	p.lastSave = time.Now()
+
+	return nil
+}
+
+func (p *UMLProject) CloseProject() duerror.DUError {
+	if p.lastModified.After(p.lastSave) {
+		if err := p.SaveProject(p.name); err != nil {
+			return duerror.NewParsingError(fmt.Sprintf("Failed to save project %s before closing.\n Error: %s", p.name, err.Error()))
+		}
+		p.lastSave = p.lastModified
+	}
 	return nil
 }

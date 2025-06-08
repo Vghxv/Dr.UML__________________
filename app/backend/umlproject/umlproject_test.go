@@ -507,3 +507,41 @@ func TestProjectSaveLoadContentEquality(t *testing.T) {
 	// Assert the content is identical
 	assert.Equal(t, string(savedContent), string(loadedContent))
 }
+
+func TestCloseProject(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Create and select a diagram to modify the project
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Save the project to set lastSave
+	tmpFile, err := os.CreateTemp("", "umlproject_close_test_*.json")
+	assert.NoError(t, err)
+	defer func(name string) {
+		_ = os.Remove(name)
+	}(tmpFile.Name())
+	assert.NoError(t, tmpFile.Close())
+
+	err = p.SaveProject(tmpFile.Name())
+	assert.NoError(t, err)
+	err = os.Remove(tmpFile.Name())
+	assert.NoError(t, err)
+
+	time.Sleep(10 * time.Millisecond) // Ensure lastModified is later than lastSave
+	// Modify the project
+	err = p.AddGadget(component.Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "header")
+	assert.NoError(t, err)
+
+	// Call CloseProject, should trigger save
+	err = p.CloseProject()
+	assert.FileExists(t, tmpFile.Name())
+	content, err := os.ReadFile(tmpFile.Name())
+	assert.NoError(t, err)
+	expectedContent := "{\n  \"diagrams\": [\n    \"TestDiagram\"\n  ]\n}"
+	assert.Equal(t, expectedContent, string(content), "Project content should match after close")
+	assert.NoError(t, err)
+}
