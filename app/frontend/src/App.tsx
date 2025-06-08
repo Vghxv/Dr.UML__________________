@@ -8,29 +8,36 @@ import {
     StartAddAssociation
 } from "../wailsjs/go/umlproject/UMLProject";
 
-import {CanvasProps, GadgetProps} from "./utils/Props";
+import {AssociationProps, CanvasProps, GadgetProps} from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
 import {GadgetPopup} from "./components/CreateGadgetPopup";
 import Toolbar from "./components/Toolbar";
-import GadgetPropertiesPanel from "./components/GadgetPropertiesPanel";
+import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
 import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
+import {useAssociationUpdater} from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
-    const [selectedGadget, setSelectedGadget] = useState<GadgetProps | null>(null);
-    const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
+    const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
+    // const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
     const [isAddingAssociation, setIsAddingAssociation] = useState(false);
     const [showAssPopup, setShowAssPopup] = useState(false);
     const [assStartPoint, setAssStartPoint] = useState<{ x: number, y: number } | null>(null);
     const [assEndPoint, setAssEndPoint] = useState<{ x: number, y: number } | null>(null);
 
-    const {backendData, setBackendData, reloadBackendData} = useBackendCanvasData();
+    const {backendData, reloadBackendData} = useBackendCanvasData();
 
     const {handleUpdateGadgetProperty, handleAddAttributeToGadget} = useGadgetUpdater(
-        selectedGadget,
+        selectedComponent as GadgetProps | null,
+        backendData,
+        reloadBackendData
+    );
+
+    const {handleUpdateAssociationProperty, handleAddAttributeToAssociation} = useAssociationUpdater(
+        selectedComponent as AssociationProps | null,
         backendData,
         reloadBackendData
     );
@@ -81,9 +88,8 @@ const App: React.FC = () => {
         setShowAssPopup(false);
     };
 
-    const handleSelectionChange = (gadget: GadgetProps | null, count: number) => {
-        setSelectedGadget(gadget);
-        setSelectedGadgetCount(count);
+    const handleSelectionChange = (component: GadgetProps| AssociationProps | null, count: number) => {
+        setSelectedComponent(component);
     };
 
     return (
@@ -121,12 +127,14 @@ const App: React.FC = () => {
                     onClose={handleAssPopupClose}
                 />
             )}
-            {selectedGadgetCount === 1 && (
-                <GadgetPropertiesPanel
-                    selectedGadget={selectedGadget}
+            {/* TODO generalize updateProperty and addAttributeToXXX */}
+            {selectedComponent && (
+                <ComponentPropertiesPanel
+                    selectedComponent={selectedComponent}
                     updateGadgetProperty={handleUpdateGadgetProperty}
+                    updateAssociationProperty={handleUpdateAssociationProperty}
                     addAttributeToGadget={handleAddAttributeToGadget}
-                    // 可加上 updateAssociationProperty, addAttributeToAssociation
+                    addAttributeToAssociation={handleAddAttributeToAssociation}
                 />
             )}
         </div>

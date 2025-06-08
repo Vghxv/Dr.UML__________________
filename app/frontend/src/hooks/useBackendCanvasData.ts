@@ -33,13 +33,8 @@ export function useBackendCanvasData() {
                     endY: association.endY,
                     deltaX: association.deltaX,
                     deltaY: association.deltaY,
-                    attributes: association.attributes.map(attr => ({
-                        content: attr.content,
-                        fontSize: attr.fontSize,
-                        fontStyle: attr.fontStyle,
-                        fontFile: attr.fontFile,
-                        ratio: attr.ratio
-                    }))
+                    isSelected: association.isSelected,
+                    attributes: association.attributes
                 }))
             };
             setBackendData(canvasData);
@@ -93,5 +88,5 @@ export function useBackendCanvasData() {
         };
     }, [reloadBackendData]);
 
-    return { backendData, reloadBackendData, setBackendData };
+    return { backendData, reloadBackendData };
 }

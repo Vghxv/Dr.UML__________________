@@ -8,7 +8,7 @@ import {useSelection} from '../hooks/useSelection';
 const DrawingCanvas: React.FC<{
     backendData: CanvasProps | null,
     reloadBackendData?: () => void,
-    onSelectionChange?: (selectedGadget: GadgetProps | null, selectedGadgetCount: number) => void,
+    onSelectionChange?: (selectedComponent: GadgetProps | AssociationProps | null, selectedComponentCount: number) => void,
     onCanvasClick?: (point: { x: number, y: number }) => void,
     isAddingAssociation?: boolean
 }> = ({
@@ -19,7 +19,11 @@ const DrawingCanvas: React.FC<{
           isAddingAssociation
       }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const {selectedGadgetCount, selectedGadget} = useSelection(backendData?.gadgets);
+    const allComponents = [
+        ...(backendData?.gadgets ?? []),
+        ...(backendData?.associations ?? [])
+    ];
+    const {selectedComponentCount, selectedComponent} = useSelection(allComponents);
 
     const redrawCanvas = useCallback(() => {
         const canvas = canvasRef.current;
@@ -59,9 +63,9 @@ const DrawingCanvas: React.FC<{
 
     useEffect(() => {
         if (onSelectionChange) {
-            onSelectionChange(selectedGadget, selectedGadgetCount);
+            onSelectionChange(selectedComponent, selectedComponentCount);
         }
-    }, [selectedGadget, selectedGadgetCount, onSelectionChange]);
+    }, [selectedComponent, selectedComponentCount, onSelectionChange]);
     useEffect(() => {
         resizeCanvas();
     }, [resizeCanvas]); // Use resizeCanvas, which already includes redrawCanvas

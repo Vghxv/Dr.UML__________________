@@ -7,7 +7,7 @@ import {
     SetAttrFontComponent,
     SetLayerComponent
 } from "../../wailsjs/go/umlproject/UMLProject";
-import {CanvasProps, AssociationProps} from "../utils/Props";
+import { CanvasProps, AssociationProps } from "../utils/Props";
 import { createSetSingleValue, createSetDoubleValue, createSetTripleValue } from "./updater";
 
 export function useAssociationUpdater(
@@ -33,13 +33,13 @@ export function useAssociationUpdater(
     const handleUpdateAssociationProperty = (property: string, value: any) => {
 
         if (!selectedAssociation || !backendData || !backendData.associations) return;
-        
+
         if (property.includes('.')) {
             const [parentProp, childProp] = property.split('.');
             if (parentProp.startsWith('attributes')) {
                 const matches = parentProp.match(/attributes:(\d+)/);
                 if (matches && matches.length === 2) {
-                    const index = parseInt(matches[1]);                    
+                    const index = parseInt(matches[1]);
                     if (childProp === 'content') {
                         setTripleValue(
                             SetAttrContentComponent,
@@ -98,5 +98,5 @@ export function useAssociationUpdater(
         }
     };
 
-    return {handleUpdateAssociationProperty, handleAddAttributeToAssociation};
+    return { handleUpdateAssociationProperty, handleAddAttributeToAssociation };
 }
