@@ -29,10 +29,10 @@ func NewAssAttribute(ratio float64, content string) (*AssAttribute, duerror.DUEr
 		ratio:     ratio,
 	}
 	att.Attribute.RegisterUpdateParentDraw(func() duerror.DUError {
-		att.UpdateDrawData()
+		att.updateDrawData()
 		return nil
 	})
-	att.UpdateDrawData()
+	att.updateDrawData()
 	return att, nil
 }
 
@@ -46,7 +46,7 @@ func FromSavedAssAttribute(savedAssAtt utils.SavedAtt) (*AssAttribute, duerror.D
 		},
 		ratio: savedAssAtt.Ratio,
 	}
-	ass.UpdateDrawData()
+	ass.updateDrawData()
 	return ass, nil
 }
 
@@ -76,11 +76,11 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 		return duerror.NewInvalidArgumentError("ratio should be between 0 and 1")
 	}
 	att.ratio = ratio
-	att.UpdateDrawData()
+	att.updateDrawData()
 	return nil
 }
 
-func (att *AssAttribute) UpdateDrawData() {
+func (att *AssAttribute) updateDrawData() {
 	att.assDD.Content = att.content
 	att.assDD.FontSize = att.size
 	att.assDD.FontStyle = int(att.style)
