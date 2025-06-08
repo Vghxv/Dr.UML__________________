@@ -7,7 +7,7 @@ type FontFile = {
 };
 
 let fontFiles: Record<string, FontFile>;
-fontFiles = import.meta.glob<FontFile>('../assets/fonts/*.woff2', { eager: true });
+fontFiles = import.meta.glob<FontFile>('../assets/fonts/*.woff2', {eager: true});
 
 const getFontOptions = () => {
     return Object.keys(fontFiles).map(path => {
