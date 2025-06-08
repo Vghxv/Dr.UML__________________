@@ -669,6 +669,7 @@ func TestUMLDiagram_SaveToFile(t *testing.T) {
 	assert.True(t, ok2)
 	ass, err := component.NewAssociation([2]*component.Gadget{gad1, gad2}, component.AssociationType(1), utils.Point{X: 1, Y: 2}, utils.Point{X: 3, Y: 4})
 	assert.NoError(t, err)
+	assert.NotNil(t, ass)
 	err = diagram.componentsContainer.Insert(ass)
 	assert.NoError(t, err)
 	diagram.associations[gad1] = [2][]*component.Association{{ass}, {}}
