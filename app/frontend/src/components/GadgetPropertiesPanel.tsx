@@ -27,27 +27,15 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
         updateGadgetProperty,
         addAttributeToGadget
     }) => {
-    const [focusedInput, setFocusedInput] = useState<string | null>(null);
-    const inputRefs = useRef<{ [key: string]: HTMLInputElement | HTMLSelectElement | null }>({});
-
-    useEffect(() => {
-        if (focusedInput && inputRefs.current[focusedInput]) {
-            inputRefs.current[focusedInput]?.focus();
-        }
-    }, [selectedGadget, focusedInput]);
-
     return (
         <div className="absolute right-0 top-0 w-[300px] h-full bg-gray-100 p-5 shadow-md overflow-y-auto">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Gadget Properties</h3>
-            {/* ...existing code for x, y, layer, color, attributes, etc... */}
             {/* x */}
             <div className="mb-4">
                 <label className="block mb-1 text-sm font-medium text-gray-700">X Position:</label>
                 <input
                     type="number"
                     value={selectedGadget.x}
-                    ref={(el) => inputRefs.current['x'] = el}
-                    onFocus={() => setFocusedInput('x')}
                     onChange={(e) => updateGadgetProperty('x', parseInt(e.target.value))}
                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
@@ -58,8 +46,6 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                 <input
                     type="number"
                     value={selectedGadget.y}
-                    ref={(el) => inputRefs.current['y'] = el}
-                    onFocus={() => setFocusedInput('y')}
                     onChange={(e) => updateGadgetProperty('y', parseInt(e.target.value))}
                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
@@ -70,8 +56,6 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                 <input
                     type="number"
                     value={selectedGadget.layer}
-                    ref={(el) => inputRefs.current['layer'] = el}
-                    onFocus={() => setFocusedInput('layer')}
                     onChange={(e) => updateGadgetProperty('layer', parseInt(e.target.value))}
                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
@@ -82,8 +66,6 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                 <input
                     type="color"
                     value={selectedGadget.color}
-                    ref={(el) => inputRefs.current['color'] = el}
-                    onFocus={() => setFocusedInput('color')}
                     onChange={(e) => updateGadgetProperty('color', e.target.value)}
                     className="w-full h-10 p-1 border border-gray-300 rounded text-black"
                 />
@@ -118,8 +100,6 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                 <input
                                     type="text"
                                     value={attr.content}
-                                    ref={(el) => inputRefs.current[`attributes${groupIndex}:${attrIndex}.content`] = el}
-                                    onFocus={() => setFocusedInput(`attributes${groupIndex}:${attrIndex}.content`)}
                                     onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.content`, e.target.value)}
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 />
@@ -129,8 +109,6 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                 <input
                                     type="number"
                                     value={attr.fontSize}
-                                    ref={(el) => inputRefs.current[`attributes${groupIndex}:${attrIndex}.fontSize`] = el}
-                                    onFocus={() => setFocusedInput(`attributes${groupIndex}:${attrIndex}.fontSize`)}
                                     onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontSize`, parseInt(e.target.value))}
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 />
@@ -201,8 +179,6 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                 <label className="block mb-1 text-sm font-medium text-gray-700">Font File:</label>
                                 <select
                                     value={attr.fontFile}
-                                    ref={(el) => inputRefs.current[`attributes${groupIndex}:${attrIndex}.fontFile`] = el}
-                                    onFocus={() => setFocusedInput(`attributes${groupIndex}:${attrIndex}.fontFile`)}
                                     onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontFile`, e.target.value)}
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 >
