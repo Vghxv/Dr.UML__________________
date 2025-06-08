@@ -1,10 +1,11 @@
 package umldiagram
 
 import (
-	"Dr.uml/backend/component/attribute"
 	"fmt"
 	"slices"
 	"time"
+
+	"Dr.uml/backend/component/attribute"
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/components"
@@ -639,7 +640,7 @@ func (ud *UMLDiagram) loadAssAttributes(ass *component.Association, attributes [
 		if err != nil {
 			return err, index
 		}
-		if err = ass.AddAttribute(newAtt); err != nil {
+		if err = ass.AddLoadedAttribute(newAtt); err != nil {
 			return err, index
 		}
 	}

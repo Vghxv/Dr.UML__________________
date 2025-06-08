@@ -7,8 +7,6 @@ import (
 
 	"Dr.uml/backend/drawdata"
 
-	"Dr.uml/backend/drawdata"
-
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/umldiagram"
 	"Dr.uml/backend/utils"

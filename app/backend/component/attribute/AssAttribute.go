@@ -37,19 +37,13 @@ func NewAssAttribute(ratio float64, content string) (*AssAttribute, duerror.DUEr
 }
 
 func FromSavedAssAttributes(savedAssAtt utils.SavedAtt) (*AssAttribute, duerror.DUError) {
-	ass := &AssAttribute{
-		Attribute: Attribute{
-			content:  savedAssAtt.Content,
-			size:     savedAssAtt.Size,
-			style:    Textstyle(savedAssAtt.Style),
-			fontFile: savedAssAtt.FontFile,
-		},
-		ratio: savedAssAtt.Ratio,
-	}
-
-	if err := ass.updateDrawData(); err != nil {
+	ass, err := NewAssAttribute(savedAssAtt.Ratio, savedAssAtt.Content)
+	if err != nil {
 		return nil, err
 	}
+	ass.SetSize(savedAssAtt.Size)
+	ass.SetStyle(Textstyle(savedAssAtt.Style))
+	ass.SetFontFile(savedAssAtt.FontFile)
 
 	return ass, nil
 }

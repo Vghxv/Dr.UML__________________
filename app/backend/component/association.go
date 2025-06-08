@@ -321,6 +321,12 @@ func (ass *Association) AddAttribute(ratio float64, content string) duerror.DUEr
 	return ass.updateDrawData()
 }
 
+func (ass *Association) AddLoadedAttribute(att *attribute.AssAttribute) duerror.DUError {
+	att.RegisterUpdateParentDraw(ass.updateDrawData)
+	ass.attributes = append(ass.attributes, att)
+	return ass.updateDrawData()
+}
+
 func (ass *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
 	if index < 0 || index >= len(ass.attributes) {
 		return duerror.NewInvalidArgumentError("index out of range")
