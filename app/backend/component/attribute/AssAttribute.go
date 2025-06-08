@@ -8,8 +8,9 @@ import (
 // AssAttribute represents an attribute specific to associations with a ratio property
 type AssAttribute struct {
 	Attribute
-	ratio float64
-	assDD drawdata.AssAttribute
+	ratio                 float64
+	assDD                 drawdata.AssAttribute
+	updateParentDrawOuter func() duerror.DUError
 }
 
 // NewAssAttribute creates a new AssAttribute instance with the specified ratio
@@ -26,6 +27,10 @@ func NewAssAttribute(ratio float64, content string) (*AssAttribute, duerror.DUEr
 		Attribute: *tmp,
 		ratio:     ratio,
 	}
+	att.Attribute.RegisterUpdateParentDraw(func() duerror.DUError {
+		att.updateDrawData()
+		return nil
+	})
 	att.updateDrawData()
 	return att, nil
 }
@@ -54,9 +59,17 @@ func (att *AssAttribute) updateDrawData() {
 	att.assDD.Content = att.content
 	att.assDD.FontSize = att.size
 	att.assDD.FontStyle = int(att.style)
-	att.assDD.FontFile = att.fontFile
+	att.assDD.FontFile = att.getFontFileBase()
 	att.assDD.Ratio = att.ratio
-	if att.updateParentDraw != nil {
-		att.updateParentDraw()
+	if att.updateParentDrawOuter != nil {
+		att.updateParentDrawOuter()
 	}
+}
+
+func (att *AssAttribute) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {
+	if update == nil {
+		return duerror.NewInvalidArgumentError("update function is nil")
+	}
+	att.updateParentDrawOuter = update
+	return nil
 }
