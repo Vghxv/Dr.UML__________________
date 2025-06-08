@@ -48,7 +48,6 @@ type UMLDiagram struct {
 	componentsSelected  map[component.Component]bool
 	associations        map[*component.Gadget][2][]*component.Association
 
-	filename string    // for saving and loading
 	lastEdit time.Time // for saving and loading
 	lastSave time.Time // for saving and loading
 
@@ -83,7 +82,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 }
 
 func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, duerror.DUError) {
-	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype>>1)) // Shift right to remove the filetype bit
+	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype)) // Shift right to remove the filetype bit
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +103,7 @@ func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, du
 		return nil, err
 	}
 
-	dia.filename = filename
+	dia.name = filename
 
 	return dia, nil
 }
@@ -476,7 +475,7 @@ func (ud *UMLDiagram) loadGadgets(gadgets []utils.SavedGad) (map[int]*component.
 
 		if err, errIndex := ud.loadGadgetAttributes(gadget, savedGadget.Attributes); err != nil {
 			return nil, duerror.NewCorruptedFile(fmt.Sprintf(
-				"Error on parsing %d-th attribute of %d gadget.  Detail: %s",
+				"Error on parsing %d-th attribute of %d-th gadget.  Detail: %s",
 				errIndex, index, err.Error()),
 			)
 		}
@@ -528,6 +527,22 @@ func (ud *UMLDiagram) LoadAsses(asses []utils.SavedAss, dp map[int]*component.Ga
 		if err = ud.componentsContainer.Insert(newAss); err != nil {
 			return err
 		}
+		if err, attIndex := ud.loadAssAttributes(newAss, ass.Attributes); err != nil {
+			return duerror.NewCorruptedFile(fmt.Sprintf("Error on adding %d-th attribute for %d-th association: %s", attIndex, index, err.Error()))
+		}
+
+		// I'm a thief
+		tmp := ud.associations[parents[0]]
+		tmp[0] = append(tmp[0], newAss)
+		ud.associations[parents[0]] = tmp
+
+		tmp = ud.associations[parents[1]]
+		tmp[1] = append(tmp[1], newAss)
+		ud.associations[parents[1]] = tmp
+
+		if err = newAss.RegisterUpdateParentDraw(ud.updateDrawData); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -568,12 +583,12 @@ func (ud *UMLDiagram) collectAssociations(dp map[*component.Gadget]int, res *uti
 }
 
 func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedFile, duerror.DUError) {
-	if filename != ud.filename {
-		ud.filename = filename
+	if filename != ud.name {
+		ud.name = filename
 	}
 
 	res := &utils.SavedFile{
-		Filetype:     utils.FiletypeDiagram | int(ud.diagramType),
+		Filetype:     utils.FiletypeDiagram | int(ud.diagramType)<<1,
 		LastEdit:     "",
 		Gadgets:      nil,
 		Associations: nil,
