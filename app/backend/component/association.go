@@ -89,7 +89,7 @@ func FromSavedAssociation(saved utils.SavedAss, parents [2]*Gadget) (*Associatio
 	if err != nil {
 		return nil, duerror.NewInvalidArgumentError("failed to create association: " + err.Error())
 	}
-	// SUSSY_FIX: NewAssociation does not set attributes, so we need to do it manually
+	// TODO: NewAssociation does not set attributes. Consider updating NewAssociation to handle attributes initialization or ensure attributes are set manually here.
 	ass.layer = saved.Layer
 
 	return ass, nil
