@@ -564,21 +564,21 @@ func TestUMLDiagram_LoadAsses(t *testing.T) {
 
 	expectedAssType := component.AssociationType(1)
 	expectedLayer := 0
-	expectedStartPoint := "10, 10"
-	expectedEndPoint := "20, 20"
+	expectedStartRatio := [2]float64{0.1, 0.2}
+	expectedEndRatio := [2]float64{0.3, 0.4}
 
 	savedAssBase := utils.SavedAss{
-		AssType:    int(expectedAssType),
-		Layer:      expectedLayer,
-		StartPoint: expectedStartPoint,
-		EndPoint:   expectedEndPoint,
+		AssType:         int(expectedAssType),
+		Layer:           expectedLayer,
+		StartPointRatio: expectedStartRatio,
+		EndPointRatio:   expectedEndRatio,
 	}
 	savedAsses := make([]utils.SavedAss, 69)
 	for i := 0; i < len(savedAsses); i++ {
 		savedAsses[i] = savedAssBase
 		savedAsses[i].Parents = []int{i, i + 1} // Assuming each association connects
 	}
-	err = dia.LoadAsses(savedAsses, dp)
+	err = dia.loadAsses(savedAsses, dp)
 	assert.NoError(t, err)
 	// Check if associations are loaded correctly
 	components := dia.componentsContainer.GetAll()

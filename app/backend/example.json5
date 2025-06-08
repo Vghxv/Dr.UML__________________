@@ -26,7 +26,7 @@
     },
     {
       "GadgetType": 1,
-      "point": "6, 9",
+      "point": "10, 100",
       "layer": 1,
       "Color": "0x4400ff",
       "attributes": [
@@ -55,8 +55,14 @@
         0,
         1
       ],
-      "startPoint": "6, 9",
-      "endPoint": "6, 29",
+      "startPointRatio": [
+        0.7,
+        0.5
+      ],
+      "endPointRatio": [
+        0.3,
+        0.5
+      ],
       "attributes": [
         {
           "content": "",
@@ -74,8 +80,14 @@
         0,
         0
       ],
-      "startPoint": "6, 9",
-      "endPoint": "6, 29",
+      "startPointRatio": [
+        0.7,
+        0.5
+      ],
+      "endPointRatio": [
+        1.0,
+        0.6
+      ],
       "attributes": [
         {
           "content": "",

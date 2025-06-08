@@ -38,9 +38,6 @@ type Association struct {
 	isSelected       bool
 	updateParentDraw func() duerror.DUError
 
-	start utils.Point
-	end   utils.Point
-
 	startPointRatio [2]float64
 	endPointRatio   [2]float64
 }
@@ -58,8 +55,6 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 	a := &Association{
 		assType: assType,
 		parents: [2]*Gadget{parents[0], parents[1]},
-		start:   stPoint,
-		end:     enPoint,
 		startPointRatio: [2]float64{
 			float64(stPoint.X-stGdd.X) / float64(stGdd.Width),
 			float64(stPoint.Y-stGdd.Y) / float64(stGdd.Height)},
@@ -77,31 +72,24 @@ func FromSavedAssociation(saved utils.SavedAss, parents [2]*Gadget) (*Associatio
 	if parents[0] == nil || parents[1] == nil {
 		return nil, duerror.NewInvalidArgumentError("At least one of the parent is nil")
 	}
-	startPoint, err := utils.FromString(saved.StartPoint)
-	if err != nil {
-		return nil, duerror.NewInvalidArgumentError("invalid start point: " + saved.StartPoint)
+	ass := &Association{
+		assType:         AssociationType(saved.AssType),
+		layer:           saved.Layer,
+		parents:         parents,
+		startPointRatio: saved.StartPointRatio,
+		endPointRatio:   saved.EndPointRatio,
 	}
-	endPoint, err := utils.FromString(saved.EndPoint)
-	if err != nil {
-		return nil, duerror.NewInvalidArgumentError("invalid end point: " + saved.EndPoint)
-	}
-	ass, err := NewAssociation(parents, AssociationType(saved.AssType), startPoint, endPoint)
-	if err != nil {
-		return nil, duerror.NewInvalidArgumentError("failed to create association: " + err.Error())
-	}
-	// TODO: NewAssociation does not set attributes. Consider updating NewAssociation to handle attributes initialization or ensure attributes are set manually here.
-	ass.layer = saved.Layer
 
 	return ass, nil
 }
 
 func (ass *Association) ToSavedAssociation(parents [2]int) utils.SavedAss {
 	savedAss := utils.SavedAss{
-		AssType:    int(ass.assType),
-		Layer:      ass.layer,
-		StartPoint: ass.start.String(),
-		EndPoint:   ass.end.String(),
-		Attributes: make([]utils.SavedAtt, 0, len(ass.attributes)),
+		AssType:         int(ass.assType),
+		Layer:           ass.layer,
+		StartPointRatio: ass.startPointRatio,
+		EndPointRatio:   ass.endPointRatio,
+		Attributes:      make([]utils.SavedAtt, 0, len(ass.attributes)),
 	}
 	savedAss.Parents = []int{parents[0], parents[1]}
 
