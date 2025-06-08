@@ -192,13 +192,19 @@ func (p *UMLProject) CreateEmptyUMLDiagram(diagramType umldiagram.DiagramType, d
 }
 
 func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
-
 	if _, ok := p.activeDiagrams[diagramName]; !ok {
 		return duerror.NewInvalidArgumentError("Diagram not loaded")
 	}
 	if p.currentDiagram != nil && p.currentDiagram.GetName() == diagramName {
+		if p.currentDiagram.IfUnsavedChangesExist() {
+			err := p.SaveDiagram(diagramName)
+			if err != nil {
+				return duerror.NewParsingError(fmt.Sprintf("Failed to save diagram %s before closing.\n Error: %s", diagramName, err.Error()))
+			}
+		}
 		p.currentDiagram = nil
 	}
+
 	delete(p.activeDiagrams, diagramName)
 	return nil
 }
@@ -305,10 +311,6 @@ func (p *UMLProject) OpenDiagram(filename string) duerror.DUError {
 	err := utils.ValidateFilePath(filename)
 	if err != nil {
 		return err
-	}
-
-	if p.availableDiagrams[filename] {
-		return p.SelectDiagram(filename)
 	}
 
 	file, err := os.OpenFile(filename, os.O_RDONLY, 0644)

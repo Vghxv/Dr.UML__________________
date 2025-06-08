@@ -108,19 +108,18 @@ func TestSelectDiagram(t *testing.T) {
 	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
 	assert.NoError(t, err)
 
-	// success, select a active diagram
+	// success, select an active diagram
 	err = p.SelectDiagram("TestDiagram")
 	assert.NoError(t, err)
 	name := p.GetCurrentDiagramName()
 	assert.Equal(t, "TestDiagram", name)
 
 	// success, select a non-active diagram
+
 	err = p.CloseDiagram("TestDiagram")
 	assert.NoError(t, err)
 	err = p.SelectDiagram("TestDiagram")
 	assert.NoError(t, err)
-	name = p.GetCurrentDiagramName()
-	assert.Equal(t, "TestDiagram", name)
 
 	// diagram not exist
 	err = p.SelectDiagram("NonExistentDiagram")

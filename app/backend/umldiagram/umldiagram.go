@@ -48,7 +48,6 @@ type UMLDiagram struct {
 	componentsSelected  map[component.Component]bool
 	associations        map[*component.Gadget][2][]*component.Association
 
-	lastEdit time.Time // for saving and loading
 	lastSave time.Time // for saving and loading
 
 	updateParentDraw func() duerror.DUError
@@ -608,6 +607,10 @@ func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedFile, duerror.DUE
 	return res, nil
 }
 
+func (ud *UMLDiagram) IfUnsavedChangesExist() bool {
+	return ud.lastModified.After(ud.lastSave)
+}
+
 // draw
 func (ud *UMLDiagram) GetDrawData() drawdata.Diagram {
 	return ud.drawData
@@ -642,5 +645,6 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	if ud.updateParentDraw == nil {
 		return nil
 	}
+	ud.lastModified = time.Now()
 	return ud.updateParentDraw()
 }
