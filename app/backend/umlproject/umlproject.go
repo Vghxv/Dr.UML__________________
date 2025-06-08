@@ -371,18 +371,18 @@ func (p *UMLProject) SaveDiagram(filename string) duerror.DUError {
 
 	file, err := os.Create(filename)
 	if err != nil {
-		return duerror.NewFileIOError(fmt.Sprintf("Failed to create file %s.\n Error: %s", p.name, err.Error()))
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to create file %s.\n Error: %s", filename, err.Error()))
 	}
 
 	data, err := json.MarshalIndent(savedFileData, "", "  ")
 	if err != nil {
-		return duerror.NewFileIOError(fmt.Sprintf("Failed to marshal data to JSON for file %s.\n Error: %s", p.name, err.Error()))
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to marshal data to JSON for file %s.\n Error: %s", filename, err.Error()))
 	}
 	if _, err := file.Write(data); err != nil {
-		return duerror.NewFileIOError(fmt.Sprintf("Failed to write data to file %s.\n Error: %s", p.name, err.Error()))
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to write data to file %s.\n Error: %s", filename, err.Error()))
 	}
 	if err := file.Close(); err != nil {
-		return duerror.NewFileIOError(fmt.Sprintf("Failed to close file %s.\n Error: %s", p.name, err.Error()))
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to close file %s.\n Error: %s", filename, err.Error()))
 	}
 
 	p.lastModified = time.Now()
