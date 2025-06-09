@@ -2,13 +2,13 @@ import { useMemo, useRef } from "react";
 import { AssociationProps, GadgetProps } from "../utils/Props";
 
 export function useSelection(
-    componenets: (GadgetProps | AssociationProps)[] | undefined
+    componnents: (GadgetProps | AssociationProps)[] | undefined
 ) {
     const previousSelectionRef = useRef<string>('');
     
     const selectedComponents = useMemo(
-        () => (componenets ? componenets.filter((g) => g.isSelected) : []),
-        [componenets]
+        () => (componnents ? componnents.filter((g) => g.isSelected) : []),
+        [componnents]
     );
     
     const selectedComponent =
