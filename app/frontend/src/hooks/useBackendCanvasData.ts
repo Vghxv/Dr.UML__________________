@@ -71,6 +71,7 @@ export function useBackendCanvasData() {
                         endY: association.endY,
                         deltaX: association.deltaX,
                         deltaY: association.deltaY,
+                        isSelected: association.isSelected,
                         attributes: association.attributes.map((attr: any) => ({
                             content: attr.content,
                             fontSize: attr.fontSize,
