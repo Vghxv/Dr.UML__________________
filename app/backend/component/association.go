@@ -62,7 +62,7 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 			float64(enPoint.X-enGdd.X) / float64(enGdd.Width),
 			float64(enPoint.Y-enGdd.Y) / float64(enGdd.Height)},
 	}
-	if err := a.updateDrawData(); err != nil {
+	if err := a.UpdateDrawData(); err != nil {
 		return nil, err
 	}
 	return a, nil
@@ -225,7 +225,7 @@ func (ass *Association) SetParentStart(gadget *Gadget, point utils.Point) duerro
 	}
 	ass.startPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
 	ass.startPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
@@ -240,7 +240,7 @@ func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.
 	}
 	ass.endPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
 	ass.endPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrContent(index int, content string) duerror.DUError {
@@ -250,7 +250,7 @@ func (ass *Association) SetAttrContent(index int, content string) duerror.DUErro
 	if err := ass.attributes[index].SetContent(content); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
@@ -260,7 +260,7 @@ func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
 	if err := ass.attributes[index].SetSize(size); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
@@ -270,7 +270,7 @@ func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
 	if err := ass.attributes[index].SetStyle(attribute.Textstyle(style)); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUError {
@@ -280,7 +280,7 @@ func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUEr
 	if err := ass.attributes[index].SetFontFile(fontFile); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
@@ -290,7 +290,7 @@ func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
 	if err := ass.attributes[index].SetRatio(ratio); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 // Other methods
@@ -316,15 +316,15 @@ func (ass *Association) AddAttribute(ratio float64, content string) duerror.DUEr
 	if err != nil {
 		return err
 	}
-	att.RegisterUpdateParentDraw(ass.updateDrawData)
+	att.RegisterUpdateParentDraw(ass.UpdateDrawData)
 	ass.attributes = append(ass.attributes, att)
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) AddLoadedAttribute(att *attribute.AssAttribute) duerror.DUError {
-	att.RegisterUpdateParentDraw(ass.updateDrawData)
+	att.RegisterUpdateParentDraw(ass.UpdateDrawData)
 	ass.attributes = append(ass.attributes, att)
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
@@ -339,10 +339,10 @@ func (ass *Association) RemoveAttribute(index int) duerror.DUError {
 		return duerror.NewInvalidArgumentError("index out of range")
 	}
 	ass.attributes = append(ass.attributes[:index], ass.attributes[index+1:]...)
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
-func (ass *Association) updateDrawData() duerror.DUError {
+func (ass *Association) UpdateDrawData() duerror.DUError {
 	if ass == nil || ass.parents[0] == nil || ass.parents[1] == nil {
 		return duerror.NewInvalidArgumentError("association or parents are nil")
 	}

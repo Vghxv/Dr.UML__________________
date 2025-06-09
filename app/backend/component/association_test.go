@@ -247,7 +247,7 @@ func Test_Association_UpdateDrawData(t *testing.T) {
 	}
 
 	t.Run("Update with valid data", func(t *testing.T) {
-		err := ass.updateDrawData()
+		err := ass.UpdateDrawData()
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}

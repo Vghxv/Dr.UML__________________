@@ -125,13 +125,24 @@ func (ud *UMLDiagram) SetPointComponent(point utils.Point) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.SetPoint(point)
-	default:
+	g, ok := c.(*component.Gadget)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	cmd := &moveGadgetCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		gadget:   g,
+		newPoint: point,
+		oldPoint: g.GetPoint(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetLayerComponent(layer int) duerror.DUError {
@@ -139,15 +150,22 @@ func (ud *UMLDiagram) SetLayerComponent(layer int) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.SetLayer(layer)
-	case *component.Association:
-		return g.SetLayer(layer)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	oldLayer := c.GetLayer()
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return c.SetLayer(layer) },
+		unexecute: func() duerror.DUError { return c.SetLayer(oldLayer) },
 	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (ud *UMLDiagram) SetColorComponent(colorHexStr string) duerror.DUError {
@@ -155,13 +173,26 @@ func (ud *UMLDiagram) SetColorComponent(colorHexStr string) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.SetColor(colorHexStr)
-	default:
+	g, ok := c.(*component.Gadget)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	oldColor := g.GetColor()
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: g,
+		execute:   func() duerror.DUError { return g.SetColor(colorHexStr) },
+		unexecute: func() duerror.DUError { return g.SetColor(oldColor) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content string) duerror.DUError {
@@ -246,7 +277,6 @@ func (ud *UMLDiagram) SetParentStartComponent(point utils.Point) duerror.DUError
 	if err != nil {
 		return err
 	}
-
 	switch a := c.(type) {
 	case *component.Association:
 		stNew, err := ud.componentsContainer.SearchGadget(point)
@@ -916,5 +946,24 @@ func (ud *UMLDiagram) selectAll(comps map[component.Component]bool, newValue boo
 		}
 	}
 	// updateDD in the SetIsSelected
+	return nil
+}
+
+func (ud *UMLDiagram) moveGadget(g *component.Gadget, point utils.Point) duerror.DUError {
+	if err := g.SetPoint(point); err != nil {
+		return err
+	}
+	if _, ok := ud.associations[g]; ok {
+		for _, a := range ud.associations[g][0] {
+			if err := a.UpdateDrawData(); err != nil {
+				return err
+			}
+		}
+		for _, a := range ud.associations[g][1] {
+			if err := a.UpdateDrawData(); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }

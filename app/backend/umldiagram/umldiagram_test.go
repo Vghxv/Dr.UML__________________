@@ -1152,3 +1152,199 @@ func CMD_SELECT_COMPONENT(t *testing.T) {
 		}
 	})
 }
+
+func CMD_COMPONENT_SETTER(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+
+	t.Run("setter gadget", func(t *testing.T) {
+		newLayer := 69
+		newColor := "#123456"
+		d.SelectComponent(gadPoint0)
+		err := d.SetLayerComponent(newLayer)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		err = d.SetColorComponent(newColor)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				if gdd.Layer != newLayer {
+					t.Errorf("unexpected layer: %v, got %v", newLayer, gdd.Layer)
+				}
+				if gdd.Color != newColor {
+					t.Errorf("unexpected color: %v, got %v", newColor, gdd.Color)
+				}
+			}
+		}
+
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				if gdd.Layer == newLayer {
+					t.Errorf("undo set layer fails")
+				}
+				if gdd.Color == newColor {
+					t.Errorf("undo set color fails")
+				}
+			}
+		}
+
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				if gdd.Layer != newLayer {
+					t.Errorf("redo set layer fails")
+				}
+				if gdd.Color != newColor {
+					t.Errorf("redo set color fails")
+				}
+			}
+		}
+	})
+
+	t.Run("setter gadget", func(t *testing.T) {
+		newLayer := 69
+		d.SelectComponent(utils.Point{X: 1000, Y: 1000})
+		d.SelectComponent(midPoint)
+		err := d.SetLayerComponent(newLayer)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, add := range d.GetDrawData().Associations {
+			if add.Layer != newLayer {
+				t.Errorf("set association layer fails")
+			}
+		}
+
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, add := range d.GetDrawData().Associations {
+			if add.Layer == newLayer {
+				t.Errorf("undo set association layer fails")
+			}
+		}
+
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, add := range d.GetDrawData().Associations {
+			if add.Layer != newLayer {
+				t.Errorf("redo set association layer fails")
+			}
+		}
+	})
+}
+
+func CMD_MOVE_GADGET(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	add := d.GetDrawData().Associations[0]
+	oldAssStart := utils.Point{X: add.StartX, Y: add.StartY}
+
+	newPoint := utils.Point{X: 69, Y: 69}
+	t.Run("move gadget", func(t *testing.T) {
+		d.SelectComponent(gadPoint0)
+		err := d.SetPointComponent(newPoint)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				point := utils.Point{X: gdd.X, Y: gdd.Y}
+				if point != newPoint {
+					t.Errorf("set point fails")
+				}
+			}
+		}
+		add := d.GetDrawData().Associations[0]
+		point := utils.Point{X: add.StartX, Y: add.StartY}
+		if point == oldAssStart {
+			t.Errorf("move gadget doesnt change its association")
+		}
+	})
+
+	t.Run("undo move gadget", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				point := utils.Point{X: gdd.X, Y: gdd.Y}
+				if point == newPoint {
+					t.Errorf("undo set point fails")
+				}
+			}
+		}
+		add := d.GetDrawData().Associations[0]
+		point := utils.Point{X: add.StartX, Y: add.StartY}
+		if point != oldAssStart {
+			t.Errorf("move gadget doesnt change its association")
+		}
+	})
+
+	t.Run("redo move gadget", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				point := utils.Point{X: gdd.X, Y: gdd.Y}
+				if point != newPoint {
+					t.Errorf("redo set point fails")
+				}
+			}
+		}
+		add := d.GetDrawData().Associations[0]
+		point := utils.Point{X: add.StartX, Y: add.StartY}
+		if point == oldAssStart {
+			t.Errorf("move gadget doesnt change its association")
+		}
+	})
+}

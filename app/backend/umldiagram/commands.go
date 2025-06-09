@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"Dr.uml/backend/component"
+	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
 )
 
@@ -63,18 +64,34 @@ func (cmd *selectAllCommand) Unexecute() duerror.DUError {
 	return cmd.diagram.selectAll(cmd.components, !cmd.newValue)
 }
 
-// component setters
-type componentSetterCommand struct {
+// simple setters
+type setterCommand struct {
 	baseCommand
 	component component.Component
 	execute   func() duerror.DUError
 	unexecute func() duerror.DUError
 }
 
-func (cmd *componentSetterCommand) Execute() duerror.DUError {
+func (cmd *setterCommand) Execute() duerror.DUError {
 	return cmd.execute()
 }
 
-func (cmd *componentSetterCommand) Unexecute() duerror.DUError {
+func (cmd *setterCommand) Unexecute() duerror.DUError {
 	return cmd.unexecute()
+}
+
+// move gadget
+type moveGadgetCommand struct {
+	baseCommand
+	gadget   *component.Gadget
+	newPoint utils.Point
+	oldPoint utils.Point
+}
+
+func (cmd *moveGadgetCommand) Execute() duerror.DUError {
+	return cmd.diagram.moveGadget(cmd.gadget, cmd.newPoint)
+}
+
+func (cmd *moveGadgetCommand) Unexecute() duerror.DUError {
+	return cmd.diagram.moveGadget(cmd.gadget, cmd.oldPoint)
 }
