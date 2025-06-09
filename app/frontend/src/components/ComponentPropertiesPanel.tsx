@@ -21,22 +21,34 @@ const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
         return obj && typeof obj.gadgetType === "string";
     }
 
-    if (isGadgetProps(selectedComponent)) {
-        return (
-            <GadgetPropertiesPanel
-                selectedGadget={selectedComponent}
-                updateGadgetProperty={updateComponentProperty}
-                addAttributeToGadget={addAttributeToComponent}
-            />
-        );
-    } else {
-        return (
-            <AssociationPropertiesPanel
-                selectedAssociation={selectedComponent}
-                updateAssociationProperty={updateComponentProperty}
-            />
-        );
-    }
+    return (
+        <div
+            style={{
+                position: "fixed", // fixed
+                right: 0,
+                top: 70, // lower than the top menu
+                width: 320,
+                height: "calc(100vh - 70px)",
+                background: "#f3f4f6",
+                boxShadow: "-2px 0 8px rgba(0,0,0,0.08)",
+                overflowY: "auto",
+                zIndex: 60
+            }}
+        >
+            {isGadgetProps(selectedComponent) ? (
+                <GadgetPropertiesPanel
+                    selectedGadget={selectedComponent}
+                    updateGadgetProperty={updateComponentProperty}
+                    addAttributeToGadget={addAttributeToComponent}
+                />
+            ) : (
+                <AssociationPropertiesPanel
+                    selectedAssociation={selectedComponent}
+                    updateAssociationProperty={updateComponentProperty}
+                />
+            )}
+        </div>
+    );
 };
 
 export default ComponentPropertiesPanel;
