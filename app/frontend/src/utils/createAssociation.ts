@@ -200,7 +200,7 @@ class AssociationElement {
                     const italicString = (attr.fontStyle & attribute.Textstyle.Italic) !== 0 ? "italic " : "";
                     const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
                     ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
-                    ctx.textBaseline = "hanging"
+                    ctx.textBaseline = "middle"
                     ctx.fillText(attr.content, x + margin, y);
                     if (isUnderline) {
                         const underlineHeight = 2;
