@@ -16,7 +16,6 @@ import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
 import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
 import AssociationPopup from "./components/AssociationPopup";
-import SessionBar from "./components/SessionBar";
 import DiagramTabs from "./components/DiagramTabs";
 import TopMenu from "./components/TopMenu";
 import SessionModal from "./components/SessionModal";
