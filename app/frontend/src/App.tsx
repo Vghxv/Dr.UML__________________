@@ -19,6 +19,7 @@ import AssociationPopup from "./components/AssociationPopup";
 import SessionBar from "./components/SessionBar";
 import DiagramTabs from "./components/DiagramTabs";
 import TopMenu from "./components/TopMenu";
+import SessionModal from "./components/SessionModal";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
@@ -187,12 +188,6 @@ const App: React.FC = () => {
                 onAddAss={handleAddAss}
                 diagramName={diagramName}
             />
-            {/* <SessionBar
-                sessionName={sessionName}
-                isConnected={isSessionConnected}
-                onJoinSession={handleJoinSession}
-                onLeaveSession={handleLeaveSession}
-            /> */}
             {showPopup && (
                 <GadgetPopup
                     isOpen={showPopup}
@@ -226,31 +221,11 @@ const App: React.FC = () => {
                     addAttributeToComponent={handleAddAttributeToGadget}
                 />
             )}
-            {showSessionModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                    <div className="bg-white rounded shadow-lg p-6 w-80">
-                        <h2 className="text-lg font-bold mb-4">加入/建立 Session</h2>
-                        <input
-                            id="session-input"
-                            type="text"
-                            className="border rounded px-2 py-1 w-full mb-4"
-                            placeholder="輸入 Session 名稱"
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') {
-                                    handleSessionModalConfirm((e.target as HTMLInputElement).value);
-                                }
-                            }}
-                        />
-                        <div className="flex justify-end gap-2">
-                            <button className="px-3 py-1 rounded bg-gray-300" onClick={handleSessionModalClose}>取消</button>
-                            <button className="px-3 py-1 rounded bg-blue-600 text-white" onClick={() => {
-                                const input = document.querySelector<HTMLInputElement>("#session-input");
-                                if (input) handleSessionModalConfirm(input.value);
-                            }}>確認</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <SessionModal
+                open={showSessionModal}
+                onConfirm={handleSessionModalConfirm}
+                onClose={handleSessionModalClose}
+            />
         </div>
     );
 };
