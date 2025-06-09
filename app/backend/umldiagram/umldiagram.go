@@ -277,41 +277,44 @@ func (ud *UMLDiagram) SetParentStartComponent(point utils.Point) duerror.DUError
 	if err != nil {
 		return err
 	}
-	switch a := c.(type) {
-	case *component.Association:
-		stNew, err := ud.componentsContainer.SearchGadget(point)
-		if err != nil {
-			return err
-		}
-		if stNew == nil {
-			return duerror.NewInvalidArgumentError("point does not contain a gadget")
-		}
-
-		// update association
-		stOld := a.GetParentStart()
-		if err = a.SetParentStart(stNew, point); err != nil {
-			return err
-		}
-
-		// update ud.associations map
-		if _, ok := ud.associations[stOld]; ok {
-			list := ud.associations[stOld][0]
-			index := slices.Index(list, a)
-			if index >= 0 {
-				list = slices.Delete(list, index, index+1)
-			}
-			ud.associations[stOld] = [2][]*component.Association{list, ud.associations[stOld][1]}
-		}
-		if _, ok := ud.associations[stNew]; ok {
-			list := ud.associations[stNew][0]
-			list = append(list, a)
-			ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
-		}
-		return nil
-
-	default:
+	a, ok := c.(*component.Association)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+
+	c, err = ud.componentsContainer.Search(point)
+	if err != nil {
+		return err
+	}
+	stNew, ok := c.(*component.Gadget)
+	if !ok {
+		return duerror.NewInvalidArgumentError("component at point is not a gadget")
+	}
+	stRatioNew, err := component.CalAssociationPointRatio(stNew, point)
+	if err != nil {
+		return err
+	}
+
+	cmd := &setParentCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		stNew:       stNew,
+		enNew:       a.GetParentEnd(),
+		stOld:       a.GetParentStart(),
+		enOld:       a.GetParentEnd(),
+		stRatioNew:  stRatioNew,
+		enRatioNew:  a.GetEndRatio(),
+		stRatioOld:  a.GetStartRatio(),
+		enRatioOld:  a.GetEndRatio(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
@@ -319,42 +322,44 @@ func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch a := c.(type) {
-	case *component.Association:
-		enNew, err := ud.componentsContainer.SearchGadget(point)
-		if err != nil {
-			return err
-		}
-		if enNew == nil {
-			return duerror.NewInvalidArgumentError("point does not contain a gadget")
-		}
-
-		// update association
-		enOld := a.GetParentEnd()
-		if err = a.SetParentEnd(enNew, point); err != nil {
-			return err
-		}
-
-		// update ud.associations map
-		if _, ok := ud.associations[enOld]; ok {
-			list := ud.associations[enOld][1]
-			index := slices.Index(list, a)
-			if index >= 0 {
-				list = slices.Delete(list, index, index+1)
-			}
-			ud.associations[enOld] = [2][]*component.Association{ud.associations[enOld][0], list}
-		}
-		if _, ok := ud.associations[enNew]; ok {
-			list := ud.associations[enNew][1]
-			list = append(list, a)
-			ud.associations[enNew] = [2][]*component.Association{ud.associations[enNew][0], list}
-		}
-		return nil
-
-	default:
+	a, ok := c.(*component.Association)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+
+	c, err = ud.componentsContainer.Search(point)
+	if err != nil {
+		return err
+	}
+	enNew, ok := c.(*component.Gadget)
+	if !ok {
+		return duerror.NewInvalidArgumentError("component at point is not a gadget")
+	}
+	enRatioNew, err := component.CalAssociationPointRatio(enNew, point)
+	if err != nil {
+		return err
+	}
+
+	cmd := &setParentCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		stNew:       a.GetParentStart(),
+		enNew:       enNew,
+		stOld:       a.GetParentStart(),
+		enOld:       a.GetParentEnd(),
+		stRatioNew:  a.GetStartRatio(),
+		enRatioNew:  enRatioNew,
+		stRatioOld:  a.GetStartRatio(),
+		enRatioOld:  a.GetEndRatio(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Methods
@@ -964,6 +969,47 @@ func (ud *UMLDiagram) moveGadget(g *component.Gadget, point utils.Point) duerror
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) updateAssociationParent(a *component.Association, stNew, enNew *component.Gadget, stRatio, enRatio [2]float64) duerror.DUError {
+	stOld := a.GetParentStart()
+	enOld := a.GetParentEnd()
+
+	if err := a.SetParentStart(stNew, stRatio); err != nil {
+		return err
+	}
+	if err := a.SetParentEnd(enNew, enRatio); err != nil {
+		return err
+	}
+
+	// update ud.associations
+	if _, ok := ud.associations[stOld]; ok {
+		list := ud.associations[stOld][0]
+		index := slices.Index(list, a)
+		if index >= 0 {
+			list = slices.Delete(list, index, index+1)
+		}
+		ud.associations[stOld] = [2][]*component.Association{list, ud.associations[stOld][1]}
+	}
+	if _, ok := ud.associations[enOld]; ok {
+		list := ud.associations[enOld][1]
+		index := slices.Index(list, a)
+		if index >= 0 {
+			list = slices.Delete(list, index, index+1)
+		}
+		ud.associations[enOld] = [2][]*component.Association{ud.associations[enOld][0], list}
+	}
+	if _, ok := ud.associations[stNew]; ok {
+		list := ud.associations[stNew][0]
+		list = append(list, a)
+		ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
+	}
+	if _, ok := ud.associations[enNew]; ok {
+		list := ud.associations[enNew][1]
+		list = append(list, a)
+		ud.associations[enNew] = [2][]*component.Association{ud.associations[enNew][0], list}
 	}
 	return nil
 }

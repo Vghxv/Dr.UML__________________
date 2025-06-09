@@ -95,3 +95,37 @@ func (cmd *moveGadgetCommand) Execute() duerror.DUError {
 func (cmd *moveGadgetCommand) Unexecute() duerror.DUError {
 	return cmd.diagram.moveGadget(cmd.gadget, cmd.oldPoint)
 }
+
+// set parent association
+type setParentCommand struct {
+	baseCommand
+	association *component.Association
+	stNew       *component.Gadget
+	enNew       *component.Gadget
+	stOld       *component.Gadget
+	enOld       *component.Gadget
+	stRatioNew  [2]float64
+	enRatioNew  [2]float64
+	stRatioOld  [2]float64
+	enRatioOld  [2]float64
+}
+
+func (cmd *setParentCommand) Execute() duerror.DUError {
+	return cmd.diagram.updateAssociationParent(
+		cmd.association,
+		cmd.stNew,
+		cmd.enNew,
+		cmd.stRatioNew,
+		cmd.enRatioNew,
+	)
+}
+
+func (cmd *setParentCommand) Unexecute() duerror.DUError {
+	return cmd.diagram.updateAssociationParent(
+		cmd.association,
+		cmd.stOld,
+		cmd.enOld,
+		cmd.stRatioOld,
+		cmd.enRatioOld,
+	)
+}

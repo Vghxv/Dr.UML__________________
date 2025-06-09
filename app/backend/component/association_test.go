@@ -101,7 +101,7 @@ func Test_Association_Setters(t *testing.T) {
 		newStPoint := utils.Point{X: 2, Y: 2}
 		newSt := newEmptyGadget(Class, newStPoint)
 
-		err := ass.SetParentStart(newSt, newStPoint)
+		err := ass.SetParentStart(newSt, [2]float64{0, 0})
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -114,7 +114,7 @@ func Test_Association_Setters(t *testing.T) {
 		newEnPoint := utils.Point{X: 4, Y: 4}
 		newEn := newEmptyGadget(Class, newEnPoint)
 
-		err := ass.SetParentEnd(newEn, newEnPoint)
+		err := ass.SetParentEnd(newEn, [2]float64{0, 0})
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}

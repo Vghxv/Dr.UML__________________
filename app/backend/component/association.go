@@ -37,9 +37,8 @@ type Association struct {
 	drawdata         drawdata.Association
 	isSelected       bool
 	updateParentDraw func() duerror.DUError
-
-	startPointRatio [2]float64
-	endPointRatio   [2]float64
+	startPointRatio  [2]float64
+	endPointRatio    [2]float64
 }
 
 // Constructor
@@ -140,6 +139,24 @@ func dist(st utils.Point, en utils.Point, p utils.Point) float64 {
 	return math.Hypot(x-xx, y-yy)
 }
 
+func validateRatio(ratio *[2]float64) duerror.DUError {
+	if ratio[0] < 0 || ratio[0] > 1 || ratio[1] < 0 || ratio[1] > 1 {
+		return duerror.NewInvalidArgumentError("invalid ratio")
+	}
+	return nil
+}
+
+func CalAssociationPointRatio(g *Gadget, point utils.Point) ([2]float64, duerror.DUError) {
+	gdd := g.GetDrawData().(drawdata.Gadget)
+	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
+		return [2]float64{}, duerror.NewInvalidArgumentError("point is out of range")
+	}
+	return [2]float64{
+		float64(point.X-gdd.X) / float64(gdd.Width),
+		float64(point.Y-gdd.Y) / float64(gdd.Height),
+	}, nil
+}
+
 // Getters
 func (ass *Association) GetAssType() AssociationType {
 	return ass.assType
@@ -213,33 +230,29 @@ func (ass *Association) SetLayer(layer int) duerror.DUError {
 	return ass.updateParentDraw()
 }
 
-func (ass *Association) SetParentStart(gadget *Gadget, point utils.Point) duerror.DUError {
+func (ass *Association) SetParentStart(gadget *Gadget, ratio [2]float64) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
-	ass.parents[0] = gadget
-
-	gdd := ass.parents[0].GetDrawData().(drawdata.Gadget)
-	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
-		return duerror.NewInvalidArgumentError("point is out of range")
+	if err := validateRatio(&ratio); err != nil {
+		return err
 	}
-	ass.startPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
-	ass.startPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
+	ass.parents[0] = gadget
+	ass.startPointRatio[0] = ratio[0]
+	ass.startPointRatio[1] = ratio[1]
 	return ass.UpdateDrawData()
 }
 
-func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
+func (ass *Association) SetParentEnd(gadget *Gadget, ratio [2]float64) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
-	ass.parents[1] = gadget
-
-	gdd := ass.parents[1].GetDrawData().(drawdata.Gadget)
-	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
-		return duerror.NewInvalidArgumentError("point is out of range")
+	if err := validateRatio(&ratio); err != nil {
+		return err
 	}
-	ass.endPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
-	ass.endPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
+	ass.parents[1] = gadget
+	ass.endPointRatio[0] = ratio[0]
+	ass.endPointRatio[1] = ratio[1]
 	return ass.UpdateDrawData()
 }
 
