@@ -18,7 +18,7 @@ const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
 
     // Type guard for GadgetProps
     function isGadgetProps(obj: any): obj is GadgetProps {
-        return obj && Array.isArray(obj.gadgetType);
+        return obj && typeof obj.gadgetType === "string";
     }
 
     if (isGadgetProps(selectedComponent)) {
