@@ -1,58 +1,52 @@
 import { AssociationProps } from "./Props";
-import { attribute } from "../../wailsjs/go/models";
-// Association type constants
-enum ASS_TYPE {
-    ASS_TYPE_EXTENSION = 1,
-    ASS_TYPE_IMPLEMENTATION = 2,
-    ASS_TYPE_COMPOSITION = 4,
-    ASS_TYPE_DEPENDENCY = 8,
-}
+import { component, attribute } from "../../wailsjs/go/models";
+
 class AssociationElement {
     public assProps: AssociationProps;
-
+    private isSelfAssociation: boolean;
     constructor(props: AssociationProps, margin: number) {
         this.assProps = props;
+        this.isSelfAssociation = props.deltaX !== 0 || props.deltaY !== 0;
     }
 
     draw(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number) {
-        // 根據 assType 決定畫法
         switch (this.assProps.assType) {
-            case ASS_TYPE.ASS_TYPE_DEPENDENCY:
-                this.drawLine(ctx, margin, lineWidth, true); // 虛線
-                this.drawArrow(ctx, margin, lineWidth, false); // 普通箭頭
+            case component.AssociationType.Dependency:
+                this.drawLine(ctx, lineWidth, true);
+                this.drawArrow(ctx, lineWidth, false);
                 break;
-            case ASS_TYPE.ASS_TYPE_COMPOSITION:
-                this.drawLine(ctx, margin, lineWidth, false); // 實線
-                this.drawDiamond(ctx, margin, lineWidth, true); // 實心菱形
-                this.drawArrow(ctx, margin, lineWidth, false); // 普通箭頭
+            case component.AssociationType.Composition:
+                this.drawLine(ctx, lineWidth, false);
+                this.drawDiamond(ctx, lineWidth, true);
+                this.drawArrow(ctx, lineWidth, false);
                 break;
-            case ASS_TYPE.ASS_TYPE_EXTENSION:
-                this.drawLine(ctx, margin, lineWidth, false); // 實線
-                this.drawArrow(ctx, margin, lineWidth, true); // 空心三角
+            case component.AssociationType.Extension:
+                this.drawLine(ctx, lineWidth, false);
+                this.drawArrow(ctx, lineWidth, true);
                 break;
-            case ASS_TYPE.ASS_TYPE_IMPLEMENTATION:
-                this.drawLine(ctx, margin, lineWidth, true); // 虛線
-                this.drawArrow(ctx, margin, lineWidth, true); // 空心三角
+            case component.AssociationType.Implementation:
+                this.drawLine(ctx, lineWidth, true);
+                this.drawArrow(ctx, lineWidth, true);
                 break;
             default:
-                // fallback: normal association
-                if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
-                    this.drawNormalAss(ctx, margin, lineWidth);
-                } else {
+                if (this.isSelfAssociation) {
                     this.drawSelfAss(ctx, margin, lineWidth);
+                } else {
+                    this.drawNormalAss(ctx, margin, lineWidth);
                 }
-                this.drawArrow(ctx, margin, lineWidth, false);
+                this.drawArrow(ctx, lineWidth, false);
         }
-        // Draw label text(s) if present
         this.drawText(ctx, margin);
 
     }
 
-    drawLine(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number, dashed: boolean) {
+    drawLine(ctx: CanvasRenderingContext2D, lineWidth: number, dashed: boolean) {
         if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
             ctx.save();
             ctx.beginPath();
-            if (dashed) ctx.setLineDash([8, 6]);
+            if (dashed){
+                ctx.setLineDash([8, 6]);
+            } 
             ctx.moveTo(this.assProps.startX, this.assProps.startY);
             ctx.lineTo(this.assProps.endX, this.assProps.endY);
             ctx.strokeStyle = "black";
@@ -102,7 +96,7 @@ class AssociationElement {
         }
     }
 
-    drawDiamond(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number, filled: boolean) {
+    drawDiamond(ctx: CanvasRenderingContext2D, lineWidth: number, filled: boolean) {
         // 菱形在起點
         const { startX, startY, endX, endY } = this.assProps;
         const dx = endX - startX;
@@ -135,7 +129,7 @@ class AssociationElement {
         ctx.restore();
     }
 
-    drawArrow(ctx: CanvasRenderingContext2D, margin: number, lineWidth: number, hollow: boolean) {
+    drawArrow(ctx: CanvasRenderingContext2D, lineWidth: number, hollow: boolean) {
         let fromX, fromY, toX, toY;
         if (this.assProps.deltaX === 0 && this.assProps.deltaY === 0) {
             fromX = this.assProps.startX;
