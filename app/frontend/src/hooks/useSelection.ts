@@ -2,9 +2,8 @@ import { useMemo } from "react";
 import { AssociationProps, GadgetProps } from "../utils/Props";
 
 export function useSelection(
-    componenets: (GadgetProps | AssociationProps)[] | undefined
+    componenets: (GadgetProps | AssociationProps)[] | null
 ) {
-    console.log("useSelection called with components:", componenets);
     const selectedComponents = useMemo(
         () => (componenets ? componenets.filter((g) => g.isSelected) : []),
         [componenets]
@@ -16,6 +15,5 @@ export function useSelection(
     return {
         selectedComponentCount,
         selectedComponent,
-        selectedComponents,
     };
 }

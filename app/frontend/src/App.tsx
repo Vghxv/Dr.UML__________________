@@ -22,7 +22,6 @@ const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
     const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
-    // const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
     const [isAddingAssociation, setIsAddingAssociation] = useState(false);
     const [showAssPopup, setShowAssPopup] = useState(false);
     const [assStartPoint, setAssStartPoint] = useState<{ x: number, y: number } | null>(null);
@@ -88,7 +87,7 @@ const App: React.FC = () => {
         setShowAssPopup(false);
     };
 
-    const handleSelectionChange = (component: GadgetProps | AssociationProps | null, count: number) => {
+    const handleSelectionChange = (component: GadgetProps | AssociationProps | null) => {
         setSelectedComponent(component);
     };
 

@@ -207,7 +207,7 @@ class AssociationElement {
                     const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
                     ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
 
-                    ctx.fillStyle = "black";
+                    ctx.fillStyle = "white";
                     ctx.fillText(attr.content, x + margin, y);
                     if (isUnderline) {
                         const underlineHeight = 2;
