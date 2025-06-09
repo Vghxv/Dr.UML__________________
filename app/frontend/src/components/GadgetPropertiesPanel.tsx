@@ -27,6 +27,49 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
     updateGadgetProperty,
     addAttributeToGadget
 }) => {
+    // Local state to track pending changes for each input
+    const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({});
+
+    // Clear pending changes when gadget selection changes
+    useEffect(() => {
+        setPendingChanges({});
+    }, [selectedGadget.x, selectedGadget.y]);
+
+    // Handle input changes locally without calling API
+    const handleInputChange = (property: string, value: any) => {
+        setPendingChanges(prev => ({
+            ...prev,
+            [property]: value
+        }));
+    };
+
+    // Handle Enter key press to commit changes
+    const handleKeyPress = (e: React.KeyboardEvent, property: string) => {
+        if (e.key === 'Enter') {
+            const value = pendingChanges[property];
+            if (value !== undefined) {
+                // Handle attribute properties specially to match the expected format
+                if (property.includes('attributes')) {
+                    const [attrPath, attrProperty] = property.split('.');
+                    const finalProperty = `${attrPath}.${attrProperty}`;
+                    updateGadgetProperty(finalProperty, value);
+                } else {
+                    updateGadgetProperty(property, value);
+                }
+                setPendingChanges(prev => {
+                    const updated = { ...prev };
+                    delete updated[property];
+                    return updated;
+                });
+            }
+        }
+    };
+
+    // Get current value (pending change or original value)
+    const getValue = (property: string, originalValue: any) => {
+        return pendingChanges[property] !== undefined ? pendingChanges[property] : originalValue;
+    };
+
     return (
         <div className="absolute right-0 top-0 w-[300px] h-full bg-gray-100 p-5 shadow-md overflow-y-auto">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Gadget Properties</h3>
@@ -35,8 +78,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                 <label className="block mb-1 text-sm font-medium text-gray-700">X Position:</label>
                 <input
                     type="number"
-                    value={selectedGadget.x}
-                    onChange={(e) => updateGadgetProperty('x', parseInt(e.target.value))}
+                    value={getValue('x', selectedGadget.x)}
+                    onChange={(e) => handleInputChange('x', parseInt(e.target.value))}
+                    onKeyPress={(e) => handleKeyPress(e, 'x')}
                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
             </div>
@@ -45,8 +89,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                 <label className="block mb-1 text-sm font-medium text-gray-700">Y Position:</label>
                 <input
                     type="number"
-                    value={selectedGadget.y}
-                    onChange={(e) => updateGadgetProperty('y', parseInt(e.target.value))}
+                    value={getValue('y', selectedGadget.y)}
+                    onChange={(e) => handleInputChange('y', parseInt(e.target.value))}
+                    onKeyPress={(e) => handleKeyPress(e, 'y')}
                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
             </div>
@@ -55,8 +100,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                 <label className="block mb-1 text-sm font-medium text-gray-700">Layer:</label>
                 <input
                     type="number"
-                    value={selectedGadget.layer}
-                    onChange={(e) => updateGadgetProperty('layer', parseInt(e.target.value))}
+                    value={getValue('layer', selectedGadget.layer)}
+                    onChange={(e) => handleInputChange('layer', parseInt(e.target.value))}
+                    onKeyPress={(e) => handleKeyPress(e, 'layer')}
                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 />
             </div>
@@ -65,8 +111,19 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                 <label className="block mb-1 text-sm font-medium text-gray-700">Color:</label>
                 <input
                     type="color"
-                    value={selectedGadget.color}
-                    onChange={(e) => updateGadgetProperty('color', e.target.value)}
+                    value={getValue('color', selectedGadget.color)}
+                    onChange={(e) => handleInputChange('color', e.target.value)}
+                    onBlur={() => {
+                        const value = pendingChanges['color'];
+                        if (value !== undefined) {
+                            updateGadgetProperty('color', value);
+                            setPendingChanges(prev => {
+                                const updated = { ...prev };
+                                delete updated['color'];
+                                return updated;
+                            });
+                        }
+                    }}
                     className="w-full h-10 p-1 border border-gray-300 rounded text-black"
                 />
             </div>
@@ -99,8 +156,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                 <label className="block mb-1 text-sm font-medium text-gray-700">Content:</label>
                                 <input
                                     type="text"
-                                    value={attr.content}
-                                    onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.content`, e.target.value)}
+                                    value={getValue(`attributes${groupIndex}:${attrIndex}.content`, attr.content)}
+                                    onChange={(e) => handleInputChange(`attributes${groupIndex}:${attrIndex}.content`, e.target.value)}
+                                    onKeyPress={(e) => handleKeyPress(e, `attributes${groupIndex}:${attrIndex}.content`)}
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 />
                             </div>
@@ -108,8 +166,9 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                                 <label className="block mb-1 text-sm font-medium text-gray-700">Font Size:</label>
                                 <input
                                     type="number"
-                                    value={attr.fontSize}
-                                    onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontSize`, parseInt(e.target.value))}
+                                    value={getValue(`attributes${groupIndex}:${attrIndex}.fontSize`, attr.fontSize)}
+                                    onChange={(e) => handleInputChange(`attributes${groupIndex}:${attrIndex}.fontSize`, parseInt(e.target.value))}
+                                    onKeyPress={(e) => handleKeyPress(e, `attributes${groupIndex}:${attrIndex}.fontSize`)}
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 />
                             </div>
@@ -178,8 +237,20 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
                             <div className="mb-3">
                                 <label className="block mb-1 text-sm font-medium text-gray-700">Font File:</label>
                                 <select
-                                    value={attr.fontFile}
-                                    onChange={(e) => updateGadgetProperty(`attributes${groupIndex}:${attrIndex}.fontFile`, e.target.value)}
+                                    value={getValue(`attributes${groupIndex}:${attrIndex}.fontFile`, attr.fontFile)}
+                                    onChange={(e) => handleInputChange(`attributes${groupIndex}:${attrIndex}.fontFile`, e.target.value)}
+                                    onBlur={() => {
+                                        const property = `attributes${groupIndex}:${attrIndex}.fontFile`;
+                                        const value = pendingChanges[property];
+                                        if (value !== undefined) {
+                                            updateGadgetProperty(property, value);
+                                            setPendingChanges(prev => {
+                                                const updated = { ...prev };
+                                                delete updated[property];
+                                                return updated;
+                                            });
+                                        }
+                                    }}
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                 >
                                     {getFontOptions().map((fontName) => (
