@@ -350,7 +350,6 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err = g.RegisterUpdateParentDraw(ud.updateDrawData); err != nil {
 		return err
 	}
-
 	cmd := &addComponentCommand{
 		baseCommand: baseCommand{
 			diagram: ud,
@@ -426,12 +425,11 @@ func (ud *UMLDiagram) RemoveSelectedComponents() duerror.DUError {
 		comps[c] = true
 		switch g := c.(type) {
 		case *component.Gadget:
-			for a, _ := range ud.getAllAssociationsInGadget(g) {
+			for a := range ud.getAllAssociationsInGadget(g) {
 				comps[a] = true
 			}
 		}
 	}
-
 	cmd := &removeSelectedComponentCommand{
 		baseCommand: baseCommand{
 			diagram: ud,
@@ -451,48 +449,34 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 	if err != nil {
 		return err
 	}
-	if c == nil {
-		ud.UnselectAllComponents()
-		return ud.updateDrawData()
-	}
-	if _, ok := ud.componentsSelected[c]; !ok {
-		switch c := c.(type) {
-		case *component.Gadget:
-			err := c.SetIsSelected(true)
-			if err != nil {
-				return err
-			}
-			ud.componentsSelected[c] = true
-		case *component.Association:
-			err := c.SetIsSelected(true)
-			if err != nil {
-				return err
-			}
-			ud.componentsSelected[c] = true
-		}
-	}
-	// ud.componentsSelected[c] = true
-	return ud.updateDrawData()
-}
-
-func (ud *UMLDiagram) UnselectComponent(point utils.Point) duerror.DUError {
-	c, err := ud.componentsContainer.Search(point)
-	if err != nil {
-		return err
-	}
-	if c == nil {
+	if c != nil && c.GetIsSelected() {
+		// if comp is already selected, do nothing
 		return nil
 	}
-	delete(ud.componentsSelected, c)
-	return ud.updateDrawData()
-}
 
-func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
-	for c := range ud.componentsSelected {
-		c.SetIsSelected(false)
+	var affectedComps map[component.Component]bool
+	var newValue bool
+	if c == nil {
+		// if click on nothing, unselect all
+		affectedComps = ud.componentsSelected
+		newValue = false
+	} else {
+		// if click on comp, select it
+		affectedComps = map[component.Component]bool{c: true}
+		newValue = true
 	}
-	// Clear the selected components map
-	ud.componentsSelected = make(map[component.Component]bool)
+	cmd := &selectAllCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		components: affectedComps,
+		newValue:   newValue,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -901,7 +885,7 @@ func (ud *UMLDiagram) getAllAssociationsInGadget(g *component.Gadget) map[*compo
 }
 
 func (ud *UMLDiagram) removeComponents(comps map[component.Component]bool) duerror.DUError {
-	for c, _ := range comps {
+	for c := range comps {
 		if err := ud.removeComponent(c); err != nil {
 			return err
 		}
@@ -911,11 +895,26 @@ func (ud *UMLDiagram) removeComponents(comps map[component.Component]bool) duerr
 }
 
 func (ud *UMLDiagram) addComponents(comps map[component.Component]bool) duerror.DUError {
-	for c, _ := range comps {
+	for c := range comps {
 		if err := ud.addComponent(c); err != nil {
 			return err
 		}
 	}
 	// updateDD in the addComponent
+	return nil
+}
+
+func (ud *UMLDiagram) selectAll(comps map[component.Component]bool, newValue bool) duerror.DUError {
+	for c := range comps {
+		if err := c.SetIsSelected(newValue); err != nil {
+			return err
+		}
+		if newValue {
+			ud.componentsSelected[c] = true
+		} else {
+			delete(ud.componentsSelected, c)
+		}
+	}
+	// updateDD in the SetIsSelected
 	return nil
 }

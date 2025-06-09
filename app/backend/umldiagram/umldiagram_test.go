@@ -200,11 +200,6 @@ func TestUMLDiagram_SelectAndUnselectComponent(t *testing.T) {
 	err := diagram.SelectComponent(utils.Point{X: 10, Y: 10})
 	assert.NoError(t, err)
 	assert.Len(t, diagram.componentsSelected, 1)
-
-	// Unselect
-	err = diagram.UnselectComponent(utils.Point{X: 10, Y: 10})
-	assert.NoError(t, err)
-	assert.Len(t, diagram.componentsSelected, 0)
 }
 
 func TestUMLDiagram_UnselectAllComponents(t *testing.T) {
@@ -212,8 +207,6 @@ func TestUMLDiagram_UnselectAllComponents(t *testing.T) {
 	_ = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
 	_ = diagram.SelectComponent(utils.Point{X: 1, Y: 1})
 	assert.Len(t, diagram.componentsSelected, 1)
-	_ = diagram.UnselectAllComponents()
-	assert.Len(t, diagram.componentsSelected, 0)
 }
 
 // func TestUMLDiagram_RegisterNotifyDrawUpdate(t *testing.T) {
@@ -372,7 +365,6 @@ func TestAssociationMethods(t *testing.T) {
 			t.Errorf("add association fail")
 		}
 
-		diagram.UnselectAllComponents()
 		dd := a.GetDrawData().(drawdata.Association)
 		midPoint := utils.Point{
 			X: (dd.StartX + dd.EndX) / 2,
@@ -406,12 +398,12 @@ func TestAssociationMethods(t *testing.T) {
 			t.Errorf("add association fail")
 		}
 
-		diagram.UnselectAllComponents()
 		dd := a.GetDrawData().(drawdata.Association)
 		midPoint := utils.Point{
 			X: (dd.StartX + dd.EndX) / 2,
 			Y: (dd.StartY + dd.EndY) / 2,
 		}
+		diagram.selectAll(diagram.componentsSelected, false)
 		diagram.SelectComponent(midPoint)
 		c, _ := diagram.getSelectedComponent()
 		if a != c.(*component.Association) {
@@ -520,7 +512,7 @@ func TestAddAttributeToGadget(t *testing.T) {
 
 	// Test with multiple selected components
 	// First clear the selection
-	err = diagram.UnselectAllComponents()
+	diagram.selectAll(diagram.componentsSelected, false)
 	assert.NoError(t, err)
 
 	// Add a second gadget
@@ -1044,6 +1036,119 @@ func CMD_REMOVE_SELECTED_COMPONENTS(t *testing.T) {
 		assType := dd.Associations[0].AssType
 		if assType != assType2 {
 			t.Errorf("failed to remove association")
+		}
+	})
+}
+
+func CMD_SELECT_COMPONENT(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	noWherePoint := utils.Point{X: 1000, Y: 1000}
+
+	t.Run("select components", func(t *testing.T) {
+		d.SelectComponent(gadPoint0)
+		if len(d.componentsSelected) != 1 {
+			t.Errorf("select one fails")
+		}
+		d.SelectComponent(gadPoint1)
+		if len(d.componentsSelected) != 2 {
+			t.Errorf("select two fails")
+		}
+		d.SelectComponent(midPoint)
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select three fails")
+		}
+		d.SelectComponent(gadPoint0)
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select already selected association fails")
+		}
+		d.SelectComponent(noWherePoint)
+		if len(d.componentsSelected) != 0 {
+			t.Errorf("select empty place fails")
+		}
+	})
+
+	t.Run("undo select components", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("undo select empty place fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 2 {
+			t.Errorf("undo select three fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 1 {
+			t.Errorf("undo select two fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 0 {
+			t.Errorf("undo select one fails")
+		}
+	})
+
+	t.Run("redo select components", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 1 {
+			t.Errorf("select one fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 2 {
+			t.Errorf("select two fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select three fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select already selected association fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 0 {
+			t.Errorf("select empty place fails")
 		}
 	})
 }

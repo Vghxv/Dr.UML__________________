@@ -64,6 +64,20 @@ func (mr *MockComponentMockRecorder) GetDrawData() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDrawData", reflect.TypeOf((*MockComponent)(nil).GetDrawData))
 }
 
+// GetIsSelected mocks base method.
+func (m *MockComponent) GetIsSelected() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetIsSelected")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// GetIsSelected indicates an expected call of GetIsSelected.
+func (mr *MockComponentMockRecorder) GetIsSelected() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIsSelected", reflect.TypeOf((*MockComponent)(nil).GetIsSelected))
+}
+
 // GetLayer mocks base method.
 func (m *MockComponent) GetLayer() int {
 	m.ctrl.T.Helper()

@@ -48,3 +48,33 @@ func (cmd *removeSelectedComponentCommand) Execute() duerror.DUError {
 func (cmd *removeSelectedComponentCommand) Unexecute() duerror.DUError {
 	return cmd.diagram.addComponents(cmd.components)
 }
+
+type selectAllCommand struct {
+	baseCommand
+	components map[component.Component]bool
+	newValue   bool
+}
+
+func (cmd *selectAllCommand) Execute() duerror.DUError {
+	return cmd.diagram.selectAll(cmd.components, cmd.newValue)
+}
+
+func (cmd *selectAllCommand) Unexecute() duerror.DUError {
+	return cmd.diagram.selectAll(cmd.components, !cmd.newValue)
+}
+
+// component setters
+type componentSetterCommand struct {
+	baseCommand
+	component component.Component
+	execute   func() duerror.DUError
+	unexecute func() duerror.DUError
+}
+
+func (cmd *componentSetterCommand) Execute() duerror.DUError {
+	return cmd.execute()
+}
+
+func (cmd *componentSetterCommand) Unexecute() duerror.DUError {
+	return cmd.unexecute()
+}
