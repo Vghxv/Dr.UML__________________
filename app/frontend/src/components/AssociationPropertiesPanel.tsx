@@ -1,21 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { AssociationProps } from "../utils/Props";
-import { attribute } from "../../wailsjs/go/models";
-
-// Define type for font files
-type FontFile = {
-    default: string;
-};
-
-let fontFiles: Record<string, FontFile>;
-fontFiles = import.meta.glob<FontFile>('../assets/fonts/*.woff2', { eager: true });
-
-const getFontOptions = () => {
-    return Object.keys(fontFiles).map(path => {
-        const filename = path.split(/[/\\]/).pop() || '';
-        return filename.replace('.woff2', '');
-    });
-};
+import { usePendingChanges } from "../hooks/usePendingChanges";
+import { getFontOptions } from "../utils/fontUtils";
+import { FontStyleButtons } from "./FontStyleButtons";
 
 interface AssociationPropertiesPanelProps {
     selectedAssociation: AssociationProps;
@@ -28,41 +15,11 @@ const AssociationPropertiesPanel: React.FC<AssociationPropertiesPanelProps> = ({
     updateAssociationProperty,
     addAttributeToAssociation
 }) => {
-    // Local state to track pending changes for each input
-    const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({});
-
-    // Clear pending changes when association selection changes
-    useEffect(() => {
-        setPendingChanges({});
-    }, [selectedAssociation.endX, selectedAssociation.endY]);
-
-    // Handle input changes locally without calling API
-    const handleInputChange = (property: string, value: any) => {
-        setPendingChanges(prev => ({
-            ...prev,
-            [property]: value
-        }));
-    };
-
-    // Handle Enter key press to commit changes
-    const handleKeyPress = (e: React.KeyboardEvent, property: string) => {
-        if (e.key === 'Enter') {
-            const value = pendingChanges[property];
-            if (value !== undefined) {
-                updateAssociationProperty(property, value);
-                setPendingChanges(prev => {
-                    const updated = { ...prev };
-                    delete updated[property];
-                    return updated;
-                });
-            }
-        }
-    };
-
-    // Get current value (pending change or original value)
-    const getValue = (property: string, originalValue: any) => {
-        return pendingChanges[property] !== undefined ? pendingChanges[property] : originalValue;
-    };
+    // Use shared pending changes hook
+    const { handleInputChange, handleKeyPress, handleBlur, getValue } = usePendingChanges({
+        onPropertyUpdate: updateAssociationProperty,
+        dependencyArray: [selectedAssociation.endX, selectedAssociation.endY]
+    });
 
     return (
         <div className="absolute right-0 top-0 w-[300px] h-full bg-gray-100 p-5 shadow-md overflow-y-auto">
@@ -113,83 +70,19 @@ const AssociationPropertiesPanel: React.FC<AssociationPropertiesPanelProps> = ({
                         </div>
                         <div className="mb-3">
                             <label className="block mb-1 text-sm font-medium text-gray-700">Font Style:</label>
-                            <div className="flex space-x-2">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const isBold = (attr.fontStyle & attribute.Textstyle.Bold) !== 0;
-                                        let newStyle = attr.fontStyle;
-                                        if (isBold) {
-                                            newStyle &= ~attribute.Textstyle.Bold;
-                                        } else {
-                                            newStyle |= attribute.Textstyle.Bold;
-                                        }
-                                        updateAssociationProperty(`attributes:${attrIndex}.fontStyleB`, newStyle);
-                                    }}
-                                    className={`px-3 py-2 border rounded-md ${(attr.fontStyle & attribute.Textstyle.Bold) !== 0
-                                        ? 'bg-blue-500 text-white'
-                                        : 'bg-white text-gray-700 border-gray-300'
-                                        } hover:bg-blue-600 hover:text-white font-bold`}
-                                >
-                                    B
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const isItalic = (attr.fontStyle & attribute.Textstyle.Italic) !== 0;
-                                        let newStyle = attr.fontStyle;
-                                        if (isItalic) {
-                                            newStyle &= ~attribute.Textstyle.Italic;
-                                        } else {
-                                            newStyle |= attribute.Textstyle.Italic;
-                                        }
-                                        updateAssociationProperty(`attributes:${attrIndex}.fontStyleI`, newStyle);
-                                    }}
-                                    className={`px-3 py-2 border rounded-md ${(attr.fontStyle & attribute.Textstyle.Italic) !== 0
-                                        ? 'bg-blue-500 text-white'
-                                        : 'bg-white text-gray-700 border-gray-300'
-                                        } hover:bg-blue-600 hover:text-white italic`}
-                                >
-                                    I
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
-                                        let newStyle = attr.fontStyle;
-                                        if (isUnderline) {
-                                            newStyle &= ~attribute.Textstyle.Underline;
-                                        } else {
-                                            newStyle |= attribute.Textstyle.Underline;
-                                        }
-                                        updateAssociationProperty(`attributes:${attrIndex}.fontStyleU`, newStyle);
-                                    }}
-                                    className={`px-3 py-2 border rounded-md ${(attr.fontStyle & attribute.Textstyle.Underline) !== 0
-                                        ? 'bg-blue-500 text-white'
-                                        : 'bg-white text-gray-700 border-gray-300'
-                                        } hover:bg-blue-600 hover:text-white underline`}
-                                >
-                                    U
-                                </button>
-                            </div>
+                            <FontStyleButtons
+                                fontStyle={attr.fontStyle}
+                                onStyleChange={(newStyle, styleType) => {
+                                    updateAssociationProperty(`attributes:${attrIndex}.fontStyle${styleType}`, newStyle);
+                                }}
+                            />
                         </div>
                         <div className="mb-3">
                             <label className="block mb-1 text-sm font-medium text-gray-700">Font File:</label>
                             <select
                                 value={getValue(`attributes:${attrIndex}.fontFile`, attr.fontFile)}
                                 onChange={(e) => handleInputChange(`attributes:${attrIndex}.fontFile`, e.target.value)}
-                                onBlur={() => {
-                                    const property = `attributes:${attrIndex}.fontFile`;
-                                    const value = pendingChanges[property];
-                                    if (value !== undefined) {
-                                        updateAssociationProperty(property, value);
-                                        setPendingChanges(prev => {
-                                            const updated = { ...prev };
-                                            delete updated[property];
-                                            return updated;
-                                        });
-                                    }
-                                }}
+                                onBlur={() => handleBlur(`attributes:${attrIndex}.fontFile`)}
                                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                             >
                                 {getFontOptions().map((fontName) => (
