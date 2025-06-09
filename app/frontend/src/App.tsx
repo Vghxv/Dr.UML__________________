@@ -54,12 +54,10 @@ const App: React.FC = () => {
     };
 
     const handleAddAss = () => {
-        // setIsAddingAssociation(true);
-        // setAssStartPoint(null);
-        // setAssEndPoint(null);
-        // setShowAssPopup(false);
-        // use mock-data for now
-
+        setIsAddingAssociation(true);
+        setAssStartPoint(null);
+        setAssEndPoint(null);
+        setShowAssPopup(false);
     };
 
     const handleCanvasClick = async (point: { x: number, y: number }) => {
