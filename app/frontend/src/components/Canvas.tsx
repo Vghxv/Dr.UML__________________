@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { AssociationProps, CanvasProps, GadgetProps } from '../utils/Props';
 import { createGad } from '../utils/createGadget';
 import { createAss } from '../utils/createAssociation';
@@ -19,10 +19,14 @@ const DrawingCanvas: React.FC<{
     isAddingAssociation
 }) => {
         const canvasRef = useRef<HTMLCanvasElement>(null);
-        const allComponents = [
-            ...(backendData?.gadgets ?? []),
-            ...(backendData?.associations ?? [])
-        ];
+        
+        // Memoize allComponents to prevent unnecessary recalculations
+        // Only recalculate when the actual arrays change, not their contents
+        const allComponents = useMemo(() => {
+            if (!backendData) return [];
+            return [...(backendData.gadgets ?? []), ...(backendData.associations ?? [])];
+        }, [backendData]);
+        
         const { selectedComponentCount, selectedComponent } = useSelection(allComponents);
 
         const redrawCanvas = useCallback(() => {

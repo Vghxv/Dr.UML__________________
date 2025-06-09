@@ -17,6 +17,7 @@ import { useBackendCanvasData } from "./hooks/useBackendCanvasData";
 import { useGadgetUpdater } from "./hooks/useGadgetUpdater";
 import { useAssociationUpdater } from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
+import { useCallback } from "react";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
@@ -87,9 +88,15 @@ const App: React.FC = () => {
         setShowAssPopup(false);
     };
 
-    const handleSelectionChange = (component: GadgetProps | AssociationProps | null) => {
-        setSelectedComponent(component);
-    };
+    const handleSelectionChange = useCallback((component: GadgetProps | AssociationProps | null) => {
+        setSelectedComponent(prev => {
+            // Only update if the selection actually changed
+            if (prev !== component) {
+                return component;
+            }
+            return prev;
+        });
+    }, []);
 
     return (
         <div className="h-screen mx-auto px-4 bg-neutral-700">
