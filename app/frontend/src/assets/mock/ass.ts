@@ -9,6 +9,7 @@ export const mockAssociation: AssociationProps = {
     endY: 500,
     deltaX: 0,
     deltaY: 0,
+    isSelected: true,
     attributes: [
         {
             content: "1",
@@ -43,6 +44,7 @@ export const mockSelfAssociation: AssociationProps = {
     endY: 600,
     deltaX: 100,
     deltaY: 100,
+    isSelected: false,
     attributes: [
         {
             content: "self",
@@ -63,6 +65,7 @@ export const mockHorizontalAssociation: AssociationProps = {
     endY: 200,
     deltaX: 0,
     deltaY: 0,
+    isSelected: false,
     attributes: [
         {
             content: "left",
@@ -90,6 +93,7 @@ export const mockVerticalAssociation: AssociationProps = {
     endY: 400,
     deltaX: 0,
     deltaY: 0,
+    isSelected: false,
     attributes: [
         {
             content: "top",
@@ -117,6 +121,7 @@ export const mockSelfAssociationLeft: AssociationProps = {
     endY: 500,
     deltaX: -100,
     deltaY: 0,
+    isSelected: false,
     attributes: [
         {
             content: "self-left",
@@ -137,6 +142,7 @@ export const mockSelfAssociationUp: AssociationProps = {
     endY: 600,
     deltaX: 0,
     deltaY: -100,
+    isSelected: false,
     attributes: [
         {
             content: "self-up",

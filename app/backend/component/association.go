@@ -37,9 +37,9 @@ type Association struct {
 	drawdata         drawdata.Association
 	isSelected       bool
 	updateParentDraw func() duerror.DUError
-
-	startPointRatio [2]float64
-	endPointRatio   [2]float64
+	IsSelected       bool
+	startPointRatio  [2]float64
+	endPointRatio    [2]float64
 }
 
 // Constructor
