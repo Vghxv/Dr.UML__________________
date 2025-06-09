@@ -83,7 +83,7 @@ func TestCreateEmptyDiagram(t *testing.T) {
 				assert.NotNil(t, diagram)
 				assert.Equal(t, tt.inputName, diagram.GetName())
 				assert.Equal(t, tt.diagramType, diagram.diagramType)
-				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
+				assert.WithinDuration(t, time.Now(), diagram.GetLastModified(), time.Second)
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
 				// New assertions
 				assert.Equal(t, "#FFFFFF", diagram.backgroundColor)
@@ -842,4 +842,208 @@ func (m *mockContainer) Len() (int, duerror.DUError) {
 		return 1, nil
 	}
 	return 0, nil
+}
+
+func CMD_ADD_GADGET(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	header := "test gadget"
+	d.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, header)
+
+	t.Run("undo add gadget", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 0 {
+			t.Errorf("fail to remove gadget from component container")
+		}
+	})
+
+	t.Run("redo add gadget", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 1 {
+			t.Errorf("fail to recover component container")
+		}
+		dd := d.GetDrawData()
+		content := dd.Gadgets[0].Attributes[0][0].Content
+		if content != header {
+			t.Errorf("fail to recover gadget content: %v, got %v", header, content)
+		}
+	})
+}
+
+func CMD_ADD_ASSOCIATION(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, "test gadget0")
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "test gadget1")
+
+	assType := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType), gadPoint1)
+
+	t.Run("undo add association", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 2 {
+			t.Errorf("fail to remove association from component container")
+		}
+		dd := d.GetDrawData()
+		assLen := len(dd.Associations)
+		if assLen != 0 {
+			t.Errorf("fail to remove correct component")
+		}
+	})
+
+	t.Run("redo add association", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 3 {
+			t.Errorf("fail to recover component container")
+		}
+		dd := d.GetDrawData()
+		assLen := len(dd.Associations)
+		if assLen != 1 {
+			t.Errorf("fail to recover association")
+		}
+		newAssType := dd.Associations[0].AssType
+		if newAssType != assType {
+			t.Errorf("fail to recover association type: %v, got %v", assType, newAssType)
+		}
+	})
+}
+
+func CMD_REMOVE_SELECTED_COMPONENTS(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	gadPoint2 := utils.Point{X: 400, Y: 400}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	header2 := "test gadget2"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	d.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, header2)
+
+	assType0 := component.Composition
+	assType1 := component.Dependency
+	assType2 := component.Extension
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType1), gadPoint0)
+	d.StartAddAssociation(gadPoint2)
+	d.EndAddAssociation(component.AssociationType(assType2), gadPoint2)
+
+	t.Run("select and remove components", func(t *testing.T) {
+		d.SelectComponent(gadPoint0)
+		d.SelectComponent(gadPoint1)
+		midPoint := utils.Point{
+			X: (gadPoint0.X + gadPoint1.X) / 2,
+			Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+		}
+		err := d.SelectComponent(midPoint)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("fail to select components")
+		}
+
+		err = d.RemoveSelectedComponents()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		dd := d.GetDrawData()
+		if len(dd.Gadgets) != 1 {
+			t.Errorf("failed to remove gadget")
+		}
+		content := dd.Gadgets[0].Attributes[0][0].Content
+		if content != header2 {
+			t.Errorf("failed to remove gadget")
+		}
+
+		if len(dd.Associations) != 1 {
+			t.Errorf("failed to remove association")
+		}
+		assType := dd.Associations[0].AssType
+		if assType != assType2 {
+			t.Errorf("failed to remove association")
+		}
+	})
+
+	t.Run("undo remove select components", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("fail to recover componentsSelected")
+		}
+
+		dd := d.GetDrawData()
+		if len(dd.Gadgets) != 3 {
+			t.Errorf("failed to recover gadget")
+		} else {
+			headers := map[string]bool{header0: true, header1: true, header2: true}
+			for i := 0; i < 3; i++ {
+				content := dd.Gadgets[i].Attributes[0][0].Content
+				val, ok := headers[content]
+				if !ok || !val {
+					t.Errorf("failed to recover gadget. incorrect header: %v", content)
+				}
+				headers[content] = false
+			}
+		}
+
+		if len(dd.Associations) != 3 {
+			t.Errorf("failed to recover association")
+		} else {
+			types := map[int]bool{assType0: true, assType1: true, assType2: true}
+			for i := 0; i < 3; i++ {
+				assType := dd.Associations[i].AssType
+				val, ok := types[assType]
+				if !ok || !val {
+					t.Errorf("failed to recover association. incorrect type: %v", assType)
+				}
+				types[assType] = false
+			}
+		}
+	})
+
+	t.Run("redo remove select components", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		dd := d.GetDrawData()
+		if len(dd.Gadgets) != 1 {
+			t.Errorf("failed to remove gadget")
+		}
+		content := dd.Gadgets[0].Attributes[0][0].Content
+		if content != header2 {
+			t.Errorf("failed to remove gadget")
+		}
+
+		if len(dd.Associations) != 1 {
+			t.Errorf("failed to remove association")
+		}
+		assType := dd.Associations[0].AssType
+		if assType != assType2 {
+			t.Errorf("failed to remove association")
+		}
+	})
 }

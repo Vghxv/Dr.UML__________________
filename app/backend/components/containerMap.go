@@ -78,6 +78,11 @@ func (cp *containerMap) SearchGadget(p utils.Point) (*component.Gadget, duerror.
 	return candidate, nil
 }
 
+func (cp *containerMap) Contain(c component.Component) bool {
+	_, ok := cp.compMap[c]
+	return ok
+}
+
 func (cp *containerMap) GetAll() []component.Component {
 	return slices.Collect(maps.Keys(cp.compMap))
 }
