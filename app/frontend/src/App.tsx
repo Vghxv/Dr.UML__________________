@@ -169,6 +169,10 @@ const App: React.FC = () => {
                 onSave={handleSave}
                 onExport={handleExport}
                 onValidate={handleValidate}
+                sessionName={sessionName}
+                isConnected={isSessionConnected}
+                onJoinSession={handleJoinSession}
+                onLeaveSession={handleLeaveSession}
             />
             <DiagramTabs
                 diagrams={diagramTabs.map(name => ({ name }))}
@@ -183,12 +187,12 @@ const App: React.FC = () => {
                 onAddAss={handleAddAss}
                 diagramName={diagramName}
             />
-            <SessionBar
+            {/* <SessionBar
                 sessionName={sessionName}
                 isConnected={isSessionConnected}
                 onJoinSession={handleJoinSession}
                 onLeaveSession={handleLeaveSession}
-            />
+            /> */}
             {showPopup && (
                 <GadgetPopup
                     isOpen={showPopup}

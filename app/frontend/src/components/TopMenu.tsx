@@ -7,7 +7,7 @@ interface TopMenuProps {
     onValidate: () => void;
 }
 
-const TopMenu: React.FC<TopMenuProps> = ({ onOpenProject, onSave, onExport, onValidate }) => {
+const TopMenu: React.FC<TopMenuProps & { sessionName: string | null; isConnected: boolean; onJoinSession: () => void; onLeaveSession: () => void; }> = ({ onOpenProject, onSave, onExport, onValidate, sessionName, isConnected, onJoinSession, onLeaveSession }) => {
     return (
         <header className="w-full shadow-lg bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white sticky top-0 z-50">
             <div className="flex items-center justify-between px-8 py-3">
@@ -44,6 +44,28 @@ const TopMenu: React.FC<TopMenuProps> = ({ onOpenProject, onSave, onExport, onVa
                         Validate
                     </button>
                 </nav>
+                <div className="ml-8">
+                    {/* Inline SessionBar UI here for top menu */}
+                    <div className="flex items-center gap-3">
+                        <span className={`w-3 h-3 rounded-full shadow ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></span>
+                        <span className="font-bold text-base text-white flex items-center gap-1">
+                            <span className="material-icons text-white text-lg">group</span>
+                            Session:
+                        </span>
+                        <span className="text-white font-semibold text-base select-none">
+                            {sessionName ? sessionName : <span className="italic text-gray-200">No session</span>}
+                        </span>
+                        {isConnected ? (
+                            <button className="flex items-center gap-1 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white px-3 py-1 rounded-lg shadow font-semibold border border-red-400 transition-all duration-150 hover:scale-105 ml-2" onClick={onLeaveSession}>
+                                離開
+                            </button>
+                        ) : (
+                            <button className="flex items-center gap-1 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white px-3 py-1 rounded-lg shadow font-semibold border border-green-400 transition-all duration-150 hover:scale-105 ml-2" onClick={onJoinSession}>
+                                加入/建立
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
         </header>
     );

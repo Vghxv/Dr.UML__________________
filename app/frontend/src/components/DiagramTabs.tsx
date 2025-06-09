@@ -26,7 +26,6 @@ const DiagramTabs: React.FC<DiagramTabsProps> = ({ diagrams, activeDiagram, onSe
                     onClick={() => onSelect(tab.name)}
                     style={{ minWidth: 120 }}
                 >
-                    <span className="material-icons text-base mr-2">tab</span>
                     <span className="truncate max-w-[80px]">{tab.name}</span>
                     <button
                         className="ml-2 text-gray-400 hover:text-red-500 rounded-full p-1 transition-colors"
