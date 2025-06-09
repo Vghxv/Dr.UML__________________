@@ -103,6 +103,17 @@ const AssociationPropertiesPanel: React.FC<AssociationPropertiesPanelProps> = ({
                                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                             />
                         </div>
+
+                        {/* Delete button */}
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => updateAssociationProperty(`attributes:${attrIndex}.delete`, true)}
+                                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
