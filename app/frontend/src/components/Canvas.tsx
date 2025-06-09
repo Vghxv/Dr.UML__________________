@@ -10,23 +10,25 @@ const DrawingCanvas: React.FC<{
     reloadBackendData?: () => void,
     onSelectionChange?: (selectedComponent: GadgetProps | AssociationProps | null, selectedComponentCount: number) => void,
     onCanvasClick?: (point: { x: number, y: number }) => void,
-    isAddingAssociation?: boolean
+    isAddingAssociation?: boolean,
+    canvasBackgroundColor: string
 }> = ({
     backendData,
     reloadBackendData,
     onSelectionChange,
     onCanvasClick,
-    isAddingAssociation
+    isAddingAssociation,
+    canvasBackgroundColor
 }) => {
         const canvasRef = useRef<HTMLCanvasElement>(null);
-        
+
         // Memoize allComponents to prevent unnecessary recalculations
         // Only recalculate when the actual arrays change, not their contents
         const allComponents = useMemo(() => {
             if (!backendData) return [];
             return [...(backendData.gadgets ?? []), ...(backendData.associations ?? [])];
         }, [backendData]);
-        
+
         const { selectedComponentCount, selectedComponent } = useSelection(allComponents);
 
         const redrawCanvas = useCallback(() => {
@@ -34,7 +36,9 @@ const DrawingCanvas: React.FC<{
             if (canvas) {
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    // Fill the canvas with the background color
+                    ctx.fillStyle = canvasBackgroundColor;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     backendData?.gadgets?.forEach((gadget: GadgetProps) => {
                         const gad = createGad("Class", gadget, backendData.margin);
@@ -47,7 +51,7 @@ const DrawingCanvas: React.FC<{
                     });
                 }
             }
-        }, [backendData]);
+        }, [backendData, canvasBackgroundColor]);
 
         const resizeCanvas = useCallback(() => {
             const canvas = canvasRef.current;

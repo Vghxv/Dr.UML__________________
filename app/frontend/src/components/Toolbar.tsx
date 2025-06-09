@@ -4,15 +4,19 @@ interface ToolbarProps {
     onGetDiagramName: () => void;
     onShowPopup: () => void;
     onAddAss: () => void;
+    onCanvasColorChange: (color: string) => void;
     diagramName?: string | null;
+    canvasBackgroundColor: string;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
-                                             onGetDiagramName,
-                                             onShowPopup,
-                                             onAddAss,
-                                             diagramName
-                                         }) => (
+    onGetDiagramName,
+    onShowPopup,
+    onAddAss,
+    onCanvasColorChange,
+    diagramName,
+    canvasBackgroundColor = "#C2C2C2"
+}) => (
     <div className="flex items-center gap-4 my-6 py-3.5 px-8 bg-gray-900 rounded-xl shadow-md min-h-[60px]">
         <button
             onClick={onGetDiagramName}
@@ -37,6 +41,19 @@ const Toolbar: React.FC<ToolbarProps> = ({
         >
             Add Association
         </button>
+        <div className="flex items-center gap-2 ml-4">
+            <label htmlFor="canvas-color" className="text-white font-medium text-sm">
+                Canvas Color:
+            </label>
+            <input
+                id="canvas-color"
+                type="color"
+                value={canvasBackgroundColor}
+                onChange={(e) => onCanvasColorChange(e.target.value)}
+                className="w-10 h-8 rounded border border-gray-300 cursor-pointer"
+                title="Change canvas background color"
+            />
+        </div>
     </div>
 );
 

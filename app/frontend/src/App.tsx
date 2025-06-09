@@ -27,6 +27,7 @@ const App: React.FC = () => {
     const [showAssPopup, setShowAssPopup] = useState(false);
     const [assStartPoint, setAssStartPoint] = useState<{ x: number, y: number } | null>(null);
     const [assEndPoint, setAssEndPoint] = useState<{ x: number, y: number } | null>(null);
+    const [canvasBackgroundColor, setCanvasBackgroundColor] = useState<string>("#C2C2C2");
 
     const { backendData, reloadBackendData } = useBackendCanvasData();
 
@@ -98,6 +99,10 @@ const App: React.FC = () => {
         });
     }, []);
 
+    const handleCanvasColorChange = (color: string) => {
+        setCanvasBackgroundColor(color);
+    };
+
     return (
         <div className="h-screen mx-auto px-4 bg-neutral-700">
             <h1 className="text-3xl text-center font-bold text-white mb-4">Dr.UML</h1>
@@ -105,7 +110,9 @@ const App: React.FC = () => {
                 onGetDiagramName={handleGetDiagramName}
                 onShowPopup={() => setShowPopup(true)}
                 onAddAss={handleAddAss}
+                onCanvasColorChange={handleCanvasColorChange}
                 diagramName={diagramName}
+                canvasBackgroundColor={canvasBackgroundColor}
             />
             {showPopup && (
                 <GadgetPopup
@@ -123,6 +130,7 @@ const App: React.FC = () => {
                 onSelectionChange={handleSelectionChange}
                 onCanvasClick={handleCanvasClick}
                 isAddingAssociation={isAddingAssociation}
+                canvasBackgroundColor={canvasBackgroundColor}
             />
             {showAssPopup && assStartPoint && assEndPoint && (
                 <AssociationPopup
