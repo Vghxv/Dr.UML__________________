@@ -67,7 +67,7 @@ class ClassElement {
                         yOffset += Math.round(attr.height);
                         if (isUnderline) {
                             const underlineHeight = 2;
-                            ctx.fillRect(this.gadgetProps.x + margin, yOffset - Math.round(attr.height * 0.2), attr.width, underlineHeight);
+                            ctx.fillRect(this.gadgetProps.x + margin, yOffset - Math.round(attr.height * 0.4), attr.width, underlineHeight);
                         }
                         yOffset += margin;
                     }

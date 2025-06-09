@@ -45,7 +45,8 @@ const transformAssociationAttribute = (attr: any) => ({
     fontSize: attr.fontSize,
     fontStyle: attr.fontStyle,
     fontFile: attr.fontFile,
-    ratio: attr.ratio
+    ratio: attr.ratio,
+    height: attr.height
 });
 
 /**

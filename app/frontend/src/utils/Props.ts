@@ -41,5 +41,6 @@ export interface AssociationProps {
         fontStyle: number;
         fontFile: string;
         ratio: number;
+        height: number;
     }[];
 }

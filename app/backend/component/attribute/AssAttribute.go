@@ -80,7 +80,14 @@ func (att *AssAttribute) SetRatio(ratio float64) duerror.DUError {
 	return nil
 }
 
-func (att *AssAttribute) updateDrawData() {
+func (att *AssAttribute) updateDrawData() duerror.DUError {
+
+	height, _, err := utils.GetTextSize(att.content, att.size, att.fontFile)
+	if err != nil {
+		return err
+	}
+
+	att.assDD.Height = height
 	att.assDD.Content = att.content
 	att.assDD.FontSize = att.size
 	att.assDD.FontStyle = int(att.style)
@@ -89,6 +96,7 @@ func (att *AssAttribute) updateDrawData() {
 	if att.updateParentDrawOuter != nil {
 		att.updateParentDrawOuter()
 	}
+	return nil
 }
 
 func (att *AssAttribute) RegisterUpdateParentDraw(update func() duerror.DUError) duerror.DUError {

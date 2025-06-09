@@ -200,12 +200,11 @@ class AssociationElement {
                     const italicString = (attr.fontStyle & attribute.Textstyle.Italic) !== 0 ? "italic " : "";
                     const isUnderline = (attr.fontStyle & attribute.Textstyle.Underline) !== 0;
                     ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
-
-                    ctx.fillStyle = "white";
+                    ctx.textBaseline = "hanging"
                     ctx.fillText(attr.content, x + margin, y);
                     if (isUnderline) {
                         const underlineHeight = 2;
-                        ctx.fillRect(x + margin, y + Math.round(attr.fontSize * 0.2), ctx.measureText(attr.content).width, underlineHeight);
+                        ctx.fillRect(x + margin, y + Math.round(attr.height * 0.6), ctx.measureText(attr.content).width, underlineHeight);
                     }
                 }
             });
