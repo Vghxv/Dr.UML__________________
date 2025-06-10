@@ -80,6 +80,10 @@ func FromSavedAssociation(saved utils.SavedAss, parents [2]*Gadget) (*Associatio
 		endPointRatio:   saved.EndPointRatio,
 	}
 
+	if err := ass.updateDrawData(); err != nil {
+		return nil, err
+	}
+
 	return ass, nil
 }
 

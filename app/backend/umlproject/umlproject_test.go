@@ -573,3 +573,70 @@ func TestCloseProject(t *testing.T) {
 	assert.Equal(t, expectedData, actualData, "Project content should match after close")
 	assert.NoError(t, err)
 }
+
+func TestDumlEndToEnd(t *testing.T) {
+	// 建立新專案與圖
+	p, err := CreateEmptyUMLProject("DumlTestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "DumlDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("DumlDiagram")
+	assert.NoError(t, err)
+
+	// 新增 Gadget
+	err = p.AddGadget(component.Class, utils.Point{X: 20, Y: 30}, 1, drawdata.DefaultGadgetColor, "header1")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 120, Y: 130}, 2, drawdata.DefaultGadgetColor, "header2")
+	assert.NoError(t, err)
+
+	// 新增 Association
+	err = p.StartAddAssociation(utils.Point{X: 20, Y: 30})
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Extension, utils.Point{X: 120, Y: 130})
+	assert.NoError(t, err)
+
+	// 儲存專案
+	tmpFile, err := os.CreateTemp("", "duml_end_to_end_*.json")
+	assert.NoError(t, err)
+	defer func(name string) {
+		_ = os.Remove(name)
+	}(tmpFile.Name())
+	assert.NoError(t, tmpFile.Close())
+	err = p.SaveProject(tmpFile.Name())
+	assert.NoError(t, err)
+
+	// 載入專案
+	p2, err := CreateEmptyUMLProject("DumlTestProject2")
+	assert.NoError(t, err)
+	err = p2.LoadProject(tmpFile.Name())
+	assert.NoError(t, err)
+	err = p2.SelectDiagram("DumlDiagram")
+	assert.NoError(t, err)
+
+	// 驗證 Gadget 與 Association 內容
+	data1 := p.GetDrawData()
+	data2 := p2.GetDrawData()
+	// 比對 Gadget
+	for _, g1 := range data1.Gadgets {
+		found := false
+		for _, g2 := range data2.Gadgets {
+			if g1.GadgetType == g2.GadgetType && g1.X == g2.X && g1.Y == g2.Y {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Gadget %+v not found after reload", g1)
+	}
+
+	// 比對 Association
+	for _, a1 := range data1.Associations {
+		found := false
+		for _, a2 := range data2.Associations {
+			if a1.AssType == a2.AssType && a1.StartX == a2.StartX && a1.EndX == a2.EndX {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Association %+v not found after reload", a1)
+	}
+}
