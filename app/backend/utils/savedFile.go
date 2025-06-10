@@ -34,9 +34,13 @@ type SavedAss struct {
 	Attributes      []SavedAtt `json:"attributes"`
 }
 
-type SavedFile struct {
+type SavedDiagram struct {
 	Filetype     int        `json:"filetype"`
 	LastEdit     string     `json:"lastEdit"`
 	Gadgets      []SavedGad `json:"Gadgets"`
 	Associations []SavedAss `json:"Associations"`
+}
+
+type SavedProject struct {
+	Diagrams []string `json:"diagrams"`
 }

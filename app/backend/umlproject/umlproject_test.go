@@ -1,6 +1,7 @@
 package umlproject
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 	"time"
@@ -382,13 +383,6 @@ func TestInvalidateCanvas(t *testing.T) {
 	// TODO
 }
 
-func TestLoadExistUMLProject(t *testing.T) {
-	// Test the function (currently returns nil, nil)
-	p, err := LoadExistUMLProject("TestProject")
-	assert.Nil(t, p)
-	assert.Nil(t, err)
-}
-
 func TestOpenDiagram(t *testing.T) {
 	proj, err := CreateEmptyUMLProject("fuck")
 	assert.NoError(t, err)
@@ -422,4 +416,154 @@ func TestSaveDiagram(t *testing.T) {
 	assert.NoError(t, err)
 	err = p.SaveDiagram(tmpFile.Name())
 	assert.Error(t, err)
+}
+
+func TestLoadProject(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	filename := os.Getenv("APP_ROOT") + "/backend/example_proj.json5"
+	err = p.LoadProject(filename)
+	assert.NoError(t, err)
+	assert.Equal(t, filename, p.GetName())
+	assert.Contains(t, p.GetAvailableDiagramsNames(), "path/to/diagram1.json5")
+}
+
+func TestSaveProject(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Create and select a diagram
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Save to a temp file
+	tmpFile, err := os.CreateTemp("", "umlproject_save_test_*.json")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err)
+	}(tmpFile.Name())
+	assert.NoError(t, tmpFile.Close())
+
+	// Save project
+	err = p.SaveProject(tmpFile.Name())
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err)
+	}(os.Getenv("APP_ROOT") + "/backend/umlproject/TestDiagram")
+
+	// Try saving with an invalid file path
+	err = p.SaveProject("")
+	assert.Error(t, err)
+}
+
+func TestProjectSaveLoadContentEquality(t *testing.T) {
+	// Create a new project and diagram
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget for some content
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 1, drawdata.DefaultGadgetColor, "header")
+	assert.NoError(t, err)
+
+	// Save project to a temp file
+	tmpFile, err := os.CreateTemp("", "umlproject_content_test_*.json")
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err)
+	}(tmpFile.Name())
+
+	err = tmpFile.Close()
+	assert.NoError(t, err)
+
+	err = p.SaveProject(tmpFile.Name())
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err)
+	}(os.Getenv("APP_ROOT") + "/backend/umlproject/TestDiagram")
+
+	// Read saved file content
+	savedContent, err := os.ReadFile(tmpFile.Name())
+	assert.NoError(t, err)
+
+	// Load project from file
+	p2, err := CreateEmptyUMLProject("AnotherProject")
+	assert.NoError(t, err)
+	err = p2.LoadProject(tmpFile.Name())
+	assert.NoError(t, err)
+
+	// Save loaded project to another temp file
+	tmpFile2, err := os.Create("umlproject_content_test2.json")
+	assert.NoError(t, err)
+	// defer os.Remove(tmpFile2.Name())
+	err = tmpFile2.Close()
+	assert.NoError(t, err)
+	defer func(name string) {
+		err := os.Remove(name)
+		assert.NoError(t, err)
+	}(tmpFile2.Name())
+
+	err = p2.SaveProject(tmpFile2.Name())
+	assert.NoError(t, err)
+
+	// Read loaded file content
+	loadedContent, err := os.ReadFile(tmpFile2.Name())
+	assert.NoError(t, err)
+
+	// Assert the content is identical
+	assert.Equal(t, string(savedContent), string(loadedContent))
+}
+
+func TestCloseProject(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Create and select a diagram to modify the project
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Save the project to set lastSave
+	tmpFile, err := os.CreateTemp("", "umlproject_close_test_*.json")
+	assert.NoError(t, err)
+	defer func(name string) {
+		_ = os.Remove(name)
+	}(tmpFile.Name())
+	assert.NoError(t, tmpFile.Close())
+
+	err = p.SaveProject(tmpFile.Name())
+	assert.NoError(t, err)
+	err = os.Remove(tmpFile.Name())
+	assert.NoError(t, err)
+
+	time.Sleep(10 * time.Millisecond) // Ensure lastModified is later than lastSave
+	// Modify the project
+	err = p.AddGadget(component.Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "header")
+	assert.NoError(t, err)
+
+	// Call CloseProject, should trigger save
+	err = p.CloseProject()
+	assert.FileExists(t, tmpFile.Name())
+	content, err := os.ReadFile(tmpFile.Name())
+	assert.NoError(t, err)
+	expectedContent := `{
+		"diagrams": [
+			"TestDiagram"
+		]
+	}`
+	var expectedData, actualData map[string]interface{}
+	assert.NoError(t, json.Unmarshal([]byte(expectedContent), &expectedData), "Failed to unmarshal expected JSON")
+	assert.NoError(t, json.Unmarshal(content, &actualData), "Failed to unmarshal actual JSON")
+	assert.Equal(t, expectedData, actualData, "Project content should match after close")
+	assert.NoError(t, err)
 }

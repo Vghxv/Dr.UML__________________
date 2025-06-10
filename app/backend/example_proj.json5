@@ -1,0 +1,5 @@
+{
+  diagrams: [
+    "path/to/diagram1.json5"
+  ]
+}
