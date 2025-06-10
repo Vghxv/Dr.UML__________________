@@ -6,6 +6,8 @@ import (
 	"Dr.uml/backend/utils/duerror"
 )
 
+const CMD_LIMIT = 20
+
 type Command interface {
 	Execute() duerror.DUError
 	Unexecute() duerror.DUError
@@ -17,13 +19,15 @@ type Manager struct {
 	undoStack    []Command
 	redoStack    []Command
 	lastModified time.Time
+	limit        int
 }
 
 func NewManager(lastModified time.Time) *Manager {
 	return &Manager{
-		undoStack:    make([]Command, 0),
-		redoStack:    make([]Command, 0),
+		undoStack:    make([]Command, 0, CMD_LIMIT),
+		redoStack:    make([]Command, 0, CMD_LIMIT),
 		lastModified: lastModified,
+		limit:        CMD_LIMIT,
 	}
 }
 
@@ -37,6 +41,9 @@ func (m *Manager) Execute(cmd Command) duerror.DUError {
 	}
 	if err := cmd.Execute(); err != nil {
 		return err
+	}
+	if len(m.undoStack) == m.limit {
+		m.undoStack = m.undoStack[1:]
 	}
 	m.undoStack = append(m.undoStack, cmd)
 	m.redoStack = nil
