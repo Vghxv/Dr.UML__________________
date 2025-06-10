@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/drawdata"
 
 	"Dr.uml/backend/component"
@@ -332,9 +333,22 @@ func TestAddAttributeToAssociation(t *testing.T) {
 	assert.NoError(t, err)
 	err = p.AddAttributeToAssociation(0.5, "newAttribute")
 	assert.NoError(t, err)
-	err = p.SetAttrContentComponent(0, 0, "aaaaaaaah")
+	err = p.SetAttrContentComponent(0, 0, "modifiedAttribute")
 	assert.NoError(t, err)
-	assert.Equal(t, "aaaaaaaah", p.GetDrawData().Associations[0].Attributes[0].Content)
+	assert.Equal(t, "modifiedAttribute", p.GetDrawData().Associations[0].Attributes[0].Content)
+	err = p.SetAttrSizeComponent(0, 0, 20)
+	assert.NoError(t, err)
+	assert.Equal(t, 20, p.GetDrawData().Associations[0].Attributes[0].FontSize)
+	err = p.SetAttrStyleComponent(0, 0, attribute.Italic)
+	assert.NoError(t, err)
+	assert.Equal(t, attribute.Italic, p.GetDrawData().Associations[0].Attributes[0].FontStyle)
+	err = p.SetAttrFontComponent(0, 0, "Inkfree")
+	assert.NoError(t, err)
+	assert.Equal(t, "Inkfree", p.GetDrawData().Associations[0].Attributes[0].FontFile)
+	err = p.SetAttrRatioComponent(0, 0, 0.5)
+	assert.NoError(t, err)
+	assert.Equal(t, 0.5, p.GetDrawData().Associations[0].Attributes[0].Ratio)
+
 }
 
 func TestSelectComponent(t *testing.T) {

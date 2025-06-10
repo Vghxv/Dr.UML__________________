@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {offBackendEvent, onBackendEvent, ToPoint} from "./utils/wailsBridge";
+import React, { useEffect, useState } from "react";
+import { offBackendEvent, onBackendEvent, ToPoint } from "./utils/wailsBridge";
 
 import {
     EndAddAssociation,
@@ -8,29 +8,37 @@ import {
     StartAddAssociation
 } from "../wailsjs/go/umlproject/UMLProject";
 
-import {CanvasProps, GadgetProps} from "./utils/Props";
+import { AssociationProps, CanvasProps, GadgetProps } from "./utils/Props";
 import DrawingCanvas from "./components/Canvas";
-import {GadgetPopup} from "./components/CreateGadgetPopup";
+import { GadgetPopup } from "./components/CreateGadgetPopup";
 import Toolbar from "./components/Toolbar";
-import GadgetPropertiesPanel from "./components/GadgetPropertiesPanel";
-import {useBackendCanvasData} from "./hooks/useBackendCanvasData";
-import {useGadgetUpdater} from "./hooks/useGadgetUpdater";
+import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
+import { useBackendCanvasData } from "./hooks/useBackendCanvasData";
+import { useGadgetUpdater } from "./hooks/useGadgetUpdater";
+import { useAssociationUpdater } from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
+import { useCallback } from "react";
 
 const App: React.FC = () => {
     const [diagramName, setDiagramName] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false);
-    const [selectedGadget, setSelectedGadget] = useState<GadgetProps | null>(null);
-    const [selectedGadgetCount, setSelectedGadgetCount] = useState<number>(0);
+    const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
     const [isAddingAssociation, setIsAddingAssociation] = useState(false);
     const [showAssPopup, setShowAssPopup] = useState(false);
     const [assStartPoint, setAssStartPoint] = useState<{ x: number, y: number } | null>(null);
     const [assEndPoint, setAssEndPoint] = useState<{ x: number, y: number } | null>(null);
+    const [canvasBackgroundColor, setCanvasBackgroundColor] = useState<string>("#C2C2C2");
 
-    const {backendData, setBackendData, reloadBackendData} = useBackendCanvasData();
+    const { backendData, reloadBackendData } = useBackendCanvasData();
 
-    const {handleUpdateGadgetProperty, handleAddAttributeToGadget} = useGadgetUpdater(
-        selectedGadget,
+    const { handleUpdateGadgetProperty, handleAddAttributeToGadget } = useGadgetUpdater(
+        selectedComponent as GadgetProps | null,
+        backendData,
+        reloadBackendData
+    );
+
+    const { handleUpdateAssociationProperty, handleAddAttributeToAssociation } = useAssociationUpdater(
+        selectedComponent as AssociationProps | null,
         backendData,
         reloadBackendData
     );
@@ -81,9 +89,18 @@ const App: React.FC = () => {
         setShowAssPopup(false);
     };
 
-    const handleSelectionChange = (gadget: GadgetProps | null, count: number) => {
-        setSelectedGadget(gadget);
-        setSelectedGadgetCount(count);
+    const handleSelectionChange = useCallback((component: GadgetProps | AssociationProps | null) => {
+        setSelectedComponent(prev => {
+            // Only update if the selection actually changed
+            if (prev !== component) {
+                return component;
+            }
+            return prev;
+        });
+    }, []);
+
+    const handleCanvasColorChange = (color: string) => {
+        setCanvasBackgroundColor(color);
     };
 
     return (
@@ -93,7 +110,9 @@ const App: React.FC = () => {
                 onGetDiagramName={handleGetDiagramName}
                 onShowPopup={() => setShowPopup(true)}
                 onAddAss={handleAddAss}
+                onCanvasColorChange={handleCanvasColorChange}
                 diagramName={diagramName}
+                canvasBackgroundColor={canvasBackgroundColor}
             />
             {showPopup && (
                 <GadgetPopup
@@ -111,6 +130,7 @@ const App: React.FC = () => {
                 onSelectionChange={handleSelectionChange}
                 onCanvasClick={handleCanvasClick}
                 isAddingAssociation={isAddingAssociation}
+                canvasBackgroundColor={canvasBackgroundColor}
             />
             {showAssPopup && assStartPoint && assEndPoint && (
                 <AssociationPopup
@@ -121,12 +141,14 @@ const App: React.FC = () => {
                     onClose={handleAssPopupClose}
                 />
             )}
-            {selectedGadgetCount === 1 && (
-                <GadgetPropertiesPanel
-                    selectedGadget={selectedGadget}
+            {/* TODO generalize updateProperty and addAttributeToXXX */}
+            {selectedComponent && (
+                <ComponentPropertiesPanel
+                    selectedComponent={selectedComponent}
                     updateGadgetProperty={handleUpdateGadgetProperty}
+                    updateAssociationProperty={handleUpdateAssociationProperty}
                     addAttributeToGadget={handleAddAttributeToGadget}
-                    // 可加上 updateAssociationProperty, addAttributeToAssociation
+                    addAttributeToAssociation={handleAddAttributeToAssociation}
                 />
             )}
         </div>

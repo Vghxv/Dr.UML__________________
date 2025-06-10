@@ -6,4 +6,5 @@ type AssAttribute struct {
 	FontStyle int     `json:"fontStyle"`
 	FontFile  string  `json:"fontFile"`
 	Ratio     float64 `json:"ratio"`
+	Height    int     `json:"height"`
 }

@@ -34,11 +34,13 @@ export interface AssociationProps {
     endY: number;
     deltaX: number;
     deltaY: number;
+    isSelected: boolean;
     attributes: {
         content: string;
         fontSize: number;
         fontStyle: number;
         fontFile: string;
         ratio: number;
+        height: number;
     }[];
 }
