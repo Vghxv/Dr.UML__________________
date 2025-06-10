@@ -81,7 +81,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 	}, nil
 }
 
-func LoadExistUMLDiagram(filename string, file utils.SavedFile) (*UMLDiagram, duerror.DUError) {
+func LoadExistUMLDiagram(filename string, file utils.SavedDiagram) (*UMLDiagram, duerror.DUError) {
 	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype)) // Shift right to remove the filetype bit
 	if err != nil {
 		return nil, err
@@ -677,7 +677,7 @@ func (ud *UMLDiagram) loadAsses(asses []utils.SavedAss, dp map[int]*component.Ga
 
 	return nil
 }
-func (ud *UMLDiagram) collectGadgets(res *utils.SavedFile) (map[*component.Gadget]int, duerror.DUError) {
+func (ud *UMLDiagram) collectGadgets(res *utils.SavedDiagram) (map[*component.Gadget]int, duerror.DUError) {
 	dp := make(map[*component.Gadget]int, ud.componentsContainer.Len())
 	cnt := 0
 	for _, comp := range ud.componentsContainer.GetAll() {
@@ -695,7 +695,7 @@ func (ud *UMLDiagram) collectGadgets(res *utils.SavedFile) (map[*component.Gadge
 	return dp, nil
 }
 
-func (ud *UMLDiagram) collectAssociations(dp map[*component.Gadget]int, res *utils.SavedFile) duerror.DUError {
+func (ud *UMLDiagram) collectAssociations(dp map[*component.Gadget]int, res *utils.SavedDiagram) duerror.DUError {
 	for comp, index := range dp {
 		for _, ass := range ud.associations[comp][0] {
 			milkBuyer := ass.GetParentEnd()
@@ -712,12 +712,12 @@ func (ud *UMLDiagram) collectAssociations(dp map[*component.Gadget]int, res *uti
 	return nil
 }
 
-func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedFile, duerror.DUError) {
+func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedDiagram, duerror.DUError) {
 	if filename != ud.name {
 		ud.name = filename
 	}
 
-	res := &utils.SavedFile{
+	res := &utils.SavedDiagram{
 		Filetype:     utils.FiletypeDiagram | int(ud.diagramType)<<1,
 		LastEdit:     "",
 		Gadgets:      nil,
@@ -738,7 +738,7 @@ func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedFile, duerror.DUE
 	return res, nil
 }
 
-func (ud *UMLDiagram) IfUnsavedChangesExist() bool {
+func (ud *UMLDiagram) HasUnsavedChanges() bool {
 	return ud.lastModified.After(ud.lastSave)
 }
 

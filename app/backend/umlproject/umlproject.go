@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/labstack/gommon/log"
 	"maps"
 	"os"
 	"slices"
@@ -22,6 +23,7 @@ type UMLProject struct {
 	ctx               context.Context
 	name              string
 	lastModified      time.Time
+	lastSave          time.Time
 	currentDiagram    *umldiagram.UMLDiagram            // The currently selected diagram
 	availableDiagrams map[string]bool                   // Use a map to store diagrams, keyed by their ID
 	activeDiagrams    map[string]*umldiagram.UMLDiagram // Keep track of active diagrams
@@ -40,11 +42,6 @@ func CreateEmptyUMLProject(fileName string) (*UMLProject, duerror.DUError) {
 		availableDiagrams: make(map[string]bool),
 		activeDiagrams:    make(map[string]*umldiagram.UMLDiagram),
 	}, nil
-}
-
-func LoadExistUMLProject(fileName string) (*UMLProject, duerror.DUError) {
-	// TODO
-	return nil, nil
 }
 
 // Getter
@@ -230,7 +227,7 @@ func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
 		return duerror.NewInvalidArgumentError("Diagram not loaded")
 	}
 	if p.currentDiagram != nil && p.currentDiagram.GetName() == diagramName {
-		if p.currentDiagram.IfUnsavedChangesExist() {
+		if p.currentDiagram.HasUnsavedChanges() {
 			err := p.SaveDiagram(diagramName)
 			if err != nil {
 				return duerror.NewParsingError(fmt.Sprintf("Failed to save diagram %s before closing.\n Error: %s", diagramName, err.Error()))
@@ -373,10 +370,15 @@ func (p *UMLProject) OpenDiagram(filename string) duerror.DUError {
 	if err != nil {
 		return duerror.NewFileIOError(fmt.Sprintf("Failed to open file %s.\n Error: %s", filename, err.Error()))
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Error(fmt.Sprintf("Failed to close diagram file %s.\n Error: %s", filename, err.Error()))
+		}
+	}(file)
 
 	decoder := json5.NewDecoder(file)
-	var savedFileData utils.SavedFile
+	var savedFileData utils.SavedDiagram
 
 	if err := decoder.Decode(&savedFileData); err != nil {
 		return duerror.NewInvalidArgumentError(fmt.Sprintf("Failed to decode file %s.\n Error: %s", filename, err.Error()))
@@ -431,6 +433,12 @@ func (p *UMLProject) SaveDiagram(filename string) duerror.DUError {
 	if err != nil {
 		return duerror.NewFileIOError(fmt.Sprintf("Failed to create file %s.\n Error: %s", filename, err.Error()))
 	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Error(fmt.Sprintf("Failed to close diagram file %s.\n Error: %s", filename, err.Error()))
+		}
+	}(file)
 
 	data, err := json.MarshalIndent(savedFileData, "", "  ")
 	if err != nil {
@@ -439,10 +447,91 @@ func (p *UMLProject) SaveDiagram(filename string) duerror.DUError {
 	if _, err := file.Write(data); err != nil {
 		return duerror.NewFileIOError(fmt.Sprintf("Failed to write data to file %s.\n Error: %s", filename, err.Error()))
 	}
-	if err := file.Close(); err != nil {
-		return duerror.NewFileIOError(fmt.Sprintf("Failed to close file %s.\n Error: %s", filename, err.Error()))
-	}
 
 	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) LoadProject(filename string) duerror.DUError {
+	if err := utils.ValidateFilePath(filename); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(filename, os.O_RDONLY, 0644)
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to open project file %s.\n Error: %s", filename, err.Error()))
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Error(fmt.Sprintf("Failed to close project file %s.\n Error: %s", filename, err.Error()))
+		}
+	}(file)
+
+	decoder := json5.NewDecoder(file)
+	var projectData utils.SavedProject
+	if err := decoder.Decode(&projectData); err != nil {
+		return duerror.NewParsingError(fmt.Sprintf("Failed to decode project file %s.\n Error: %s", filename, err.Error()))
+	}
+	p.name = filename
+	p.lastModified = time.Now()
+	p.lastSave = time.Now()
+	p.availableDiagrams = make(map[string]bool)
+	p.activeDiagrams = make(map[string]*umldiagram.UMLDiagram)
+	for _, diagramName := range projectData.Diagrams {
+		p.availableDiagrams[diagramName] = true
+	}
+
+	return nil
+}
+
+func (p *UMLProject) SaveProject(filename string) duerror.DUError {
+	if filename != p.name {
+		if err := utils.ValidateFilePath(filename); err != nil {
+			return err
+		}
+		p.name = filename
+	}
+	projectData := utils.SavedProject{
+		Diagrams: p.GetAvailableDiagramsNames(),
+	}
+	for _, diagram := range p.activeDiagrams {
+		if diagram.HasUnsavedChanges() {
+			if err := p.SaveDiagram(diagram.GetName()); err != nil {
+				return duerror.NewParsingError(fmt.Sprintf("Failed to save diagram %s before saving project.\n Error: %s", diagram.GetName(), err.Error()))
+			}
+		}
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to create project file %s.\n Error: %s", filename, err.Error()))
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Error(fmt.Sprintf("Failed to close project file %s.\n Error: %s", filename, err.Error()))
+		}
+	}(file)
+
+	data, err := json.MarshalIndent(projectData, "", "  ")
+	if err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to marshal project data to JSON for file %s.\n Error: %s", filename, err.Error()))
+	}
+	if _, err := file.Write(data); err != nil {
+		return duerror.NewFileIOError(fmt.Sprintf("Failed to write project data to file %s.\n Error: %s", filename, err.Error()))
+	}
+	p.lastSave = time.Now()
+
+	return nil
+}
+
+func (p *UMLProject) CloseProject() duerror.DUError {
+	if p.lastModified.After(p.lastSave) {
+		if err := p.SaveProject(p.name); err != nil {
+			return duerror.NewParsingError(fmt.Sprintf("Failed to save project %s before closing.\n Error: %s", p.name, err.Error()))
+		}
+		p.lastSave = p.lastModified
+	}
 	return nil
 }
