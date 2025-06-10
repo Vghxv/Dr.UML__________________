@@ -22,7 +22,7 @@ const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
     
     return (
         <div 
-            className="absolute right-0 top-0 w-[320px] h-full shadow-2xl border-l-2 border-[#1C1C1C] overflow-y-auto"
+            className="absolute right-0 top-20 w-[320px] h-full shadow-2xl border-l-2 border-[#1C1C1C] overflow-y-auto"
             style={{
                 background: 'linear-gradient(180deg, #333333 0%, #1C1C1C 50%, #333333 100%)',
                 boxShadow: 'inset 1px 0 0 rgba(242, 242, 240, 0.1), inset -1px 0 0 rgba(0, 0, 0, 0.3)'
