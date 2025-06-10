@@ -4,6 +4,8 @@ interface ToolbarProps {
     onGetDiagramName: () => void;
     onShowPopup: () => void;
     onAddAss: () => void;
+    onSaveProject: () => void;
+    onSaveDiagram: () => void;
     onCanvasColorChange: (color: string) => void;
     diagramName?: string | null;
     canvasBackgroundColor: string;
@@ -13,6 +15,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
     onGetDiagramName,
     onShowPopup,
     onAddAss,
+    onSaveProject,
+    onSaveDiagram,
     onCanvasColorChange,
     diagramName,
     canvasBackgroundColor = "#C2C2C2"
@@ -54,6 +58,18 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 title="Change canvas background color"
             />
         </div>
+        <button
+            onClick={onSaveProject}
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold text-sm py-2.5 px-5 rounded-md shadow-sm transition-colors cursor-pointer"
+        >
+            Save Project
+        </button>
+        <button
+            onClick={onSaveDiagram}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm py-2.5 px-5 rounded-md shadow-sm transition-colors cursor-pointer"
+        >
+            Save Diagram
+        </button>
     </div>
 );
 

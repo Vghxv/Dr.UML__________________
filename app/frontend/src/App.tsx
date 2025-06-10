@@ -4,7 +4,10 @@ import { offBackendEvent, onBackendEvent, ToPoint } from "./utils/wailsBridge";
 import {
     EndAddAssociation,
     GetCurrentDiagramName,
-    GetDrawData,
+    SaveDiagram,
+    SaveDiagramFileDialog,
+    SaveFileDialog,
+    SaveProject,
     StartAddAssociation
 } from "../wailsjs/go/umlproject/UMLProject";
 
@@ -138,6 +141,38 @@ const App: React.FC = () => {
         setCanvasBackgroundColor(color);
     };
 
+    const handleSaveProject = async () => {
+        try {
+            // Open file dialog to get save location
+            const filePath = await SaveFileDialog();
+            if (filePath) {
+                // Save the project to the selected file path
+                await SaveProject(filePath);
+                console.log("Project saved successfully to:", filePath);
+                // You could add a success notification here
+            }
+        } catch (error) {
+            console.error("Error saving project:", error);
+            // You could add an error notification here
+        }
+    };
+
+    const handleSaveDiagram = async () => {
+        try {
+            // Open file dialog to get save location for diagram
+            const filePath = await SaveDiagramFileDialog();
+            if (filePath) {
+                // Save the current diagram to the selected file path
+                await SaveDiagram(filePath);
+                console.log("Diagram saved successfully to:", filePath);
+                // You could add a success notification here
+            }
+        } catch (error) {
+            console.error("Error saving diagram:", error);
+            // You could add an error notification here
+        }
+    };
+
     // Render different views based on current state
     if (currentView === 'load') {
         return <LoadProjectPage onProjectLoaded={handleProjectLoaded} />;
@@ -180,6 +215,8 @@ const App: React.FC = () => {
                 onShowPopup={() => setShowPopup(true)}
                 onAddAss={handleAddAss}
                 onCanvasColorChange={handleCanvasColorChange}
+                onSaveProject={handleSaveProject}
+                onSaveDiagram={handleSaveDiagram}
                 diagramName={diagramName}
                 canvasBackgroundColor={canvasBackgroundColor}
             />
