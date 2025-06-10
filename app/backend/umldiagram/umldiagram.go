@@ -295,7 +295,7 @@ func (ud *UMLDiagram) SetParentStartComponent(point utils.Point) duerror.DUError
 		return err
 	}
 
-	cmd := &setParentCommand{
+	cmd := &setParentStartCommand{
 		baseCommand: baseCommand{
 			diagram: ud,
 			before:  ud.GetLastModified(),
@@ -303,13 +303,9 @@ func (ud *UMLDiagram) SetParentStartComponent(point utils.Point) duerror.DUError
 		},
 		association: a,
 		stNew:       stNew,
-		enNew:       a.GetParentEnd(),
 		stOld:       a.GetParentStart(),
-		enOld:       a.GetParentEnd(),
 		stRatioNew:  stRatioNew,
-		enRatioNew:  a.GetEndRatio(),
 		stRatioOld:  a.GetStartRatio(),
-		enRatioOld:  a.GetEndRatio(),
 	}
 	if err := ud.cmdManager.Execute(cmd); err != nil {
 		return err
@@ -340,20 +336,16 @@ func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
 		return err
 	}
 
-	cmd := &setParentCommand{
+	cmd := &setParentEndCommand{
 		baseCommand: baseCommand{
 			diagram: ud,
 			before:  ud.GetLastModified(),
 			after:   time.Now(),
 		},
 		association: a,
-		stNew:       a.GetParentStart(),
 		enNew:       enNew,
-		stOld:       a.GetParentStart(),
 		enOld:       a.GetParentEnd(),
-		stRatioNew:  a.GetStartRatio(),
 		enRatioNew:  enRatioNew,
-		stRatioOld:  a.GetStartRatio(),
 		enRatioOld:  a.GetEndRatio(),
 	}
 	if err := ud.cmdManager.Execute(cmd); err != nil {
@@ -973,17 +965,11 @@ func (ud *UMLDiagram) moveGadget(g *component.Gadget, point utils.Point) duerror
 	return nil
 }
 
-func (ud *UMLDiagram) updateAssociationParent(a *component.Association, stNew, enNew *component.Gadget, stRatio, enRatio [2]float64) duerror.DUError {
+func (ud *UMLDiagram) setAssociationParentStart(a *component.Association, stNew *component.Gadget, stRatio [2]float64) duerror.DUError {
 	stOld := a.GetParentStart()
-	enOld := a.GetParentEnd()
-
 	if err := a.SetParentStart(stNew, stRatio); err != nil {
 		return err
 	}
-	if err := a.SetParentEnd(enNew, enRatio); err != nil {
-		return err
-	}
-
 	// update ud.associations
 	if _, ok := ud.associations[stOld]; ok {
 		list := ud.associations[stOld][0]
@@ -993,6 +979,20 @@ func (ud *UMLDiagram) updateAssociationParent(a *component.Association, stNew, e
 		}
 		ud.associations[stOld] = [2][]*component.Association{list, ud.associations[stOld][1]}
 	}
+	if _, ok := ud.associations[stNew]; ok {
+		list := ud.associations[stNew][0]
+		list = append(list, a)
+		ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) updateAssociationParentEnd(a *component.Association, enNew *component.Gadget, enRatio [2]float64) duerror.DUError {
+	enOld := a.GetParentEnd()
+	if err := a.SetParentEnd(enNew, enRatio); err != nil {
+		return err
+	}
+	// update ud.associations
 	if _, ok := ud.associations[enOld]; ok {
 		list := ud.associations[enOld][1]
 		index := slices.Index(list, a)
@@ -1000,11 +1000,6 @@ func (ud *UMLDiagram) updateAssociationParent(a *component.Association, stNew, e
 			list = slices.Delete(list, index, index+1)
 		}
 		ud.associations[enOld] = [2][]*component.Association{ud.associations[enOld][0], list}
-	}
-	if _, ok := ud.associations[stNew]; ok {
-		list := ud.associations[stNew][0]
-		list = append(list, a)
-		ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
 	}
 	if _, ok := ud.associations[enNew]; ok {
 		list := ud.associations[enNew][1]
