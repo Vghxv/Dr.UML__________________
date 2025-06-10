@@ -1423,3 +1423,249 @@ func CMD_SET_PARENT(t *testing.T) {
 		}
 	})
 }
+
+func CMD_SET_ATTR_GAD(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	header0 := "test gadget0"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.SelectComponent(gadPoint0)
+
+	g, _ := d.componentsContainer.SearchGadget(gadPoint0)
+
+	t.Run("set content", func(t *testing.T) {
+		getValue := func(g *component.Gadget) string {
+			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].Content
+		}
+		newValue := "new content"
+		oldValue := getValue(g)
+
+		err := d.SetAttrContentComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+	})
+
+	t.Run("set size", func(t *testing.T) {
+		getValue := func(g *component.Gadget) int {
+			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].FontSize
+		}
+		newValue := 69
+		oldValue := getValue(g)
+
+		err := d.SetAttrSizeComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+	})
+
+	t.Run("set style", func(t *testing.T) {
+		getValue := func(g *component.Gadget) int {
+			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].FontStyle
+		}
+		newValue := attribute.Bold
+		oldValue := getValue(g)
+
+		err := d.SetAttrStyleComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+	})
+}
+
+func CMD_SET_ATTR_ASS(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	d.SelectComponent(midPoint)
+	c, _ := d.componentsContainer.Search(midPoint)
+	a := c.(*component.Association)
+
+	d.AddAttributeToAssociation(0.5, "test")
+
+	t.Run("set content", func(t *testing.T) {
+		getValue := func(a *component.Association) string {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].Content
+		}
+		newValue := "new content"
+		oldValue := getValue(a)
+
+		err := d.SetAttrContentComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+
+	t.Run("set size", func(t *testing.T) {
+		getValue := func(a *component.Association) int {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].FontSize
+		}
+		newValue := 69
+		oldValue := getValue(a)
+
+		err := d.SetAttrSizeComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+
+	t.Run("set style", func(t *testing.T) {
+		getValue := func(a *component.Association) int {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].FontStyle
+		}
+		newValue := attribute.Bold
+		oldValue := getValue(a)
+
+		err := d.SetAttrStyleComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+
+	t.Run("set ratio", func(t *testing.T) {
+		getValue := func(a *component.Association) float64 {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].Ratio
+		}
+		newValue := 0.69
+		oldValue := getValue(a)
+
+		err := d.SetAttrRatioComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+}
