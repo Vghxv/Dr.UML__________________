@@ -205,12 +205,20 @@ func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content st
 	var oldContent string
 	switch c := c.(type) {
 	case *component.Gadget:
-		oldContent = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].Content
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldContent = att.GetContent()
 		setContent = func(content string) duerror.DUError {
 			return c.SetAttrContent(section, index, content)
 		}
 	case *component.Association:
-		oldContent = c.GetDrawData().(drawdata.Association).Attributes[index].Content
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldContent = att.GetContent()
 		setContent = func(content string) duerror.DUError {
 			return c.SetAttrContent(index, content)
 		}
@@ -244,12 +252,20 @@ func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) due
 	var oldSize int
 	switch c := c.(type) {
 	case *component.Gadget:
-		oldSize = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].FontSize
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldSize = att.GetSize()
 		setSize = func(size int) duerror.DUError {
 			return c.SetAttrSize(section, index, size)
 		}
 	case *component.Association:
-		oldSize = c.GetDrawData().(drawdata.Association).Attributes[index].FontSize
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldSize = att.GetSize()
 		setSize = func(size int) duerror.DUError {
 			return c.SetAttrSize(index, size)
 		}
@@ -283,12 +299,20 @@ func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) d
 	var oldStyle int
 	switch c := c.(type) {
 	case *component.Gadget:
-		oldStyle = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].FontStyle
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldStyle = int(att.GetStyle())
 		setStyle = func(style int) duerror.DUError {
 			return c.SetAttrStyle(section, index, style)
 		}
 	case *component.Association:
-		oldStyle = c.GetDrawData().(drawdata.Association).Attributes[index].FontStyle
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldStyle = int(att.GetStyle())
 		setStyle = func(style int) duerror.DUError {
 			return c.SetAttrStyle(index, style)
 		}
@@ -322,12 +346,20 @@ func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile stri
 	var oldFontFile string
 	switch c := c.(type) {
 	case *component.Gadget:
-		oldFontFile = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].FontFile
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldFontFile = att.GetFontFile()
 		setFont = func(font string) duerror.DUError {
 			return c.SetAttrFontFile(section, index, font)
 		}
 	case *component.Association:
-		oldFontFile = c.GetDrawData().(drawdata.Association).Attributes[index].FontFile
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldFontFile = att.GetFontFile()
 		setFont = func(font string) duerror.DUError {
 			return c.SetAttrFontFile(index, font)
 		}
@@ -605,13 +637,29 @@ func (ud *UMLDiagram) AddAttributeToGadget(section int, content string) duerror.
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.AddAttribute(section, content)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	g, ok := c.(*component.Gadget)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	if section < 0 || section >= len(g.GetAttributesLen()) {
+		duerror.NewInvalidArgumentError("invalid section")
+	}
+
+	cmd := &addAttributeGadgetCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		gadget:  g,
+		content: content,
+		section: section,
+		index:   g.GetAttributesLen()[section],
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.DUError {
@@ -619,13 +667,30 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.RemoveAttribute(section, index)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	g, ok := c.(*component.Gadget)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	att, err := g.GetAttribute(section, index)
+	if err != nil {
+		return err
+	}
+
+	cmd := &removeAttributeGadgetCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		gadget:  g,
+		content: att.GetContent(),
+		section: section,
+		index:   g.GetAttributesLen()[section],
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) duerror.DUError {
@@ -633,13 +698,26 @@ func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) d
 	if err != nil {
 		return err
 	}
-
-	switch ass := c.(type) {
-	case *component.Association:
-		return ass.AddAttribute(ratio, content)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not an association")
+	a, ok := c.(*component.Association)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+
+	cmd := &addAttributeAssociationCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		content:     content,
+		ratio:       ratio,
+		index:       a.GetAttributesLen(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError {
@@ -647,13 +725,30 @@ func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError 
 	if err != nil {
 		return err
 	}
-
-	switch ass := c.(type) {
-	case *component.Association:
-		return ass.RemoveAttribute(index)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not an association")
+	a, ok := c.(*component.Association)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+	att, err := a.GetAttribute(index)
+	if err != nil {
+		return err
+	}
+
+	cmd := &removeAttributeAssociationCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		content:     att.GetContent(),
+		ratio:       att.GetRatio(),
+		index:       index,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Private methods
@@ -772,6 +867,7 @@ func (ud *UMLDiagram) loadAsses(asses []utils.SavedAss, dp map[int]*component.Ga
 
 	return nil
 }
+
 func (ud *UMLDiagram) collectGadgets(res *utils.SavedFile) (map[*component.Gadget]int, duerror.DUError) {
 	dp := make(map[*component.Gadget]int, ud.componentsContainer.Len())
 	cnt := 0
@@ -1100,4 +1196,20 @@ func (ud *UMLDiagram) setParentEndAssociation(a *component.Association, enNew *c
 		ud.associations[enNew] = [2][]*component.Association{ud.associations[enNew][0], list}
 	}
 	return nil
+}
+
+func (ud *UMLDiagram) addAttributeGadget(g *component.Gadget, section, index int, content string) duerror.DUError {
+	return g.AddAttribute(section, index, content)
+}
+
+func (ud *UMLDiagram) removeAttributeGadget(g *component.Gadget, section, index int) duerror.DUError {
+	return g.RemoveAttribute(section, index)
+}
+
+func (ud *UMLDiagram) addAttributeAssociation(a *component.Association, index int, ratio float64, content string) duerror.DUError {
+	return a.AddAttribute(index, ratio, content)
+}
+
+func (ud *UMLDiagram) removeAttributeAssociation(a *component.Association, index int) duerror.DUError {
+	return a.RemoveAttribute(index)
 }

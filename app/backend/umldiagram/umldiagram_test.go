@@ -753,9 +753,7 @@ func TestUMLDiagram_loadAssAttributes(t *testing.T) {
 	assert.NoError(t, errRet)
 	assert.Equal(t, 0, idx)
 
-	atts, err := ass.GetAttributes()
-	assert.NoError(t, err)
-
+	atts := ass.GetAttributes()
 	for i, att := range atts {
 		assert.Equal(t, expectedContent, att.GetContent())
 		assert.Equal(t, expectedStyle, int(att.GetStyle()))

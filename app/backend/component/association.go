@@ -2,6 +2,7 @@ package component
 
 import (
 	"math"
+	"slices"
 
 	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/drawdata"
@@ -162,16 +163,22 @@ func (ass *Association) GetAssType() AssociationType {
 	return ass.assType
 }
 
-func (ass *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUError) {
-	// TODO: should not do ass
-	if len(ass.attributes) == 0 {
-		return nil, duerror.NewInvalidArgumentError("no attributes found")
-	}
-	return ass.attributes, nil
+func (ass *Association) GetAttributes() []*attribute.AssAttribute {
+	return ass.attributes
 }
 
 func (ass *Association) GetAttributesLen() int {
 	return len(ass.attributes)
+}
+
+func (ass *Association) GetAttribute(index int) (*attribute.AssAttribute, duerror.DUError) {
+	// to implement command pattern, require "original" data before dong setter
+	// using this function as attribute's getter, no changes to the attribute
+	// beside expose attribute, this function also make some error checking duplicate, may need to refactor
+	if err := ass.validateIndex(index); err != nil {
+		return nil, err
+	}
+	return ass.attributes[index], nil
 }
 
 func (ass *Association) GetDrawData() any {
@@ -324,13 +331,26 @@ func (ass *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 		dist(en, enDelta, p) <= threshold, nil
 }
 
-func (ass *Association) AddAttribute(ratio float64, content string) duerror.DUError {
+func (ass *Association) AddAttribute(index int, ratio float64, content string) duerror.DUError {
+	if index < -1 || index > len(ass.attributes) {
+		return duerror.NewInvalidArgumentError("index not allow")
+	}
+
 	att, err := attribute.NewAssAttribute(ratio, content)
 	if err != nil {
 		return err
 	}
-	att.RegisterUpdateParentDraw(ass.UpdateDrawData)
-	ass.attributes = append(ass.attributes, att)
+	if err := att.RegisterUpdateParentDraw(ass.UpdateDrawData); err != nil {
+		return err
+	}
+
+	if index == -1 {
+		// if index is -1, add to back
+		ass.attributes = append(ass.attributes, att)
+	} else {
+		// if 0 <= index <= len, add to index
+		ass.attributes = slices.Insert(ass.attributes, index, att)
+	}
 	return ass.UpdateDrawData()
 }
 

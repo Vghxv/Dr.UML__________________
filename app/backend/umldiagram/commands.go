@@ -146,3 +146,102 @@ func (cmd *setParentEndCommand) Unexecute() duerror.DUError {
 		cmd.enRatioOld,
 	)
 }
+
+// add/remove attribute
+type addAttributeGadgetCommand struct {
+	baseCommand
+	gadget  *component.Gadget
+	content string
+	section int
+	index   int
+}
+
+func (cmd *addAttributeGadgetCommand) Execute() duerror.DUError {
+	return cmd.diagram.addAttributeGadget(
+		cmd.gadget,
+		cmd.section,
+		cmd.index,
+		cmd.content,
+	)
+}
+
+func (cmd *addAttributeGadgetCommand) Unexecute() duerror.DUError {
+	return cmd.diagram.removeAttributeGadget(
+		cmd.gadget,
+		cmd.section,
+		cmd.index,
+	)
+}
+
+type removeAttributeGadgetCommand struct {
+	baseCommand
+	gadget  *component.Gadget
+	content string
+	section int
+	index   int
+}
+
+func (cmd *removeAttributeGadgetCommand) Execute() duerror.DUError {
+	return cmd.diagram.removeAttributeGadget(
+		cmd.gadget,
+		cmd.section,
+		cmd.index,
+	)
+}
+
+func (cmd *removeAttributeGadgetCommand) Unexecute() duerror.DUError {
+	return cmd.diagram.addAttributeGadget(
+		cmd.gadget,
+		cmd.section,
+		cmd.index,
+		cmd.content,
+	)
+}
+
+type addAttributeAssociationCommand struct {
+	baseCommand
+	association *component.Association
+	content     string
+	ratio       float64
+	index       int
+}
+
+func (cmd *addAttributeAssociationCommand) Execute() duerror.DUError {
+	return cmd.diagram.addAttributeAssociation(
+		cmd.association,
+		cmd.index,
+		cmd.ratio,
+		cmd.content,
+	)
+}
+
+func (cmd *addAttributeAssociationCommand) Unexecute() duerror.DUError {
+	return cmd.diagram.removeAttributeAssociation(
+		cmd.association,
+		cmd.index,
+	)
+}
+
+type removeAttributeAssociationCommand struct {
+	baseCommand
+	association *component.Association
+	content     string
+	ratio       float64
+	index       int
+}
+
+func (cmd *removeAttributeAssociationCommand) Execute() duerror.DUError {
+	return cmd.diagram.removeAttributeAssociation(
+		cmd.association,
+		cmd.index,
+	)
+}
+
+func (cmd *removeAttributeAssociationCommand) Unexecute() duerror.DUError {
+	return cmd.diagram.addAttributeAssociation(
+		cmd.association,
+		cmd.index,
+		cmd.ratio,
+		cmd.content,
+	)
+}

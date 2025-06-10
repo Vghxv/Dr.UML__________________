@@ -135,7 +135,7 @@ func Test_Association_AddAttribute(t *testing.T) {
 	content := "test attribute"
 	var att *attribute.AssAttribute
 	t.Run("Add Attribute", func(t *testing.T) {
-		err := ass.AddAttribute(ratio, content)
+		err := ass.AddAttribute(-1, ratio, content)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}

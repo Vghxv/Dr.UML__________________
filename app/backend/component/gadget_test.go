@@ -150,7 +150,7 @@ func TestSetAttrContent(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add an attribute to test
-	assert.NoError(t, g.AddAttribute(0, "test"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test"))
 
 	// Test valid case
 	assert.NoError(t, g.SetAttrContent(0, 0, "updated"))
@@ -174,7 +174,7 @@ func TestSetAttrSize(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add an attribute to test
-	assert.NoError(t, g.AddAttribute(0, "test"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test"))
 
 	// Test valid case
 	assert.NoError(t, g.SetAttrSize(0, 0, 16))
@@ -197,7 +197,7 @@ func TestSetAttrStyle(t *testing.T) {
 	err := g.RegisterUpdateParentDraw(mp.UpdateParentDraw)
 	assert.NoError(t, err)
 	// Add an attribute to test
-	assert.NoError(t, g.AddAttribute(0, "test"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test"))
 
 	// Test valid cases
 	assert.NoError(t, g.SetAttrStyle(0, 0, int(attribute.Bold)))
@@ -265,9 +265,9 @@ func TestAddAttribute(t *testing.T) {
 	initialLengths := g.GetAttributesLen()
 
 	// Test adding attributes to different sections
-	assert.NoError(t, g.AddAttribute(0, "test0"))
-	assert.NoError(t, g.AddAttribute(1, "test1"))
-	assert.NoError(t, g.AddAttribute(2, "test2"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test0"))
+	assert.NoError(t, g.AddAttribute(1, -1, "test1"))
+	assert.NoError(t, g.AddAttribute(2, -1, "test2"))
 
 	// Verify lengths increased
 	newLengths := g.GetAttributesLen()
@@ -276,17 +276,17 @@ func TestAddAttribute(t *testing.T) {
 	}
 
 	// Test invalid section
-	assert.Error(t, g.AddAttribute(-1, "invalid"))
-	assert.Error(t, g.AddAttribute(len(g.attributes), "invalid"))
+	assert.Error(t, g.AddAttribute(-1, -1, "invalid"))
+	assert.Error(t, g.AddAttribute(len(g.attributes), -1, "invalid"))
 
 	// Test with parent draw update
-	assert.NoError(t, g.AddAttribute(0, "test with parent"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test with parent"))
 	assert.Equal(t, 4, mp.Times)
 
 	// Test with invalid content (this depends on attribute.NewAttribute implementation)
 	// We can't easily test this without knowing what makes content invalid
 	// But we can at least call it with empty string to see if it works
-	assert.NoError(t, g.AddAttribute(0, ""))
+	assert.NoError(t, g.AddAttribute(0, -1, ""))
 }
 
 func TestRemoveAttribute(t *testing.T) {
@@ -296,9 +296,9 @@ func TestRemoveAttribute(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add attributes to test removal
-	assert.NoError(t, g.AddAttribute(0, "test0"))
-	assert.NoError(t, g.AddAttribute(0, "test1"))
-	assert.NoError(t, g.AddAttribute(1, "test2"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test0"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test1"))
+	assert.NoError(t, g.AddAttribute(1, -1, "test2"))
 
 	// Get lengths before removal
 	beforeLengths := g.GetAttributesLen()
@@ -372,7 +372,7 @@ func TestRegisterUpdateParentDraw(t *testing.T) {
 	assert.NoError(t, g.RegisterUpdateParentDraw(mp.UpdateParentDraw))
 	assert.Equal(t, 0, mp.Times)
 
-	assert.NoError(t, g.AddAttribute(0, "test"))
+	assert.NoError(t, g.AddAttribute(0, -1, "test"))
 	assert.Equal(t, 1, mp.Times)
 
 	// nil function
