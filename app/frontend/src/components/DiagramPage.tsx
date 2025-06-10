@@ -89,50 +89,138 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onDiagramSelecte
     };
 
     return (
-        <div className="min-h-screen bg-neutral-700 p-4">
-            <div className="max-w-4xl mx-auto">
-                <div className="flex items-center justify-between mb-6">
+        <div 
+            className="min-h-screen p-6 relative"
+            style={{
+                background: 'linear-gradient(135deg, #333333 0%, #1C1C1C 50%, #333333 100%)',
+            }}
+        >
+            {/* Industrial texture overlay */}
+            <div 
+                className="absolute inset-0 opacity-10"
+                style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23F2F2F0' fill-opacity='0.1'%3E%3Cpath d='M20 20c0 11.046-8.954 20-20 20v-40c11.046 0 20 8.954 20 20zM0 0h40v40H0V0z'/%3E%3C/g%3E%3C/svg%3E")`,
+                }}
+            />
+            
+            <div className="max-w-6xl mx-auto relative z-10">
+                {/* Header Section */}
+                <div 
+                    className="flex items-center justify-between mb-8 p-6 border-2 border-[#4682B4]"
+                    style={{
+                        background: 'linear-gradient(145deg, #4682B4, #333333)',
+                        boxShadow: '6px 6px 12px rgba(0,0,0,0.6), inset 2px 2px 4px rgba(242,242,240,0.1)'
+                    }}
+                >
                     <div>
-                        <h1 className="text-3xl font-bold text-white">Dr.UML</h1>
-                        <h2 className="text-xl text-neutral-300 mt-2">
-                            Project: {projectData.ProjectName}
-                        </h2>
+                        <h1 className="text-4xl font-bold text-[#F2F2F0] tracking-wider uppercase mb-2">DR.UML</h1>
+                        <div 
+                            className="px-4 py-2 border-2 border-[#B87333] inline-block"
+                            style={{
+                                background: 'linear-gradient(145deg, #B87333, #1C1C1C)',
+                                boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.3)'
+                            }}
+                        >
+                            <h2 className="text-lg text-[#F2F2F0] font-bold tracking-wide uppercase">
+                                PROJECT: {projectData.ProjectName}
+                            </h2>
+                        </div>
                     </div>
                 </div>
 
                 {error && (
-                    <div className="bg-red-600 text-white p-3 rounded mb-4">
-                        {error}
+                    <div 
+                        className="p-4 mb-6 border-2 border-[#B7410E]"
+                        style={{
+                            background: 'linear-gradient(145deg, #B7410E, #1C1C1C)',
+                            boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.3)'
+                        }}
+                    >
+                        <p className="text-[#F2F2F0] font-bold text-sm tracking-wide">{error}</p>
                     </div>
                 )}
 
-                <div className="bg-neutral-800 rounded-lg p-6">
+                <div 
+                    className="p-8 border-2 border-[#918175]"
+                    style={{
+                        background: 'linear-gradient(145deg, #918175, #333333)',
+                        boxShadow: '6px 6px 12px rgba(0,0,0,0.6), inset 2px 2px 4px rgba(242,242,240,0.1)'
+                    }}
+                >
                     {projectData.diagrams.length === 0 ? (
-                        <div className="text-center py-12">
-                            you do not have any diagrams in this project. nor can you create a new one.
-
+                        <div 
+                            className="text-center py-16 border-2 border-[#556B2F]"
+                            style={{
+                                background: 'linear-gradient(145deg, #333333, #1C1C1C)',
+                                boxShadow: 'inset 4px 4px 8px rgba(0,0,0,0.5)'
+                            }}
+                        >
+                            <p className="text-[#F2F2F0] font-bold text-lg tracking-wide uppercase">
+                                YOU DO NOT HAVE ANY DIAGRAMS IN THIS PROJECT.
+                            </p>
+                            <p className="text-[#918175] font-bold text-sm tracking-wide uppercase mt-2">
+                                NOR CAN YOU CREATE A NEW ONE.
+                            </p>
                         </div>
                     ) : (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {projectData.diagrams.map((diagramPath, index) => (
                                 <div
                                     key={index}
-                                    className={`bg-neutral-700 rounded-lg p-4 cursor-pointer transition-all hover:bg-neutral-600 ${selectedDiagram === diagramPath && isLoading
-                                        ? 'opacity-50 cursor-not-allowed'
-                                        : ''
-                                        }`}
+                                    className={`p-6 cursor-pointer transition-all duration-200 border-2 border-[#4682B4] hover:border-[#B87333] ${
+                                        selectedDiagram === diagramPath && isLoading
+                                            ? 'opacity-50 cursor-not-allowed'
+                                            : 'hover:scale-105'
+                                    }`}
+                                    style={{
+                                        background: selectedDiagram === diagramPath && isLoading
+                                            ? 'linear-gradient(145deg, #918175, #1C1C1C)'
+                                            : 'linear-gradient(145deg, #556B2F, #333333)',
+                                        boxShadow: selectedDiagram === diagramPath && isLoading
+                                            ? 'inset 4px 4px 8px rgba(0,0,0,0.5)'
+                                            : '4px 4px 8px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(242,242,240,0.1)'
+                                    }}
                                     onClick={() => !isLoading && handleDiagramClick(diagramPath)}
                                 >
                                     <div className="flex flex-col">
-                                        <h4 className="text-lg font-medium text-white mb-2">
-                                            {getBaseName(diagramPath)}
-                                        </h4>
-                                        <p className="text-sm text-neutral-400 break-all">
-                                            {diagramPath}
-                                        </p>
+                                        {/* Diagram Title */}
+                                        <div 
+                                            className="mb-4 p-3 border-2 border-[#B87333]"
+                                            style={{
+                                                background: 'linear-gradient(145deg, #B87333, #1C1C1C)',
+                                                boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.3)'
+                                            }}
+                                        >
+                                            <h4 className="text-lg font-bold text-[#F2F2F0] tracking-wide uppercase">
+                                                {getBaseName(diagramPath)}
+                                            </h4>
+                                        </div>
+                                        
+                                        {/* Diagram Path */}
+                                        <div 
+                                            className="p-3 border-2 border-[#918175] mb-3"
+                                            style={{
+                                                background: 'linear-gradient(145deg, #333333, #1C1C1C)',
+                                                boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.5)'
+                                            }}
+                                        >
+                                            <p className="text-xs font-bold text-[#918175] tracking-wide uppercase break-all">
+                                                {diagramPath}
+                                            </p>
+                                        </div>
+                                        
+                                        {/* Loading State */}
                                         {selectedDiagram === diagramPath && isLoading && (
-                                            <div className="mt-3 text-blue-400 text-sm">
-                                                Loading...
+                                            <div 
+                                                className="p-2 border-2 border-[#4682B4]"
+                                                style={{
+                                                    background: 'linear-gradient(145deg, #4682B4, #1C1C1C)',
+                                                    boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.3)'
+                                                }}
+                                            >
+                                                <p className="text-[#F2F2F0] font-bold text-sm tracking-wide uppercase text-center">
+                                                    LOADING...
+                                                </p>
                                             </div>
                                         )}
                                     </div>

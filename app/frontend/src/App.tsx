@@ -26,7 +26,6 @@ interface ProjectData {
     isNewEmptyProject?: boolean;
 }
 import DrawingCanvas from "./components/Canvas";
-import Toolbar from "./components/Toolbar";
 import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import TopMenu from "./components/TopMenu";
 
@@ -174,7 +173,7 @@ const App: React.FC = () => {
 
     if (currentView === 'diagrams' && projectData) {
         return (
-            <DiagramPage 
+            <DiagramPage
                 projectData={projectData}
                 onDiagramSelected={handleDiagramSelected}
                 isNewEmptyProject={projectData.isNewEmptyProject}
@@ -185,21 +184,9 @@ const App: React.FC = () => {
     // Editor view (current main application)
     return (
         <div className="h-screen mx-auto px-4 bg-neutral-700">
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-3xl text-center font-bold text-white">Dr.UML</h1>
-                {projectData && (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleBackToDiagrams}
-                            className="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-1 rounded text-sm transition-colors"
-                        >
-                            Back to Diagrams
-                        </button>
-                    </div>
-                )}
-            </div>
-            <TopMenu />
-            <Toolbar
+            <TopMenu
+                projectData={projectData}
+                handleBackToDiagrams={handleBackToDiagrams}
                 onGetDiagramName={handleGetDiagramName}
                 onShowPopup={() => setShowPopup(true)}
                 onAddAss={handleAddAss}
@@ -225,7 +212,7 @@ const App: React.FC = () => {
                     startPoint={assStartPoint}
                     endPoint={assEndPoint}
                     onAdd={handleAssPopupAdd}
-                onClose={handleAssPopupClose}
+                    onClose={handleAssPopupClose}
                 />
             )}
             <DrawingCanvas
