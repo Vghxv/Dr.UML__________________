@@ -1669,3 +1669,133 @@ func CMD_SET_ATTR_ASS(t *testing.T) {
 		}
 	})
 }
+
+func CMD_ADD_REMOVE_ATTR_GAD(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	header0 := "test gadget0"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.SelectComponent(gadPoint0)
+
+	g, _ := d.componentsContainer.SearchGadget(gadPoint0)
+	section := 1
+	t.Run("add attribute", func(t *testing.T) {
+		err := d.AddAttributeToGadget(section, "ඞ")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 1 {
+			t.Errorf("add attr to gad fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 0 {
+			t.Errorf("undo add attr to gad fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 1 {
+			t.Errorf("undo add attr to gad fail")
+		}
+	})
+
+	t.Run("remove attribute", func(t *testing.T) {
+		err := d.RemoveAttributeFromGadget(section, 0)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 0 {
+			t.Errorf("remove attr to gad fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 1 {
+			t.Errorf("undo remove attr to gad fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 0 {
+			t.Errorf("undo remove attr to gad fail")
+		}
+	})
+}
+
+func CMD_ADD_REMOVE_ATTR_ASS(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	d.SelectComponent(midPoint)
+	c, _ := d.componentsContainer.Search(midPoint)
+	a := c.(*component.Association)
+
+	t.Run("add attribute", func(t *testing.T) {
+		err := d.AddAttributeToAssociation(0.5, "ඞ")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 1 {
+			t.Errorf("add attr to ass fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 0 {
+			t.Errorf("undo add attr to ass fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 1 {
+			t.Errorf("undo add attr to ass fail")
+		}
+	})
+
+	t.Run("remove attribute", func(t *testing.T) {
+		err := d.RemoveAttributeFromAssociation(0)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 0 {
+			t.Errorf("remove attr to ass fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 1 {
+			t.Errorf("undo remove attr to ass fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 0 {
+			t.Errorf("undo remove attr to ass fail")
+		}
+	})
+}
