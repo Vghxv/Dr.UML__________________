@@ -3,7 +3,7 @@ import { ToPoint } from "../utils/wailsBridge";
 import { SelectComponent } from "../../wailsjs/go/umlproject/UMLProject";
 
 interface ExtraHandlers {
-    onCanvasClick?: (point: {x: number, y: number}) => void;
+    onCanvasClick?: (point: { x: number, y: number }) => void;
     isAddingAssociation?: boolean;
 }
 
@@ -26,7 +26,7 @@ export function useCanvasMouseEvents(
         const y = Math.round((event.clientY - rect.top) * scaleY);
 
         if (extraHandlers?.isAddingAssociation && extraHandlers?.onCanvasClick) {
-            extraHandlers.onCanvasClick({x, y});
+            extraHandlers.onCanvasClick({ x, y });
         } else {
             SelectComponent(ToPoint(x, y))
                 .then(() => {

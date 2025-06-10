@@ -1,5 +1,5 @@
-import {GadgetProps} from "./Props";
-import {attribute} from "../../wailsjs/go/models";
+import { GadgetProps } from "./Props";
+import { attribute } from "../../wailsjs/go/models";
 
 
 class ClassElement {
@@ -64,10 +64,10 @@ class ClassElement {
                         ctx.font = `${boldString}${italicString}${attr.fontSize}px ${attr.fontFile}`;
                         ctx.textBaseline = "hanging"
                         ctx.fillText(attr.content, this.gadgetProps.x + margin, yOffset);
-                        yOffset += Math.round(attr.height) ;
+                        yOffset += Math.round(attr.height);
                         if (isUnderline) {
                             const underlineHeight = 2;
-                            ctx.fillRect(this.gadgetProps.x + margin, yOffset - Math.round(attr.height * 0.2) , attr.width, underlineHeight);
+                            ctx.fillRect(this.gadgetProps.x + margin, yOffset - Math.round(attr.height * 0.4), attr.width, underlineHeight);
                         }
                         yOffset += margin;
                     }
