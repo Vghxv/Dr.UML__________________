@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { AssociationProps, GadgetProps } from "../utils/Props";
 
 export function useSelection(
@@ -30,11 +30,12 @@ export function useSelection(
             .join('|');
     }, [selectedComponents]);
     
-    // Update the ref and log only when there's a real change
-    if (currentSelectionHash !== previousSelectionRef.current) {
-        previousSelectionRef.current = currentSelectionHash;
-        console.log("Selected components:", selectedComponents);
-    }
+    useEffect(() => {
+        if (currentSelectionHash !== previousSelectionRef.current) {
+            previousSelectionRef.current = currentSelectionHash;
+            console.log("Selected components:", selectedComponents);
+        }
+    }, [currentSelectionHash, selectedComponents]);
     
     return {
         selectedComponentCount,
