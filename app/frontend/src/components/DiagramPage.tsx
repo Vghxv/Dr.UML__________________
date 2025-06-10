@@ -8,11 +8,10 @@ interface ProjectData {
 
 interface DiagramPageProps {
     projectData: ProjectData;
-    onBack: () => void;
     onDiagramSelected: (diagramData: any) => void;
 }
 
-const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack, onDiagramSelected }) => {
+const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onDiagramSelected }) => {
     const [selectedDiagram, setSelectedDiagram] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,16 +22,49 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack, onDiagra
         setSelectedDiagram(diagramPath);
 
         try {
+            // Open the diagram first
+            await OpenDiagram(diagramPath);
+            
+            // Then get the draw data
             const diagramData = await GetDrawData();
-
-            const frontendDiagramData = {
-                diagramName: getBaseName(diagramPath),
-                diagramType: "ClassDiagram", // This could be extracted from backend data
-                components: diagramData.gadgets || [],
-                associations: diagramData.associations || []
+            console.log('Diagram data received:', diagramData);
+            // Transform the backend data into the proper CanvasProps format
+            const canvasData = {
+                margin: diagramData.margin,
+                color: diagramData.color,
+                lineWidth: diagramData.lineWidth,
+                gadgets: diagramData.gadgets?.map((gadget: any) => ({
+                    gadgetType: gadget.gadgetType.toString(),
+                    x: gadget.x,
+                    y: gadget.y,
+                    layer: gadget.layer,
+                    height: gadget.height,
+                    width: gadget.width,
+                    color: gadget.color,
+                    isSelected: gadget.isSelected,
+                    attributes: gadget.attributes
+                })) || [],
+                associations: diagramData.associations?.map((association: any) => ({
+                    assType: association.assType,
+                    layer: association.layer,
+                    startX: association.startX,
+                    startY: association.startY,
+                    endX: association.endX,
+                    endY: association.endY,
+                    deltaX: association.deltaX,
+                    deltaY: association.deltaY,
+                    attributes: association.attributes?.map((attr: any) => ({
+                        content: attr.content,
+                        fontSize: attr.fontSize,
+                        fontStyle: attr.fontStyle,
+                        fontFile: attr.fontFile,
+                        ratio: attr.ratio
+                    })) || []
+                })) || []
             };
-            // Call the callback to switch to editor view
-            onDiagramSelected(frontendDiagramData);
+            
+            // Call the callback to switch to editor view with the properly formatted data
+            onDiagramSelected(canvasData);
         } catch (err) {
             console.error('Error loading diagram:', err);
             setError(`Failed to load diagram: ${err instanceof Error ? err.message : 'Unknown error'}`);

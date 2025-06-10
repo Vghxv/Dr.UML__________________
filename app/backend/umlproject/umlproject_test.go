@@ -472,6 +472,12 @@ func TestProjectSaveLoadContentEquality(t *testing.T) {
 	// Add a gadget for some content
 	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 1, drawdata.DefaultGadgetColor, "header")
 	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 110, Y: 120}, 2, drawdata.DefaultGadgetColor, "header2")
+	assert.NoError(t, err)
+	err = p.StartAddAssociation(utils.Point{X: 11, Y: 21})
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Extension, utils.Point{X: 111, Y: 121})
+	assert.NoError(t, err)
 
 	// Save project to a temp file
 	tmpFile, err := os.CreateTemp("", "umlproject_content_test_*.json")

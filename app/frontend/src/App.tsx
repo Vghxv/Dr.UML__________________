@@ -66,14 +66,8 @@ const App: React.FC = () => {
         console.log('Diagram data received:', diagramData);
         setCurrentView('editor');
         // Here you could set the diagram data to the backend or state as needed
+        setBackendData(diagramData as CanvasProps);
         reloadBackendData();
-    };
-
-    // Handle going back to LoadProject
-    const handleBackToLoad = () => {
-        setCurrentView('load');
-        setProjectData(null);
-        setDiagramName(null);
     };
 
     // Handle going back to DiagramPage
@@ -182,7 +176,6 @@ const App: React.FC = () => {
         return (
             <DiagramPage 
                 projectData={projectData}
-                onBack={handleBackToLoad}
                 onDiagramSelected={handleDiagramSelected}
             />
         );
@@ -200,12 +193,6 @@ const App: React.FC = () => {
                             className="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-1 rounded text-sm transition-colors"
                         >
                             Back to Diagrams
-                        </button>
-                        <button
-                            onClick={handleBackToLoad}
-                            className="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-1 rounded text-sm transition-colors"
-                        >
-                            Load Different Project
                         </button>
                     </div>
                 )}
