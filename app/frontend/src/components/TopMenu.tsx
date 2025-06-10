@@ -112,7 +112,7 @@ const TopMenu: React.FC<ToolbarProps> = (
                                 boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
                             }}
                         >
-                            + CREATE
+                            + GADGET
                         </button>
                         
                         <div className="w-0.5 h-8 bg-[#4682B4] mx-2 shadow-sm" />
@@ -125,7 +125,7 @@ const TopMenu: React.FC<ToolbarProps> = (
                                 boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
                             }}
                         >
-                            ASSOCIATION
+                            + ASSOCIATION
                         </button>
                         
                         <div className="flex items-center gap-3 ml-4">
