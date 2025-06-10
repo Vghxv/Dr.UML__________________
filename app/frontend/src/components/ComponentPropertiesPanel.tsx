@@ -19,24 +19,25 @@ const ComponentPropertiesPanel: React.FC<ComponentPropertiesPanelProps> = ({
     addAttributeToAssociation
 }) => {
     if (!selectedComponent) return null;
+    return (
 
-    if ((selectedComponent as GadgetProps).gadgetType !== undefined) {
-        return (
-            <GadgetPropertiesPanel
-                selectedGadget={selectedComponent as GadgetProps}
-                updateGadgetProperty={updateGadgetProperty}
-                addAttributeToGadget={addAttributeToGadget}
-            />
-        );
-    } else {
-        return (
-            <AssociationPropertiesPanel
-                selectedAssociation={selectedComponent as AssociationProps}
-                updateAssociationProperty={updateAssociationProperty}
-                addAttributeToAssociation={addAttributeToAssociation}
-            />
-        );
-    }
+        (selectedComponent as GadgetProps).gadgetType !== undefined
+            ? (
+                
+                <GadgetPropertiesPanel
+                    selectedGadget={selectedComponent as GadgetProps}
+                    updateGadgetProperty={updateGadgetProperty}
+                    addAttributeToGadget={addAttributeToGadget}
+                />
+            ) : (
+                <AssociationPropertiesPanel
+                    selectedAssociation={selectedComponent as AssociationProps}
+                    updateAssociationProperty={updateAssociationProperty}
+                    addAttributeToAssociation={addAttributeToAssociation}
+                />
+            )
+
+    )
 };
 
 export default ComponentPropertiesPanel;

@@ -31,7 +31,7 @@ const GadgetPropertiesPanel: React.FC<GadgetPropertiesPanelProps> = ({
     });
 
     return (
-        <div className="absolute right-0 top-0 w-[300px] h-full bg-gray-100 p-5 shadow-md overflow-y-auto">
+        <div className="absolute right-0 top-35 w-[300px] h-full bg-gray-100 p-5 shadow-md overflow-y-auto">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Gadget Properties</h3>
             {/* x */}
             <div className="mb-4">

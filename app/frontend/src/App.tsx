@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { offBackendEvent, onBackendEvent, ToPoint } from "./utils/wailsBridge";
 
 import {
@@ -12,10 +12,7 @@ import {
 } from "../wailsjs/go/umlproject/UMLProject";
 
 import { AssociationProps, CanvasProps, GadgetProps } from "./utils/Props";
-import DrawingCanvas from "./components/Canvas";
 import { GadgetPopup } from "./components/CreateGadgetPopup";
-import Toolbar from "./components/Toolbar";
-import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import { useBackendCanvasData } from "./hooks/useBackendCanvasData";
 import { useGadgetUpdater } from "./hooks/useGadgetUpdater";
 import { useAssociationUpdater } from "./hooks/useAssociationUpdater";
@@ -28,7 +25,11 @@ interface ProjectData {
     diagrams: string[];
     isNewEmptyProject?: boolean;
 }
-import { useCallback } from "react";
+import DrawingCanvas from "./components/Canvas";
+import Toolbar from "./components/Toolbar";
+import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
+import TopMenu from "./components/TopMenu";
+
 
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<'load' | 'diagrams' | 'editor'>('load');
@@ -197,6 +198,7 @@ const App: React.FC = () => {
                     </div>
                 )}
             </div>
+            <TopMenu />
             <Toolbar
                 onGetDiagramName={handleGetDiagramName}
                 onShowPopup={() => setShowPopup(true)}
@@ -217,6 +219,15 @@ const App: React.FC = () => {
                     onClose={() => setShowPopup(false)}
                 />
             )}
+            {showAssPopup && assStartPoint && assEndPoint && (
+                <AssociationPopup
+                    isOpen={showAssPopup}
+                    startPoint={assStartPoint}
+                    endPoint={assEndPoint}
+                    onAdd={handleAssPopupAdd}
+                onClose={handleAssPopupClose}
+                />
+            )}
             <DrawingCanvas
                 backendData={backendData}
                 reloadBackendData={reloadBackendData}
@@ -225,17 +236,9 @@ const App: React.FC = () => {
                 isAddingAssociation={isAddingAssociation}
                 canvasBackgroundColor={canvasBackgroundColor}
             />
-            {showAssPopup && assStartPoint && assEndPoint && (
-                <AssociationPopup
-                    isOpen={showAssPopup}
-                    startPoint={assStartPoint}
-                    endPoint={assEndPoint}
-                    onAdd={handleAssPopupAdd}
-                    onClose={handleAssPopupClose}
-                />
-            )}
-            {/* TODO generalize updateProperty and addAttributeToXXX */}
+
             {selectedComponent && (
+
                 <ComponentPropertiesPanel
                     selectedComponent={selectedComponent}
                     updateGadgetProperty={handleUpdateGadgetProperty}
