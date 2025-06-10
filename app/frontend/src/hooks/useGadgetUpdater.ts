@@ -7,69 +7,24 @@ import {
     SetAttrStyleComponent,
     SetColorComponent,
     SetPointComponent,
-    SetLayerComponent
+    SetLayerComponent,
 } from "../../wailsjs/go/umlproject/UMLProject";
-import {ToPoint} from "../utils/wailsBridge";
-import {CanvasProps, GadgetProps} from "../utils/Props";
-
+import { ToPoint } from "../utils/wailsBridge";
+import { CanvasProps, GadgetProps } from "../utils/Props";
+import {
+    createSetSingleValue,
+    createSetDoubleValue,
+    createSetTripleValue,
+} from "./updater";
 export function useGadgetUpdater(
     selectedGadget: GadgetProps | null,
     backendData: CanvasProps | null,
     reloadBackendData: () => void
 ) {
-    // Helper function to handle setting a single value with a promise
-    const setSingleValue = (
-        apiFunction: (value: any) => Promise<any>,
-        value: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(value).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
-
-    // Helper function to handle setting a value with two parameters
-    const setDoubleValue = (
-        apiFunction: (param1: any, param2: any) => Promise<any>,
-        param1: any,
-        param2: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(param1, param2).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
-
-    // Helper function to handle setting a value with three parameters
-    const setTripleValue = (
-        apiFunction: (param1: any, param2: any, param3: any) => Promise<any>,
-        param1: any,
-        param2: any,
-        param3: any,
-        successMessage: string,
-        errorPrefix: string
-    ) => {
-        apiFunction(param1, param2, param3).then(
-            () => {
-                console.log(successMessage);
-                reloadBackendData();
-            }
-        ).catch((error) => {
-            console.error(`${errorPrefix}:`, error);
-        });
-    };
+    // Create bound helper functions using factory functions
+    const setSingleValue = createSetSingleValue(reloadBackendData);
+    const setDoubleValue = createSetDoubleValue(reloadBackendData);
+    const setTripleValue = createSetTripleValue(reloadBackendData);
 
     const handleAddAttributeToGadget = (section: number, content: string) => {
         if (!selectedGadget || !backendData || !backendData.gadgets) return;
@@ -83,65 +38,78 @@ export function useGadgetUpdater(
 
     const handleUpdateGadgetProperty = (property: string, value: any) => {
         if (!selectedGadget || !backendData || !backendData.gadgets) return;
-        if (property.includes('.')) {
-            const [parentProp, childProp] = property.split('.');
-            if (parentProp.startsWith('attributes')) {
+        if (property.includes(".")) {
+            const [parentProp, childProp] = property.split(".");
+            if (parentProp.startsWith("attributes")) {
                 const matches = parentProp.match(/attributes(\d+):(\d+)/);
                 if (matches && matches.length === 3) {
                     const i = parseInt(matches[1]);
                     const j = parseInt(matches[2]);
-                    if (childProp === 'content') {
+                    if (childProp === "content") {
                         setTripleValue(
                             SetAttrContentComponent,
-                            i, j, value,
+                            i,
+                            j,
+                            value,
                             "Gadget content changed",
                             "Error editing gadget content"
                         );
                     }
-                    if (childProp === 'fontSize') {
+                    if (childProp === "fontSize") {
                         setTripleValue(
                             SetAttrSizeComponent,
-                            i, j, value,
+                            i,
+                            j,
+                            value,
                             "Gadget fontSize changed",
                             "Error editing gadget fontSize"
                         );
                     }
-                    if (childProp === 'fontStyleB') {
+                    if (childProp === "fontStyleB") {
                         setTripleValue(
                             SetAttrStyleComponent,
-                            i, j, value,
+                            i,
+                            j,
+                            value,
                             "Gadget font style (bold) changed",
                             "Error editing gadget font style (bold)"
                         );
                     }
-                    if (childProp === 'fontStyleI') {
+                    if (childProp === "fontStyleI") {
                         setTripleValue(
                             SetAttrStyleComponent,
-                            i, j, value,
+                            i,
+                            j,
+                            value,
                             "Gadget font style (italic) changed",
                             "Error editing gadget font style (italic)"
                         );
                     }
-                    if (childProp === 'fontStyleU') {
+                    if (childProp === "fontStyleU") {
                         setTripleValue(
                             SetAttrStyleComponent,
-                            i, j, value,
+                            i,
+                            j,
+                            value,
                             "Gadget font style (underline) changed",
                             "Error editing gadget font style (underline)"
                         );
                     }
-                    if (childProp === 'fontFile') {
+                    if (childProp === "fontFile") {
                         setTripleValue(
                             SetAttrFontComponent,
-                            i, j, value,
+                            i,
+                            j,
+                            value,
                             "Gadget font changed",
                             "Error editing gadget font"
                         );
                     }
-                    if (childProp === 'delete') {
+                    if (childProp === "delete") {
                         setDoubleValue(
                             RemoveAttributeFromGadget,
-                            i, j,
+                            i,
+                            j,
                             "Attribute deleted",
                             "Error deleting attribute"
                         );
@@ -184,5 +152,5 @@ export function useGadgetUpdater(
         }
     };
 
-    return {handleUpdateGadgetProperty, handleAddAttributeToGadget};
+    return { handleUpdateGadgetProperty, handleAddAttributeToGadget };
 }

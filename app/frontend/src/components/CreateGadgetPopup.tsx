@@ -1,7 +1,7 @@
-import React, {useState} from "react";
-import {AddGadget} from "../../wailsjs/go/umlproject/UMLProject";
-import {ToPoint} from "../utils/wailsBridge";
-import {component} from "../../wailsjs/go/models";
+import React, { useState } from "react";
+import { AddGadget } from "../../wailsjs/go/umlproject/UMLProject";
+import { ToPoint } from "../utils/wailsBridge";
+import { component } from "../../wailsjs/go/models";
 
 export interface GadgetPopupProps {
     isOpen: boolean;
@@ -9,7 +9,7 @@ export interface GadgetPopupProps {
     onClose: () => void;
 }
 
-export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClose}) => {
+export const GadgetPopup: React.FC<GadgetPopupProps> = ({ isOpen, onCreate, onClose }) => {
     // TODO: import type from backend
     const [formData, setFormData] = useState({
         gtype: 1,
@@ -20,7 +20,7 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClo
         header: "sample header",
     });
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData({
             ...formData,
             [name]: name === "x" || name === "y" || name === "layer" || name === "gtype" ? parseInt(value) : value
@@ -29,8 +29,8 @@ export const GadgetPopup: React.FC<GadgetPopupProps> = ({isOpen, onCreate, onClo
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const {gtype, x, y, layer, color, header} = formData;
-        onCreate({gtype, position: {x, y}, layer, color: color, header});
+        const { gtype, x, y, layer, color, header } = formData;
+        onCreate({ gtype, position: { x, y }, layer, color: color, header });
         AddGadget(gtype, ToPoint(x, y), layer, color, header).then(
             (res) => {
                 console.log(res)
