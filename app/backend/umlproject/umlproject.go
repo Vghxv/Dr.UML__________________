@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/gommon/log"
 	"maps"
 	"os"
 	"slices"
 	"time"
+
+	"github.com/labstack/gommon/log"
 
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/drawdata"
@@ -242,6 +243,28 @@ func (p *UMLProject) CloseDiagram(diagramName string) duerror.DUError {
 
 func (p *UMLProject) DeleteDiagram(diagramName string) duerror.DUError {
 	// TODO: remove the file
+	return nil
+}
+
+func (p *UMLProject) UndoDiagramChange() duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.Undo(); err != nil {
+		return nil
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
+func (p *UMLProject) RedoDiagramChange() duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.Redo(); err != nil {
+		return nil
+	}
+	p.lastModified = time.Now()
 	return nil
 }
 
