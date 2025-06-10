@@ -201,14 +201,37 @@ func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content st
 		return err
 	}
 
+	var setContent func(content string) duerror.DUError
+	var oldContent string
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrContent(section, index, content)
+		oldContent = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].Content
+		setContent = func(content string) duerror.DUError {
+			return c.SetAttrContent(section, index, content)
+		}
 	case *component.Association:
-		return c.SetAttrContent(index, content)
+		oldContent = c.GetDrawData().(drawdata.Association).Attributes[index].Content
+		setContent = func(content string) duerror.DUError {
+			return c.SetAttrContent(index, content)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setContent(content) },
+		unexecute: func() duerror.DUError { return setContent(oldContent) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) duerror.DUError {
@@ -217,14 +240,37 @@ func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) due
 		return err
 	}
 
+	var setSize func(size int) duerror.DUError
+	var oldSize int
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrSize(section, index, size)
+		oldSize = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].FontSize
+		setSize = func(size int) duerror.DUError {
+			return c.SetAttrSize(section, index, size)
+		}
 	case *component.Association:
-		return c.SetAttrSize(index, size)
+		oldSize = c.GetDrawData().(drawdata.Association).Attributes[index].FontSize
+		setSize = func(size int) duerror.DUError {
+			return c.SetAttrSize(index, size)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setSize(size) },
+		unexecute: func() duerror.DUError { return setSize(oldSize) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) duerror.DUError {
@@ -233,14 +279,37 @@ func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) d
 		return err
 	}
 
+	var setStyle func(style int) duerror.DUError
+	var oldStyle int
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrStyle(section, index, style)
+		oldStyle = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].FontStyle
+		setStyle = func(style int) duerror.DUError {
+			return c.SetAttrStyle(section, index, style)
+		}
 	case *component.Association:
-		return c.SetAttrStyle(index, style)
+		oldStyle = c.GetDrawData().(drawdata.Association).Attributes[index].FontStyle
+		setStyle = func(style int) duerror.DUError {
+			return c.SetAttrStyle(index, style)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setStyle(style) },
+		unexecute: func() duerror.DUError { return setStyle(oldStyle) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile string) duerror.DUError {
@@ -248,14 +317,38 @@ func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile stri
 	if err != nil {
 		return err
 	}
+
+	var setFont func(font string) duerror.DUError
+	var oldFontFile string
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrFontFile(section, index, fontFile)
+		oldFontFile = c.GetDrawData().(drawdata.Gadget).Attributes[section][index].FontFile
+		setFont = func(font string) duerror.DUError {
+			return c.SetAttrFontFile(section, index, font)
+		}
 	case *component.Association:
-		return c.SetAttrFontFile(index, fontFile)
+		oldFontFile = c.GetDrawData().(drawdata.Association).Attributes[index].FontFile
+		setFont = func(font string) duerror.DUError {
+			return c.SetAttrFontFile(index, font)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setFont(fontFile) },
+		unexecute: func() duerror.DUError { return setFont(oldFontFile) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrRatioComponent(section int, index int, ratio float64) duerror.DUError {
