@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import path from 'path-browserify';
+import React, { useState, useEffect } from 'react';
+import { SelectDiagram, OpenDiagram, GetDrawData, SaveDiagramFileDialog, GetAvailableDiagramsNames } from '../../wailsjs/go/umlproject/UMLProject';
 
 interface ProjectData {
     ProjectName: string;
@@ -23,37 +23,19 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack, onDiagra
         setSelectedDiagram(diagramPath);
 
         try {
-            // TODO: Call backend API to load the .duml file
-            // For now, we'll simulate loading the diagram
-            console.log('Loading diagram:', diagramPath);
-            
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Mock diagram data in JSON5 format
-            const mockDiagramData = {
-                diagramName: path.basename(diagramPath, '.duml'),
-                diagramType: "ClassDiagram",
-                components: [
-                    {
-                        type: "Class",
-                        name: "Example Class",
-                        x: 100,
-                        y: 100,
-                        attributes: ["attribute1: String", "attribute2: int"],
-                        methods: ["method1(): void", "method2(): String"]
-                    }
-                ],
-                associations: []
+            const diagramData = await GetDrawData();
+
+            const frontendDiagramData = {
+                diagramName: getBaseName(diagramPath),
+                diagramType: "ClassDiagram", // This could be extracted from backend data
+                components: diagramData.gadgets || [],
+                associations: diagramData.associations || []
             };
-              console.log('Loaded diagram data:', mockDiagramData);
-            
             // Call the callback to switch to editor view
-            onDiagramSelected(mockDiagramData);
-            
+            onDiagramSelected(frontendDiagramData);
         } catch (err) {
             console.error('Error loading diagram:', err);
-            setError('Failed to load diagram file.');
+            setError(`Failed to load diagram: ${err instanceof Error ? err.message : 'Unknown error'}`);
         } finally {
             setIsLoading(false);
             setSelectedDiagram(null);
@@ -61,7 +43,9 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack, onDiagra
     };
 
     const getBaseName = (filePath: string): string => {
-        return path.basename(filePath, '.duml');
+        const parts = filePath.replace(/\\/g, '/').split('/');
+        const fileName = parts[parts.length - 1];
+        return fileName.replace(/\.duml$/, '');
     };
 
     return (
@@ -74,42 +58,29 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onBack, onDiagra
                             Project: {projectData.ProjectName}
                         </h2>
                     </div>
-                    <button
-                        onClick={onBack}
-                        className="bg-neutral-600 hover:bg-neutral-500 text-white px-4 py-2 rounded transition-colors"
-                    >
-                        Back to Load Project
-                    </button>
                 </div>
 
                 {error && (
                     <div className="bg-red-600 text-white p-3 rounded mb-4">
                         {error}
                     </div>
-                )}                <div className="bg-neutral-800 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-white">
-                            Available Diagrams ({projectData.diagrams.length})
-                        </h3>
-                        <div className="text-sm text-neutral-400">
-                            Click on a diagram to load it
-                        </div>
-                    </div>
-                    
+                )}
+
+                <div className="bg-neutral-800 rounded-lg p-6">
                     {projectData.diagrams.length === 0 ? (
-                        <div className="text-neutral-400 text-center py-8">
-                            No diagrams found in this project.
+                        <div className="text-center py-12">
+                            you do not have any diagrams in this project. nor can you create a new one.
+
                         </div>
                     ) : (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {projectData.diagrams.map((diagramPath, index) => (
                                 <div
                                     key={index}
-                                    className={`bg-neutral-700 rounded-lg p-4 cursor-pointer transition-all hover:bg-neutral-600 ${
-                                        selectedDiagram === diagramPath && isLoading
+                                    className={`bg-neutral-700 rounded-lg p-4 cursor-pointer transition-all hover:bg-neutral-600 ${selectedDiagram === diagramPath && isLoading
                                             ? 'opacity-50 cursor-not-allowed'
                                             : ''
-                                    }`}
+                                        }`}
                                     onClick={() => !isLoading && handleDiagramClick(diagramPath)}
                                 >
                                     <div className="flex flex-col">

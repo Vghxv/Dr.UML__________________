@@ -17,7 +17,7 @@ import { useBackendCanvasData } from "./hooks/useBackendCanvasData";
 import { useGadgetUpdater } from "./hooks/useGadgetUpdater";
 import { useAssociationUpdater } from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
-import LoadProject from "./components/LoadProject";
+import LoadProjectPage from "./components/LoadProjectPage";
 import DiagramPage from "./components/DiagramPage";
 
 interface ProjectData {
@@ -140,7 +140,7 @@ const App: React.FC = () => {
 
     // Render different views based on current state
     if (currentView === 'load') {
-        return <LoadProject onProjectLoaded={handleProjectLoaded} />;
+        return <LoadProjectPage onProjectLoaded={handleProjectLoaded} />;
     }
 
     if (currentView === 'diagrams' && projectData) {
