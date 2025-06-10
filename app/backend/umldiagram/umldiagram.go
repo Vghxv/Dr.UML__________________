@@ -965,7 +965,7 @@ func (ud *UMLDiagram) moveGadget(g *component.Gadget, point utils.Point) duerror
 	return nil
 }
 
-func (ud *UMLDiagram) setAssociationParentStart(a *component.Association, stNew *component.Gadget, stRatio [2]float64) duerror.DUError {
+func (ud *UMLDiagram) setParentStartAssociation(a *component.Association, stNew *component.Gadget, stRatio [2]float64) duerror.DUError {
 	stOld := a.GetParentStart()
 	if err := a.SetParentStart(stNew, stRatio); err != nil {
 		return err
@@ -987,7 +987,7 @@ func (ud *UMLDiagram) setAssociationParentStart(a *component.Association, stNew 
 	return nil
 }
 
-func (ud *UMLDiagram) updateAssociationParentEnd(a *component.Association, enNew *component.Gadget, enRatio [2]float64) duerror.DUError {
+func (ud *UMLDiagram) setParentEndAssociation(a *component.Association, enNew *component.Gadget, enRatio [2]float64) duerror.DUError {
 	enOld := a.GetParentEnd()
 	if err := a.SetParentEnd(enNew, enRatio); err != nil {
 		return err

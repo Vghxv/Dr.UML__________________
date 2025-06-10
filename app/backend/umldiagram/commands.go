@@ -107,7 +107,7 @@ type setParentStartCommand struct {
 }
 
 func (cmd *setParentStartCommand) Execute() duerror.DUError {
-	return cmd.diagram.setAssociationParentStart(
+	return cmd.diagram.setParentStartAssociation(
 		cmd.association,
 		cmd.stNew,
 		cmd.stRatioNew,
@@ -115,7 +115,7 @@ func (cmd *setParentStartCommand) Execute() duerror.DUError {
 }
 
 func (cmd *setParentStartCommand) Unexecute() duerror.DUError {
-	return cmd.diagram.setAssociationParentStart(
+	return cmd.diagram.setParentStartAssociation(
 		cmd.association,
 		cmd.stOld,
 		cmd.stRatioOld,
@@ -132,7 +132,7 @@ type setParentEndCommand struct {
 }
 
 func (cmd *setParentEndCommand) Execute() duerror.DUError {
-	return cmd.diagram.updateAssociationParentEnd(
+	return cmd.diagram.setParentEndAssociation(
 		cmd.association,
 		cmd.enNew,
 		cmd.enRatioNew,
@@ -140,7 +140,7 @@ func (cmd *setParentEndCommand) Execute() duerror.DUError {
 }
 
 func (cmd *setParentEndCommand) Unexecute() duerror.DUError {
-	return cmd.diagram.updateAssociationParentEnd(
+	return cmd.diagram.setParentEndAssociation(
 		cmd.association,
 		cmd.enOld,
 		cmd.enRatioOld,

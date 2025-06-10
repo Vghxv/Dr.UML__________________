@@ -1348,3 +1348,80 @@ func CMD_MOVE_GADGET(t *testing.T) {
 		}
 	})
 }
+
+func CMD_SET_PARENT(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	gadPoint2 := utils.Point{X: 400, Y: 400}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	header2 := "test gadget2"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	d.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, header2)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	d.SelectComponent(midPoint)
+	c, _ := d.componentsContainer.Search(midPoint)
+	a := c.(*component.Association)
+
+	g0, _ := d.componentsContainer.SearchGadget(gadPoint0)
+	g1, _ := d.componentsContainer.SearchGadget(gadPoint1)
+	g2, _ := d.componentsContainer.SearchGadget(gadPoint2)
+	t.Run("set parent start", func(t *testing.T) {
+		err := d.SetParentStartComponent(gadPoint2)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("set parent start fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g0 {
+			t.Errorf("undo set parent start fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("undi set parent start fails")
+		}
+	})
+
+	t.Run("set parent end", func(t *testing.T) {
+		err := d.SetParentEndComponent(gadPoint2)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("set parent start fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g1 {
+			t.Errorf("undo set parent start fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("undi set parent start fails")
+		}
+	})
+}
