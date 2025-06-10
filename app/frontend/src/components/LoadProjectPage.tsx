@@ -4,6 +4,7 @@ import { GetAvailableDiagramsNames, GetName, OpenFileDialog, SaveFileDialog, Loa
 interface ProjectData {
     ProjectName: string;
     diagrams: string[];
+    isNewEmptyProject?: boolean;
 }
 
 interface LoadProjectProps {
@@ -14,7 +15,7 @@ const LoadProjectPage: React.FC<LoadProjectProps> = ({ onProjectLoaded }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const loadProjectFromPath = async (filePath: string) => {
+    const loadProjectFromPath = async (filePath: string, isNewProject: boolean = false) => {
         setIsLoading(true);
         setError(null);
 
@@ -35,7 +36,8 @@ const LoadProjectPage: React.FC<LoadProjectProps> = ({ onProjectLoaded }) => {
             
             const projectData: ProjectData = {
                 ProjectName: projectName,
-                diagrams: availableDiagrams || [] // Ensure diagrams is always an array
+                diagrams: availableDiagrams || [], // Ensure diagrams is always an array
+                isNewEmptyProject: isNewProject
             };
             
             console.log('Successfully loaded project from backend:', projectData);
@@ -92,7 +94,7 @@ const LoadProjectPage: React.FC<LoadProjectProps> = ({ onProjectLoaded }) => {
             console.log('Creating new project at path:', selectedFilePath);
             
             // Create and save the empty project
-            await loadProjectFromPath(selectedFilePath);
+            await loadProjectFromPath(selectedFilePath, true);
  
             console.log('Empty project created successfully');
 

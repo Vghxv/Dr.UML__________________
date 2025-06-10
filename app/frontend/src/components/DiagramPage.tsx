@@ -9,9 +9,10 @@ interface ProjectData {
 interface DiagramPageProps {
     projectData: ProjectData;
     onDiagramSelected: (diagramData: any) => void;
+    isNewEmptyProject?: boolean;
 }
 
-const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onDiagramSelected }) => {
+const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onDiagramSelected, isNewEmptyProject = false }) => {
     const [selectedDiagram, setSelectedDiagram] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -22,8 +23,15 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onDiagramSelecte
         setSelectedDiagram(diagramPath);
 
         try {
-            // Open the diagram first
-            await OpenDiagram(diagramPath);
+            // For new empty projects, skip trying to open the diagram file
+            if (!isNewEmptyProject) {
+                // Check if file exists and open the diagram only if it exists
+                try {
+                    await OpenDiagram(diagramPath);
+                } catch (openError) {
+                    // This is normal behavior when file doesn't exist
+                }
+            }
             
             // Then get the draw data
             const diagramData = await GetDrawData();
@@ -62,7 +70,7 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onDiagramSelecte
                     })) || []
                 })) || []
             };
-            
+
             // Call the callback to switch to editor view with the properly formatted data
             onDiagramSelected(canvasData);
         } catch (err) {
@@ -110,8 +118,8 @@ const DiagramPage: React.FC<DiagramPageProps> = ({ projectData, onDiagramSelecte
                                 <div
                                     key={index}
                                     className={`bg-neutral-700 rounded-lg p-4 cursor-pointer transition-all hover:bg-neutral-600 ${selectedDiagram === diagramPath && isLoading
-                                            ? 'opacity-50 cursor-not-allowed'
-                                            : ''
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : ''
                                         }`}
                                     onClick={() => !isLoading && handleDiagramClick(diagramPath)}
                                 >

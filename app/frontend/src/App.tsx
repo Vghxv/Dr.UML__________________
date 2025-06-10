@@ -26,6 +26,7 @@ import DiagramPage from "./components/DiagramPage";
 interface ProjectData {
     ProjectName: string;
     diagrams: string[];
+    isNewEmptyProject?: boolean;
 }
 import { useCallback } from "react";
 
@@ -65,8 +66,6 @@ const App: React.FC = () => {
     const handleDiagramSelected = (diagramData: any) => {
         console.log('Diagram data received:', diagramData);
         setCurrentView('editor');
-        // Here you could set the diagram data to the backend or state as needed
-        setBackendData(diagramData as CanvasProps);
         reloadBackendData();
     };
 
@@ -177,6 +176,7 @@ const App: React.FC = () => {
             <DiagramPage 
                 projectData={projectData}
                 onDiagramSelected={handleDiagramSelected}
+                isNewEmptyProject={projectData.isNewEmptyProject}
             />
         );
     }
