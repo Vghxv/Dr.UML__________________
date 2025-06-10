@@ -1037,14 +1037,22 @@ func (ud *UMLDiagram) removeComponent(c component.Component) duerror.DUError {
 		return duerror.NewInvalidArgumentError("unsupported component type")
 	}
 }
-
-// ONLY REMOVE SINGLE GADGET, IGNORE ITS ASSOCIATIONS
-func (ud *UMLDiagram) removeGadget(g *component.Gadget) duerror.DUError {
-	if err := ud.componentsContainer.Remove(g); err != nil {
-		return err
+func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
+	// Remove all associations related to this gadget and remove the gadget itself
+	if _, ok := ud.associations[gad]; ok {
+		for _, a := range ud.associations[gad][0] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		for _, a := range ud.associations[gad][1] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		delete(ud.associations, gad)
 	}
-	delete(ud.associations, g)
-	delete(ud.componentsSelected, g)
+	delete(ud.componentsSelected, gad)
 	if err := ud.componentsContainer.Remove(g); err != nil {
 		return err
 	}
@@ -1055,6 +1063,12 @@ func (ud *UMLDiagram) removeGadget(g *component.Gadget) duerror.DUError {
 }
 
 func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUError {
+	// Unregister the association as an observer of its parent gadgets
+	if err := a.UnregisterAsObserver(); err != nil {
+		// Log error but continue with removal
+		// In a production system, you might want to log this error
+	}
+
 	st := a.GetParentStart()
 	en := a.GetParentEnd()
 	if _, ok := ud.associations[st]; ok {

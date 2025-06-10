@@ -2,7 +2,6 @@ package component
 
 import (
 	"math"
-	"slices"
 
 	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/drawdata"
@@ -65,6 +64,9 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 	if err := a.UpdateDrawData(); err != nil {
 		return nil, err
 	}
+	if err := a.RegisterAsObserver(); err != nil {
+		return nil, err
+	}
 	return a, nil
 }
 
@@ -80,7 +82,12 @@ func FromSavedAssociation(saved utils.SavedAss, parents [2]*Gadget) (*Associatio
 		endPointRatio:   saved.EndPointRatio,
 	}
 
-	if err := ass.updateDrawData(); err != nil {
+	if err := ass.UpdateDrawData(); err != nil {
+		return nil, err
+	}
+
+	// Register this association as an observer of its parent gadgets
+	if err := ass.RegisterAsObserver(); err != nil {
 		return nil, err
 	}
 
@@ -217,6 +224,9 @@ func (ass *Association) GetIsSelected() bool {
 func (ass *Association) SetIsSelected(value bool) duerror.DUError {
 	ass.isSelected = value
 	ass.drawdata.IsSelected = value
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
 	return ass.updateParentDraw()
 }
 
@@ -229,6 +239,9 @@ func (ass *Association) SetAssType(assType AssociationType) duerror.DUError {
 	if ass.updateParentDraw == nil {
 		return nil
 	}
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
 	return ass.updateParentDraw()
 }
 
@@ -238,7 +251,11 @@ func (ass *Association) SetLayer(layer int) duerror.DUError {
 	if ass.updateParentDraw == nil {
 		return nil
 	}
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
 	return ass.updateParentDraw()
+
 }
 
 func (ass *Association) SetParentStart(gadget *Gadget, ratio [2]float64) duerror.DUError {
@@ -248,10 +265,26 @@ func (ass *Association) SetParentStart(gadget *Gadget, ratio [2]float64) duerror
 	if err := validateRatio(&ratio); err != nil {
 		return err
 	}
+
+	// Unregister from old parent if different
+	oldParent := ass.parents[0]
+	if oldParent != nil && oldParent != gadget {
+		oldParent.RemoveObserver(ass)
+	}
+
 	ass.parents[0] = gadget
 	ass.startPointRatio[0] = ratio[0]
 	ass.startPointRatio[1] = ratio[1]
-	return ass.UpdateDrawData()
+
+	// Register with new parent
+	if err := gadget.AddObserver(ass, ass.UpdateDrawData); err != nil {
+		return err
+	}
+
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) SetParentEnd(gadget *Gadget, ratio [2]float64) duerror.DUError {
@@ -261,10 +294,25 @@ func (ass *Association) SetParentEnd(gadget *Gadget, ratio [2]float64) duerror.D
 	if err := validateRatio(&ratio); err != nil {
 		return err
 	}
+
+	// Unregister from old parent if different
+	oldParent := ass.parents[1]
+	if oldParent != nil && oldParent != gadget {
+		oldParent.RemoveObserver(ass)
+	}
+
 	ass.parents[1] = gadget
 	ass.endPointRatio[0] = ratio[0]
 	ass.endPointRatio[1] = ratio[1]
-	return ass.UpdateDrawData()
+
+	if err := gadget.AddObserver(ass, ass.UpdateDrawData); err != nil {
+		return err
+	}
+
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) SetAttrContent(index int, content string) duerror.DUError {
@@ -274,7 +322,10 @@ func (ass *Association) SetAttrContent(index int, content string) duerror.DUErro
 	if err := ass.attributes[index].SetContent(content); err != nil {
 		return err
 	}
-	return ass.UpdateDrawData()
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
@@ -284,7 +335,10 @@ func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
 	if err := ass.attributes[index].SetSize(size); err != nil {
 		return err
 	}
-	return ass.UpdateDrawData()
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
@@ -294,7 +348,10 @@ func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
 	if err := ass.attributes[index].SetStyle(attribute.Textstyle(style)); err != nil {
 		return err
 	}
-	return ass.UpdateDrawData()
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUError {
@@ -304,7 +361,11 @@ func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUEr
 	if err := ass.attributes[index].SetFontFile(fontFile); err != nil {
 		return err
 	}
-	return ass.UpdateDrawData()
+
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
@@ -314,7 +375,11 @@ func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
 	if err := ass.attributes[index].SetRatio(ratio); err != nil {
 		return err
 	}
-	return ass.UpdateDrawData()
+
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Other methods
@@ -344,24 +409,23 @@ func (ass *Association) AddAttribute(index int, ratio float64, content string) d
 	if err != nil {
 		return err
 	}
-	if err := att.RegisterUpdateParentDraw(ass.UpdateDrawData); err != nil {
+	att.RegisterUpdateParentDraw(ass.UpdateDrawData)
+	ass.attributes = append(ass.attributes, att)
+
+	if err := ass.UpdateDrawData(); err != nil {
 		return err
 	}
-
-	if index == -1 {
-		// if index is -1, add to back
-		ass.attributes = append(ass.attributes, att)
-	} else {
-		// if 0 <= index <= len, add to index
-		ass.attributes = slices.Insert(ass.attributes, index, att)
-	}
-	return ass.UpdateDrawData()
+	return nil
 }
 
 func (ass *Association) AddLoadedAttribute(att *attribute.AssAttribute) duerror.DUError {
 	att.RegisterUpdateParentDraw(ass.UpdateDrawData)
 	ass.attributes = append(ass.attributes, att)
-	return ass.UpdateDrawData()
+
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
@@ -376,7 +440,11 @@ func (ass *Association) RemoveAttribute(index int) duerror.DUError {
 		return duerror.NewInvalidArgumentError("index out of range")
 	}
 	ass.attributes = append(ass.attributes[:index], ass.attributes[index+1:]...)
-	return ass.UpdateDrawData()
+
+	if err := ass.UpdateDrawData(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ass *Association) UpdateDrawData() duerror.DUError {
@@ -446,6 +514,37 @@ func (ass *Association) RegisterUpdateParentDraw(update func() duerror.DUError) 
 		return duerror.NewInvalidArgumentError("update function is nil")
 	}
 	ass.updateParentDraw = update
+	return nil
+}
+
+// Observer pattern methods for associations
+func (ass *Association) RegisterAsObserver() duerror.DUError {
+	// Register this association as an observer of its parent gadgets
+	if ass.parents[0] != nil {
+		if err := ass.parents[0].AddObserver(ass, ass.UpdateDrawData); err != nil {
+			return err
+		}
+	}
+	if ass.parents[1] != nil && ass.parents[1] != ass.parents[0] {
+		if err := ass.parents[1].AddObserver(ass, ass.UpdateDrawData); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (ass *Association) UnregisterAsObserver() duerror.DUError {
+	// Unregister this association as an observer of its parent gadgets
+	if ass.parents[0] != nil {
+		if err := ass.parents[0].RemoveObserver(ass); err != nil {
+			// Don't return error if observer wasn't found, just continue
+		}
+	}
+	if ass.parents[1] != nil && ass.parents[1] != ass.parents[0] {
+		if err := ass.parents[1].RemoveObserver(ass); err != nil {
+			// Don't return error if observer wasn't found, just continue
+		}
+	}
 	return nil
 }
 
