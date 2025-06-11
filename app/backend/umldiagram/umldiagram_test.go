@@ -4,6 +4,7 @@ package umldiagram
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"slices"
 	"strings"
@@ -2067,5 +2068,269 @@ func TestRemoveAttributeFromGadget(t *testing.T) {
 		err = diagram.RemoveAttributeFromGadget(1, 0)
 		assert.NoError(t, err)
 		assert.Equal(t, 0, g.GetAttributesLen()[1])
+	})
+}
+
+// Test function for SetAssociationType
+func TestSetAssociationType(t *testing.T) {
+	t.Run("successful association type change", func(t *testing.T) {
+		// Create diagram and add gadgets
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		gadPoint1 := utils.Point{X: 10, Y: 20}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
+		assert.NoError(t, err)
+
+		// Create association
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Extension, gadPoint2)
+		assert.NoError(t, err)
+
+		// Select the association
+		midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Get the association to verify changes
+		comp, err := diagram.componentsContainer.Search(midPoint)
+		assert.NoError(t, err)
+		assert.NotNil(t, comp)
+		association := comp.(*component.Association)
+
+		// Verify initial type
+		var expectedInitialType component.AssociationType = component.Extension
+		assert.Equal(t, expectedInitialType, association.GetAssType())
+
+		// Change association type
+		var newAssociationType component.AssociationType = component.Composition
+		err = diagram.SetAssociationType(newAssociationType)
+		assert.NoError(t, err)
+
+		// Verify the type was changed
+		assert.Equal(t, newAssociationType, association.GetAssType())
+
+		// Verify draw data is updated
+		drawData := association.GetDrawData().(drawdata.Association)
+		assert.Equal(t, int(component.Composition), drawData.AssType)
+	})
+
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		// Try to set association type without selecting anything
+		err = diagram.SetAssociationType(component.Composition)
+		assert.Error(t, err)
+		assert.Equal(t, "can only operate on one component", err.Error())
+	})
+
+	t.Run("multiple components selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		// Add two gadgets
+		gadPoint1 := utils.Point{X: 10, Y: 20}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
+		assert.NoError(t, err)
+
+		// Select both gadgets
+		err = diagram.SelectComponent(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint2)
+		assert.NoError(t, err)
+
+		// Try to set association type with multiple selections
+		err = diagram.SetAssociationType(component.Composition)
+		assert.Error(t, err)
+		assert.Equal(t, "can only operate on one component", err.Error())
+	})
+
+	t.Run("selected component is not an association", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		// Add a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Select the gadget
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+
+		// Try to set association type on a gadget
+		err = diagram.SetAssociationType(component.Composition)
+		assert.Error(t, err)
+		assert.Equal(t, "selected component is not an association", err.Error())
+	})
+
+	t.Run("test all valid association types", func(t *testing.T) {
+		validTypes := []component.AssociationType{
+			component.Extension,
+			component.Implementation,
+			component.Composition,
+			component.Dependency,
+		}
+
+		for _, assType := range validTypes {
+			t.Run(fmt.Sprintf("test_%v", assType), func(t *testing.T) {
+				// Create diagram and add gadgets
+				diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+				assert.NoError(t, err)
+
+				gadPoint1 := utils.Point{X: 10, Y: 20}
+				gadPoint2 := utils.Point{X: 100, Y: 100}
+				err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
+				assert.NoError(t, err)
+				err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
+				assert.NoError(t, err)
+
+				// Create association with a different type initially
+				var initialType component.AssociationType = component.Extension
+				if assType == component.Extension {
+					initialType = component.Composition
+				}
+
+				err = diagram.StartAddAssociation(gadPoint1)
+				assert.NoError(t, err)
+				err = diagram.EndAddAssociation(initialType, gadPoint2)
+				assert.NoError(t, err)
+
+				// Select the association
+				midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
+				err = diagram.SelectComponent(midPoint)
+				assert.NoError(t, err)
+
+				// Change to the test type
+				err = diagram.SetAssociationType(assType)
+				assert.NoError(t, err)
+
+				// Verify the change
+				comp, err := diagram.componentsContainer.Search(midPoint)
+				assert.NoError(t, err)
+				association := comp.(*component.Association)
+				assert.Equal(t, assType, association.GetAssType())
+			})
+		}
+	})
+
+	t.Run("undo and redo functionality", func(t *testing.T) {
+		// Create diagram and add gadgets
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		gadPoint1 := utils.Point{X: 10, Y: 20}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
+		assert.NoError(t, err)
+
+		// Create association
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Extension, gadPoint2)
+		assert.NoError(t, err)
+
+		// Select the association
+		midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Get the association
+		comp, err := diagram.componentsContainer.Search(midPoint)
+		assert.NoError(t, err)
+		association := comp.(*component.Association)
+
+		// Record original type
+		originalType := association.GetAssType()
+		var expectedOriginalType component.AssociationType = component.Extension
+		assert.Equal(t, expectedOriginalType, originalType)
+
+		// Change association type
+		var newType component.AssociationType = component.Composition
+		err = diagram.SetAssociationType(newType)
+		assert.NoError(t, err)
+		assert.Equal(t, newType, association.GetAssType())
+
+		// Test undo
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Equal(t, originalType, association.GetAssType())
+
+		// Test redo
+		err = diagram.Redo()
+		assert.NoError(t, err)
+		assert.Equal(t, newType, association.GetAssType())
+	})
+
+	t.Run("command execution failure", func(t *testing.T) {
+		// Create diagram and add gadgets
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		gadPoint1 := utils.Point{X: 10, Y: 20}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
+		assert.NoError(t, err)
+
+		// Create association
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Extension, gadPoint2)
+		assert.NoError(t, err)
+
+		// Select the association
+		midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Try to set an invalid association type (0 is invalid)
+		err = diagram.SetAssociationType(component.AssociationType(0))
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "unsupported association type")
+	})
+
+	t.Run("verify draw data update", func(t *testing.T) {
+		// Create diagram and add gadgets
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		gadPoint1 := utils.Point{X: 10, Y: 20}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
+		assert.NoError(t, err)
+
+		// Create association
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Extension, gadPoint2)
+		assert.NoError(t, err)
+
+		// Select the association
+		midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Change association type
+		err = diagram.SetAssociationType(component.Composition)
+		assert.NoError(t, err)
+
+		// Verify the diagram's draw data reflects the change
+		diagramDrawData := diagram.GetDrawData()
+		assert.Equal(t, 1, len(diagramDrawData.Associations))
+		assert.Equal(t, int(component.Composition), diagramDrawData.Associations[0].AssType)
 	})
 }

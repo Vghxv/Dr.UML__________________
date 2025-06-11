@@ -184,6 +184,17 @@ func (p *UMLProject) SetParentEndComponent(point utils.Point) duerror.DUError {
 	return nil
 }
 
+func (p *UMLProject) SetAssociationType(associationType component.AssociationType) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAssociationType(associationType); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
 // methods
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx

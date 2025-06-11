@@ -479,6 +479,32 @@ func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
 	return nil
 }
 
+func (ud *UMLDiagram) SetAssociationType(value component.AssociationType) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+	a, ok := c.(*component.Association)
+	if !ok {
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+	oldAssType := a.GetAssType() // Capture the original value before change
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return a.SetAssType(value) },
+		unexecute: func() duerror.DUError { return a.SetAssType(oldAssType) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Methods
 func (ud *UMLDiagram) Undo() duerror.DUError {
 	if err := ud.cmdManager.Undo(); err != nil {
