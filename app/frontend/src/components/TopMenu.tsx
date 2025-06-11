@@ -11,6 +11,8 @@ interface ToolbarProps {
     onCanvasColorChange: (color: string) => void;
     diagramName?: string | null;
     canvasBackgroundColor: string;
+    onUndo: () => void; // 新增 Undo handler
+    onRedo: () => void; // 新增 Redo handler
 }
 
 const TopMenu: React.FC<ToolbarProps> = (
@@ -24,7 +26,9 @@ const TopMenu: React.FC<ToolbarProps> = (
         onSaveDiagram,
         onCanvasColorChange,
         diagramName,
-        canvasBackgroundColor = "#C2C2C2"
+        canvasBackgroundColor = "#C2C2C2",
+        onUndo, // 新增 Undo handler
+        onRedo  // 新增 Redo handler
     } = { 
         projectData: null, 
         handleBackToDiagrams: () => {},
@@ -35,7 +39,9 @@ const TopMenu: React.FC<ToolbarProps> = (
         onSaveDiagram: () => {},
         onCanvasColorChange: () => {},
         diagramName: null,
-        canvasBackgroundColor: "#C2C2C2"
+        canvasBackgroundColor: "#C2C2C2",
+        onUndo: () => {}, // 預設 Undo handler
+        onRedo: () => {}  // 預設 Redo handler
     }
 ) => {
     useEffect(() => {
@@ -167,6 +173,35 @@ const TopMenu: React.FC<ToolbarProps> = (
                             }}
                         >
                             SAVE DIAGRAM
+                        </button>
+
+                        <button
+                            onClick={onUndo}
+                            className="flex items-center gap-2 px-4 py-2.5 text-[#F2F2F0] font-bold text-sm tracking-wide uppercase transition-all duration-200 border-2 border-[#4682B4] hover:border-[#B87333] active:border-[#556B2F] rounded shadow-md hover:shadow-lg active:shadow-sm"
+                            style={{
+                                background: 'linear-gradient(145deg, #4682B4, #1C1C1C)',
+                                boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
+                            }}
+                            title="Undo"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14H5.41a1 1 0 01-.71-1.71l5.3-5.29a1 1 0 011.42 0l5.3 5.29A1 1 0 0118.59 14H15" />
+                            </svg>
+                            UNDO
+                        </button>
+                        <button
+                            onClick={onRedo}
+                            className="flex items-center gap-2 px-4 py-2.5 text-[#F2F2F0] font-bold text-sm tracking-wide uppercase transition-all duration-200 border-2 border-[#B87333] hover:border-[#4682B4] active:border-[#556B2F] rounded shadow-md hover:shadow-lg active:shadow-sm"
+                            style={{
+                                background: 'linear-gradient(145deg, #B87333, #1C1C1C)',
+                                boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
+                            }}
+                            title="Redo"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10h3.59a1 1 0 01.71 1.71l-5.3 5.29a1 1 0 01-1.42 0l-5.3-5.29A1 1 0 015.41 10H9" />
+                            </svg>
+                            REDO
                         </button>
                         
                         
