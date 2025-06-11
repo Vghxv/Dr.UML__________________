@@ -180,7 +180,7 @@ const App: React.FC = () => {
             />
         );
     }
-
+    console.log("Rendering editor view with projectData:", projectData);
     // Editor view (current main application)
     return (
         <div className="h-screen mx-auto px-4 bg-neutral-700">
