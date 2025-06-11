@@ -1053,7 +1053,7 @@ func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
 		delete(ud.associations, gad)
 	}
 	delete(ud.componentsSelected, gad)
-	if err := ud.componentsContainer.Remove(g); err != nil {
+	if err := ud.componentsContainer.Remove(gad); err != nil {
 		return err
 	}
 	if err := ud.updateDrawData(); err != nil {
