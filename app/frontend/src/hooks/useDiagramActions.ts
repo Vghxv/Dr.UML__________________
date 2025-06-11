@@ -1,4 +1,4 @@
-import { SaveFileDialog, SaveProject, SaveDiagramFileDialog, SaveDiagram, UndoDiagramChange, RedoDiagramChange } from "../../wailsjs/go/umlproject/UMLProject";
+import { SaveFileDialog, SaveProject, SaveDiagramFileDialog, SaveDiagram, UndoDiagramChange, RedoDiagramChange, RemoveSelectedComponents } from "../../wailsjs/go/umlproject/UMLProject";
 
 export function useDiagramActions(reloadBackendData: () => void) {
     const handleSaveProject = async () => {
@@ -41,10 +41,21 @@ export function useDiagramActions(reloadBackendData: () => void) {
         }
     };
 
+    const handleDeleteSelectedComponent = async () => {
+        try {
+            console.log("deleting selected component ");
+            await RemoveSelectedComponents();
+            reloadBackendData();
+        } catch (error) {
+            console.error("Error deleting component:", error);
+        }
+    };
+
     return {
         handleSaveProject,
         handleSaveDiagram,
         handleDiagramUndo,
-        handleDiagramRedo
+        handleDiagramRedo,
+        handleDeleteSelectedComponent
     };
 }
