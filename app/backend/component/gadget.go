@@ -1,11 +1,13 @@
 package component
 
 import (
+	"fmt"
+	"slices"
+
 	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
 	"Dr.uml/backend/utils/duerror"
-	"fmt"
 )
 
 type GadgetType int
@@ -59,7 +61,7 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr 
 	// The first section contains the header
 	g.attributes[0] = make([]*attribute.Attribute, 0, 1)
 	if header != "" {
-		if err := g.AddAttribute(0, header); err != nil {
+		if err := g.AddAttribute(0, -1, header); err != nil {
 			return nil, err
 		}
 	}
@@ -143,6 +145,19 @@ func (g *Gadget) GetIsSelected() bool {
 
 func (g *Gadget) GetAttributes() [][]*attribute.Attribute {
 	return g.attributes
+}
+
+func (g *Gadget) GetAttribute(section, index int) (*attribute.Attribute, duerror.DUError) {
+	// to implement command pattern, require "original" data before dong setter
+	// using this function as attribute's getter, no changes to the attribute
+	// beside expose attribute, this function also make some error checking duplicate, may need to refactor
+	if err := g.validateSection(section); err != nil {
+		return nil, err
+	}
+	if err := g.validateIndex(index, section); err != nil {
+		return nil, err
+	}
+	return g.attributes[section][index], nil
 }
 
 // Setter
@@ -230,10 +245,14 @@ func (g *Gadget) Cover(p utils.Point) (bool, duerror.DUError) {
 	return p.X >= tl.X && p.X <= br.X && p.Y >= tl.Y && p.Y <= br.Y, nil
 }
 
-func (g *Gadget) AddAttribute(section int, content string) duerror.DUError {
+func (g *Gadget) AddAttribute(section int, index int, content string) duerror.DUError {
 	if err := g.validateSection(section); err != nil {
 		return err
 	}
+	if index < -1 || index > len(g.attributes[section]) {
+		return duerror.NewInvalidArgumentError("index not allow")
+	}
+
 	att, err := attribute.NewAttribute(content)
 	if err != nil {
 		return err
@@ -241,7 +260,14 @@ func (g *Gadget) AddAttribute(section int, content string) duerror.DUError {
 	if err = att.RegisterUpdateParentDraw(g.updateDrawData); err != nil {
 		return err
 	}
-	g.attributes[section] = append(g.attributes[section], att)
+
+	if index == -1 {
+		// if index is -1, add to back
+		g.attributes[section] = append(g.attributes[section], att)
+	} else {
+		// if 0 <= index <= len, add to index
+		g.attributes[section] = slices.Insert(g.attributes[section], index, att)
+	}
 	return g.updateDrawData()
 }
 
@@ -273,6 +299,7 @@ func (g *Gadget) RemoveAttribute(section int, index int) duerror.DUError {
 	g.attributes[section] = append(g.attributes[section][:index], g.attributes[section][index+1:]...)
 	return g.updateDrawData()
 }
+
 func (g *Gadget) validateSection(section int) duerror.DUError {
 	if section < 0 || section >= len(g.attributes) {
 		return duerror.NewInvalidArgumentError("section out of range")

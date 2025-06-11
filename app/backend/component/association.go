@@ -2,6 +2,7 @@ package component
 
 import (
 	"math"
+	"slices"
 
 	"Dr.uml/backend/component/attribute"
 	"Dr.uml/backend/drawdata"
@@ -37,9 +38,8 @@ type Association struct {
 	drawdata         drawdata.Association
 	isSelected       bool
 	updateParentDraw func() duerror.DUError
-
-	startPointRatio [2]float64
-	endPointRatio   [2]float64
+	startPointRatio  [2]float64
+	endPointRatio    [2]float64
 }
 
 // Constructor
@@ -62,7 +62,7 @@ func NewAssociation(parents [2]*Gadget, assType AssociationType, stPoint utils.P
 			float64(enPoint.X-enGdd.X) / float64(enGdd.Width),
 			float64(enPoint.Y-enGdd.Y) / float64(enGdd.Height)},
 	}
-	if err := a.updateDrawData(); err != nil {
+	if err := a.UpdateDrawData(); err != nil {
 		return nil, err
 	}
 	return a, nil
@@ -140,21 +140,45 @@ func dist(st utils.Point, en utils.Point, p utils.Point) float64 {
 	return math.Hypot(x-xx, y-yy)
 }
 
+func validateRatio(ratio *[2]float64) duerror.DUError {
+	if ratio[0] < 0 || ratio[0] > 1 || ratio[1] < 0 || ratio[1] > 1 {
+		return duerror.NewInvalidArgumentError("invalid ratio")
+	}
+	return nil
+}
+
+func CalAssociationPointRatio(g *Gadget, point utils.Point) ([2]float64, duerror.DUError) {
+	gdd := g.GetDrawData().(drawdata.Gadget)
+	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
+		return [2]float64{}, duerror.NewInvalidArgumentError("point is out of range")
+	}
+	return [2]float64{
+		float64(point.X-gdd.X) / float64(gdd.Width),
+		float64(point.Y-gdd.Y) / float64(gdd.Height),
+	}, nil
+}
+
 // Getters
 func (ass *Association) GetAssType() AssociationType {
 	return ass.assType
 }
 
-func (ass *Association) GetAttributes() ([]*attribute.AssAttribute, duerror.DUError) {
-	// TODO: should not do ass
-	if len(ass.attributes) == 0 {
-		return nil, duerror.NewInvalidArgumentError("no attributes found")
-	}
-	return ass.attributes, nil
+func (ass *Association) GetAttributes() []*attribute.AssAttribute {
+	return ass.attributes
 }
 
 func (ass *Association) GetAttributesLen() int {
 	return len(ass.attributes)
+}
+
+func (ass *Association) GetAttribute(index int) (*attribute.AssAttribute, duerror.DUError) {
+	// to implement command pattern, require "original" data before dong setter
+	// using this function as attribute's getter, no changes to the attribute
+	// beside expose attribute, this function also make some error checking duplicate, may need to refactor
+	if err := ass.validateIndex(index); err != nil {
+		return nil, err
+	}
+	return ass.attributes[index], nil
 }
 
 func (ass *Association) GetDrawData() any {
@@ -213,34 +237,30 @@ func (ass *Association) SetLayer(layer int) duerror.DUError {
 	return ass.updateParentDraw()
 }
 
-func (ass *Association) SetParentStart(gadget *Gadget, point utils.Point) duerror.DUError {
+func (ass *Association) SetParentStart(gadget *Gadget, ratio [2]float64) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
+	}
+	if err := validateRatio(&ratio); err != nil {
+		return err
 	}
 	ass.parents[0] = gadget
-
-	gdd := ass.parents[0].GetDrawData().(drawdata.Gadget)
-	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
-		return duerror.NewInvalidArgumentError("point is out of range")
-	}
-	ass.startPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
-	ass.startPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
-	return ass.updateDrawData()
+	ass.startPointRatio[0] = ratio[0]
+	ass.startPointRatio[1] = ratio[1]
+	return ass.UpdateDrawData()
 }
 
-func (ass *Association) SetParentEnd(gadget *Gadget, point utils.Point) duerror.DUError {
+func (ass *Association) SetParentEnd(gadget *Gadget, ratio [2]float64) duerror.DUError {
 	if gadget == nil {
 		return duerror.NewInvalidArgumentError("gadget is nil")
 	}
-	ass.parents[1] = gadget
-
-	gdd := ass.parents[1].GetDrawData().(drawdata.Gadget)
-	if point.X < gdd.X || point.X > gdd.X+gdd.Width || point.Y < gdd.Y || point.Y > gdd.Y+gdd.Height {
-		return duerror.NewInvalidArgumentError("point is out of range")
+	if err := validateRatio(&ratio); err != nil {
+		return err
 	}
-	ass.endPointRatio[0] = float64(point.X-gdd.X) / float64(gdd.Width)
-	ass.endPointRatio[1] = float64(point.Y-gdd.Y) / float64(gdd.Height)
-	return ass.updateDrawData()
+	ass.parents[1] = gadget
+	ass.endPointRatio[0] = ratio[0]
+	ass.endPointRatio[1] = ratio[1]
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrContent(index int, content string) duerror.DUError {
@@ -250,7 +270,7 @@ func (ass *Association) SetAttrContent(index int, content string) duerror.DUErro
 	if err := ass.attributes[index].SetContent(content); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
@@ -260,7 +280,7 @@ func (ass *Association) SetAttrSize(index int, size int) duerror.DUError {
 	if err := ass.attributes[index].SetSize(size); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
@@ -270,7 +290,7 @@ func (ass *Association) SetAttrStyle(index int, style int) duerror.DUError {
 	if err := ass.attributes[index].SetStyle(attribute.Textstyle(style)); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUError {
@@ -280,7 +300,7 @@ func (ass *Association) SetAttrFontFile(index int, fontFile string) duerror.DUEr
 	if err := ass.attributes[index].SetFontFile(fontFile); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
@@ -290,7 +310,7 @@ func (ass *Association) SetAttrRatio(index int, ratio float64) duerror.DUError {
 	if err := ass.attributes[index].SetRatio(ratio); err != nil {
 		return err
 	}
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 // Other methods
@@ -311,20 +331,33 @@ func (ass *Association) Cover(p utils.Point) (bool, duerror.DUError) {
 		dist(en, enDelta, p) <= threshold, nil
 }
 
-func (ass *Association) AddAttribute(ratio float64, content string) duerror.DUError {
+func (ass *Association) AddAttribute(index int, ratio float64, content string) duerror.DUError {
+	if index < -1 || index > len(ass.attributes) {
+		return duerror.NewInvalidArgumentError("index not allow")
+	}
+
 	att, err := attribute.NewAssAttribute(ratio, content)
 	if err != nil {
 		return err
 	}
-	att.RegisterUpdateParentDraw(ass.updateDrawData)
-	ass.attributes = append(ass.attributes, att)
-	return ass.updateDrawData()
+	if err := att.RegisterUpdateParentDraw(ass.UpdateDrawData); err != nil {
+		return err
+	}
+
+	if index == -1 {
+		// if index is -1, add to back
+		ass.attributes = append(ass.attributes, att)
+	} else {
+		// if 0 <= index <= len, add to index
+		ass.attributes = slices.Insert(ass.attributes, index, att)
+	}
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) AddLoadedAttribute(att *attribute.AssAttribute) duerror.DUError {
-	att.RegisterUpdateParentDraw(ass.updateDrawData)
+	att.RegisterUpdateParentDraw(ass.UpdateDrawData)
 	ass.attributes = append(ass.attributes, att)
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
 func (ass *Association) MoveAttribute(index int, ratio float64) duerror.DUError {
@@ -339,10 +372,10 @@ func (ass *Association) RemoveAttribute(index int) duerror.DUError {
 		return duerror.NewInvalidArgumentError("index out of range")
 	}
 	ass.attributes = append(ass.attributes[:index], ass.attributes[index+1:]...)
-	return ass.updateDrawData()
+	return ass.UpdateDrawData()
 }
 
-func (ass *Association) updateDrawData() duerror.DUError {
+func (ass *Association) UpdateDrawData() duerror.DUError {
 	if ass == nil || ass.parents[0] == nil || ass.parents[1] == nil {
 		return duerror.NewInvalidArgumentError("association or parents are nil")
 	}

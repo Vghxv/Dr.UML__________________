@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	"Dr.uml/backend/command"
 	"Dr.uml/backend/component/attribute"
 
 	"Dr.uml/backend/component"
@@ -41,10 +42,10 @@ func validateDiagramType(input DiagramType) duerror.DUError {
 type UMLDiagram struct {
 	name            string
 	diagramType     DiagramType // e.g., "Class", "UseCase", "Sequence"
-	lastModified    time.Time
 	startPoint      utils.Point // for dragging and linking ass
 	backgroundColor string
 
+	cmdManager          *command.Manager
 	componentsContainer components.Container
 	componentsSelected  map[component.Component]bool
 	associations        map[*component.Gadget][2][]*component.Association
@@ -67,12 +68,12 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 	return &UMLDiagram{
 		name:                name,
 		diagramType:         dt,
-		lastModified:        time.Now(),
 		startPoint:          utils.Point{X: 0, Y: 0},
 		backgroundColor:     drawdata.DefaultDiagramColor, // Default white background
+		cmdManager:          command.NewManager(time.Now()),
 		componentsContainer: components.NewContainerMap(),
-		associations:        make(map[*component.Gadget][2][]*component.Association),
 		componentsSelected:  make(map[component.Component]bool),
+		associations:        make(map[*component.Gadget][2][]*component.Association),
 		drawData: drawdata.Diagram{
 			Margin:    drawdata.Margin,
 			LineWidth: drawdata.LineWidth,
@@ -115,7 +116,7 @@ func (ud *UMLDiagram) GetDiagramType() DiagramType {
 }
 
 func (ud *UMLDiagram) GetLastModified() time.Time {
-	return ud.lastModified
+	return ud.cmdManager.GetLastModified()
 }
 
 // Setters
@@ -124,13 +125,24 @@ func (ud *UMLDiagram) SetPointComponent(point utils.Point) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.SetPoint(point)
-	default:
+	g, ok := c.(*component.Gadget)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	cmd := &moveGadgetCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		gadget:   g,
+		newPoint: point,
+		oldPoint: g.GetPoint(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetLayerComponent(layer int) duerror.DUError {
@@ -138,15 +150,22 @@ func (ud *UMLDiagram) SetLayerComponent(layer int) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.SetLayer(layer)
-	case *component.Association:
-		return g.SetLayer(layer)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	oldLayer := c.GetLayer()
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return c.SetLayer(layer) },
+		unexecute: func() duerror.DUError { return c.SetLayer(oldLayer) },
 	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (ud *UMLDiagram) SetColorComponent(colorHexStr string) duerror.DUError {
@@ -154,13 +173,26 @@ func (ud *UMLDiagram) SetColorComponent(colorHexStr string) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.SetColor(colorHexStr)
-	default:
+	g, ok := c.(*component.Gadget)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	oldColor := g.GetColor()
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: g,
+		execute:   func() duerror.DUError { return g.SetColor(colorHexStr) },
+		unexecute: func() duerror.DUError { return g.SetColor(oldColor) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content string) duerror.DUError {
@@ -169,14 +201,45 @@ func (ud *UMLDiagram) SetAttrContentComponent(section int, index int, content st
 		return err
 	}
 
+	var setContent func(content string) duerror.DUError
+	var oldContent string
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrContent(section, index, content)
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldContent = att.GetContent()
+		setContent = func(content string) duerror.DUError {
+			return c.SetAttrContent(section, index, content)
+		}
 	case *component.Association:
-		return c.SetAttrContent(index, content)
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldContent = att.GetContent()
+		setContent = func(content string) duerror.DUError {
+			return c.SetAttrContent(index, content)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setContent(content) },
+		unexecute: func() duerror.DUError { return setContent(oldContent) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) duerror.DUError {
@@ -185,14 +248,45 @@ func (ud *UMLDiagram) SetAttrSizeComponent(section int, index int, size int) due
 		return err
 	}
 
+	var setSize func(size int) duerror.DUError
+	var oldSize int
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrSize(section, index, size)
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldSize = att.GetSize()
+		setSize = func(size int) duerror.DUError {
+			return c.SetAttrSize(section, index, size)
+		}
 	case *component.Association:
-		return c.SetAttrSize(index, size)
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldSize = att.GetSize()
+		setSize = func(size int) duerror.DUError {
+			return c.SetAttrSize(index, size)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setSize(size) },
+		unexecute: func() duerror.DUError { return setSize(oldSize) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) duerror.DUError {
@@ -201,14 +295,45 @@ func (ud *UMLDiagram) SetAttrStyleComponent(section int, index int, style int) d
 		return err
 	}
 
+	var setStyle func(style int) duerror.DUError
+	var oldStyle int
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrStyle(section, index, style)
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldStyle = int(att.GetStyle())
+		setStyle = func(style int) duerror.DUError {
+			return c.SetAttrStyle(section, index, style)
+		}
 	case *component.Association:
-		return c.SetAttrStyle(index, style)
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldStyle = int(att.GetStyle())
+		setStyle = func(style int) duerror.DUError {
+			return c.SetAttrStyle(index, style)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setStyle(style) },
+		unexecute: func() duerror.DUError { return setStyle(oldStyle) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile string) duerror.DUError {
@@ -216,14 +341,46 @@ func (ud *UMLDiagram) SetAttrFontComponent(section int, index int, fontFile stri
 	if err != nil {
 		return err
 	}
+
+	var setFont func(font string) duerror.DUError
+	var oldFontFile string
 	switch c := c.(type) {
 	case *component.Gadget:
-		return c.SetAttrFontFile(section, index, fontFile)
+		att, err := c.GetAttribute(section, index)
+		if err != nil {
+			return nil
+		}
+		oldFontFile = att.GetFontFile()
+		setFont = func(font string) duerror.DUError {
+			return c.SetAttrFontFile(section, index, font)
+		}
 	case *component.Association:
-		return c.SetAttrFontFile(index, fontFile)
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return nil
+		}
+		oldFontFile = att.GetFontFile()
+		setFont = func(font string) duerror.DUError {
+			return c.SetAttrFontFile(index, font)
+		}
 	default:
 		return duerror.NewInvalidArgumentError("invalid selected component")
 	}
+
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return setFont(fontFile) },
+		unexecute: func() duerror.DUError { return setFont(oldFontFile) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetAttrRatioComponent(section int, index int, ratio float64) duerror.DUError {
@@ -245,42 +402,40 @@ func (ud *UMLDiagram) SetParentStartComponent(point utils.Point) duerror.DUError
 	if err != nil {
 		return err
 	}
-
-	switch a := c.(type) {
-	case *component.Association:
-		stNew, err := ud.componentsContainer.SearchGadget(point)
-		if err != nil {
-			return err
-		}
-		if stNew == nil {
-			return duerror.NewInvalidArgumentError("point does not contain a gadget")
-		}
-
-		// update association
-		stOld := a.GetParentStart()
-		if err = a.SetParentStart(stNew, point); err != nil {
-			return err
-		}
-
-		// update ud.associations map
-		if _, ok := ud.associations[stOld]; ok {
-			list := ud.associations[stOld][0]
-			index := slices.Index(list, a)
-			if index >= 0 {
-				list = slices.Delete(list, index, index+1)
-			}
-			ud.associations[stOld] = [2][]*component.Association{list, ud.associations[stOld][1]}
-		}
-		if _, ok := ud.associations[stNew]; ok {
-			list := ud.associations[stNew][0]
-			list = append(list, a)
-			ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
-		}
-		return nil
-
-	default:
+	a, ok := c.(*component.Association)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+
+	c, err = ud.componentsContainer.Search(point)
+	if err != nil {
+		return err
+	}
+	stNew, ok := c.(*component.Gadget)
+	if !ok {
+		return duerror.NewInvalidArgumentError("component at point is not a gadget")
+	}
+	stRatioNew, err := component.CalAssociationPointRatio(stNew, point)
+	if err != nil {
+		return err
+	}
+
+	cmd := &setParentStartCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		stNew:       stNew,
+		stOld:       a.GetParentStart(),
+		stRatioNew:  stRatioNew,
+		stRatioOld:  a.GetStartRatio(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
@@ -288,45 +443,57 @@ func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
 	if err != nil {
 		return err
 	}
-
-	switch a := c.(type) {
-	case *component.Association:
-		enNew, err := ud.componentsContainer.SearchGadget(point)
-		if err != nil {
-			return err
-		}
-		if enNew == nil {
-			return duerror.NewInvalidArgumentError("point does not contain a gadget")
-		}
-
-		// update association
-		enOld := a.GetParentEnd()
-		if err = a.SetParentEnd(enNew, point); err != nil {
-			return err
-		}
-
-		// update ud.associations map
-		if _, ok := ud.associations[enOld]; ok {
-			list := ud.associations[enOld][1]
-			index := slices.Index(list, a)
-			if index >= 0 {
-				list = slices.Delete(list, index, index+1)
-			}
-			ud.associations[enOld] = [2][]*component.Association{ud.associations[enOld][0], list}
-		}
-		if _, ok := ud.associations[enNew]; ok {
-			list := ud.associations[enNew][1]
-			list = append(list, a)
-			ud.associations[enNew] = [2][]*component.Association{ud.associations[enNew][0], list}
-		}
-		return nil
-
-	default:
+	a, ok := c.(*component.Association)
+	if !ok {
 		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+
+	c, err = ud.componentsContainer.Search(point)
+	if err != nil {
+		return err
+	}
+	enNew, ok := c.(*component.Gadget)
+	if !ok {
+		return duerror.NewInvalidArgumentError("component at point is not a gadget")
+	}
+	enRatioNew, err := component.CalAssociationPointRatio(enNew, point)
+	if err != nil {
+		return err
+	}
+
+	cmd := &setParentEndCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		enNew:       enNew,
+		enOld:       a.GetParentEnd(),
+		enRatioNew:  enRatioNew,
+		enRatioOld:  a.GetEndRatio(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Methods
+func (ud *UMLDiagram) Undo() duerror.DUError {
+	if err := ud.cmdManager.Undo(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) Redo() duerror.DUError {
+	if err := ud.cmdManager.Redo(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Point, layer int, colorHexStr string, header string) duerror.DUError {
 	g, err := component.NewGadget(gadgetType, point, layer, colorHexStr, header)
 	if err != nil {
@@ -335,11 +502,18 @@ func (ud *UMLDiagram) AddGadget(gadgetType component.GadgetType, point utils.Poi
 	if err = g.RegisterUpdateParentDraw(ud.updateDrawData); err != nil {
 		return err
 	}
-	if err = ud.componentsContainer.Insert(g); err != nil {
+	cmd := &addComponentCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: g,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
 		return err
 	}
-	ud.associations[g] = [2][]*component.Association{{}, {}}
-	return ud.updateDrawData()
+	return nil
 }
 
 func (ud *UMLDiagram) StartAddAssociation(point utils.Point) duerror.DUError {
@@ -382,36 +556,44 @@ func (ud *UMLDiagram) EndAddAssociation(assType component.AssociationType, endPo
 	if err = a.RegisterUpdateParentDraw(ud.updateDrawData); err != nil {
 		return err
 	}
-	if err = ud.componentsContainer.Insert(a); err != nil {
+
+	cmd := &addComponentCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: a,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
 		return err
 	}
-
-	// record it, cant modify the slice, being a value of the map, directly
-	tmp := ud.associations[stGad]
-	tmp[0] = append(tmp[0], a)
-	ud.associations[stGad] = tmp
-
-	tmp = ud.associations[enGad]
-	tmp[1] = append(tmp[1], a)
-	ud.associations[enGad] = tmp
-
-	return ud.updateDrawData()
+	return nil
 }
 
 func (ud *UMLDiagram) RemoveSelectedComponents() duerror.DUError {
+	comps := map[component.Component]bool{}
 	for c := range ud.componentsSelected {
-		switch c := c.(type) {
+		comps[c] = true
+		switch g := c.(type) {
 		case *component.Gadget:
-			if err := ud.removeGadget(c); err != nil {
-				return err
-			}
-		case *component.Association:
-			if err := ud.removeAssociation(c); err != nil {
-				return err
+			for a := range ud.getAllAssociationsInGadget(g) {
+				comps[a] = true
 			}
 		}
 	}
-	return ud.updateDrawData()
+	cmd := &removeSelectedComponentCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		components: comps,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
@@ -419,48 +601,34 @@ func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 	if err != nil {
 		return err
 	}
-	if c == nil {
-		ud.UnselectAllComponents()
-		return ud.updateDrawData()
-	}
-	if _, ok := ud.componentsSelected[c]; !ok {
-		switch c := c.(type) {
-		case *component.Gadget:
-			err := c.SetIsSelected(true)
-			if err != nil {
-				return err
-			}
-			ud.componentsSelected[c] = true
-		case *component.Association:
-			err := c.SetIsSelected(true)
-			if err != nil {
-				return err
-			}
-			ud.componentsSelected[c] = true
-		}
-	}
-	// ud.componentsSelected[c] = true
-	return ud.updateDrawData()
-}
-
-func (ud *UMLDiagram) UnselectComponent(point utils.Point) duerror.DUError {
-	c, err := ud.componentsContainer.Search(point)
-	if err != nil {
-		return err
-	}
-	if c == nil {
+	if c != nil && c.GetIsSelected() {
+		// if comp is already selected, do nothing
 		return nil
 	}
-	delete(ud.componentsSelected, c)
-	return ud.updateDrawData()
-}
 
-func (ud *UMLDiagram) UnselectAllComponents() duerror.DUError {
-	for c := range ud.componentsSelected {
-		c.SetIsSelected(false)
+	var affectedComps map[component.Component]bool
+	var newValue bool
+	if c == nil {
+		// if click on nothing, unselect all
+		affectedComps = ud.componentsSelected
+		newValue = false
+	} else {
+		// if click on comp, select it
+		affectedComps = map[component.Component]bool{c: true}
+		newValue = true
 	}
-	// Clear the selected components map
-	ud.componentsSelected = make(map[component.Component]bool)
+	cmd := &selectAllCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		components: affectedComps,
+		newValue:   newValue,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -469,13 +637,29 @@ func (ud *UMLDiagram) AddAttributeToGadget(section int, content string) duerror.
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.AddAttribute(section, content)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	g, ok := c.(*component.Gadget)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	if section < 0 || section >= len(g.GetAttributesLen()) {
+		duerror.NewInvalidArgumentError("invalid section")
+	}
+
+	cmd := &addAttributeGadgetCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		gadget:  g,
+		content: content,
+		section: section,
+		index:   g.GetAttributesLen()[section],
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.DUError {
@@ -483,13 +667,30 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 	if err != nil {
 		return err
 	}
-
-	switch g := c.(type) {
-	case *component.Gadget:
-		return g.RemoveAttribute(section, index)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not a gadget")
+	g, ok := c.(*component.Gadget)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
+	att, err := g.GetAttribute(section, index)
+	if err != nil {
+		return err
+	}
+
+	cmd := &removeAttributeGadgetCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		gadget:  g,
+		content: att.GetContent(),
+		section: section,
+		index:   g.GetAttributesLen()[section],
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) duerror.DUError {
@@ -497,13 +698,26 @@ func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) d
 	if err != nil {
 		return err
 	}
-
-	switch ass := c.(type) {
-	case *component.Association:
-		return ass.AddAttribute(ratio, content)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not an association")
+	a, ok := c.(*component.Association)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+
+	cmd := &addAttributeAssociationCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		content:     content,
+		ratio:       ratio,
+		index:       a.GetAttributesLen(),
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError {
@@ -511,13 +725,30 @@ func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError 
 	if err != nil {
 		return err
 	}
-
-	switch ass := c.(type) {
-	case *component.Association:
-		return ass.RemoveAttribute(index)
-	default:
-		return duerror.NewInvalidArgumentError("selected component is not an association")
+	a, ok := c.(*component.Association)
+	if !ok {
+		duerror.NewInvalidArgumentError("selected component is not an association")
 	}
+	att, err := a.GetAttribute(index)
+	if err != nil {
+		return err
+	}
+
+	cmd := &removeAttributeAssociationCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		association: a,
+		content:     att.GetContent(),
+		ratio:       att.GetRatio(),
+		index:       index,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Private methods
@@ -529,47 +760,6 @@ func (ud *UMLDiagram) getSelectedComponent() (component.Component, duerror.DUErr
 		return c, nil
 	}
 	return nil, duerror.NewInvalidArgumentError("no component selected")
-}
-
-func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
-	if _, ok := ud.associations[gad]; ok {
-		for _, a := range ud.associations[gad][0] {
-			if err := ud.removeAssociation(a); err != nil {
-				return err
-			}
-		}
-		for _, a := range ud.associations[gad][1] {
-			if err := ud.removeAssociation(a); err != nil {
-				return err
-			}
-		}
-		delete(ud.associations, gad)
-	}
-	delete(ud.componentsSelected, gad)
-	return ud.componentsContainer.Remove(gad)
-}
-
-func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUError {
-	st := a.GetParentStart()
-	en := a.GetParentEnd()
-	if _, ok := ud.associations[st]; ok {
-		stList := ud.associations[st][0]
-		index := slices.Index(stList, a)
-		if index >= 0 {
-			stList = slices.Delete(stList, index, index+1)
-		}
-		ud.associations[st] = [2][]*component.Association{stList, ud.associations[st][1]}
-	}
-	if _, ok := ud.associations[en]; ok {
-		enList := ud.associations[en][1]
-		index := slices.Index(enList, a)
-		if index >= 0 {
-			enList = slices.Delete(enList, index, index+1)
-		}
-		ud.associations[en] = [2][]*component.Association{ud.associations[en][0], enList}
-	}
-	delete(ud.componentsSelected, a)
-	return ud.componentsContainer.Remove(a)
 }
 
 func (ud *UMLDiagram) validatePoint(point utils.Point) duerror.DUError {
@@ -739,7 +929,7 @@ func (ud *UMLDiagram) SaveToFile(filename string) (*utils.SavedDiagram, duerror.
 }
 
 func (ud *UMLDiagram) HasUnsavedChanges() bool {
-	return ud.lastModified.After(ud.lastSave)
+	return ud.GetLastModified().After(ud.lastSave)
 }
 
 // draw
@@ -776,6 +966,249 @@ func (ud *UMLDiagram) updateDrawData() duerror.DUError {
 	if ud.updateParentDraw == nil {
 		return nil
 	}
-	ud.lastModified = time.Now()
 	return ud.updateParentDraw()
+}
+
+func (ud *UMLDiagram) addComponent(c component.Component) duerror.DUError {
+	switch c := c.(type) {
+	case *component.Gadget:
+		return ud.addGadget(c)
+	case *component.Association:
+		return ud.addAssociation(c)
+	default:
+		return duerror.NewInvalidArgumentError("unsupported component type")
+	}
+}
+
+func (ud *UMLDiagram) addGadget(g *component.Gadget) duerror.DUError {
+	if err := ud.componentsContainer.Insert(g); err != nil {
+		return err
+	}
+	if _, ok := ud.associations[g]; !ok {
+		ud.associations[g] = [2][]*component.Association{{}, {}}
+	}
+	if g.GetIsSelected() {
+		ud.componentsSelected[g] = true
+	}
+	if err := ud.updateDrawData(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) addAssociation(a *component.Association) duerror.DUError {
+	if err := ud.componentsContainer.Insert(a); err != nil {
+		return err
+	}
+	// record it, cant modify the slice, being a value of the map, directly
+	stGad := a.GetParentStart()
+	enGad := a.GetParentEnd()
+	if _, ok := ud.associations[stGad]; !ok {
+		ud.associations[stGad] = [2][]*component.Association{{}, {}}
+	}
+	if _, ok := ud.associations[enGad]; !ok {
+		ud.associations[enGad] = [2][]*component.Association{{}, {}}
+	}
+
+	tmp := ud.associations[stGad]
+	tmp[0] = append(tmp[0], a)
+	ud.associations[stGad] = tmp
+
+	tmp = ud.associations[enGad]
+	tmp[1] = append(tmp[1], a)
+	ud.associations[enGad] = tmp
+
+	if a.GetIsSelected() {
+		ud.componentsSelected[a] = true
+	}
+	if err := ud.updateDrawData(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) removeComponent(c component.Component) duerror.DUError {
+	switch c := c.(type) {
+	case *component.Gadget:
+		return ud.removeGadget(c)
+	case *component.Association:
+		return ud.removeAssociation(c)
+	default:
+		return duerror.NewInvalidArgumentError("unsupported component type")
+	}
+}
+
+// ONLY REMOVE SINGLE GADGET, IGNORE ITS ASSOCIATIONS
+func (ud *UMLDiagram) removeGadget(g *component.Gadget) duerror.DUError {
+	if err := ud.componentsContainer.Remove(g); err != nil {
+		return err
+	}
+	delete(ud.associations, g)
+	delete(ud.componentsSelected, g)
+	if err := ud.componentsContainer.Remove(g); err != nil {
+		return err
+	}
+	if err := ud.updateDrawData(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUError {
+	st := a.GetParentStart()
+	en := a.GetParentEnd()
+	if _, ok := ud.associations[st]; ok {
+		stList := ud.associations[st][0]
+		index := slices.Index(stList, a)
+		if index >= 0 {
+			stList = slices.Delete(stList, index, index+1)
+		}
+		ud.associations[st] = [2][]*component.Association{stList, ud.associations[st][1]}
+	}
+	if _, ok := ud.associations[en]; ok {
+		enList := ud.associations[en][1]
+		index := slices.Index(enList, a)
+		if index >= 0 {
+			enList = slices.Delete(enList, index, index+1)
+		}
+		ud.associations[en] = [2][]*component.Association{ud.associations[en][0], enList}
+	}
+	delete(ud.componentsSelected, a)
+	if err := ud.componentsContainer.Remove(a); err != nil {
+		return err
+	}
+	if err := ud.updateDrawData(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) getAllAssociationsInGadget(g *component.Gadget) map[*component.Association]bool {
+	asses := map[*component.Association]bool{}
+	if g == nil {
+		return asses
+	}
+	if _, ok := ud.associations[g]; ok {
+		for _, a := range ud.associations[g][0] {
+			asses[a] = true
+		}
+		for _, a := range ud.associations[g][1] {
+			asses[a] = true
+		}
+	}
+	return asses
+}
+
+func (ud *UMLDiagram) removeComponents(comps map[component.Component]bool) duerror.DUError {
+	for c := range comps {
+		if err := ud.removeComponent(c); err != nil {
+			return err
+		}
+	}
+	// updateDD in the removeComponent
+	return nil
+}
+
+func (ud *UMLDiagram) addComponents(comps map[component.Component]bool) duerror.DUError {
+	for c := range comps {
+		if err := ud.addComponent(c); err != nil {
+			return err
+		}
+	}
+	// updateDD in the addComponent
+	return nil
+}
+
+func (ud *UMLDiagram) selectAll(comps map[component.Component]bool, newValue bool) duerror.DUError {
+	for c := range comps {
+		if err := c.SetIsSelected(newValue); err != nil {
+			return err
+		}
+		if newValue {
+			ud.componentsSelected[c] = true
+		} else {
+			delete(ud.componentsSelected, c)
+		}
+	}
+	// updateDD in the SetIsSelected
+	return nil
+}
+
+func (ud *UMLDiagram) moveGadget(g *component.Gadget, point utils.Point) duerror.DUError {
+	if err := g.SetPoint(point); err != nil {
+		return err
+	}
+	if _, ok := ud.associations[g]; ok {
+		for _, a := range ud.associations[g][0] {
+			if err := a.UpdateDrawData(); err != nil {
+				return err
+			}
+		}
+		for _, a := range ud.associations[g][1] {
+			if err := a.UpdateDrawData(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) setParentStartAssociation(a *component.Association, stNew *component.Gadget, stRatio [2]float64) duerror.DUError {
+	stOld := a.GetParentStart()
+	if err := a.SetParentStart(stNew, stRatio); err != nil {
+		return err
+	}
+	// update ud.associations
+	if _, ok := ud.associations[stOld]; ok {
+		list := ud.associations[stOld][0]
+		index := slices.Index(list, a)
+		if index >= 0 {
+			list = slices.Delete(list, index, index+1)
+		}
+		ud.associations[stOld] = [2][]*component.Association{list, ud.associations[stOld][1]}
+	}
+	if _, ok := ud.associations[stNew]; ok {
+		list := ud.associations[stNew][0]
+		list = append(list, a)
+		ud.associations[stNew] = [2][]*component.Association{list, ud.associations[stNew][1]}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) setParentEndAssociation(a *component.Association, enNew *component.Gadget, enRatio [2]float64) duerror.DUError {
+	enOld := a.GetParentEnd()
+	if err := a.SetParentEnd(enNew, enRatio); err != nil {
+		return err
+	}
+	// update ud.associations
+	if _, ok := ud.associations[enOld]; ok {
+		list := ud.associations[enOld][1]
+		index := slices.Index(list, a)
+		if index >= 0 {
+			list = slices.Delete(list, index, index+1)
+		}
+		ud.associations[enOld] = [2][]*component.Association{ud.associations[enOld][0], list}
+	}
+	if _, ok := ud.associations[enNew]; ok {
+		list := ud.associations[enNew][1]
+		list = append(list, a)
+		ud.associations[enNew] = [2][]*component.Association{ud.associations[enNew][0], list}
+	}
+	return nil
+}
+
+func (ud *UMLDiagram) addAttributeGadget(g *component.Gadget, section, index int, content string) duerror.DUError {
+	return g.AddAttribute(section, index, content)
+}
+
+func (ud *UMLDiagram) removeAttributeGadget(g *component.Gadget, section, index int) duerror.DUError {
+	return g.RemoveAttribute(section, index)
+}
+
+func (ud *UMLDiagram) addAttributeAssociation(a *component.Association, index int, ratio float64, content string) duerror.DUError {
+	return a.AddAttribute(index, ratio, content)
+}
+
+func (ud *UMLDiagram) removeAttributeAssociation(a *component.Association, index int) duerror.DUError {
+	return a.RemoveAttribute(index)
 }

@@ -83,7 +83,7 @@ func TestCreateEmptyDiagram(t *testing.T) {
 				assert.NotNil(t, diagram)
 				assert.Equal(t, tt.inputName, diagram.GetName())
 				assert.Equal(t, tt.diagramType, diagram.diagramType)
-				assert.WithinDuration(t, time.Now(), diagram.lastModified, time.Second)
+				assert.WithinDuration(t, time.Now(), diagram.GetLastModified(), time.Second)
 				assert.Equal(t, utils.Point{X: 0, Y: 0}, diagram.startPoint)
 				// New assertions
 				assert.Equal(t, "#FFFFFF", diagram.backgroundColor)
@@ -200,11 +200,6 @@ func TestUMLDiagram_SelectAndUnselectComponent(t *testing.T) {
 	err := diagram.SelectComponent(utils.Point{X: 10, Y: 10})
 	assert.NoError(t, err)
 	assert.Len(t, diagram.componentsSelected, 1)
-
-	// Unselect
-	err = diagram.UnselectComponent(utils.Point{X: 10, Y: 10})
-	assert.NoError(t, err)
-	assert.Len(t, diagram.componentsSelected, 0)
 }
 
 func TestUMLDiagram_UnselectAllComponents(t *testing.T) {
@@ -212,8 +207,6 @@ func TestUMLDiagram_UnselectAllComponents(t *testing.T) {
 	_ = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 1}, 0, drawdata.DefaultGadgetColor, "")
 	_ = diagram.SelectComponent(utils.Point{X: 1, Y: 1})
 	assert.Len(t, diagram.componentsSelected, 1)
-	_ = diagram.UnselectAllComponents()
-	assert.Len(t, diagram.componentsSelected, 0)
 }
 
 // func TestUMLDiagram_RegisterNotifyDrawUpdate(t *testing.T) {
@@ -372,7 +365,6 @@ func TestAssociationMethods(t *testing.T) {
 			t.Errorf("add association fail")
 		}
 
-		diagram.UnselectAllComponents()
 		dd := a.GetDrawData().(drawdata.Association)
 		midPoint := utils.Point{
 			X: (dd.StartX + dd.EndX) / 2,
@@ -406,12 +398,12 @@ func TestAssociationMethods(t *testing.T) {
 			t.Errorf("add association fail")
 		}
 
-		diagram.UnselectAllComponents()
 		dd := a.GetDrawData().(drawdata.Association)
 		midPoint := utils.Point{
 			X: (dd.StartX + dd.EndX) / 2,
 			Y: (dd.StartY + dd.EndY) / 2,
 		}
+		diagram.selectAll(diagram.componentsSelected, false)
 		diagram.SelectComponent(midPoint)
 		c, _ := diagram.getSelectedComponent()
 		if a != c.(*component.Association) {
@@ -520,7 +512,7 @@ func TestAddAttributeToGadget(t *testing.T) {
 
 	// Test with multiple selected components
 	// First clear the selection
-	err = diagram.UnselectAllComponents()
+	diagram.selectAll(diagram.componentsSelected, false)
 	assert.NoError(t, err)
 
 	// Add a second gadget
@@ -761,9 +753,7 @@ func TestUMLDiagram_loadAssAttributes(t *testing.T) {
 	assert.NoError(t, errRet)
 	assert.Equal(t, 0, idx)
 
-	atts, err := ass.GetAttributes()
-	assert.NoError(t, err)
-
+	atts := ass.GetAttributes()
 	for i, att := range atts {
 		assert.Equal(t, expectedContent, att.GetContent())
 		assert.Equal(t, expectedStyle, int(att.GetStyle()))
@@ -842,4 +832,970 @@ func (m *mockContainer) Len() (int, duerror.DUError) {
 		return 1, nil
 	}
 	return 0, nil
+}
+
+func CMD_ADD_GADGET(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	header := "test gadget"
+	d.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, header)
+
+	t.Run("undo add gadget", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 0 {
+			t.Errorf("fail to remove gadget from component container")
+		}
+	})
+
+	t.Run("redo add gadget", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 1 {
+			t.Errorf("fail to recover component container")
+		}
+		dd := d.GetDrawData()
+		content := dd.Gadgets[0].Attributes[0][0].Content
+		if content != header {
+			t.Errorf("fail to recover gadget content: %v, got %v", header, content)
+		}
+	})
+}
+
+func CMD_ADD_ASSOCIATION(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, "test gadget0")
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "test gadget1")
+
+	assType := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType), gadPoint1)
+
+	t.Run("undo add association", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 2 {
+			t.Errorf("fail to remove association from component container")
+		}
+		dd := d.GetDrawData()
+		assLen := len(dd.Associations)
+		if assLen != 0 {
+			t.Errorf("fail to remove correct component")
+		}
+	})
+
+	t.Run("redo add association", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if d.componentsContainer.Len() != 3 {
+			t.Errorf("fail to recover component container")
+		}
+		dd := d.GetDrawData()
+		assLen := len(dd.Associations)
+		if assLen != 1 {
+			t.Errorf("fail to recover association")
+		}
+		newAssType := dd.Associations[0].AssType
+		if newAssType != assType {
+			t.Errorf("fail to recover association type: %v, got %v", assType, newAssType)
+		}
+	})
+}
+
+func CMD_REMOVE_SELECTED_COMPONENTS(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	gadPoint2 := utils.Point{X: 400, Y: 400}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	header2 := "test gadget2"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	d.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, header2)
+
+	assType0 := component.Composition
+	assType1 := component.Dependency
+	assType2 := component.Extension
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType1), gadPoint0)
+	d.StartAddAssociation(gadPoint2)
+	d.EndAddAssociation(component.AssociationType(assType2), gadPoint2)
+
+	t.Run("select and remove components", func(t *testing.T) {
+		d.SelectComponent(gadPoint0)
+		d.SelectComponent(gadPoint1)
+		midPoint := utils.Point{
+			X: (gadPoint0.X + gadPoint1.X) / 2,
+			Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+		}
+		err := d.SelectComponent(midPoint)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("fail to select components")
+		}
+
+		err = d.RemoveSelectedComponents()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		dd := d.GetDrawData()
+		if len(dd.Gadgets) != 1 {
+			t.Errorf("failed to remove gadget")
+		}
+		content := dd.Gadgets[0].Attributes[0][0].Content
+		if content != header2 {
+			t.Errorf("failed to remove gadget")
+		}
+
+		if len(dd.Associations) != 1 {
+			t.Errorf("failed to remove association")
+		}
+		assType := dd.Associations[0].AssType
+		if assType != assType2 {
+			t.Errorf("failed to remove association")
+		}
+	})
+
+	t.Run("undo remove select components", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("fail to recover componentsSelected")
+		}
+
+		dd := d.GetDrawData()
+		if len(dd.Gadgets) != 3 {
+			t.Errorf("failed to recover gadget")
+		} else {
+			headers := map[string]bool{header0: true, header1: true, header2: true}
+			for i := 0; i < 3; i++ {
+				content := dd.Gadgets[i].Attributes[0][0].Content
+				val, ok := headers[content]
+				if !ok || !val {
+					t.Errorf("failed to recover gadget. incorrect header: %v", content)
+				}
+				headers[content] = false
+			}
+		}
+
+		if len(dd.Associations) != 3 {
+			t.Errorf("failed to recover association")
+		} else {
+			types := map[int]bool{assType0: true, assType1: true, assType2: true}
+			for i := 0; i < 3; i++ {
+				assType := dd.Associations[i].AssType
+				val, ok := types[assType]
+				if !ok || !val {
+					t.Errorf("failed to recover association. incorrect type: %v", assType)
+				}
+				types[assType] = false
+			}
+		}
+	})
+
+	t.Run("redo remove select components", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		dd := d.GetDrawData()
+		if len(dd.Gadgets) != 1 {
+			t.Errorf("failed to remove gadget")
+		}
+		content := dd.Gadgets[0].Attributes[0][0].Content
+		if content != header2 {
+			t.Errorf("failed to remove gadget")
+		}
+
+		if len(dd.Associations) != 1 {
+			t.Errorf("failed to remove association")
+		}
+		assType := dd.Associations[0].AssType
+		if assType != assType2 {
+			t.Errorf("failed to remove association")
+		}
+	})
+}
+
+func CMD_SELECT_COMPONENT(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	noWherePoint := utils.Point{X: 1000, Y: 1000}
+
+	t.Run("select components", func(t *testing.T) {
+		d.SelectComponent(gadPoint0)
+		if len(d.componentsSelected) != 1 {
+			t.Errorf("select one fails")
+		}
+		d.SelectComponent(gadPoint1)
+		if len(d.componentsSelected) != 2 {
+			t.Errorf("select two fails")
+		}
+		d.SelectComponent(midPoint)
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select three fails")
+		}
+		d.SelectComponent(gadPoint0)
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select already selected association fails")
+		}
+		d.SelectComponent(noWherePoint)
+		if len(d.componentsSelected) != 0 {
+			t.Errorf("select empty place fails")
+		}
+	})
+
+	t.Run("undo select components", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("undo select empty place fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 2 {
+			t.Errorf("undo select three fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 1 {
+			t.Errorf("undo select two fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 0 {
+			t.Errorf("undo select one fails")
+		}
+	})
+
+	t.Run("redo select components", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 1 {
+			t.Errorf("select one fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 2 {
+			t.Errorf("select two fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select three fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 3 {
+			t.Errorf("select already selected association fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if len(d.componentsSelected) != 0 {
+			t.Errorf("select empty place fails")
+		}
+	})
+}
+
+func CMD_COMPONENT_SETTER(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+
+	t.Run("setter gadget", func(t *testing.T) {
+		newLayer := 69
+		newColor := "#123456"
+		d.SelectComponent(gadPoint0)
+		err := d.SetLayerComponent(newLayer)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		err = d.SetColorComponent(newColor)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				if gdd.Layer != newLayer {
+					t.Errorf("unexpected layer: %v, got %v", newLayer, gdd.Layer)
+				}
+				if gdd.Color != newColor {
+					t.Errorf("unexpected color: %v, got %v", newColor, gdd.Color)
+				}
+			}
+		}
+
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				if gdd.Layer == newLayer {
+					t.Errorf("undo set layer fails")
+				}
+				if gdd.Color == newColor {
+					t.Errorf("undo set color fails")
+				}
+			}
+		}
+
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				if gdd.Layer != newLayer {
+					t.Errorf("redo set layer fails")
+				}
+				if gdd.Color != newColor {
+					t.Errorf("redo set color fails")
+				}
+			}
+		}
+	})
+
+	t.Run("setter gadget", func(t *testing.T) {
+		newLayer := 69
+		d.SelectComponent(utils.Point{X: 1000, Y: 1000})
+		d.SelectComponent(midPoint)
+		err := d.SetLayerComponent(newLayer)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, add := range d.GetDrawData().Associations {
+			if add.Layer != newLayer {
+				t.Errorf("set association layer fails")
+			}
+		}
+
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, add := range d.GetDrawData().Associations {
+			if add.Layer == newLayer {
+				t.Errorf("undo set association layer fails")
+			}
+		}
+
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, add := range d.GetDrawData().Associations {
+			if add.Layer != newLayer {
+				t.Errorf("redo set association layer fails")
+			}
+		}
+	})
+}
+
+func CMD_MOVE_GADGET(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	add := d.GetDrawData().Associations[0]
+	oldAssStart := utils.Point{X: add.StartX, Y: add.StartY}
+
+	newPoint := utils.Point{X: 69, Y: 69}
+	t.Run("move gadget", func(t *testing.T) {
+		d.SelectComponent(gadPoint0)
+		err := d.SetPointComponent(newPoint)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				point := utils.Point{X: gdd.X, Y: gdd.Y}
+				if point != newPoint {
+					t.Errorf("set point fails")
+				}
+			}
+		}
+		add := d.GetDrawData().Associations[0]
+		point := utils.Point{X: add.StartX, Y: add.StartY}
+		if point == oldAssStart {
+			t.Errorf("move gadget doesnt change its association")
+		}
+	})
+
+	t.Run("undo move gadget", func(t *testing.T) {
+		err := d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				point := utils.Point{X: gdd.X, Y: gdd.Y}
+				if point == newPoint {
+					t.Errorf("undo set point fails")
+				}
+			}
+		}
+		add := d.GetDrawData().Associations[0]
+		point := utils.Point{X: add.StartX, Y: add.StartY}
+		if point != oldAssStart {
+			t.Errorf("move gadget doesnt change its association")
+		}
+	})
+
+	t.Run("redo move gadget", func(t *testing.T) {
+		err := d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		for _, gdd := range d.GetDrawData().Gadgets {
+			if gdd.Attributes[0][0].Content == header0 {
+				point := utils.Point{X: gdd.X, Y: gdd.Y}
+				if point != newPoint {
+					t.Errorf("redo set point fails")
+				}
+			}
+		}
+		add := d.GetDrawData().Associations[0]
+		point := utils.Point{X: add.StartX, Y: add.StartY}
+		if point == oldAssStart {
+			t.Errorf("move gadget doesnt change its association")
+		}
+	})
+}
+
+func CMD_SET_PARENT(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	gadPoint2 := utils.Point{X: 400, Y: 400}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	header2 := "test gadget2"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	d.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, header2)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	d.SelectComponent(midPoint)
+	c, _ := d.componentsContainer.Search(midPoint)
+	a := c.(*component.Association)
+
+	g0, _ := d.componentsContainer.SearchGadget(gadPoint0)
+	g1, _ := d.componentsContainer.SearchGadget(gadPoint1)
+	g2, _ := d.componentsContainer.SearchGadget(gadPoint2)
+	t.Run("set parent start", func(t *testing.T) {
+		err := d.SetParentStartComponent(gadPoint2)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("set parent start fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g0 {
+			t.Errorf("undo set parent start fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("undi set parent start fails")
+		}
+	})
+
+	t.Run("set parent end", func(t *testing.T) {
+		err := d.SetParentEndComponent(gadPoint2)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("set parent start fails")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g1 {
+			t.Errorf("undo set parent start fails")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetParentStart() != g2 {
+			t.Errorf("undi set parent start fails")
+		}
+	})
+}
+
+func CMD_SET_ATTR_GAD(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	header0 := "test gadget0"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.SelectComponent(gadPoint0)
+
+	g, _ := d.componentsContainer.SearchGadget(gadPoint0)
+
+	t.Run("set content", func(t *testing.T) {
+		getValue := func(g *component.Gadget) string {
+			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].Content
+		}
+		newValue := "new content"
+		oldValue := getValue(g)
+
+		err := d.SetAttrContentComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+	})
+
+	t.Run("set size", func(t *testing.T) {
+		getValue := func(g *component.Gadget) int {
+			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].FontSize
+		}
+		newValue := 69
+		oldValue := getValue(g)
+
+		err := d.SetAttrSizeComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+	})
+
+	t.Run("set style", func(t *testing.T) {
+		getValue := func(g *component.Gadget) int {
+			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].FontStyle
+		}
+		newValue := attribute.Bold
+		oldValue := getValue(g)
+
+		err := d.SetAttrStyleComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(g) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
+		}
+	})
+}
+
+func CMD_SET_ATTR_ASS(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	d.SelectComponent(midPoint)
+	c, _ := d.componentsContainer.Search(midPoint)
+	a := c.(*component.Association)
+
+	d.AddAttributeToAssociation(0.5, "test")
+
+	t.Run("set content", func(t *testing.T) {
+		getValue := func(a *component.Association) string {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].Content
+		}
+		newValue := "new content"
+		oldValue := getValue(a)
+
+		err := d.SetAttrContentComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+
+	t.Run("set size", func(t *testing.T) {
+		getValue := func(a *component.Association) int {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].FontSize
+		}
+		newValue := 69
+		oldValue := getValue(a)
+
+		err := d.SetAttrSizeComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+
+	t.Run("set style", func(t *testing.T) {
+		getValue := func(a *component.Association) int {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].FontStyle
+		}
+		newValue := attribute.Bold
+		oldValue := getValue(a)
+
+		err := d.SetAttrStyleComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+
+	t.Run("set ratio", func(t *testing.T) {
+		getValue := func(a *component.Association) float64 {
+			return a.GetDrawData().(drawdata.Association).Attributes[0].Ratio
+		}
+		newValue := 0.69
+		oldValue := getValue(a)
+
+		err := d.SetAttrRatioComponent(0, 0, newValue)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != oldValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if getValue(a) != newValue {
+			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
+		}
+	})
+}
+
+func CMD_ADD_REMOVE_ATTR_GAD(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	header0 := "test gadget0"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.SelectComponent(gadPoint0)
+
+	g, _ := d.componentsContainer.SearchGadget(gadPoint0)
+	section := 1
+	t.Run("add attribute", func(t *testing.T) {
+		err := d.AddAttributeToGadget(section, "ඞ")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 1 {
+			t.Errorf("add attr to gad fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 0 {
+			t.Errorf("undo add attr to gad fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 1 {
+			t.Errorf("undo add attr to gad fail")
+		}
+	})
+
+	t.Run("remove attribute", func(t *testing.T) {
+		err := d.RemoveAttributeFromGadget(section, 0)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 0 {
+			t.Errorf("remove attr to gad fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 1 {
+			t.Errorf("undo remove attr to gad fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if g.GetAttributesLen()[section] != 0 {
+			t.Errorf("undo remove attr to gad fail")
+		}
+	})
+}
+
+func CMD_ADD_REMOVE_ATTR_ASS(t *testing.T) {
+	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+
+	gadPoint0 := utils.Point{X: 0, Y: 0}
+	gadPoint1 := utils.Point{X: 200, Y: 200}
+	header0 := "test gadget0"
+	header1 := "test gadget1"
+	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
+	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+
+	assType0 := component.Composition
+	d.StartAddAssociation(gadPoint0)
+	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+
+	midPoint := utils.Point{
+		X: (gadPoint0.X + gadPoint1.X) / 2,
+		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
+	}
+	d.SelectComponent(midPoint)
+	c, _ := d.componentsContainer.Search(midPoint)
+	a := c.(*component.Association)
+
+	t.Run("add attribute", func(t *testing.T) {
+		err := d.AddAttributeToAssociation(0.5, "ඞ")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 1 {
+			t.Errorf("add attr to ass fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 0 {
+			t.Errorf("undo add attr to ass fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 1 {
+			t.Errorf("undo add attr to ass fail")
+		}
+	})
+
+	t.Run("remove attribute", func(t *testing.T) {
+		err := d.RemoveAttributeFromAssociation(0)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 0 {
+			t.Errorf("remove attr to ass fail")
+		}
+		err = d.Undo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 1 {
+			t.Errorf("undo remove attr to ass fail")
+		}
+		err = d.Redo()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if a.GetAttributesLen() != 0 {
+			t.Errorf("undo remove attr to ass fail")
+		}
+	})
 }

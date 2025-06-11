@@ -11,6 +11,7 @@ type Component interface {
 	// Copy() (Component, duerror.DUError)
 	Cover(p utils.Point) (bool, duerror.DUError)
 	GetLayer() int
+	GetIsSelected() bool
 	SetLayer(layer int) duerror.DUError
 	SetIsSelected(isSelected bool) duerror.DUError
 	GetDrawData() any
