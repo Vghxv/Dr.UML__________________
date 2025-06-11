@@ -45,7 +45,7 @@ const App: React.FC = () => {
         reloadBackendData
     );
     // actions
-    const { handleSaveProject, handleSaveDiagram, handleDiagramUndo, handleDiagramRedo } = useDiagramActions(reloadBackendData);
+    const { handleSaveProject, handleSaveDiagram, handleDiagramUndo, handleDiagramRedo, handleDeleteSelectedComponent} = useDiagramActions(reloadBackendData);
 
     // handler: project/diagram
     const handleProjectLoaded = (loadedProjectData: ProjectData) => {
@@ -108,6 +108,7 @@ const App: React.FC = () => {
         setSelectedComponent(prev => (prev !== component ? component : prev));
     }, []);
     const handleCanvasColorChange = (color: string) => setCanvasBackgroundColor(color);
+    
 
     // Render
     if (currentView === 'load') {
@@ -138,6 +139,7 @@ const App: React.FC = () => {
                 canvasBackgroundColor={canvasBackgroundColor}
                 onUndo={handleDiagramUndo}
                 onRedo={handleDiagramRedo}
+                onDeleteSelectedComponent={handleDeleteSelectedComponent}
             />
             {showPopup && (
                 <GadgetPopup
