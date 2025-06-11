@@ -669,7 +669,7 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 	}
 	g, ok := c.(*component.Gadget)
 	if !ok {
-		duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
 	att, err := g.GetAttribute(section, index)
 	if err != nil {
@@ -685,7 +685,7 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 		gadget:  g,
 		content: att.GetContent(),
 		section: section,
-		index:   g.GetAttributesLen()[section],
+		index:   index,
 	}
 	if err := ud.cmdManager.Execute(cmd); err != nil {
 		return err
