@@ -261,9 +261,9 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 	t.Run("load diagram with gadgets and associations", func(t *testing.T) {
 		// Create a saved diagram structure
 		savedDiagram := utils.SavedDiagram{
-			Filetype:  utils.FiletypeDiagram | int(ClassDiagram)<<1,
-			LastEdit:  "2023-01-01T00:00:00Z",
-			Gadgets:   []utils.SavedGad{},
+			Filetype:     utils.FiletypeDiagram | int(ClassDiagram)<<1,
+			LastEdit:     "2023-01-01T00:00:00Z",
+			Gadgets:      []utils.SavedGad{},
 			Associations: []utils.SavedAss{},
 		}
 
@@ -291,7 +291,7 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 		assert.NotNil(t, diagram)
 		assert.Equal(t, "test.uml", diagram.GetName())
 		assert.Equal(t, ClassDiagram, diagram.GetDiagramType())
-		
+
 		// Verify gadget was loaded
 		components := diagram.componentsContainer.GetAll()
 		assert.Len(t, components, 1)
@@ -301,7 +301,7 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 		savedDiagram := utils.SavedDiagram{
 			Filetype: utils.FiletypeDiagram | int(UseCaseDiagram)<<1, // Invalid type
 		}
-		
+
 		_, err := LoadExistUMLDiagram("test.uml", savedDiagram)
 		assert.Error(t, err)
 	})
@@ -317,7 +317,7 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 				},
 			},
 		}
-		
+
 		_, err := LoadExistUMLDiagram("test.uml", savedDiagram)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "test.uml")
@@ -370,7 +370,7 @@ func TestSetPointComponent(t *testing.T) {
 	t.Run("no component selected", func(t *testing.T) {
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
-		
+
 		err = diagram.SetPointComponent(utils.Point{X: 10, Y: 10})
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "can only operate on one component")
@@ -388,7 +388,7 @@ func TestSetPointComponent(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -433,7 +433,7 @@ func TestSetLayerComponent(t *testing.T) {
 	t.Run("no component selected", func(t *testing.T) {
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
-		
+
 		err = diagram.SetLayerComponent(5)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "can only operate on one component")
@@ -467,7 +467,7 @@ func TestSetColorComponent(t *testing.T) {
 	t.Run("no component selected", func(t *testing.T) {
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
-		
+
 		err = diagram.SetColorComponent("#ff0000")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "can only operate on one component")
@@ -485,7 +485,7 @@ func TestSetColorComponent(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -536,7 +536,7 @@ func TestSetAttrContentComponent_Gadget(t *testing.T) {
 	t.Run("no component selected", func(t *testing.T) {
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
-		
+
 		err = diagram.SetAttrContentComponent(1, 0, "content")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "can only operate on one component")
@@ -556,7 +556,7 @@ func TestSetAttrContentComponent_Association(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -600,7 +600,7 @@ func TestAddAttributeToAssociation(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -629,7 +629,7 @@ func TestAddAttributeToAssociation(t *testing.T) {
 	t.Run("no component selected", func(t *testing.T) {
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
-		
+
 		err = diagram.AddAttributeToAssociation(0.5, "testAttribute")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "can only operate on one component")
@@ -666,7 +666,7 @@ func TestRemoveAttributeFromAssociation(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -699,7 +699,7 @@ func TestRemoveAttributeFromAssociation(t *testing.T) {
 	t.Run("no component selected", func(t *testing.T) {
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
-		
+
 		err = diagram.RemoveAttributeFromAssociation(0)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "can only operate on one component")
@@ -730,7 +730,7 @@ func TestRemoveAttributeFromAssociation(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -760,7 +760,7 @@ func TestSetAttrRatioComponent(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -793,7 +793,7 @@ func TestSetAttrRatioComponent(t *testing.T) {
 	t.Run("no component selected", func(t *testing.T) {
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
-		
+
 		err = diagram.SetAttrRatioComponent(0, 0, 0.5)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "can only operate on one component")
@@ -902,7 +902,7 @@ func TestPrivateHelperMethods(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -911,7 +911,7 @@ func TestPrivateHelperMethods(t *testing.T) {
 		// Select first gadget and move it
 		err = diagram.SelectComponent(gadPoint1)
 		assert.NoError(t, err)
-		
+
 		newPoint := utils.Point{X: 200, Y: 200}
 		err = diagram.SetPointComponent(newPoint)
 		assert.NoError(t, err)
@@ -930,7 +930,7 @@ func TestPrivateHelperMethods(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class4")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -951,12 +951,12 @@ func TestPrivateHelperMethods(t *testing.T) {
 
 	t.Run("test addComponents through Undo", func(t *testing.T) {
 		initialCount := len(diagram.componentsContainer.GetAll())
-		
+
 		// Add a gadget
 		gadPoint := utils.Point{X: 500, Y: 500}
 		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
 		assert.NoError(t, err)
-		
+
 		afterAddCount := len(diagram.componentsContainer.GetAll())
 		assert.True(t, afterAddCount > initialCount)
 
@@ -969,7 +969,7 @@ func TestPrivateHelperMethods(t *testing.T) {
 		// Undo the removal (triggers unexecute)
 		err = diagram.Undo()
 		assert.NoError(t, err)
-		
+
 		undoCount := len(diagram.componentsContainer.GetAll())
 		assert.Equal(t, afterAddCount, undoCount)
 	})
@@ -1058,7 +1058,7 @@ func TestSetParentComponentErrors(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -1160,7 +1160,7 @@ func TestCollectAssociations_Errors(t *testing.T) {
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
 		assert.NoError(t, err)
-		
+
 		err = diagram.StartAddAssociation(gadPoint1)
 		assert.NoError(t, err)
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
@@ -1198,7 +1198,7 @@ func TestCommandUnexecuteMethods(t *testing.T) {
 		gadPoint := utils.Point{X: 20, Y: 20}
 		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
 		assert.NoError(t, err)
-		
+
 		// Select and remove
 		err = diagram.SelectComponent(gadPoint)
 		assert.NoError(t, err)
