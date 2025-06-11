@@ -510,6 +510,7 @@ func (ud *UMLDiagram) Undo() duerror.DUError {
 	if err := ud.cmdManager.Undo(); err != nil {
 		return err
 	}
+	ud.updateDrawData()
 	return nil
 }
 
@@ -517,6 +518,7 @@ func (ud *UMLDiagram) Redo() duerror.DUError {
 	if err := ud.cmdManager.Redo(); err != nil {
 		return err
 	}
+	ud.updateDrawData()
 	return nil
 }
 
