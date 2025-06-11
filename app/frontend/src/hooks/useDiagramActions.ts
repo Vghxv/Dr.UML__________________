@@ -6,10 +6,8 @@ export function useDiagramActions(reloadBackendData: () => void) {
             const filePath = await SaveFileDialog();
             if (filePath) {
                 await SaveProject(filePath);
-                // 可加通知
             }
         } catch (error) {
-            // 可加錯誤通知
             console.error("Error saving project:", error);
         }
     };
@@ -19,10 +17,8 @@ export function useDiagramActions(reloadBackendData: () => void) {
             const filePath = await SaveDiagramFileDialog();
             if (filePath) {
                 await SaveDiagram(filePath);
-                // 可加通知
             }
         } catch (error) {
-            // 可加錯誤通知
             console.error("Error saving diagram:", error);
         }
     };
