@@ -169,29 +169,7 @@ const TopMenu: React.FC<ToolbarProps> = (
                             SAVE DIAGRAM
                         </button>
                         
-                        <div className="w-0.5 h-8 bg-[#4682B4] mx-2 shadow-sm" />
                         
-                        <button
-                            onClick={handleExport}
-                            className="flex items-center gap-2 px-4 py-2.5 text-[#1C1C1C] font-bold text-sm tracking-wide uppercase transition-all duration-200 border-2 border-[#B87333] hover:border-[#B7410E] active:border-[#556B2F]"
-                            style={{
-                                background: 'linear-gradient(145deg, #B87333, #918175)',
-                                boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
-                            }}
-                        >
-                            EXPORT
-                        </button>
-                        
-                        <button
-                            onClick={handleValidate}
-                            className="flex items-center gap-2 px-4 py-2.5 text-[#F2F2F0] font-bold text-sm tracking-wide uppercase transition-all duration-200 border-2 border-[#B7410E] hover:border-[#B87333] active:border-[#4682B4]"
-                            style={{
-                                background: 'linear-gradient(145deg, #B7410E, #1C1C1C)',
-                                boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
-                            }}
-                        >
-                            VALIDATE
-                        </button>
                     </div>
                 </nav>
             </div>
