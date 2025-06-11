@@ -21,7 +21,6 @@ interface ProjectData {
 }
 
 const App: React.FC = () => {
-    // 狀態管理
     const [currentView, setCurrentView] = useState<'load' | 'diagrams' | 'editor'>('load');
     const [projectData, setProjectData] = useState<ProjectData | null>(null);
     const [diagramName, setDiagramName] = useState<string | null>(null);
