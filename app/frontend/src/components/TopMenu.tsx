@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ToolbarProps {
     projectData: any
@@ -38,6 +38,12 @@ const TopMenu: React.FC<ToolbarProps> = (
         canvasBackgroundColor: "#C2C2C2"
     }
 ) => {
+    useEffect(() => {
+        if (onGetDiagramName) {
+            onGetDiagramName();
+        }
+    }, [onGetDiagramName]);
+
     const handleExport = () => {
         alert("[TODO] Export Project API");
     };
@@ -78,17 +84,6 @@ const TopMenu: React.FC<ToolbarProps> = (
                                 <div className="w-0.5 h-8 bg-[#4682B4] mx-2 shadow-sm" />
                             </>
                         )}
-                        
-                        <button
-                            onClick={onGetDiagramName}
-                            className="flex items-center gap-2 px-4 py-2.5 text-[#F2F2F0] font-bold text-sm tracking-wide uppercase transition-all duration-200 border-2 border-[#4682B4] hover:border-[#B87333] active:border-[#918175]"
-                            style={{
-                                background: 'linear-gradient(145deg, #4682B4, #333333)',
-                                boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
-                            }}
-                        >
-                            DIAGRAM NAME
-                        </button>
                         
                         {diagramName && (
                             <div 
