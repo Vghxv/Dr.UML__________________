@@ -111,6 +111,7 @@ export function useBackendCanvasData() {
         // Set up backend event listener
         const handleBackendEvent = (result: BackendDiagram) => {
             if (result) {
+                console.log("Received backend event data:", result);
                 const canvasData = transformDiagramToCanvasProps(result);
                 setBackendData(canvasData);
             }
