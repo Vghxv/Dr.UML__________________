@@ -11,8 +11,8 @@ interface ToolbarProps {
     onCanvasColorChange: (color: string) => void;
     diagramName?: string | null;
     canvasBackgroundColor: string;
-    onUndo: () => void; // 新增 Undo handler
-    onRedo: () => void; // 新增 Redo handler
+    onUndo: () => void;
+    onRedo: () => void;
 }
 
 const TopMenu: React.FC<ToolbarProps> = (
@@ -27,8 +27,8 @@ const TopMenu: React.FC<ToolbarProps> = (
         onCanvasColorChange,
         diagramName,
         canvasBackgroundColor = "#C2C2C2",
-        onUndo, // 新增 Undo handler
-        onRedo  // 新增 Redo handler
+        onUndo,
+        onRedo
     } = { 
         projectData: null, 
         handleBackToDiagrams: () => {},
@@ -40,8 +40,8 @@ const TopMenu: React.FC<ToolbarProps> = (
         onCanvasColorChange: () => {},
         diagramName: null,
         canvasBackgroundColor: "#C2C2C2",
-        onUndo: () => {}, // 預設 Undo handler
-        onRedo: () => {}  // 預設 Redo handler
+        onUndo: () => {},
+        onRedo: () => {}
     }
 ) => {
     useEffect(() => {
