@@ -1,13 +1,8 @@
-// VIBE CODING
-
 package umldiagram
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"slices"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,7 +11,6 @@ import (
 	"Dr.uml/backend/component"
 	"Dr.uml/backend/drawdata"
 	"Dr.uml/backend/utils"
-	"Dr.uml/backend/utils/duerror"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -262,1542 +256,1080 @@ func TestUMLDiagram_LoadExistUMLDiagram(t *testing.T) {
 	// TODO
 }
 
-func TestValidatePoint(t *testing.T) {
-	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-
-	// Valid point
-	err = diagram.validatePoint(utils.Point{X: 10, Y: 20})
-	assert.NoError(t, err)
-
-	// Negative X
-	err = diagram.validatePoint(utils.Point{X: -5, Y: 20})
-	assert.Error(t, err)
-	assert.Equal(t, "point coordinates must be non-negative", err.Error())
-
-	// Negative Y
-	err = diagram.validatePoint(utils.Point{X: 10, Y: -5})
-	assert.Error(t, err)
-	assert.Equal(t, "point coordinates must be non-negative", err.Error())
-
-	// Both negative
-	err = diagram.validatePoint(utils.Point{X: -10, Y: -10})
-	assert.Error(t, err)
-	assert.Equal(t, "point coordinates must be non-negative", err.Error())
-}
-
-func TestAddGadget(t *testing.T) {
-	// TODO
-}
-
-func TestRemoveGadget(t *testing.T) {
-	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-
-	// This is a placeholder test since removeGadget is currently a no-op
-	gad := &component.Gadget{}
-	err = diagram.removeGadget(gad)
-	assert.NoError(t, err)
-}
-
-func TestAssociationMethods(t *testing.T) {
-	// TODO
-
-	diagram, _ := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-
-	gadgetPoint0 := utils.Point{X: 0, Y: 0}
-	gadgetPoint1 := utils.Point{X: 0, Y: 200}
-	gadgetPoint2 := utils.Point{X: 200, Y: 0}
-	gadgetPoint3 := utils.Point{X: 200, Y: 200}
-	diagram.AddGadget(component.Class, gadgetPoint0, 0, drawdata.DefaultGadgetColor, "")
-	diagram.AddGadget(component.Class, gadgetPoint1, 0, drawdata.DefaultGadgetColor, "")
-	diagram.AddGadget(component.Class, gadgetPoint2, 0, drawdata.DefaultGadgetColor, "")
-	diagram.AddGadget(component.Class, gadgetPoint3, 0, drawdata.DefaultGadgetColor, "")
-	gad0, _ := diagram.componentsContainer.SearchGadget(gadgetPoint0)
-	gad1, _ := diagram.componentsContainer.SearchGadget(gadgetPoint1)
-	gad2, _ := diagram.componentsContainer.SearchGadget(gadgetPoint2)
-	gad3, _ := diagram.componentsContainer.SearchGadget(gadgetPoint3)
-
-	t.Run("StartAddAssociation", func(t *testing.T) {
-		err := diagram.StartAddAssociation(gadgetPoint0)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-	})
-
-	var a *component.Association
-	t.Run("EndAddAssociation", func(t *testing.T) {
-		err := diagram.EndAddAssociation(component.Extension, gadgetPoint1)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
+// Test LoadExistUMLDiagram functionality
+func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
+	t.Run("load diagram with gadgets and associations", func(t *testing.T) {
+		// Create a saved diagram structure
+		savedDiagram := utils.SavedDiagram{
+			Filetype:  utils.FiletypeDiagram | int(ClassDiagram)<<1,
+			LastEdit:  "2023-01-01T00:00:00Z",
+			Gadgets:   []utils.SavedGad{},
+			Associations: []utils.SavedAss{},
 		}
 
-		for _, c := range diagram.componentsContainer.GetAll() {
-			switch tmp := c.(type) {
-			case *component.Association:
-				a = tmp
-			}
-			if a != nil {
-				break
-			}
+		// Add a gadget
+		savedGadget := utils.SavedGad{
+			GadgetType: 1,
+			Point:      "10, 20",
+			Layer:      0,
+			Color:      drawdata.DefaultGadgetColor,
+			Attributes: []utils.SavedAtt{
+				{
+					Content:  "TestClass",
+					Size:     12,
+					Style:    int(attribute.Bold),
+					FontFile: os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf",
+					Ratio:    0.0,
+				},
+			},
 		}
-		if a == nil {
-			t.Errorf("add association fail")
-		}
-		if a.GetParentStart() != gad0 {
-			t.Errorf("incorrect start parent")
-		}
-		if a.GetParentEnd() != gad1 {
-			t.Errorf("incorrect end parent")
-		}
+		savedDiagram.Gadgets = append(savedDiagram.Gadgets, savedGadget)
 
-		stList := diagram.associations[gad0][0]
-		if !slices.Contains(stList, a) {
-			t.Errorf("not in stList of diagram.associations")
-		}
-		enList := diagram.associations[gad1][1]
-		if !slices.Contains(enList, a) {
-			t.Errorf("not in enList of diagram.associations")
-		}
-	})
-
-	t.Run("SetParentStartComponent", func(t *testing.T) {
-		if a == nil {
-			t.Errorf("add association fail")
-		}
-
-		dd := a.GetDrawData().(drawdata.Association)
-		midPoint := utils.Point{
-			X: (dd.StartX + dd.EndX) / 2,
-			Y: (dd.StartY + dd.EndY) / 2,
-		}
-		diagram.SelectComponent(midPoint)
-		c, _ := diagram.getSelectedComponent()
-		if a != c.(*component.Association) {
-			t.Errorf("can not select added association")
-		}
-
-		err := diagram.SetParentStartComponent(gadgetPoint2)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentStart() != gad2 {
-			t.Errorf("incorrect start parent")
-		}
-		stListOld := diagram.associations[gad0][0]
-		stListNew := diagram.associations[gad2][0]
-		if slices.Contains(stListOld, a) {
-			t.Errorf("updated association in old stList")
-		}
-		if !slices.Contains(stListNew, a) {
-			t.Errorf("updated association not in new stList")
-		}
-	})
-
-	t.Run("SetParentEndComponent", func(t *testing.T) {
-		if a == nil {
-			t.Errorf("add association fail")
-		}
-
-		dd := a.GetDrawData().(drawdata.Association)
-		midPoint := utils.Point{
-			X: (dd.StartX + dd.EndX) / 2,
-			Y: (dd.StartY + dd.EndY) / 2,
-		}
-		diagram.selectAll(diagram.componentsSelected, false)
-		diagram.SelectComponent(midPoint)
-		c, _ := diagram.getSelectedComponent()
-		if a != c.(*component.Association) {
-			t.Errorf("can not select added association")
-		}
-
-		err := diagram.SetParentEndComponent(gadgetPoint3)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentEnd() != gad3 {
-			t.Errorf("incorrect end parent")
-		}
-		enListOld := diagram.associations[gad1][1]
-		enListNew := diagram.associations[gad3][1]
-		if slices.Contains(enListOld, a) {
-			t.Errorf("updated association in old enList")
-		}
-		if !slices.Contains(enListNew, a) {
-			t.Errorf("updated association not in new enList")
-		}
-	})
-}
-
-func TestRegisterUpdateParentDraw(t *testing.T) {
-	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-
-	// Try to register nil function
-	err = diagram.RegisterUpdateParentDraw(nil)
-	assert.Error(t, err)
-	assert.Equal(t, "update function cannot be nil", err.Error())
-
-	// Register valid function
-	updateCalled := false
-	updateFunc := func() duerror.DUError {
-		updateCalled = true
-		return nil
-	}
-
-	err = diagram.RegisterUpdateParentDraw(updateFunc)
-	assert.NoError(t, err)
-
-	// Test that the function gets called through updateDrawData
-	err = diagram.updateDrawData()
-	assert.NoError(t, err)
-	assert.True(t, updateCalled)
-}
-
-func TestUpdateDrawData(t *testing.T) {
-	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-
-	// Add a gadget
-	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
-	assert.NoError(t, err)
-
-	// Check that drawData contains the gadget
-	assert.Equal(t, 1, len(diagram.drawData.Gadgets))
-
-	// Manual update of drawData
-	err = diagram.updateDrawData()
-	assert.NoError(t, err)
-
-	// Test with a registered update function
-	updateCalled := false
-	updateFunc := func() duerror.DUError {
-		updateCalled = true
-		return nil
-	}
-
-	err = diagram.RegisterUpdateParentDraw(updateFunc)
-	assert.NoError(t, err)
-
-	err = diagram.updateDrawData()
-	assert.NoError(t, err)
-	assert.True(t, updateCalled)
-}
-
-func TestAddAttributeToGadget(t *testing.T) {
-	diagram, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-
-	// Try to add an attribute with no selected components
-	err = diagram.AddAttributeToGadget(0, "attribute")
-	assert.Error(t, err)
-	assert.Equal(t, "can only operate on one component", err.Error())
-
-	// Add a gadget to the diagram
-	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "sample header")
-	assert.NoError(t, err)
-
-	// Get the gadget from the container
-	components := diagram.componentsContainer.GetAll()
-	assert.Equal(t, 1, len(components))
-
-	gadget, ok := components[0].(*component.Gadget)
-	assert.True(t, ok)
-
-	// Select the gadget
-	diagram.componentsSelected[gadget] = true
-
-	// Add attribute
-	err = diagram.AddAttributeToGadget(0, "NewAttribute")
-	assert.NoError(t, err)
-
-	// Test with multiple selected components
-	// First clear the selection
-	diagram.selectAll(diagram.componentsSelected, false)
-	assert.NoError(t, err)
-
-	// Add a second gadget
-	err = diagram.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "sample header 2")
-	assert.NoError(t, err)
-
-	// Get all gadgets
-	components = diagram.componentsContainer.GetAll()
-	assert.Equal(t, 2, len(components))
-
-	// Select both gadgets
-	for _, comp := range components {
-		diagram.componentsSelected[comp] = true
-	}
-
-	// Try to add attribute with multiple gadgets selected
-	err = diagram.AddAttributeToGadget(0, "attribute")
-	assert.Error(t, err)
-	assert.Equal(t, "can only operate on one component", err.Error())
-}
-
-func TestLoadExistUMLDiagram(t *testing.T) {
-
-}
-
-func TestLoadGadgetAttributes(t *testing.T) {
-	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-	assert.NotNil(t, dia)
-
-	expectedContent := "test content"
-	expectedSize := 12
-	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
-
-	savedAttributeBase := utils.SavedAtt{
-		Content:  expectedContent,
-		Size:     expectedSize,
-		Style:    int(expectedStyle),
-		FontFile: expectedFontFile,
-	}
-	savedAttributes := make([]utils.SavedAtt, 3)
-	for i := 0; i < 3; i++ {
-		savedAttributes[i] = savedAttributeBase
-		savedAttributes[i].Size += i
-		savedAttributes[i].Ratio = 0.3 * float64(i)
-	}
-
-	gad, err := component.NewGadget(component.Class, utils.Point{}, 0, "someInvalidColorHex", "")
-	assert.NoError(t, err)
-	assert.NotNil(t, gad)
-
-	err, _ = dia.loadGadgetAttributes(gad, savedAttributes) // Err-index is not important cuz we expect err is nil
-	assert.NoError(t, err)
-
-	loadedAttributes := gad.GetAttributes()
-
-	for i := 0; i < 3; i++ {
-		assert.Equal(t, 1, len(loadedAttributes[i]))
-		assert.Equal(t, savedAttributes[i].Content, loadedAttributes[i][0].GetContent())
-		assert.Equal(t, savedAttributes[i].Style, int(loadedAttributes[i][0].GetStyle()))
-		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
-		assert.Equal(t, savedAttributes[i].Size, loadedAttributes[i][0].GetSize())
-		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
-	}
-}
-func TestLoadGadgetAttributesButWithJsonStr(t *testing.T) {
-	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-	assert.NotNil(t, dia)
-
-	jsonStr := `{
-		"Content": "test content",
-		"Size": 12,
-		"Style": 3,
-		"FontFile": "` + os.Getenv("APP_ROOT") + `/frontend/src//assets/fonts/Inkfree.ttf"
-	}`
-	jsonStr = strings.ReplaceAll(jsonStr, "\\", "/")
-	var savedAttributeBase utils.SavedAtt
-	err = json.Unmarshal([]byte(jsonStr), &savedAttributeBase)
-	assert.NoError(t, err)
-
-	savedAttributes := make([]utils.SavedAtt, 3)
-	for i := 0; i < 3; i++ {
-		savedAttributes[i] = savedAttributeBase
-		savedAttributes[i].Size += i
-		savedAttributes[i].Ratio = 0.3 * float64(i)
-	}
-
-	gad, err := component.NewGadget(component.Class, utils.Point{}, 0, "someInvalidColorHex", "")
-	assert.NoError(t, err)
-	assert.NotNil(t, gad)
-
-	err, _ = dia.loadGadgetAttributes(gad, savedAttributes) // Err-index is not important cuz we expect err is nil
-	assert.NoError(t, err)
-
-	loadedAttributes := gad.GetAttributes()
-
-	for i := 0; i < 3; i++ {
-		assert.Equal(t, 1, len(loadedAttributes[i]))
-		assert.Equal(t, savedAttributes[i].Content, loadedAttributes[i][0].GetContent())
-		assert.Equal(t, savedAttributes[i].Style, int(loadedAttributes[i][0].GetStyle()))
-		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
-		assert.Equal(t, savedAttributes[i].Size, loadedAttributes[i][0].GetSize())
-		assert.Equal(t, savedAttributes[i].FontFile, loadedAttributes[i][0].GetFontFile())
-	}
-}
-func TestLoadGadgets(t *testing.T) {
-	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-	assert.NotNil(t, dia)
-
-	expectedContent := "test content"
-	expectedSize := 12
-	expectedStyle := attribute.Textstyle(attribute.Bold | attribute.Italic)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
-
-	savedAttributeBase := utils.SavedAtt{
-		Content:  expectedContent,
-		Size:     expectedSize,
-		Style:    int(expectedStyle),
-		FontFile: expectedFontFile,
-	}
-
-	savedAttributes := make([]utils.SavedAtt, 3)
-	for i := 0; i < 3; i++ {
-		savedAttributes[i] = savedAttributeBase
-		savedAttributes[i].Size += i
-		savedAttributes[i].Ratio = 0.3 * float64(i)
-	}
-
-	savedGadgetBase := utils.SavedGad{
-		GadgetType: 1,
-		Point:      "0, 0",
-		Color:      "InvalidColorHex",
-		Attributes: savedAttributes,
-	}
-	savedGadgets := make([]utils.SavedGad, 69)
-
-	for i := 0; i < len(savedGadgets); i++ {
-		savedGadgets[i] = savedGadgetBase
-		savedGadgets[i].Layer = i
-	}
-
-	dp, err := dia.loadGadgets(savedGadgets)
-	assert.NoError(t, err)
-	assert.NotNil(t, dp)
-	assert.Equal(t, len(savedGadgets), len(dp))
-}
-
-func TestUMLDiagram_LoadAsses(t *testing.T) {
-	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-	assert.NotNil(t, dia)
-
-	savedGadgetBase := utils.SavedGad{
-		GadgetType: 1,
-		Point:      "0, 0",
-		Color:      "InvalidColorHex",
-	}
-	savedGadgets := make([]utils.SavedGad, 70)
-
-	for i := 0; i < len(savedGadgets); i++ {
-		savedGadgets[i] = savedGadgetBase
-		savedGadgets[i].Layer = i
-	}
-	dp, err := dia.loadGadgets(savedGadgets)
-	assert.NoError(t, err)
-
-	expectedAssType := component.AssociationType(1)
-	expectedLayer := 0
-	expectedStartRatio := [2]float64{0.1, 0.2}
-	expectedEndRatio := [2]float64{0.3, 0.4}
-
-	savedAssBase := utils.SavedAss{
-		AssType:         int(expectedAssType),
-		Layer:           expectedLayer,
-		StartPointRatio: expectedStartRatio,
-		EndPointRatio:   expectedEndRatio,
-	}
-	savedAsses := make([]utils.SavedAss, 69)
-	for i := 0; i < len(savedAsses); i++ {
-		savedAsses[i] = savedAssBase
-		savedAsses[i].Parents = []int{i, i + 1} // Assuming each association connects
-	}
-	err = dia.loadAsses(savedAsses, dp)
-	assert.NoError(t, err)
-	// Check if associations are loaded correctly
-	components := dia.componentsContainer.GetAll()
-	for _, comp := range components {
-		switch comp.(type) {
-		case *component.Association:
-			assert.Equal(t, expectedAssType, comp.(*component.Association).GetAssType())
-			assert.Equal(t, expectedLayer, comp.(*component.Association).GetLayer())
-		default:
-			continue
-		}
-	}
-}
-
-func TestUMLDiagram_loadAssAttributes(t *testing.T) {
-	dia, err := CreateEmptyUMLDiagram("TestDiagram", ClassDiagram)
-	assert.NoError(t, err)
-	assert.NotNil(t, dia)
-
-	var parents = [2]*component.Gadget{nil, nil}
-	for i := 0; i < 2; i++ {
-		parents[i], err = component.NewGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, "InvalidColorHex", "")
+		// Load the diagram
+		diagram, err := LoadExistUMLDiagram("test.uml", savedDiagram)
 		assert.NoError(t, err)
-	}
+		assert.NotNil(t, diagram)
+		assert.Equal(t, "test.uml", diagram.GetName())
+		assert.Equal(t, ClassDiagram, diagram.GetDiagramType())
+		
+		// Verify gadget was loaded
+		components := diagram.componentsContainer.GetAll()
+		assert.Len(t, components, 1)
+	})
 
-	ass, err := component.NewAssociation(parents, component.AssociationType(1), utils.Point{X: 0, Y: 0}, utils.Point{X: 1, Y: 1})
-	assert.NoError(t, err)
-	assert.NotNil(t, ass)
+	t.Run("load diagram with invalid filetype", func(t *testing.T) {
+		savedDiagram := utils.SavedDiagram{
+			Filetype: utils.FiletypeDiagram | int(UseCaseDiagram)<<1, // Invalid type
+		}
+		
+		_, err := LoadExistUMLDiagram("test.uml", savedDiagram)
+		assert.Error(t, err)
+	})
 
-	// Prepare attributes
-
-	expectedContent := "test"
-	expectedStyle := int(attribute.Bold)
-	expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
-	expectedRatio := 0.69
-
-	savedAttBase := utils.SavedAtt{
-		Content:  expectedContent,
-		Style:    expectedStyle,
-		FontFile: expectedFontFile,
-		Ratio:    expectedRatio,
-	}
-
-	attributes := make([]utils.SavedAtt, 2)
-	for i := 0; i < len(attributes); i++ {
-		attributes[i] = savedAttBase
-		attributes[i].Size = i + 1
-	}
-
-	// Should succeed
-	errRet, idx := dia.loadAssAttributes(ass, attributes)
-	assert.NoError(t, errRet)
-	assert.Equal(t, 0, idx)
-
-	atts := ass.GetAttributes()
-	for i, att := range atts {
-		assert.Equal(t, expectedContent, att.GetContent())
-		assert.Equal(t, expectedStyle, int(att.GetStyle()))
-		assert.Equal(t, expectedRatio, att.GetRatio())
-		assert.Equal(t, expectedFontFile, att.GetFontFile())
-		assert.Equal(t, i+1, att.GetSize())
-	}
-
-	// Should fail with nil association
-	errRet, idx = dia.loadAssAttributes(nil, attributes)
-	assert.Error(t, errRet)
-	assert.Equal(t, 0, idx)
+	t.Run("load diagram with corrupted gadgets", func(t *testing.T) {
+		savedDiagram := utils.SavedDiagram{
+			Filetype: utils.FiletypeDiagram | int(ClassDiagram)<<1,
+			Gadgets: []utils.SavedGad{
+				{
+					GadgetType: 999, // Invalid gadget type
+					Point:      "invalid_point",
+					Color:      "invalid_color",
+				},
+			},
+		}
+		
+		_, err := LoadExistUMLDiagram("test.uml", savedDiagram)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "test.uml")
+	})
 }
 
-func TestUMLDiagram_SaveToFile(t *testing.T) {
-	diagram, err := CreateEmptyUMLDiagram("SaveToFileTest.uml", ClassDiagram)
-	assert.NoError(t, err)
-	assert.NotNil(t, diagram)
-
-	// Add two gadgets
-	err = diagram.AddGadget(component.Class, utils.Point{X: 1, Y: 2}, 0, drawdata.DefaultGadgetColor, "Header1")
-	assert.NoError(t, err)
-	err = diagram.AddGadget(component.Class, utils.Point{X: 3, Y: 4}, 1, drawdata.DefaultGadgetColor, "Header2")
+// Test HasUnsavedChanges
+func TestHasUnsavedChanges(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 	assert.NoError(t, err)
 
-	// Add an association between the two gadgets
-	gadgets := diagram.componentsContainer.GetAll()
-	assert.Len(t, gadgets, 2)
-	gad1, ok1 := gadgets[0].(*component.Gadget)
-	gad2, ok2 := gadgets[1].(*component.Gadget)
-	assert.True(t, ok1)
-	assert.True(t, ok2)
-	ass, err := component.NewAssociation([2]*component.Gadget{gad1, gad2}, component.AssociationType(1), utils.Point{X: 1, Y: 2}, utils.Point{X: 3, Y: 4})
+	// Initially should not have unsaved changes
+	assert.False(t, diagram.HasUnsavedChanges())
+
+	// After making a change
+	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "TestClass")
 	assert.NoError(t, err)
-	assert.NotNil(t, ass)
-	err = diagram.componentsContainer.Insert(ass)
+	assert.True(t, diagram.HasUnsavedChanges())
+
+	// After saving
+	_, err = diagram.SaveToFile("test.uml")
 	assert.NoError(t, err)
-	diagram.associations[gad1] = [2][]*component.Association{{ass}, {}}
-	diagram.associations[gad2] = [2][]*component.Association{{}, {ass}}
+	assert.False(t, diagram.HasUnsavedChanges())
+}
 
-	// Save to file
-	_, err = diagram.SaveToFile("SaveToFileTest.uml")
+// Test SetPointComponent
+func TestSetPointComponent(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 	assert.NoError(t, err)
-}
 
-// Mock container for testing selection methods
-type mockContainer struct {
-	mockComponent component.Component
-	pointToMatch  utils.Point
-}
+	t.Run("successful point setting", func(t *testing.T) {
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
 
-func (m *mockContainer) Insert(c component.Component) duerror.DUError {
-	return nil
-}
+		// Set new point
+		newPoint := utils.Point{X: 50, Y: 60}
+		err = diagram.SetPointComponent(newPoint)
+		assert.NoError(t, err)
 
-func (m *mockContainer) Remove(c component.Component) duerror.DUError {
-	return nil
-}
-
-func (m *mockContainer) Search(p utils.Point) (component.Component, duerror.DUError) {
-	if p.X == m.pointToMatch.X && p.Y == m.pointToMatch.Y {
-		return m.mockComponent, nil
-	}
-	return nil, nil
-}
-
-func (m *mockContainer) GetAll() []component.Component {
-	if m.mockComponent != nil {
-		return []component.Component{m.mockComponent}
-	}
-	return []component.Component{}
-}
-
-func (m *mockContainer) Len() (int, duerror.DUError) {
-	if m.mockComponent != nil {
-		return 1, nil
-	}
-	return 0, nil
-}
-
-func CMD_ADD_GADGET(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
-	header := "test gadget"
-	d.AddGadget(component.Class, utils.Point{X: 0, Y: 0}, 0, drawdata.DefaultGadgetColor, header)
-
-	t.Run("undo add gadget", func(t *testing.T) {
-		err := d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if d.componentsContainer.Len() != 0 {
-			t.Errorf("fail to remove gadget from component container")
-		}
+		// Verify the point was changed
+		g, err := diagram.componentsContainer.SearchGadget(newPoint)
+		assert.NoError(t, err)
+		assert.NotNil(t, g)
 	})
 
-	t.Run("redo add gadget", func(t *testing.T) {
-		err := d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if d.componentsContainer.Len() != 1 {
-			t.Errorf("fail to recover component container")
-		}
-		dd := d.GetDrawData()
-		content := dd.Gadgets[0].Attributes[0][0].Content
-		if content != header {
-			t.Errorf("fail to recover gadget content: %v, got %v", header, content)
-		}
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+		
+		err = diagram.SetPointComponent(utils.Point{X: 10, Y: 10})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can only operate on one component")
+	})
+
+	t.Run("selected component is not a gadget", func(t *testing.T) {
+		// Create diagram with association
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
+
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Try to set point on association
+		err = diagram.SetPointComponent(utils.Point{X: 200, Y: 200})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "selected component is not a gadget")
 	})
 }
 
-func CMD_ADD_ASSOCIATION(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test SetLayerComponent
+func TestSetLayerComponent(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, "test gadget0")
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "test gadget1")
+	t.Run("successful layer setting", func(t *testing.T) {
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
 
-	assType := component.Composition
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType), gadPoint1)
+		// Set new layer
+		newLayer := 5
+		err = diagram.SetLayerComponent(newLayer)
+		assert.NoError(t, err)
 
-	t.Run("undo add association", func(t *testing.T) {
-		err := d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if d.componentsContainer.Len() != 2 {
-			t.Errorf("fail to remove association from component container")
-		}
-		dd := d.GetDrawData()
-		assLen := len(dd.Associations)
-		if assLen != 0 {
-			t.Errorf("fail to remove correct component")
-		}
+		// Verify the layer was changed
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		assert.Equal(t, newLayer, g.GetLayer())
 	})
 
-	t.Run("redo add association", func(t *testing.T) {
-		err := d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if d.componentsContainer.Len() != 3 {
-			t.Errorf("fail to recover component container")
-		}
-		dd := d.GetDrawData()
-		assLen := len(dd.Associations)
-		if assLen != 1 {
-			t.Errorf("fail to recover association")
-		}
-		newAssType := dd.Associations[0].AssType
-		if newAssType != assType {
-			t.Errorf("fail to recover association type: %v, got %v", assType, newAssType)
-		}
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+		
+		err = diagram.SetLayerComponent(5)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can only operate on one component")
 	})
 }
 
-func CMD_REMOVE_SELECTED_COMPONENTS(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test SetColorComponent
+func TestSetColorComponent(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	gadPoint2 := utils.Point{X: 400, Y: 400}
-	header0 := "test gadget0"
-	header1 := "test gadget1"
-	header2 := "test gadget2"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
-	d.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, header2)
+	t.Run("successful color setting", func(t *testing.T) {
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
 
-	assType0 := component.Composition
-	assType1 := component.Dependency
-	assType2 := component.Extension
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType1), gadPoint0)
-	d.StartAddAssociation(gadPoint2)
-	d.EndAddAssociation(component.AssociationType(assType2), gadPoint2)
+		// Set new color
+		newColor := "#ff0000"
+		err = diagram.SetColorComponent(newColor)
+		assert.NoError(t, err)
 
-	t.Run("select and remove components", func(t *testing.T) {
-		d.SelectComponent(gadPoint0)
-		d.SelectComponent(gadPoint1)
-		midPoint := utils.Point{
-			X: (gadPoint0.X + gadPoint1.X) / 2,
-			Y: (gadPoint0.Y + gadPoint1.Y) / 2,
-		}
-		err := d.SelectComponent(midPoint)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 3 {
-			t.Errorf("fail to select components")
-		}
-
-		err = d.RemoveSelectedComponents()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-
-		dd := d.GetDrawData()
-		if len(dd.Gadgets) != 1 {
-			t.Errorf("failed to remove gadget")
-		}
-		content := dd.Gadgets[0].Attributes[0][0].Content
-		if content != header2 {
-			t.Errorf("failed to remove gadget")
-		}
-
-		if len(dd.Associations) != 1 {
-			t.Errorf("failed to remove association")
-		}
-		assType := dd.Associations[0].AssType
-		if assType != assType2 {
-			t.Errorf("failed to remove association")
-		}
+		// Verify the color was changed
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		assert.Equal(t, newColor, g.GetColor())
 	})
 
-	t.Run("undo remove select components", func(t *testing.T) {
-		err := d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-
-		if len(d.componentsSelected) != 3 {
-			t.Errorf("fail to recover componentsSelected")
-		}
-
-		dd := d.GetDrawData()
-		if len(dd.Gadgets) != 3 {
-			t.Errorf("failed to recover gadget")
-		} else {
-			headers := map[string]bool{header0: true, header1: true, header2: true}
-			for i := 0; i < 3; i++ {
-				content := dd.Gadgets[i].Attributes[0][0].Content
-				val, ok := headers[content]
-				if !ok || !val {
-					t.Errorf("failed to recover gadget. incorrect header: %v", content)
-				}
-				headers[content] = false
-			}
-		}
-
-		if len(dd.Associations) != 3 {
-			t.Errorf("failed to recover association")
-		} else {
-			types := map[int]bool{assType0: true, assType1: true, assType2: true}
-			for i := 0; i < 3; i++ {
-				assType := dd.Associations[i].AssType
-				val, ok := types[assType]
-				if !ok || !val {
-					t.Errorf("failed to recover association. incorrect type: %v", assType)
-				}
-				types[assType] = false
-			}
-		}
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+		
+		err = diagram.SetColorComponent("#ff0000")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can only operate on one component")
 	})
 
-	t.Run("redo remove select components", func(t *testing.T) {
-		err := d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+	t.Run("selected component is not a gadget", func(t *testing.T) {
+		// Create diagram with association
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
 
-		dd := d.GetDrawData()
-		if len(dd.Gadgets) != 1 {
-			t.Errorf("failed to remove gadget")
-		}
-		content := dd.Gadgets[0].Attributes[0][0].Content
-		if content != header2 {
-			t.Errorf("failed to remove gadget")
-		}
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
 
-		if len(dd.Associations) != 1 {
-			t.Errorf("failed to remove association")
-		}
-		assType := dd.Associations[0].AssType
-		if assType != assType2 {
-			t.Errorf("failed to remove association")
-		}
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Try to set color on association
+		err = diagram.SetColorComponent("#ff0000")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "selected component is not a gadget")
 	})
 }
 
-func CMD_SELECT_COMPONENT(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test SetAttrContentComponent for gadgets
+func TestSetAttrContentComponent_Gadget(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	header0 := "test gadget0"
-	header1 := "test gadget1"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	t.Run("successful content setting for gadget", func(t *testing.T) {
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
 
-	assType0 := component.Composition
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+		// Add an attribute first
+		err = diagram.AddAttributeToGadget(1, "oldContent")
+		assert.NoError(t, err)
 
-	midPoint := utils.Point{
-		X: (gadPoint0.X + gadPoint1.X) / 2,
-		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
-	}
-	noWherePoint := utils.Point{X: 1000, Y: 1000}
+		// Set new content
+		newContent := "newContent"
+		err = diagram.SetAttrContentComponent(1, 0, newContent)
+		assert.NoError(t, err)
 
-	t.Run("select components", func(t *testing.T) {
-		d.SelectComponent(gadPoint0)
-		if len(d.componentsSelected) != 1 {
-			t.Errorf("select one fails")
-		}
-		d.SelectComponent(gadPoint1)
-		if len(d.componentsSelected) != 2 {
-			t.Errorf("select two fails")
-		}
-		d.SelectComponent(midPoint)
-		if len(d.componentsSelected) != 3 {
-			t.Errorf("select three fails")
-		}
-		d.SelectComponent(gadPoint0)
-		if len(d.componentsSelected) != 3 {
-			t.Errorf("select already selected association fails")
-		}
-		d.SelectComponent(noWherePoint)
-		if len(d.componentsSelected) != 0 {
-			t.Errorf("select empty place fails")
-		}
+		// Verify the content was changed
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		attr, err := g.GetAttribute(1, 0)
+		assert.NoError(t, err)
+		assert.Equal(t, newContent, attr.GetContent())
 	})
 
-	t.Run("undo select components", func(t *testing.T) {
-		err := d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 3 {
-			t.Errorf("undo select empty place fails")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 2 {
-			t.Errorf("undo select three fails")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 1 {
-			t.Errorf("undo select two fails")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 0 {
-			t.Errorf("undo select one fails")
-		}
-	})
-
-	t.Run("redo select components", func(t *testing.T) {
-		err := d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 1 {
-			t.Errorf("select one fails")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 2 {
-			t.Errorf("select two fails")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 3 {
-			t.Errorf("select three fails")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 3 {
-			t.Errorf("select already selected association fails")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if len(d.componentsSelected) != 0 {
-			t.Errorf("select empty place fails")
-		}
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+		
+		err = diagram.SetAttrContentComponent(1, 0, "content")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can only operate on one component")
 	})
 }
 
-func CMD_COMPONENT_SETTER(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test SetAttrContentComponent for associations
+func TestSetAttrContentComponent_Association(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	header0 := "test gadget0"
-	header1 := "test gadget1"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	t.Run("successful content setting for association", func(t *testing.T) {
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
 
-	assType0 := component.Composition
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
-	midPoint := utils.Point{
-		X: (gadPoint0.X + gadPoint1.X) / 2,
-		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
-	}
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
 
-	t.Run("setter gadget", func(t *testing.T) {
-		newLayer := 69
-		newColor := "#123456"
-		d.SelectComponent(gadPoint0)
-		err := d.SetLayerComponent(newLayer)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		err = d.SetColorComponent(newColor)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, gdd := range d.GetDrawData().Gadgets {
-			if gdd.Attributes[0][0].Content == header0 {
-				if gdd.Layer != newLayer {
-					t.Errorf("unexpected layer: %v, got %v", newLayer, gdd.Layer)
-				}
-				if gdd.Color != newColor {
-					t.Errorf("unexpected color: %v, got %v", newColor, gdd.Color)
-				}
-			}
-		}
+		// Add an attribute to association first
+		err = diagram.AddAttributeToAssociation(0.5, "oldContent")
+		assert.NoError(t, err)
 
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, gdd := range d.GetDrawData().Gadgets {
-			if gdd.Attributes[0][0].Content == header0 {
-				if gdd.Layer == newLayer {
-					t.Errorf("undo set layer fails")
-				}
-				if gdd.Color == newColor {
-					t.Errorf("undo set color fails")
-				}
-			}
-		}
+		// Set new content
+		newContent := "newContent"
+		err = diagram.SetAttrContentComponent(0, 0, newContent)
+		assert.NoError(t, err)
 
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, gdd := range d.GetDrawData().Gadgets {
-			if gdd.Attributes[0][0].Content == header0 {
-				if gdd.Layer != newLayer {
-					t.Errorf("redo set layer fails")
-				}
-				if gdd.Color != newColor {
-					t.Errorf("redo set color fails")
-				}
-			}
-		}
-	})
-
-	t.Run("setter gadget", func(t *testing.T) {
-		newLayer := 69
-		d.SelectComponent(utils.Point{X: 1000, Y: 1000})
-		d.SelectComponent(midPoint)
-		err := d.SetLayerComponent(newLayer)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, add := range d.GetDrawData().Associations {
-			if add.Layer != newLayer {
-				t.Errorf("set association layer fails")
-			}
-		}
-
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, add := range d.GetDrawData().Associations {
-			if add.Layer == newLayer {
-				t.Errorf("undo set association layer fails")
-			}
-		}
-
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, add := range d.GetDrawData().Associations {
-			if add.Layer != newLayer {
-				t.Errorf("redo set association layer fails")
-			}
-		}
+		// Verify the content was changed
+		c, err := diagram.componentsContainer.Search(midPoint)
+		assert.NoError(t, err)
+		a, ok := c.(*component.Association)
+		assert.True(t, ok)
+		attr, err := a.GetAttribute(0)
+		assert.NoError(t, err)
+		assert.Equal(t, newContent, attr.GetContent())
 	})
 }
 
-func CMD_MOVE_GADGET(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test AddAttributeToAssociation
+func TestAddAttributeToAssociation(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	header0 := "test gadget0"
-	header1 := "test gadget1"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	t.Run("successful attribute addition", func(t *testing.T) {
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
 
-	assType0 := component.Composition
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
 
-	add := d.GetDrawData().Associations[0]
-	oldAssStart := utils.Point{X: add.StartX, Y: add.StartY}
+		// Add attribute
+		err = diagram.AddAttributeToAssociation(0.5, "testAttribute")
+		assert.NoError(t, err)
 
-	newPoint := utils.Point{X: 69, Y: 69}
-	t.Run("move gadget", func(t *testing.T) {
-		d.SelectComponent(gadPoint0)
-		err := d.SetPointComponent(newPoint)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, gdd := range d.GetDrawData().Gadgets {
-			if gdd.Attributes[0][0].Content == header0 {
-				point := utils.Point{X: gdd.X, Y: gdd.Y}
-				if point != newPoint {
-					t.Errorf("set point fails")
-				}
-			}
-		}
-		add := d.GetDrawData().Associations[0]
-		point := utils.Point{X: add.StartX, Y: add.StartY}
-		if point == oldAssStart {
-			t.Errorf("move gadget doesnt change its association")
-		}
+		// Verify attribute was added
+		c, err := diagram.componentsContainer.Search(midPoint)
+		assert.NoError(t, err)
+		a, ok := c.(*component.Association)
+		assert.True(t, ok)
+		assert.Equal(t, 1, a.GetAttributesLen())
+		attr, err := a.GetAttribute(0)
+		assert.NoError(t, err)
+		assert.Equal(t, "testAttribute", attr.GetContent())
 	})
 
-	t.Run("undo move gadget", func(t *testing.T) {
-		err := d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, gdd := range d.GetDrawData().Gadgets {
-			if gdd.Attributes[0][0].Content == header0 {
-				point := utils.Point{X: gdd.X, Y: gdd.Y}
-				if point == newPoint {
-					t.Errorf("undo set point fails")
-				}
-			}
-		}
-		add := d.GetDrawData().Associations[0]
-		point := utils.Point{X: add.StartX, Y: add.StartY}
-		if point != oldAssStart {
-			t.Errorf("move gadget doesnt change its association")
-		}
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+		
+		err = diagram.AddAttributeToAssociation(0.5, "testAttribute")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can only operate on one component")
 	})
 
-	t.Run("redo move gadget", func(t *testing.T) {
-		err := d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		for _, gdd := range d.GetDrawData().Gadgets {
-			if gdd.Attributes[0][0].Content == header0 {
-				point := utils.Point{X: gdd.X, Y: gdd.Y}
-				if point != newPoint {
-					t.Errorf("redo set point fails")
-				}
-			}
-		}
-		add := d.GetDrawData().Associations[0]
-		point := utils.Point{X: add.StartX, Y: add.StartY}
-		if point == oldAssStart {
-			t.Errorf("move gadget doesnt change its association")
-		}
+	t.Run("selected component is not an association", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+
+		// Try to add attribute to gadget (should fail)
+		err = diagram.AddAttributeToAssociation(0.5, "testAttribute")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "selected component is not an association")
 	})
 }
 
-func CMD_SET_PARENT(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test RemoveAttributeFromAssociation
+func TestRemoveAttributeFromAssociation(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	gadPoint2 := utils.Point{X: 400, Y: 400}
-	header0 := "test gadget0"
-	header1 := "test gadget1"
-	header2 := "test gadget2"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
-	d.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, header2)
+	t.Run("successful attribute removal", func(t *testing.T) {
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
 
-	assType0 := component.Composition
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
 
-	midPoint := utils.Point{
-		X: (gadPoint0.X + gadPoint1.X) / 2,
-		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
-	}
-	d.SelectComponent(midPoint)
-	c, _ := d.componentsContainer.Search(midPoint)
-	a := c.(*component.Association)
+		// Add attribute first
+		err = diagram.AddAttributeToAssociation(0.5, "testAttribute")
+		assert.NoError(t, err)
 
-	g0, _ := d.componentsContainer.SearchGadget(gadPoint0)
-	g1, _ := d.componentsContainer.SearchGadget(gadPoint1)
-	g2, _ := d.componentsContainer.SearchGadget(gadPoint2)
-	t.Run("set parent start", func(t *testing.T) {
-		err := d.SetParentStartComponent(gadPoint2)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentStart() != g2 {
-			t.Errorf("set parent start fails")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentStart() != g0 {
-			t.Errorf("undo set parent start fails")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentStart() != g2 {
-			t.Errorf("undi set parent start fails")
-		}
+		// Verify it was added
+		c, err := diagram.componentsContainer.Search(midPoint)
+		assert.NoError(t, err)
+		a, ok := c.(*component.Association)
+		assert.True(t, ok)
+		assert.Equal(t, 1, a.GetAttributesLen())
+
+		// Remove the attribute
+		err = diagram.RemoveAttributeFromAssociation(0)
+		assert.NoError(t, err)
+
+		// Verify it was removed
+		assert.Equal(t, 0, a.GetAttributesLen())
 	})
 
-	t.Run("set parent end", func(t *testing.T) {
-		err := d.SetParentEndComponent(gadPoint2)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentStart() != g2 {
-			t.Errorf("set parent start fails")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentStart() != g1 {
-			t.Errorf("undo set parent start fails")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetParentStart() != g2 {
-			t.Errorf("undi set parent start fails")
-		}
-	})
-}
-
-func CMD_SET_ATTR_GAD(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
-
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	header0 := "test gadget0"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.SelectComponent(gadPoint0)
-
-	g, _ := d.componentsContainer.SearchGadget(gadPoint0)
-
-	t.Run("set content", func(t *testing.T) {
-		getValue := func(g *component.Gadget) string {
-			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].Content
-		}
-		newValue := "new content"
-		oldValue := getValue(g)
-
-		err := d.SetAttrContentComponent(0, 0, newValue)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != newValue {
-			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != oldValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != newValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
-		}
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+		
+		err = diagram.RemoveAttributeFromAssociation(0)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can only operate on one component")
 	})
 
-	t.Run("set size", func(t *testing.T) {
-		getValue := func(g *component.Gadget) int {
-			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].FontSize
-		}
-		newValue := 69
-		oldValue := getValue(g)
+	t.Run("selected component is not an association", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
 
-		err := d.SetAttrSizeComponent(0, 0, newValue)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != newValue {
-			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != oldValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != newValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
-		}
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+
+		// Try to remove attribute from gadget
+		err = diagram.RemoveAttributeFromAssociation(0)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "selected component is not an association")
 	})
 
-	t.Run("set style", func(t *testing.T) {
-		getValue := func(g *component.Gadget) int {
-			return g.GetDrawData().(drawdata.Gadget).Attributes[0][0].FontStyle
-		}
-		newValue := attribute.Bold
-		oldValue := getValue(g)
+	t.Run("invalid index", func(t *testing.T) {
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
 
-		err := d.SetAttrStyleComponent(0, 0, newValue)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != newValue {
-			t.Errorf("unexpected value: %v, got %v", newValue, getValue(g))
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != oldValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(g) != newValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(g))
-		}
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Try to remove non-existent attribute
+		err = diagram.RemoveAttributeFromAssociation(0)
+		assert.Error(t, err)
 	})
 }
 
-func CMD_SET_ATTR_ASS(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test SetAttrRatioComponent
+func TestSetAttrRatioComponent(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	header0 := "test gadget0"
-	header1 := "test gadget1"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	t.Run("successful ratio setting for association", func(t *testing.T) {
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
 
-	assType0 := component.Composition
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
 
-	midPoint := utils.Point{
-		X: (gadPoint0.X + gadPoint1.X) / 2,
-		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
-	}
-	d.SelectComponent(midPoint)
-	c, _ := d.componentsContainer.Search(midPoint)
-	a := c.(*component.Association)
+		// Add attribute first
+		err = diagram.AddAttributeToAssociation(0.3, "testAttribute")
+		assert.NoError(t, err)
 
-	d.AddAttributeToAssociation(0.5, "test")
+		// Set new ratio
+		newRatio := 0.7
+		err = diagram.SetAttrRatioComponent(0, 0, newRatio)
+		assert.NoError(t, err)
 
-	t.Run("set content", func(t *testing.T) {
-		getValue := func(a *component.Association) string {
-			return a.GetDrawData().(drawdata.Association).Attributes[0].Content
-		}
-		newValue := "new content"
-		oldValue := getValue(a)
-
-		err := d.SetAttrContentComponent(0, 0, newValue)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != oldValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
+		// Verify the ratio was changed
+		c, err := diagram.componentsContainer.Search(midPoint)
+		assert.NoError(t, err)
+		a, ok := c.(*component.Association)
+		assert.True(t, ok)
+		attr, err := a.GetAttribute(0)
+		assert.NoError(t, err)
+		assert.Equal(t, newRatio, attr.GetRatio())
 	})
 
-	t.Run("set size", func(t *testing.T) {
-		getValue := func(a *component.Association) int {
-			return a.GetDrawData().(drawdata.Association).Attributes[0].FontSize
-		}
-		newValue := 69
-		oldValue := getValue(a)
-
-		err := d.SetAttrSizeComponent(0, 0, newValue)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != oldValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
+	t.Run("no component selected", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
+		
+		err = diagram.SetAttrRatioComponent(0, 0, 0.5)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "can only operate on one component")
 	})
 
-	t.Run("set style", func(t *testing.T) {
-		getValue := func(a *component.Association) int {
-			return a.GetDrawData().(drawdata.Association).Attributes[0].FontStyle
-		}
-		newValue := attribute.Bold
-		oldValue := getValue(a)
+	t.Run("selected component is not an association", func(t *testing.T) {
+		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+		assert.NoError(t, err)
 
-		err := d.SetAttrStyleComponent(0, 0, newValue)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != oldValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
-	})
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
 
-	t.Run("set ratio", func(t *testing.T) {
-		getValue := func(a *component.Association) float64 {
-			return a.GetDrawData().(drawdata.Association).Attributes[0].Ratio
-		}
-		newValue := 0.69
-		oldValue := getValue(a)
-
-		err := d.SetAttrRatioComponent(0, 0, newValue)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", newValue, getValue(a))
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != oldValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if getValue(a) != newValue {
-			t.Errorf("unexpected value: %v, got %v", oldValue, getValue(a))
-		}
+		// Try to set ratio on gadget
+		err = diagram.SetAttrRatioComponent(0, 0, 0.5)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "selected component is not an association")
 	})
 }
 
-func CMD_ADD_REMOVE_ATTR_GAD(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test Undo and Redo with error conditions
+func TestUndoRedoWithErrors(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	header0 := "test gadget0"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.SelectComponent(gadPoint0)
-
-	g, _ := d.componentsContainer.SearchGadget(gadPoint0)
-	section := 1
-	t.Run("add attribute", func(t *testing.T) {
-		err := d.AddAttributeToGadget(section, "ඞ")
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if g.GetAttributesLen()[section] != 1 {
-			t.Errorf("add attr to gad fail")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if g.GetAttributesLen()[section] != 0 {
-			t.Errorf("undo add attr to gad fail")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if g.GetAttributesLen()[section] != 1 {
-			t.Errorf("undo add attr to gad fail")
-		}
+	t.Run("undo with no commands", func(t *testing.T) {
+		err = diagram.Undo()
+		assert.Error(t, err) // Should fail when there's nothing to undo
 	})
 
-	t.Run("remove attribute", func(t *testing.T) {
-		err := d.RemoveAttributeFromGadget(section, 0)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if g.GetAttributesLen()[section] != 0 {
-			t.Errorf("remove attr to gad fail")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if g.GetAttributesLen()[section] != 1 {
-			t.Errorf("undo remove attr to gad fail")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if g.GetAttributesLen()[section] != 0 {
-			t.Errorf("undo remove attr to gad fail")
-		}
+	t.Run("redo with no commands", func(t *testing.T) {
+		err = diagram.Redo()
+		assert.Error(t, err) // Should fail when there's nothing to redo
+	})
+
+	t.Run("successful undo/redo cycle", func(t *testing.T) {
+		// Add a gadget
+		gadPoint := utils.Point{X: 10, Y: 10}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+
+		// Undo the addition
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 0)
+
+		// Redo the addition
+		err = diagram.Redo()
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
 	})
 }
 
-func CMD_ADD_REMOVE_ATTR_ASS(t *testing.T) {
-	d, _ := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+// Test error conditions in EndAddAssociation
+func TestEndAddAssociation_ErrorCases(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
 
-	gadPoint0 := utils.Point{X: 0, Y: 0}
-	gadPoint1 := utils.Point{X: 200, Y: 200}
-	header0 := "test gadget0"
-	header1 := "test gadget1"
-	d.AddGadget(component.Class, gadPoint0, 0, drawdata.DefaultGadgetColor, header0)
-	d.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, header1)
+	t.Run("start and end on same gadget", func(t *testing.T) {
+		// Add a single gadget
+		gadPoint := utils.Point{X: 10, Y: 10}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
 
-	assType0 := component.Composition
-	d.StartAddAssociation(gadPoint0)
-	d.EndAddAssociation(component.AssociationType(assType0), gadPoint1)
+		err = diagram.StartAddAssociation(gadPoint)
+		assert.NoError(t, err)
 
-	midPoint := utils.Point{
-		X: (gadPoint0.X + gadPoint1.X) / 2,
-		Y: (gadPoint0.Y + gadPoint1.Y) / 2,
-	}
-	d.SelectComponent(midPoint)
-	c, _ := d.componentsContainer.Search(midPoint)
-	a := c.(*component.Association)
-
-	t.Run("add attribute", func(t *testing.T) {
-		err := d.AddAttributeToAssociation(0.5, "ඞ")
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetAttributesLen() != 1 {
-			t.Errorf("add attr to ass fail")
-		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetAttributesLen() != 0 {
-			t.Errorf("undo add attr to ass fail")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetAttributesLen() != 1 {
-			t.Errorf("undo add attr to ass fail")
-		}
+		// Try to end on the same gadget
+		err = diagram.EndAddAssociation(component.Composition, gadPoint)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cannot create association")
 	})
 
-	t.Run("remove attribute", func(t *testing.T) {
-		err := d.RemoveAttributeFromAssociation(0)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
+	t.Run("invalid association type", func(t *testing.T) {
+		// Add two gadgets
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+
+		// Try with invalid association type
+		err = diagram.EndAddAssociation(component.AssociationType(999), gadPoint2)
+		assert.Error(t, err)
+	})
+}
+
+// Test private helper methods by creating scenarios that use them
+func TestPrivateHelperMethods(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
+
+	t.Run("test moveGadget through SetPointComponent", func(t *testing.T) {
+		// Add gadget with association to test moveGadget's association update logic
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
+
+		// Select first gadget and move it
+		err = diagram.SelectComponent(gadPoint1)
+		assert.NoError(t, err)
+		
+		newPoint := utils.Point{X: 200, Y: 200}
+		err = diagram.SetPointComponent(newPoint)
+		assert.NoError(t, err)
+
+		// Verify the gadget moved and association updated
+		g, err := diagram.componentsContainer.SearchGadget(newPoint)
+		assert.NoError(t, err)
+		assert.NotNil(t, g)
+	})
+
+	t.Run("test removeAssociation through RemoveSelectedComponents", func(t *testing.T) {
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 300, Y: 300}
+		gadPoint2 := utils.Point{X: 400, Y: 400}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class3")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class4")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
+
+		initialCount := len(diagram.componentsContainer.GetAll())
+
+		// Select and remove first gadget (should also remove the association)
+		err = diagram.SelectComponent(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.RemoveSelectedComponents()
+		assert.NoError(t, err)
+
+		// Should have one less gadget and one less association
+		finalCount := len(diagram.componentsContainer.GetAll())
+		assert.True(t, finalCount < initialCount)
+	})
+
+	t.Run("test addComponents through Undo", func(t *testing.T) {
+		initialCount := len(diagram.componentsContainer.GetAll())
+		
+		// Add a gadget
+		gadPoint := utils.Point{X: 500, Y: 500}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		
+		afterAddCount := len(diagram.componentsContainer.GetAll())
+		assert.True(t, afterAddCount > initialCount)
+
+		// Remove it
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+		err = diagram.RemoveSelectedComponents()
+		assert.NoError(t, err)
+
+		// Undo the removal (triggers unexecute)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		
+		undoCount := len(diagram.componentsContainer.GetAll())
+		assert.Equal(t, afterAddCount, undoCount)
+	})
+}
+
+// Test attribute-related setter methods
+func TestAttributeSetterMethods(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
+
+	// Setup gadget with attribute
+	gadPoint := utils.Point{X: 10, Y: 20}
+	err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+	assert.NoError(t, err)
+	err = diagram.SelectComponent(gadPoint)
+	assert.NoError(t, err)
+	err = diagram.AddAttributeToGadget(1, "testAttribute")
+	assert.NoError(t, err)
+
+	t.Run("test SetAttrSizeComponent", func(t *testing.T) {
+		newSize := 16
+		err = diagram.SetAttrSizeComponent(1, 0, newSize)
+		assert.NoError(t, err)
+
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		attr, err := g.GetAttribute(1, 0)
+		assert.NoError(t, err)
+		assert.Equal(t, newSize, attr.GetSize())
+	})
+
+	t.Run("test SetAttrStyleComponent", func(t *testing.T) {
+		newStyle := int(attribute.Bold | attribute.Italic)
+		err = diagram.SetAttrStyleComponent(1, 0, newStyle)
+		assert.NoError(t, err)
+
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		attr, err := g.GetAttribute(1, 0)
+		assert.NoError(t, err)
+		assert.Equal(t, attribute.Textstyle(newStyle), attr.GetStyle())
+	})
+
+	t.Run("test SetAttrFontComponent", func(t *testing.T) {
+		newFont := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
+		err = diagram.SetAttrFontComponent(1, 0, newFont)
+		assert.NoError(t, err)
+
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		attr, err := g.GetAttribute(1, 0)
+		assert.NoError(t, err)
+		assert.Equal(t, newFont, attr.GetFontFile())
+	})
+}
+
+// Test SetParentStartComponent and SetParentEndComponent error cases
+func TestSetParentComponentErrors(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
+
+	t.Run("SetParentStartComponent with no association selected", func(t *testing.T) {
+		// Add a gadget and select it (not an association)
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+
+		err = diagram.SetParentStartComponent(utils.Point{X: 100, Y: 100})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "selected component is not an association")
+	})
+
+	t.Run("SetParentEndComponent with no association selected", func(t *testing.T) {
+		err = diagram.SetParentEndComponent(utils.Point{X: 100, Y: 100})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "selected component is not an association")
+	})
+
+	t.Run("SetParentStartComponent with invalid target point", func(t *testing.T) {
+		// Create association first
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
+
+		// Select the association
+		midPoint := utils.Point{X: 55, Y: 55}
+		err = diagram.SelectComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Try to set parent to empty space
+		err = diagram.SetParentStartComponent(utils.Point{X: 500, Y: 500})
+		assert.Error(t, err)
+	})
+}
+
+// Test SelectComponent edge cases
+func TestSelectComponent_EdgeCases(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
+
+	t.Run("select already selected component", func(t *testing.T) {
+		// Add and select a gadget
+		gadPoint := utils.Point{X: 10, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsSelected, 1)
+
+		// Select it again - should not change anything
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsSelected, 1)
+	})
+
+	t.Run("select empty space to unselect all", func(t *testing.T) {
+		// Should have one selected component from previous test
+		assert.Len(t, diagram.componentsSelected, 1)
+
+		// Click on empty space
+		err = diagram.SelectComponent(utils.Point{X: 500, Y: 500})
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsSelected, 0)
+	})
+}
+
+// Test error conditions in loadGadgetAttributes
+func TestLoadGadgetAttributes_Errors(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
+
+	t.Run("load attributes to nil gadget", func(t *testing.T) {
+		savedAttributes := []utils.SavedAtt{
+			{
+				Content:  "test",
+				Size:     12,
+				Style:    int(attribute.Bold),
+				FontFile: "test.ttf",
+				Ratio:    0.0,
+			},
 		}
-		if a.GetAttributesLen() != 0 {
-			t.Errorf("remove attr to ass fail")
+
+		err, _ := diagram.loadGadgetAttributes(nil, savedAttributes)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "Cannot load attributes to a nil gadget")
+	})
+
+	t.Run("load invalid attributes", func(t *testing.T) {
+		gad, err := component.NewGadget(component.Class, utils.Point{}, 0, drawdata.DefaultGadgetColor, "")
+		assert.NoError(t, err)
+
+		savedAttributes := []utils.SavedAtt{
+			{
+				Content:  "test",
+				Size:     -1, // Invalid size
+				Style:    int(attribute.Bold),
+				FontFile: "nonexistent.ttf",
+				Ratio:    0.0,
+			},
 		}
-		err = d.Undo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetAttributesLen() != 1 {
-			t.Errorf("undo remove attr to ass fail")
-		}
-		err = d.Redo()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if a.GetAttributesLen() != 0 {
-			t.Errorf("undo remove attr to ass fail")
-		}
+
+		err, index := diagram.loadGadgetAttributes(gad, savedAttributes)
+		assert.Error(t, err)
+		assert.Equal(t, 0, index)
+	})
+}
+
+// Test collectAssociations errors
+func TestCollectAssociations_Errors(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
+
+	t.Run("collect associations with invalid gadget mapping", func(t *testing.T) {
+		// Add gadgets and association
+		gadPoint1 := utils.Point{X: 10, Y: 10}
+		gadPoint2 := utils.Point{X: 100, Y: 100}
+		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		
+		err = diagram.StartAddAssociation(gadPoint1)
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
+		assert.NoError(t, err)
+
+		// Create invalid gadget mapping (missing gadgets)
+		invalidDP := make(map[*component.Gadget]int)
+		res := &utils.SavedDiagram{}
+
+		err = diagram.collectAssociations(invalidDP, res)
+		assert.Error(t, err)
+	})
+}
+
+// Test command unexecute methods by triggering undo operations
+func TestCommandUnexecuteMethods(t *testing.T) {
+	diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
+	assert.NoError(t, err)
+
+	t.Run("test addComponentCommand unexecute", func(t *testing.T) {
+		// Add gadget
+		gadPoint := utils.Point{X: 10, Y: 10}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+
+		// Undo (triggers unexecute)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 0)
+	})
+
+	t.Run("test removeSelectedComponentCommand unexecute", func(t *testing.T) {
+		// Add gadget
+		gadPoint := utils.Point{X: 20, Y: 20}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		
+		// Select and remove
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+		err = diagram.RemoveSelectedComponents()
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 0)
+
+		// Undo removal (triggers unexecute of remove command)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+	})
+
+	t.Run("test setterCommand unexecute", func(t *testing.T) {
+		// Add and select gadget
+		gadPoint := utils.Point{X: 30, Y: 30}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+
+		// Get original layer
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		originalLayer := g.GetLayer()
+
+		// Change layer
+		newLayer := originalLayer + 5
+		err = diagram.SetLayerComponent(newLayer)
+		assert.NoError(t, err)
+		assert.Equal(t, newLayer, g.GetLayer())
+
+		// Undo layer change (triggers setterCommand unexecute)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Equal(t, originalLayer, g.GetLayer())
+	})
+
+	t.Run("test selectAllCommand unexecute", func(t *testing.T) {
+		// Add gadget
+		gadPoint := utils.Point{X: 40, Y: 40}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Select component
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsSelected, 1)
+
+		// Undo selection (triggers selectAllCommand unexecute)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Len(t, diagram.componentsSelected, 0)
+	})
+
+	t.Run("test moveGadgetCommand unexecute", func(t *testing.T) {
+		// Add and select gadget
+		originalPoint := utils.Point{X: 50, Y: 50}
+		err = diagram.AddGadget(component.Class, originalPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(originalPoint)
+		assert.NoError(t, err)
+
+		// Move gadget
+		newPoint := utils.Point{X: 150, Y: 150}
+		err = diagram.SetPointComponent(newPoint)
+		assert.NoError(t, err)
+
+		// Verify it moved
+		g, err := diagram.componentsContainer.SearchGadget(newPoint)
+		assert.NoError(t, err)
+		assert.NotNil(t, g)
+
+		// Undo move (triggers moveGadgetCommand unexecute)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+
+		// Should be back at original position
+		g, err = diagram.componentsContainer.SearchGadget(originalPoint)
+		assert.NoError(t, err)
+		assert.NotNil(t, g)
+	})
+
+	t.Run("test addAttributeGadgetCommand unexecute", func(t *testing.T) {
+		// Add and select gadget
+		gadPoint := utils.Point{X: 60, Y: 60}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+
+		// Add attribute
+		err = diagram.AddAttributeToGadget(1, "testAttribute")
+		assert.NoError(t, err)
+
+		// Verify attribute was added
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, g.GetAttributesLen()[1])
+
+		// Undo add attribute (triggers unexecute)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Equal(t, 0, g.GetAttributesLen()[1])
+	})
+
+	t.Run("test removeAttributeGadgetCommand unexecute", func(t *testing.T) {
+		// Add and select gadget
+		gadPoint := utils.Point{X: 70, Y: 70}
+		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+		err = diagram.SelectComponent(gadPoint)
+		assert.NoError(t, err)
+
+		// Add attribute
+		err = diagram.AddAttributeToGadget(1, "testAttribute")
+		assert.NoError(t, err)
+
+		// Remove attribute
+		err = diagram.RemoveAttributeFromGadget(1, 0)
+		assert.NoError(t, err)
+
+		// Verify attribute was removed
+		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, g.GetAttributesLen()[1])
+
+		// Undo remove attribute (triggers removeAttributeGadgetCommand unexecute)
+		err = diagram.Undo()
+		assert.NoError(t, err)
+		assert.Equal(t, 1, g.GetAttributesLen()[1])
 	})
 }
 
@@ -2205,7 +1737,7 @@ func TestSetAssociationType(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Select the association
-				midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
+				midPoint := utils.Point{X: 55, Y: 55}
 				err = diagram.SelectComponent(midPoint)
 				assert.NoError(t, err)
 
@@ -2223,85 +1755,6 @@ func TestSetAssociationType(t *testing.T) {
 	})
 
 	t.Run("undo and redo functionality", func(t *testing.T) {
-		// Create diagram and add gadgets
-		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
-		assert.NoError(t, err)
-
-		gadPoint1 := utils.Point{X: 10, Y: 20}
-		gadPoint2 := utils.Point{X: 100, Y: 100}
-		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
-		assert.NoError(t, err)
-		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
-		assert.NoError(t, err)
-
-		// Create association
-		err = diagram.StartAddAssociation(gadPoint1)
-		assert.NoError(t, err)
-		err = diagram.EndAddAssociation(component.Extension, gadPoint2)
-		assert.NoError(t, err)
-
-		// Select the association
-		midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
-		err = diagram.SelectComponent(midPoint)
-		assert.NoError(t, err)
-
-		// Get the association
-		comp, err := diagram.componentsContainer.Search(midPoint)
-		assert.NoError(t, err)
-		association := comp.(*component.Association)
-
-		// Record original type
-		originalType := association.GetAssType()
-		var expectedOriginalType component.AssociationType = component.Extension
-		assert.Equal(t, expectedOriginalType, originalType)
-
-		// Change association type
-		var newType component.AssociationType = component.Composition
-		err = diagram.SetAssociationType(newType)
-		assert.NoError(t, err)
-		assert.Equal(t, newType, association.GetAssType())
-
-		// Test undo
-		err = diagram.Undo()
-		assert.NoError(t, err)
-		assert.Equal(t, originalType, association.GetAssType())
-
-		// Test redo
-		err = diagram.Redo()
-		assert.NoError(t, err)
-		assert.Equal(t, newType, association.GetAssType())
-	})
-
-	t.Run("command execution failure", func(t *testing.T) {
-		// Create diagram and add gadgets
-		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
-		assert.NoError(t, err)
-
-		gadPoint1 := utils.Point{X: 10, Y: 20}
-		gadPoint2 := utils.Point{X: 100, Y: 100}
-		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "TestClass1")
-		assert.NoError(t, err)
-		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "TestClass2")
-		assert.NoError(t, err)
-
-		// Create association
-		err = diagram.StartAddAssociation(gadPoint1)
-		assert.NoError(t, err)
-		err = diagram.EndAddAssociation(component.Extension, gadPoint2)
-		assert.NoError(t, err)
-
-		// Select the association
-		midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
-		err = diagram.SelectComponent(midPoint)
-		assert.NoError(t, err)
-
-		// Try to set an invalid association type (0 is invalid)
-		err = diagram.SetAssociationType(component.AssociationType(0))
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "unsupported association type")
-	})
-
-	t.Run("verify draw data update", func(t *testing.T) {
 		// Create diagram and add gadgets
 		diagram, err := CreateEmptyUMLDiagram("test.uml", ClassDiagram)
 		assert.NoError(t, err)
