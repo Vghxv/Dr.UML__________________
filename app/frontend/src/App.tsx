@@ -8,7 +8,9 @@ import {
     SaveDiagramFileDialog,
     SaveFileDialog,
     SaveProject,
-    StartAddAssociation
+    StartAddAssociation,
+    UndoDiagramChange,
+    RedoDiagramChange
 } from "../wailsjs/go/umlproject/UMLProject";
 
 import { AssociationProps, CanvasProps, GadgetProps } from "./utils/Props";
@@ -166,6 +168,27 @@ const App: React.FC = () => {
         }
     };
 
+    const handleDiagramUndo = () => {
+      try{
+        console.log("Undo action triggered");
+        UndoDiagramChange();
+        reloadBackendData();
+      }  
+        catch (error) {
+            console.error("Error performing undo:", error);
+        }
+    };
+
+    const handleDiagramRedo = () => {
+        try{
+            console.log("Redo action triggered");
+            RedoDiagramChange();
+            reloadBackendData();
+        }
+        catch (error) {
+            console.error("Error performing redo:", error);
+        }
+    };
     // Render different views based on current state
     if (currentView === 'load') {
         return <LoadProjectPage onProjectLoaded={handleProjectLoaded} />;
@@ -180,7 +203,6 @@ const App: React.FC = () => {
             />
         );
     }
-    console.log("Rendering editor view with projectData:", projectData);
     // Editor view (current main application)
     return (
         <div className="h-screen mx-auto px-4 bg-neutral-700">
@@ -195,6 +217,8 @@ const App: React.FC = () => {
                 onSaveDiagram={handleSaveDiagram}
                 diagramName={diagramName}
                 canvasBackgroundColor={canvasBackgroundColor}
+                onUndo={handleDiagramUndo}
+                onRedo={handleDiagramRedo}
             />
             {showPopup && (
                 <GadgetPopup
