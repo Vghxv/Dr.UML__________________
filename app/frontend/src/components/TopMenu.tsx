@@ -13,6 +13,7 @@ interface ToolbarProps {
     canvasBackgroundColor: string;
     onUndo: () => void;
     onRedo: () => void;
+    onDeleteSelectedComponent: () => void;
 }
 
 const TopMenu: React.FC<ToolbarProps> = (
@@ -28,7 +29,8 @@ const TopMenu: React.FC<ToolbarProps> = (
         diagramName,
         canvasBackgroundColor = "#C2C2C2",
         onUndo,
-        onRedo
+        onRedo,
+        onDeleteSelectedComponent
     } = { 
         projectData: null, 
         handleBackToDiagrams: () => {},
@@ -41,7 +43,8 @@ const TopMenu: React.FC<ToolbarProps> = (
         diagramName: null,
         canvasBackgroundColor: "#C2C2C2",
         onUndo: () => {},
-        onRedo: () => {}
+        onRedo: () => {},
+        onDeleteSelectedComponent: () => {}
     }
 ) => {
     useEffect(() => {
@@ -50,12 +53,6 @@ const TopMenu: React.FC<ToolbarProps> = (
         }
     }, [onGetDiagramName]);
 
-    const handleExport = () => {
-        alert("[TODO] Export Project API");
-    };
-    const handleValidate = () => {
-        alert("[TODO] Validate Project API");
-    };
     return (
         <header className="w-full sticky top-0 z-50 shadow-2xl border-b-2 border-[#1C1C1C]">
             <div 
@@ -129,6 +126,17 @@ const TopMenu: React.FC<ToolbarProps> = (
                             + ASSOCIATION
                         </button>
                         
+                        <button
+                            onClick={onDeleteSelectedComponent}
+                            className="flex items-center gap-2 px-4 py-2.5 text-[#fff] font-bold text-sm tracking-wide uppercase transition-all duration-200 border-2 border-red-600 hover:border-red-400 active:border-red-800 ml-2"
+                            style={{
+                                background: 'linear-gradient(145deg, #e3342f, #b91c1c)',
+                                boxShadow: '3px 3px 6px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(242,242,240,0.1)'
+                            }}
+                        >
+                            Delete component
+                        </button>
+
                         <div className="flex items-center gap-3 ml-4">
                             <label htmlFor="canvas-color" className="text-[#F2F2F0] font-bold text-sm tracking-wide uppercase">
                                 CANVAS:
