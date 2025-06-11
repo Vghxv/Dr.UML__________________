@@ -410,7 +410,9 @@ func (ass *Association) AddAttribute(index int, ratio float64, content string) d
 	if err != nil {
 		return err
 	}
-	att.RegisterUpdateParentDraw(ass.UpdateDrawData)
+    if err := att.RegisterUpdateParentDraw(ass.UpdateDrawData); err != nil {
+		return err
+    }
 	ass.attributes = append(ass.attributes, att)
 
 	if err := ass.UpdateDrawData(); err != nil {
