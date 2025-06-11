@@ -267,6 +267,7 @@ func (ass *Association) SetParentStart(gadget *Gadget, ratio [2]float64) duerror
 	}
 
 	// Unregister from old parent if different
+	// This ensures the observer does not receive updates from a gadget it is no longer associated with.
 	oldParent := ass.parents[0]
 	if oldParent != nil && oldParent != gadget {
 		oldParent.RemoveObserver(ass)
