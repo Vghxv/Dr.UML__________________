@@ -308,6 +308,19 @@ func (p *UMLProject) EndAddAssociation(associationType component.AssociationType
 	return nil
 }
 
+func (p *UMLProject) RemoveComponent(point utils.Point) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+
+	if err := p.currentDiagram.RemoveComponentAtPoint(point); err != nil {
+		return err
+	}
+
+	p.lastModified = time.Now()
+	return nil
+}
+
 func (p *UMLProject) RemoveSelectedComponents() duerror.DUError {
 	if p.currentDiagram == nil {
 		return duerror.NewInvalidArgumentError("No current diagram selected")

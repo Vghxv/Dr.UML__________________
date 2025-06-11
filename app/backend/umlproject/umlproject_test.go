@@ -263,6 +263,218 @@ func TestRemoveSelectedComponents(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestRemoveComponent(t *testing.T) {
+	t.Run("remove single gadget", func(t *testing.T) {
+		p, err := CreateEmptyUMLProject("TestProject")
+		assert.NoError(t, err)
+		err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+		assert.NoError(t, err)
+		err = p.SelectDiagram("TestDiagram")
+		assert.NoError(t, err)
+
+		// Add a gadget
+		err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Verify the gadget exists
+		data := p.GetDrawData()
+		assert.Len(t, data.Gadgets, 1)
+		assert.Equal(t, "TestClass", data.Gadgets[0].Attributes[0][0].Content)
+
+		// Remove the gadget by clicking on it
+		err = p.RemoveComponent(utils.Point{X: 100, Y: 100})
+		assert.NoError(t, err)
+
+		// Verify the gadget was removed
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 0)
+	})
+
+	t.Run("remove gadget with associations", func(t *testing.T) {
+		p, err := CreateEmptyUMLProject("TestProject")
+		assert.NoError(t, err)
+		err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+		assert.NoError(t, err)
+		err = p.SelectDiagram("TestDiagram")
+		assert.NoError(t, err)
+
+		// Add two gadgets
+		err = p.AddGadget(component.Class, utils.Point{X: 50, Y: 50}, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = p.AddGadget(component.Class, utils.Point{X: 200, Y: 200}, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+
+		// Add an association between them
+		err = p.StartAddAssociation(utils.Point{X: 50, Y: 50})
+		assert.NoError(t, err)
+		err = p.EndAddAssociation(component.Composition, utils.Point{X: 200, Y: 200})
+		assert.NoError(t, err)
+
+		// Verify both gadgets and the association exist
+		data := p.GetDrawData()
+		assert.Len(t, data.Gadgets, 2)
+		assert.Len(t, data.Associations, 1)
+
+		// Remove the first gadget - this should also remove the association
+		err = p.RemoveComponent(utils.Point{X: 50, Y: 50})
+		assert.NoError(t, err)
+
+		// Verify only one gadget remains and no associations
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 1)
+		assert.Equal(t, "Class2", data.Gadgets[0].Attributes[0][0].Content)
+		assert.Len(t, data.Associations, 0)
+	})
+
+	t.Run("remove association", func(t *testing.T) {
+		p, err := CreateEmptyUMLProject("TestProject")
+		assert.NoError(t, err)
+		err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+		assert.NoError(t, err)
+		err = p.SelectDiagram("TestDiagram")
+		assert.NoError(t, err)
+
+		// Add two gadgets
+		err = p.AddGadget(component.Class, utils.Point{X: 50, Y: 50}, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = p.AddGadget(component.Class, utils.Point{X: 200, Y: 200}, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+
+		// Add an association between them
+		err = p.StartAddAssociation(utils.Point{X: 50, Y: 50})
+		assert.NoError(t, err)
+		err = p.EndAddAssociation(component.Composition, utils.Point{X: 200, Y: 200})
+		assert.NoError(t, err)
+
+		// Verify both gadgets and the association exist
+		data := p.GetDrawData()
+		assert.Len(t, data.Gadgets, 2)
+		assert.Len(t, data.Associations, 1)
+
+		// Remove the association by clicking on its midpoint
+		midPoint := utils.Point{X: 125, Y: 125}
+		err = p.RemoveComponent(midPoint)
+		assert.NoError(t, err)
+
+		// Verify both gadgets remain but association is removed
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 2)
+		assert.Len(t, data.Associations, 0)
+	})
+
+	t.Run("no component at point", func(t *testing.T) {
+		p, err := CreateEmptyUMLProject("TestProject")
+		assert.NoError(t, err)
+		err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+		assert.NoError(t, err)
+		err = p.SelectDiagram("TestDiagram")
+		assert.NoError(t, err)
+
+		// Add a gadget
+		err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Try to remove component at a point where there's nothing
+		err = p.RemoveComponent(utils.Point{X: 500, Y: 500})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "No component found at the specified point")
+
+		// Verify the original gadget is still there
+		data := p.GetDrawData()
+		assert.Len(t, data.Gadgets, 1)
+	})
+
+	t.Run("no diagram selected", func(t *testing.T) {
+		p, err := CreateEmptyUMLProject("TestProject")
+		assert.NoError(t, err)
+
+		// Try to remove component without selecting a diagram
+		err = p.RemoveComponent(utils.Point{X: 100, Y: 100})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "No current diagram selected")
+	})
+
+	t.Run("integration with undo/redo", func(t *testing.T) {
+		p, err := CreateEmptyUMLProject("TestProject")
+		assert.NoError(t, err)
+		err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+		assert.NoError(t, err)
+		err = p.SelectDiagram("TestDiagram")
+		assert.NoError(t, err)
+
+		// Add a gadget
+		err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Verify the gadget exists
+		data := p.GetDrawData()
+		assert.Len(t, data.Gadgets, 1)
+
+		// Remove the gadget
+		err = p.RemoveComponent(utils.Point{X: 100, Y: 100})
+		assert.NoError(t, err)
+
+		// Verify the gadget was removed
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 0)
+
+		// Undo the removal
+		err = p.UndoDiagramChange()
+		assert.NoError(t, err)
+
+		// Verify the gadget is back
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 1)
+		assert.Equal(t, "TestClass", data.Gadgets[0].Attributes[0][0].Content)
+
+		// Redo the removal
+		err = p.RedoDiagramChange()
+		assert.NoError(t, err)
+
+		// Verify the gadget was removed again
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 0)
+	})
+
+	t.Run("remove multiple components sequentially", func(t *testing.T) {
+		p, err := CreateEmptyUMLProject("TestProject")
+		assert.NoError(t, err)
+		err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+		assert.NoError(t, err)
+		err = p.SelectDiagram("TestDiagram")
+		assert.NoError(t, err)
+
+		// Add multiple gadgets
+		err = p.AddGadget(component.Class, utils.Point{X: 50, Y: 50}, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = p.AddGadget(component.Class, utils.Point{X: 150, Y: 150}, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+		err = p.AddGadget(component.Class, utils.Point{X: 250, Y: 250}, 0, drawdata.DefaultGadgetColor, "Class3")
+		assert.NoError(t, err)
+
+		// Verify all gadgets exist
+		data := p.GetDrawData()
+		assert.Len(t, data.Gadgets, 3)
+
+		// Remove them one by one
+		err = p.RemoveComponent(utils.Point{X: 50, Y: 50})
+		assert.NoError(t, err)
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 2)
+
+		err = p.RemoveComponent(utils.Point{X: 150, Y: 150})
+		assert.NoError(t, err)
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 1)
+		assert.Equal(t, "Class3", data.Gadgets[0].Attributes[0][0].Content)
+
+		err = p.RemoveComponent(utils.Point{X: 250, Y: 250})
+		assert.NoError(t, err)
+		data = p.GetDrawData()
+		assert.Len(t, data.Gadgets, 0)
+	})
+}
+
 func TestGetDrawData(t *testing.T) {
 	p, err := CreateEmptyUMLProject("TestProject")
 	assert.NoError(t, err)

@@ -244,6 +244,127 @@ func TestUMLDiagram_RemoveSelectedComponents(t *testing.T) {
 	assert.Len(t, diagram.componentsContainer.GetAll(), 0)
 }
 
+func TestUMLDiagram_RemoveComponentAtPoint(t *testing.T) {
+	t.Run("remove single gadget", func(t *testing.T) {
+		diagram, _ := CreateEmptyUMLDiagram("RemoveAtPoint.uml", ClassDiagram)
+
+		// Add a gadget
+		err := diagram.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Verify the gadget exists
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+
+		// Remove the gadget at the point
+		err = diagram.RemoveComponentAtPoint(utils.Point{X: 100, Y: 100})
+		assert.NoError(t, err)
+
+		// Verify the gadget was removed
+		assert.Len(t, diagram.componentsContainer.GetAll(), 0)
+	})
+
+	t.Run("remove gadget with associations", func(t *testing.T) {
+		diagram, _ := CreateEmptyUMLDiagram("RemoveGadgetWithAss.uml", ClassDiagram)
+
+		// Add two gadgets
+		err := diagram.AddGadget(component.Class, utils.Point{X: 50, Y: 50}, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, utils.Point{X: 200, Y: 200}, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+
+		// Add an association
+		err = diagram.StartAddAssociation(utils.Point{X: 50, Y: 50})
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, utils.Point{X: 200, Y: 200})
+		assert.NoError(t, err)
+
+		// Verify both gadgets and association exist
+		assert.Len(t, diagram.componentsContainer.GetAll(), 3) // 2 gadgets + 1 association
+
+		// Remove one gadget - should also remove the association
+		err = diagram.RemoveComponentAtPoint(utils.Point{X: 50, Y: 50})
+		assert.NoError(t, err)
+
+		// Verify only one gadget remains (the association should be auto-removed)
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+	})
+
+	t.Run("remove association only", func(t *testing.T) {
+		diagram, _ := CreateEmptyUMLDiagram("RemoveAssOnly.uml", ClassDiagram)
+
+		// Add two gadgets
+		err := diagram.AddGadget(component.Class, utils.Point{X: 50, Y: 50}, 0, drawdata.DefaultGadgetColor, "Class1")
+		assert.NoError(t, err)
+		err = diagram.AddGadget(component.Class, utils.Point{X: 200, Y: 200}, 0, drawdata.DefaultGadgetColor, "Class2")
+		assert.NoError(t, err)
+
+		// Add an association
+		err = diagram.StartAddAssociation(utils.Point{X: 50, Y: 50})
+		assert.NoError(t, err)
+		err = diagram.EndAddAssociation(component.Composition, utils.Point{X: 200, Y: 200})
+		assert.NoError(t, err)
+
+		// Verify both gadgets and association exist
+		assert.Len(t, diagram.componentsContainer.GetAll(), 3) // 2 gadgets + 1 association
+
+		// Remove the association by clicking on its midpoint
+		midPoint := utils.Point{X: 125, Y: 125}
+		err = diagram.RemoveComponentAtPoint(midPoint)
+		assert.NoError(t, err)
+
+		// Verify both gadgets remain but association is removed
+		assert.Len(t, diagram.componentsContainer.GetAll(), 2) // Only gadgets remain
+	})
+
+	t.Run("no component at point", func(t *testing.T) {
+		diagram, _ := CreateEmptyUMLDiagram("NoCompAtPoint.uml", ClassDiagram)
+
+		// Add a gadget
+		err := diagram.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Try to remove at a point where there's no component
+		err = diagram.RemoveComponentAtPoint(utils.Point{X: 500, Y: 500})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "No component found at the specified point")
+
+		// Verify the original gadget is still there
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+	})
+
+	t.Run("integration with undo/redo", func(t *testing.T) {
+		diagram, _ := CreateEmptyUMLDiagram("UndoRedo.uml", ClassDiagram)
+
+		// Add a gadget
+		err := diagram.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "TestClass")
+		assert.NoError(t, err)
+
+		// Verify the gadget exists
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+
+		// Remove the gadget
+		err = diagram.RemoveComponentAtPoint(utils.Point{X: 100, Y: 100})
+		assert.NoError(t, err)
+
+		// Verify the gadget was removed
+		assert.Len(t, diagram.componentsContainer.GetAll(), 0)
+
+		// Undo the removal
+		err = diagram.Undo()
+		assert.NoError(t, err)
+
+		// Verify the gadget is back
+		assert.Len(t, diagram.componentsContainer.GetAll(), 1)
+
+		// Redo the removal
+		err = diagram.Redo()
+		assert.NoError(t, err)
+
+		// Verify the gadget was removed again
+		assert.Len(t, diagram.componentsContainer.GetAll(), 0)
+	})
+}
+
 func TestUMLDiagram_EndAddAssociation_NoGadget(t *testing.T) {
 	diagram, _ := CreateEmptyUMLDiagram("EndAddAssNoGadget.uml", ClassDiagram)
 	_ = diagram.StartAddAssociation(utils.Point{X: 1, Y: 1})

@@ -622,6 +622,42 @@ func (ud *UMLDiagram) RemoveSelectedComponents() duerror.DUError {
 	return nil
 }
 
+func (ud *UMLDiagram) RemoveComponentAtPoint(point utils.Point) duerror.DUError {
+	// Find the component at the specified point
+	c, err := ud.componentsContainer.Search(point)
+	if err != nil {
+		return err
+	}
+	if c == nil {
+		return duerror.NewInvalidArgumentError("No component found at the specified point")
+	}
+
+	// Create a map of components to remove (similar to RemoveSelectedComponents)
+	comps := map[component.Component]bool{c: true}
+
+	// If it's a gadget, also include all associated associations
+	switch g := c.(type) {
+	case *component.Gadget:
+		for a := range ud.getAllAssociationsInGadget(g) {
+			comps[a] = true
+		}
+	}
+
+	// Execute the removal using the command pattern
+	cmd := &removeSelectedComponentCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		components: comps,
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ud *UMLDiagram) SelectComponent(point utils.Point) duerror.DUError {
 	c, err := ud.componentsContainer.Search(point)
 	if err != nil {
