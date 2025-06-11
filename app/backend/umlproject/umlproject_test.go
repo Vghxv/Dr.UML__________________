@@ -1,6 +1,7 @@
 package umlproject
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"testing"
@@ -234,7 +235,7 @@ func TestStartAddAssociation(t *testing.T) {
 
 }
 
-func TestEndAddAssociation(t *testing.T) {
+func TestEndAddAssociationTODO(t *testing.T) {
 	// TODO
 }
 
@@ -638,5 +639,806 @@ func TestDumlEndToEnd(t *testing.T) {
 			}
 		}
 		assert.True(t, found, "Association %+v not found after reload", a1)
+	}
+}
+
+// Test SetPointComponent method
+func TestSetPointComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget and select it
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+
+	// Test setting point
+	newPoint := utils.Point{X: 50, Y: 60}
+	err = p.SetPointComponent(newPoint)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetPointComponent(newPoint)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetLayerComponent method
+func TestSetLayerComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget and select it
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+
+	// Test setting layer
+	err = p.SetLayerComponent(5)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetLayerComponent(3)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetColorComponent method
+func TestSetColorComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget and select it
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+
+	// Test setting color
+	err = p.SetColorComponent("#FF0000")
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetColorComponent("#00FF00")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetAttrContentComponent method
+func TestSetAttrContentComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget, select it, and add attribute
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.AddAttributeToGadget(1, "test attribute")
+	assert.NoError(t, err)
+
+	// Test setting attribute content
+	err = p.SetAttrContentComponent(1, 0, "modified attribute")
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetAttrContentComponent(1, 0, "another content")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetAttrSizeComponent method
+func TestSetAttrSizeComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget, select it, and add attribute
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.AddAttributeToGadget(1, "test attribute")
+	assert.NoError(t, err)
+
+	// Test setting attribute size
+	err = p.SetAttrSizeComponent(1, 0, 16)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetAttrSizeComponent(1, 0, 18)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetAttrStyleComponent method
+func TestSetAttrStyleComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget, select it, and add attribute
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.AddAttributeToGadget(1, "test attribute")
+	assert.NoError(t, err)
+
+	// Test setting attribute style
+	err = p.SetAttrStyleComponent(1, 0, attribute.Bold)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetAttrStyleComponent(1, 0, attribute.Italic)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetAttrFontComponent method
+func TestSetAttrFontComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget, select it, and add attribute
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.AddAttributeToGadget(1, "test attribute")
+	assert.NoError(t, err)
+
+	// Test setting attribute font
+	err = p.SetAttrFontComponent(1, 0, "Arial")
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetAttrFontComponent(1, 0, "Times")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetAttrRatioComponent method
+func TestSetAttrRatioComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add two gadgets to create an association
+	gadPoint1 := utils.Point{X: 10, Y: 10}
+	gadPoint2 := utils.Point{X: 100, Y: 100}
+	err = p.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "test gadget1")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "test gadget2")
+	assert.NoError(t, err)
+
+	// Create association
+	err = p.StartAddAssociation(gadPoint1)
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Composition, gadPoint2)
+	assert.NoError(t, err)
+
+	// Select the association and add attribute
+	midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
+	err = p.SelectComponent(midPoint)
+	assert.NoError(t, err)
+	err = p.AddAttributeToAssociation(0.5, "test attribute")
+	assert.NoError(t, err)
+
+	// Test setting attribute ratio
+	err = p.SetAttrRatioComponent(0, 0, 0.75)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetAttrRatioComponent(0, 0, 0.5)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetParentStartComponent method
+func TestSetParentStartComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add gadgets and create association
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "gadget1")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "gadget2")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 200, Y: 200}, 0, drawdata.DefaultGadgetColor, "gadget3")
+	assert.NoError(t, err)
+
+	err = p.StartAddAssociation(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Composition, utils.Point{X: 105, Y: 105})
+	assert.NoError(t, err)
+
+	// Select the association and change its start parent
+	err = p.SelectComponent(utils.Point{X: 55, Y: 55})
+	assert.NoError(t, err)
+	err = p.SetParentStartComponent(utils.Point{X: 205, Y: 205})
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetParentStartComponent(utils.Point{X: 15, Y: 15})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetParentEndComponent method
+func TestSetParentEndComponent(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add gadgets and create association
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "gadget1")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "gadget2")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 200, Y: 200}, 0, drawdata.DefaultGadgetColor, "gadget3")
+	assert.NoError(t, err)
+
+	err = p.StartAddAssociation(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Composition, utils.Point{X: 105, Y: 105})
+	assert.NoError(t, err)
+
+	// Select the association and change its end parent
+	err = p.SelectComponent(utils.Point{X: 55, Y: 55})
+	assert.NoError(t, err)
+	err = p.SetParentEndComponent(utils.Point{X: 205, Y: 205})
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetParentEndComponent(utils.Point{X: 105, Y: 105})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test SetAssociationType method
+func TestSetAssociationType(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add gadgets and create association
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "gadget1")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "gadget2")
+	assert.NoError(t, err)
+
+	err = p.StartAddAssociation(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Composition, utils.Point{X: 105, Y: 105})
+	assert.NoError(t, err)
+
+	// Select the association and change its type
+	err = p.SelectComponent(utils.Point{X: 55, Y: 55})
+	assert.NoError(t, err)
+	err = p.SetAssociationType(component.Extension)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.SetAssociationType(component.Dependency)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test UndoDiagramChange method
+func TestUndoDiagramChange(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget to have something to undo
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+
+	// Test undo
+	err = p.UndoDiagramChange()
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.UndoDiagramChange()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test RedoDiagramChange method
+func TestRedoDiagramChange(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget and undo to have something to redo
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.UndoDiagramChange()
+	assert.NoError(t, err)
+
+	// Test redo
+	err = p.RedoDiagramChange()
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.RedoDiagramChange()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test RemoveAttributeFromGadget method
+func TestRemoveAttributeFromGadget(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add a gadget, select it, and add attributes
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test gadget")
+	assert.NoError(t, err)
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.AddAttributeToGadget(1, "attribute1")
+	assert.NoError(t, err)
+	err = p.AddAttributeToGadget(1, "attribute2")
+	assert.NoError(t, err)
+
+	// Test removing attribute
+	err = p.RemoveAttributeFromGadget(1, 0)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.RemoveAttributeFromGadget(1, 0)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test RemoveAttributeFromAssociation method
+func TestRemoveAttributeFromAssociation(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add gadgets and create association
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "gadget1")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "gadget2")
+	assert.NoError(t, err)
+
+	err = p.StartAddAssociation(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Composition, utils.Point{X: 105, Y: 105})
+	assert.NoError(t, err)
+
+	// Select association and add attributes
+	err = p.SelectComponent(utils.Point{X: 55, Y: 55})
+	assert.NoError(t, err)
+	err = p.AddAttributeToAssociation(0.3, "attr1")
+	assert.NoError(t, err)
+	err = p.AddAttributeToAssociation(0.7, "attr2")
+	assert.NoError(t, err)
+
+	// Test removing attribute
+	err = p.RemoveAttributeFromAssociation(0)
+	assert.NoError(t, err)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.RemoveAttributeFromAssociation(0)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test proper EndAddAssociation implementation
+func TestEndAddAssociationImplementation(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Add gadgets
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "gadget1")
+	assert.NoError(t, err)
+	err = p.AddGadget(component.Class, utils.Point{X: 100, Y: 100}, 0, drawdata.DefaultGadgetColor, "gadget2")
+	assert.NoError(t, err)
+
+	// Start association
+	err = p.StartAddAssociation(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+
+	// End association successfully
+	err = p.EndAddAssociation(component.Composition, utils.Point{X: 105, Y: 105})
+	assert.NoError(t, err)
+
+	// Verify association was created
+	drawData := p.GetDrawData()
+	assert.Len(t, drawData.Associations, 1)
+	assert.Equal(t, component.Composition, drawData.Associations[0].AssType)
+
+	// Test with no diagram selected
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.EndAddAssociation(component.Extension, utils.Point{X: 50, Y: 50})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test DeleteDiagram method (currently TODO)
+func TestDeleteDiagramTODO(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+
+	// Currently this method just returns nil as it's not implemented
+	err = p.DeleteDiagram("TestDiagram")
+	assert.NoError(t, err)
+}
+
+// Test InvalidateCanvas method more thoroughly
+func TestInvalidateCanvasDetailed(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Test without context - should not error but do nothing
+	err = p.InvalidateCanvas()
+	assert.NoError(t, err)
+
+	// Test with runFrontend false - should return early
+	p.runFrontend = false
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.InvalidateCanvas()
+	assert.NoError(t, err)
+
+	// Test with no current diagram selected
+	p.runFrontend = true
+	err = p.CloseDiagram("TestDiagram")
+	assert.NoError(t, err)
+	err = p.InvalidateCanvas()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+}
+
+// Test Startup method
+func TestStartupDetailed(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	p.Startup(ctx)
+
+	// Verify startup effects
+	assert.Equal(t, ctx, p.ctx)
+	assert.True(t, p.runFrontend)
+	assert.Contains(t, p.GetAvailableDiagramsNames(), "new class diagram")
+	assert.Contains(t, p.GetActiveDiagramsNames(), "new class diagram")
+	assert.Equal(t, "new class diagram", p.GetCurrentDiagramName())
+}
+
+// Test OpenDiagram error cases
+func TestOpenDiagramErrors(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Test with invalid file path
+	err = p.OpenDiagram("")
+	assert.Error(t, err)
+
+	// Test with non-existent file
+	err = p.OpenDiagram("non_existent_file.json5")
+	assert.Error(t, err)
+
+	// Test with invalid JSON content
+	tmpFile, err := os.CreateTemp("", "invalid_*.json5")
+	assert.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	// Write invalid JSON
+	tmpFile.WriteString("invalid json content")
+	tmpFile.Close()
+
+	err = p.OpenDiagram(tmpFile.Name())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to decode file")
+}
+
+// Test SaveDiagram error cases
+func TestSaveDiagramErrors(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Test with no current diagram
+	err = p.SaveDiagram("test.json")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "No current diagram selected")
+
+	// Create a diagram to test other error cases
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Test with invalid file path (directory that doesn't exist)
+	err = p.SaveDiagram("/non_existent_directory/test.json")
+	assert.Error(t, err)
+}
+
+// Test LoadProject error cases
+func TestLoadProjectErrors(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Test with invalid file path
+	err = p.LoadProject("")
+	assert.Error(t, err)
+
+	// Test with non-existent file
+	err = p.LoadProject("non_existent_project.json5")
+	assert.Error(t, err)
+
+	// Test with invalid JSON content
+	tmpFile, err := os.CreateTemp("", "invalid_project_*.json5")
+	assert.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	// Write invalid JSON
+	tmpFile.WriteString("invalid json content")
+	tmpFile.Close()
+
+	err = p.LoadProject(tmpFile.Name())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to decode project file")
+}
+
+// Test SaveProject error cases
+func TestSaveProjectErrors(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Test with invalid file path (when filename differs from project name)
+	err = p.SaveProject("")
+	assert.Error(t, err)
+
+	// Test with directory that doesn't exist
+	err = p.SaveProject("/non_existent_directory/project.json")
+	assert.Error(t, err)
+}
+
+// Test CloseProject when no save is needed
+func TestCloseProjectNoSave(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Set lastSave to be after lastModified (no save needed)
+	p.lastSave = time.Now().Add(time.Hour)
+	p.lastModified = time.Now()
+
+	err = p.CloseProject()
+	assert.NoError(t, err)
+}
+
+// Test various diagram types
+func TestCreateDiagramDifferentTypes(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Test creating class diagram (supported)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "ClassDiagram")
+	assert.NoError(t, err)
+
+	// Test creating use case diagram (not supported - should fail)
+	err = p.CreateEmptyUMLDiagram(umldiagram.UseCaseDiagram, "UseCaseDiagram")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Invalid diagram type")
+
+	// Verify only supported diagram exists
+	diagrams := p.GetAvailableDiagramsNames()
+	assert.Contains(t, diagrams, "ClassDiagram")
+	assert.NotContains(t, diagrams, "UseCaseDiagram")
+}
+
+// Test file dialog methods without context
+func TestFileDialogsWithoutContext(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Test OpenFileDialog without context
+	_, err = p.OpenFileDialog()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "application context not available")
+
+	// Test SaveFileDialog without context
+	_, err = p.SaveFileDialog()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "application context not available")
+
+	// Test SaveDiagramFileDialog without context
+	_, err = p.SaveDiagramFileDialog()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "application context not available")
+}
+
+// Test edge cases for component selection and modification
+func TestComponentSelectionEdgeCases(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	// Test selecting component when no components exist - should not error but not select anything
+	err = p.SelectComponent(utils.Point{X: 50, Y: 50})
+	assert.NoError(t, err) // No error but nothing selected
+
+	// Add a component and test selecting outside its bounds - should not error
+	err = p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test")
+	assert.NoError(t, err)
+
+	err = p.SelectComponent(utils.Point{X: 500, Y: 500})
+	assert.NoError(t, err) // No error but nothing selected
+
+	// Test that we can successfully select the component at its correct location
+	err = p.SelectComponent(utils.Point{X: 15, Y: 15})
+	assert.NoError(t, err)
+}
+
+// Test multiple diagram management
+func TestMultipleDiagramManagement(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+
+	// Create multiple diagrams
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "Diagram1")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "Diagram2")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "Diagram3")
+	assert.NoError(t, err)
+
+	// Select different diagrams
+	err = p.SelectDiagram("Diagram1")
+	assert.NoError(t, err)
+	assert.Equal(t, "Diagram1", p.GetCurrentDiagramName())
+
+	err = p.SelectDiagram("Diagram2")
+	assert.NoError(t, err)
+	assert.Equal(t, "Diagram2", p.GetCurrentDiagramName())
+
+	// Close one diagram
+	err = p.CloseDiagram("Diagram1")
+	assert.NoError(t, err)
+
+	activeDiagrams := p.GetActiveDiagramsNames()
+	assert.NotContains(t, activeDiagrams, "Diagram1")
+	assert.Contains(t, activeDiagrams, "Diagram2")
+	assert.Contains(t, activeDiagrams, "Diagram3")
+
+	// Available diagrams should still contain all
+	availableDiagrams := p.GetAvailableDiagramsNames()
+	assert.Contains(t, availableDiagrams, "Diagram1")
+	assert.Contains(t, availableDiagrams, "Diagram2")
+	assert.Contains(t, availableDiagrams, "Diagram3")
+}
+
+// Test lastModified updates
+func TestLastModifiedUpdates(t *testing.T) {
+	p, err := CreateEmptyUMLProject("TestProject")
+	assert.NoError(t, err)
+	err = p.CreateEmptyUMLDiagram(umldiagram.ClassDiagram, "TestDiagram")
+	assert.NoError(t, err)
+	err = p.SelectDiagram("TestDiagram")
+	assert.NoError(t, err)
+
+	initialTime := p.GetLastModified()
+
+	// Sleep to ensure time difference
+	time.Sleep(10 * time.Millisecond)
+
+	// Operations that should update lastModified
+	operations := []func() error{
+		func() error {
+			return p.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "test")
+		},
+		func() error { return p.SelectComponent(utils.Point{X: 15, Y: 15}) },
+		func() error { return p.SetLayerComponent(1) },
+		func() error { return p.SetColorComponent("#FF0000") },
+	}
+
+	for i, operation := range operations {
+		time.Sleep(10 * time.Millisecond) // Ensure time difference
+		err := operation()
+		assert.NoError(t, err, "Operation %d failed", i)
+
+		newTime := p.GetLastModified()
+		assert.True(t, newTime.After(initialTime), "LastModified should be updated after operation %d", i)
+		initialTime = newTime
 	}
 }
