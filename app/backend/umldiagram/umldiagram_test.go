@@ -710,12 +710,11 @@ func TestRemoveAttributeFromAssociation(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Add and select a gadget
-		gadPoint := utils.Point{X: 10, Y: 20}
-		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 20}, 0, drawdata.DefaultGadgetColor, "TestClass")
 		assert.NoError(t, err)
-		err = diagram.SelectComponent(gadPoint)
+		// Select the gadget
+		err = diagram.SelectComponent(utils.Point{X: 11, Y: 21})
 		assert.NoError(t, err)
-
 		// Try to remove attribute from gadget
 		err = diagram.RemoveAttributeFromAssociation(0)
 		assert.Error(t, err)
@@ -868,7 +867,7 @@ func TestEndAddAssociation_ErrorCases(t *testing.T) {
 		// Try to end on the same gadget
 		err = diagram.EndAddAssociation(component.Composition, gadPoint)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "cannot create association")
+		assert.Contains(t, err.Error(), "start and end points are the same")
 	})
 
 	t.Run("invalid association type", func(t *testing.T) {
@@ -1014,15 +1013,16 @@ func TestAttributeSetterMethods(t *testing.T) {
 	})
 
 	t.Run("test SetAttrFontComponent", func(t *testing.T) {
-		newFont := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
-		err = diagram.SetAttrFontComponent(1, 0, newFont)
+		fontName := "Inkfree"
+		err = diagram.SetAttrFontComponent(1, 0, fontName)
 		assert.NoError(t, err)
 
 		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
 		assert.NoError(t, err)
 		attr, err := g.GetAttribute(1, 0)
 		assert.NoError(t, err)
-		assert.Equal(t, newFont, attr.GetFontFile())
+		expectedFontFile := os.Getenv("APP_ROOT") + "/frontend/src/assets/fonts/Inkfree.ttf"
+		assert.Equal(t, expectedFontFile, attr.GetFontFile())
 	})
 }
 
@@ -1166,12 +1166,20 @@ func TestCollectAssociations_Errors(t *testing.T) {
 		err = diagram.EndAddAssociation(component.Composition, gadPoint2)
 		assert.NoError(t, err)
 
-		// Create invalid gadget mapping (missing gadgets)
+		// Get the actual gadgets
+		g1, err := diagram.componentsContainer.SearchGadget(gadPoint1)
+		assert.NoError(t, err)
+		_, err = diagram.componentsContainer.SearchGadget(gadPoint2)
+		assert.NoError(t, err)
+
+		// Create invalid gadget mapping (missing one of the gadgets)
 		invalidDP := make(map[*component.Gadget]int)
+		invalidDP[g1] = 0 // Include only first gadget, missing second gadget
 		res := &utils.SavedDiagram{}
 
 		err = diagram.collectAssociations(invalidDP, res)
 		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "SecondParent not found")
 	})
 }
 
@@ -1238,96 +1246,112 @@ func TestCommandUnexecuteMethods(t *testing.T) {
 	})
 
 	t.Run("test selectAllCommand unexecute", func(t *testing.T) {
+		// Create fresh diagram for this test
+		testDiagram, err := CreateEmptyUMLDiagram("test_select.uml", ClassDiagram)
+		assert.NoError(t, err)
+
 		// Add gadget
 		gadPoint := utils.Point{X: 40, Y: 40}
-		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		err = testDiagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
 		assert.NoError(t, err)
 
 		// Select component
-		err = diagram.SelectComponent(gadPoint)
+		err = testDiagram.SelectComponent(gadPoint)
 		assert.NoError(t, err)
-		assert.Len(t, diagram.componentsSelected, 1)
+		assert.Len(t, testDiagram.componentsSelected, 1)
 
 		// Undo selection (triggers selectAllCommand unexecute)
-		err = diagram.Undo()
+		err = testDiagram.Undo()
 		assert.NoError(t, err)
-		assert.Len(t, diagram.componentsSelected, 0)
+		assert.Len(t, testDiagram.componentsSelected, 0)
 	})
 
 	t.Run("test moveGadgetCommand unexecute", func(t *testing.T) {
+		// Create fresh diagram for this test
+		testDiagram, err := CreateEmptyUMLDiagram("test_move.uml", ClassDiagram)
+		assert.NoError(t, err)
+
 		// Add and select gadget
 		originalPoint := utils.Point{X: 50, Y: 50}
-		err = diagram.AddGadget(component.Class, originalPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		err = testDiagram.AddGadget(component.Class, originalPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
 		assert.NoError(t, err)
-		err = diagram.SelectComponent(originalPoint)
+		err = testDiagram.SelectComponent(originalPoint)
 		assert.NoError(t, err)
 
 		// Move gadget
 		newPoint := utils.Point{X: 150, Y: 150}
-		err = diagram.SetPointComponent(newPoint)
+		err = testDiagram.SetPointComponent(newPoint)
 		assert.NoError(t, err)
 
 		// Verify it moved
-		g, err := diagram.componentsContainer.SearchGadget(newPoint)
+		g, err := testDiagram.componentsContainer.SearchGadget(newPoint)
 		assert.NoError(t, err)
 		assert.NotNil(t, g)
 
 		// Undo move (triggers moveGadgetCommand unexecute)
-		err = diagram.Undo()
+		err = testDiagram.Undo()
 		assert.NoError(t, err)
 
 		// Should be back at original position
-		g, err = diagram.componentsContainer.SearchGadget(originalPoint)
+		g, err = testDiagram.componentsContainer.SearchGadget(originalPoint)
 		assert.NoError(t, err)
 		assert.NotNil(t, g)
 	})
 
 	t.Run("test addAttributeGadgetCommand unexecute", func(t *testing.T) {
+		// Create fresh diagram for this test
+		testDiagram, err := CreateEmptyUMLDiagram("test_add_attr.uml", ClassDiagram)
+		assert.NoError(t, err)
+
 		// Add and select gadget
 		gadPoint := utils.Point{X: 60, Y: 60}
-		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		err = testDiagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
 		assert.NoError(t, err)
-		err = diagram.SelectComponent(gadPoint)
+		err = testDiagram.SelectComponent(gadPoint)
 		assert.NoError(t, err)
 
 		// Add attribute
-		err = diagram.AddAttributeToGadget(1, "testAttribute")
+		err = testDiagram.AddAttributeToGadget(1, "testAttribute")
 		assert.NoError(t, err)
 
 		// Verify attribute was added
-		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		g, err := testDiagram.componentsContainer.SearchGadget(gadPoint)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, g.GetAttributesLen()[1])
 
 		// Undo add attribute (triggers unexecute)
-		err = diagram.Undo()
+		err = testDiagram.Undo()
 		assert.NoError(t, err)
 		assert.Equal(t, 0, g.GetAttributesLen()[1])
 	})
 
 	t.Run("test removeAttributeGadgetCommand unexecute", func(t *testing.T) {
+		// Create fresh diagram for this test
+		testDiagram, err := CreateEmptyUMLDiagram("test_remove_attr.uml", ClassDiagram)
+		assert.NoError(t, err)
+
 		// Add and select gadget
 		gadPoint := utils.Point{X: 70, Y: 70}
-		err = diagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
+		err = testDiagram.AddGadget(component.Class, gadPoint, 0, drawdata.DefaultGadgetColor, "TestClass")
 		assert.NoError(t, err)
-		err = diagram.SelectComponent(gadPoint)
+		err = testDiagram.SelectComponent(gadPoint)
 		assert.NoError(t, err)
 
 		// Add attribute
-		err = diagram.AddAttributeToGadget(1, "testAttribute")
+		err = testDiagram.AddAttributeToGadget(1, "testAttribute")
 		assert.NoError(t, err)
 
 		// Remove attribute
-		err = diagram.RemoveAttributeFromGadget(1, 0)
+		err = testDiagram.RemoveAttributeFromGadget(1, 0)
 		assert.NoError(t, err)
 
 		// Verify attribute was removed
-		g, err := diagram.componentsContainer.SearchGadget(gadPoint)
+		g, err := testDiagram.componentsContainer.SearchGadget(gadPoint)
 		assert.NoError(t, err)
 		assert.Equal(t, 0, g.GetAttributesLen()[1])
 
 		// Undo remove attribute (triggers removeAttributeGadgetCommand unexecute)
-		err = diagram.Undo()
+		err = testDiagram.Undo()
 		assert.NoError(t, err)
 		assert.Equal(t, 1, g.GetAttributesLen()[1])
 	})
@@ -1736,8 +1760,8 @@ func TestSetAssociationType(t *testing.T) {
 				err = diagram.EndAddAssociation(initialType, gadPoint2)
 				assert.NoError(t, err)
 
-				// Select the association
-				midPoint := utils.Point{X: 55, Y: 55}
+				// Select the association at actual midpoint between gadgets
+				midPoint := utils.Point{X: (gadPoint1.X + gadPoint2.X) / 2, Y: (gadPoint1.Y + gadPoint2.Y) / 2}
 				err = diagram.SelectComponent(midPoint)
 				assert.NoError(t, err)
 
