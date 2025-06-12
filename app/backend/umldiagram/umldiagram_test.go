@@ -896,7 +896,7 @@ func TestPrivateHelperMethods(t *testing.T) {
 	t.Run("test moveGadget through SetPointComponent", func(t *testing.T) {
 		// Add gadget with association to test moveGadget's association update logic
 		gadPoint1 := utils.Point{X: 10, Y: 10}
-		gadPoint2 := utils.Point{X: 100, Y: 100}
+		gadPoint2 := utils.Point{X: 500, Y: 500}
 		err = diagram.AddGadget(component.Class, gadPoint1, 0, drawdata.DefaultGadgetColor, "Class1")
 		assert.NoError(t, err)
 		err = diagram.AddGadget(component.Class, gadPoint2, 0, drawdata.DefaultGadgetColor, "Class2")
@@ -908,7 +908,7 @@ func TestPrivateHelperMethods(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Select first gadget and move it
-		err = diagram.SelectComponent(gadPoint1)
+		err = diagram.SelectComponent(utils.Point{X: 10, Y: 20})
 		assert.NoError(t, err)
 
 		newPoint := utils.Point{X: 200, Y: 200}
