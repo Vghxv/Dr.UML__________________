@@ -83,7 +83,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 }
 
 func LoadExistUMLDiagram(filename string, file utils.SavedDiagram) (*UMLDiagram, duerror.DUError) {
-	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype)) // Shift right to remove the filetype bit
+	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype))
 	if err != nil {
 		return nil, err
 	}
@@ -726,26 +726,27 @@ func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) d
 	if err != nil {
 		return err
 	}
-	a, ok := c.(*component.Association)
-	if !ok {
-		duerror.NewInvalidArgumentError("selected component is not an association")
-	}
+	switch c := c.(type) {
+	case *component.Association:
 
-	cmd := &addAttributeAssociationCommand{
-		baseCommand: baseCommand{
-			diagram: ud,
-			before:  ud.GetLastModified(),
-			after:   time.Now(),
-		},
-		association: a,
-		content:     content,
-		ratio:       ratio,
-		index:       a.GetAttributesLen(),
+		cmd := &addAttributeAssociationCommand{
+			baseCommand: baseCommand{
+				diagram: ud,
+				before:  ud.GetLastModified(),
+				after:   time.Now(),
+			},
+			association: c,
+			content:     content,
+			ratio:       ratio,
+			index:       c.GetAttributesLen(),
+		}
+		if err := ud.cmdManager.Execute(cmd); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
-	if err := ud.cmdManager.Execute(cmd); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError {
@@ -753,30 +754,33 @@ func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError 
 	if err != nil {
 		return err
 	}
-	a, ok := c.(*component.Association)
-	if !ok {
-		duerror.NewInvalidArgumentError("selected component is not an association")
-	}
-	att, err := a.GetAttribute(index)
-	if err != nil {
-		return err
+	switch c := c.(type) {
+	case *component.Gadget:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	case *component.Association:
+		att, err := c.GetAttribute(index)
+		if err != nil {
+			return err
+		}
+		cmd := &removeAttributeAssociationCommand{
+			baseCommand: baseCommand{
+				diagram: ud,
+				before:  ud.GetLastModified(),
+				after:   time.Now(),
+			},
+			association: c,
+			content:     att.GetContent(),
+			ratio:       att.GetRatio(),
+			index:       index,
+		}
+		if err := ud.cmdManager.Execute(cmd); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return duerror.NewInvalidArgumentError("selected component is not an association")
 	}
 
-	cmd := &removeAttributeAssociationCommand{
-		baseCommand: baseCommand{
-			diagram: ud,
-			before:  ud.GetLastModified(),
-			after:   time.Now(),
-		},
-		association: a,
-		content:     att.GetContent(),
-		ratio:       att.GetRatio(),
-		index:       index,
-	}
-	if err := ud.cmdManager.Execute(cmd); err != nil {
-		return err
-	}
-	return nil
 }
 
 // Private methods
