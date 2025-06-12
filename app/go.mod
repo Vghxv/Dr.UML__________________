@@ -6,6 +6,7 @@ toolchain go1.23.8
 
 require (
 	github.com/golang/mock v1.6.0
+	github.com/labstack/gommon v0.4.2
 	github.com/stretchr/testify v1.10.0
 	github.com/titanous/json5 v1.0.0
 	github.com/wailsapp/wails/v2 v2.10.1
@@ -20,7 +21,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/labstack/echo/v4 v4.13.3 // indirect
-	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
 	github.com/leaanthony/gosod v1.0.4 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect

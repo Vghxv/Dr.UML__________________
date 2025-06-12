@@ -479,11 +479,38 @@ func (ud *UMLDiagram) SetParentEndComponent(point utils.Point) duerror.DUError {
 	return nil
 }
 
+func (ud *UMLDiagram) SetAssociationType(value component.AssociationType) duerror.DUError {
+	c, err := ud.getSelectedComponent()
+	if err != nil {
+		return err
+	}
+	a, ok := c.(*component.Association)
+	if !ok {
+		return duerror.NewInvalidArgumentError("selected component is not an association")
+	}
+	oldAssType := a.GetAssType() // Capture the original value before change
+	cmd := &setterCommand{
+		baseCommand: baseCommand{
+			diagram: ud,
+			before:  ud.GetLastModified(),
+			after:   time.Now(),
+		},
+		component: c,
+		execute:   func() duerror.DUError { return a.SetAssType(value) },
+		unexecute: func() duerror.DUError { return a.SetAssType(oldAssType) },
+	}
+	if err := ud.cmdManager.Execute(cmd); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Methods
 func (ud *UMLDiagram) Undo() duerror.DUError {
 	if err := ud.cmdManager.Undo(); err != nil {
 		return err
 	}
+	ud.updateDrawData()
 	return nil
 }
 
@@ -491,6 +518,7 @@ func (ud *UMLDiagram) Redo() duerror.DUError {
 	if err := ud.cmdManager.Redo(); err != nil {
 		return err
 	}
+	ud.updateDrawData()
 	return nil
 }
 
@@ -669,7 +697,7 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 	}
 	g, ok := c.(*component.Gadget)
 	if !ok {
-		duerror.NewInvalidArgumentError("selected component is not a gadget")
+		return duerror.NewInvalidArgumentError("selected component is not a gadget")
 	}
 	att, err := g.GetAttribute(section, index)
 	if err != nil {
@@ -685,7 +713,7 @@ func (ud *UMLDiagram) RemoveAttributeFromGadget(section int, index int) duerror.
 		gadget:  g,
 		content: att.GetContent(),
 		section: section,
-		index:   g.GetAttributesLen()[section],
+		index:   index,
 	}
 	if err := ud.cmdManager.Execute(cmd); err != nil {
 		return err
@@ -1037,15 +1065,23 @@ func (ud *UMLDiagram) removeComponent(c component.Component) duerror.DUError {
 		return duerror.NewInvalidArgumentError("unsupported component type")
 	}
 }
-
-// ONLY REMOVE SINGLE GADGET, IGNORE ITS ASSOCIATIONS
-func (ud *UMLDiagram) removeGadget(g *component.Gadget) duerror.DUError {
-	if err := ud.componentsContainer.Remove(g); err != nil {
-		return err
+func (ud *UMLDiagram) removeGadget(gad *component.Gadget) duerror.DUError {
+	// Remove all associations related to this gadget and remove the gadget itself
+	if _, ok := ud.associations[gad]; ok {
+		for _, a := range ud.associations[gad][0] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		for _, a := range ud.associations[gad][1] {
+			if err := ud.removeAssociation(a); err != nil {
+				return err
+			}
+		}
+		delete(ud.associations, gad)
 	}
-	delete(ud.associations, g)
-	delete(ud.componentsSelected, g)
-	if err := ud.componentsContainer.Remove(g); err != nil {
+	delete(ud.componentsSelected, gad)
+	if err := ud.componentsContainer.Remove(gad); err != nil {
 		return err
 	}
 	if err := ud.updateDrawData(); err != nil {
@@ -1055,6 +1091,12 @@ func (ud *UMLDiagram) removeGadget(g *component.Gadget) duerror.DUError {
 }
 
 func (ud *UMLDiagram) removeAssociation(a *component.Association) duerror.DUError {
+	// Unregister the association as an observer of its parent gadgets
+	if err := a.UnregisterAsObserver(); err != nil {
+		// Log error but continue with removal
+		// In a production system, you might want to log this error
+	}
+
 	st := a.GetParentStart()
 	en := a.GetParentEnd()
 	if _, ok := ud.associations[st]; ok {

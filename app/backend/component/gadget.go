@@ -33,6 +33,7 @@ type Gadget struct {
 	isSelected       bool
 	drawData         drawdata.Gadget
 	updateParentDraw func() duerror.DUError
+	observers        map[interface{}]func() duerror.DUError // Map of observer objects to their functions
 }
 
 // Other functions
@@ -53,6 +54,7 @@ func NewGadget(gadgetType GadgetType, point utils.Point, layer int, colorHexStr 
 		point:      point,
 		layer:      layer,
 		color:      colorHexStr,
+		observers:  make(map[interface{}]func() duerror.DUError),
 	}
 
 	// Init attributes with three sections
@@ -171,19 +173,32 @@ func (g *Gadget) SetPoint(point utils.Point) duerror.DUError {
 	g.point = point
 	g.drawData.X = point.X
 	g.drawData.Y = point.Y
-	return g.updateParentDraw()
+	// Notify observers about position change
+	if err := g.notifyObservers(); err != nil {
+		return err
+	}
+	if g.updateParentDraw != nil {
+		return g.updateParentDraw()
+	}
+	return nil
 }
 
 func (g *Gadget) SetLayer(layer int) duerror.DUError {
 	g.layer = layer
 	g.drawData.Layer = layer
-	return g.updateParentDraw()
+	if g.updateParentDraw != nil {
+		return g.updateParentDraw()
+	}
+	return nil
 }
 
 func (g *Gadget) SetColor(colorHexStr string) duerror.DUError {
 	g.color = colorHexStr
 	g.drawData.Color = colorHexStr
-	return g.updateParentDraw()
+	if g.updateParentDraw != nil {
+		return g.updateParentDraw()
+	}
+	return nil
 }
 
 func (g *Gadget) SetAttrContent(section int, index int, content string) duerror.DUError {
@@ -320,6 +335,12 @@ func (g *Gadget) GetDrawData() any {
 }
 
 func (g *Gadget) updateDrawData() duerror.DUError {
+	// Store previous dimensions to check if they changed
+	oldWidth := g.drawData.Width
+	oldHeight := g.drawData.Height
+	oldX := g.drawData.X
+	oldY := g.drawData.Y
+
 	height := drawdata.LineWidth
 	maxAttWidth := 0
 	atts := make([][]drawdata.Attribute, len(g.attributes))
@@ -346,6 +367,13 @@ func (g *Gadget) updateDrawData() duerror.DUError {
 	g.drawData.Color = g.color
 	g.drawData.Attributes = atts
 
+	// Check if position or size changed and notify observers
+	if oldX != g.drawData.X || oldY != g.drawData.Y || oldWidth != g.drawData.Width || oldHeight != g.drawData.Height {
+		if err := g.notifyObservers(); err != nil {
+			return err
+		}
+	}
+
 	if g.updateParentDraw == nil {
 		return nil
 	}
@@ -357,5 +385,40 @@ func (g *Gadget) RegisterUpdateParentDraw(update func() duerror.DUError) duerror
 		return duerror.NewInvalidArgumentError("update function is nil")
 	}
 	g.updateParentDraw = update
+	return nil
+}
+
+// Observer pattern methods
+func (g *Gadget) AddObserver(observerKey interface{}, observer func() duerror.DUError) duerror.DUError {
+	if observer == nil {
+		return duerror.NewInvalidArgumentError("observer function is nil")
+	}
+	if observerKey == nil {
+		return duerror.NewInvalidArgumentError("observer key is nil")
+	}
+	if g.observers == nil {
+		g.observers = make(map[interface{}]func() duerror.DUError)
+	}
+	g.observers[observerKey] = observer
+	return nil
+}
+
+func (g *Gadget) RemoveObserver(observerKey interface{}) duerror.DUError {
+	if observerKey == nil {
+		return duerror.NewInvalidArgumentError("observer key is nil")
+	}
+	if g.observers == nil {
+		return nil // Nothing to remove
+	}
+	delete(g.observers, observerKey)
+	return nil
+}
+
+func (g *Gadget) notifyObservers() duerror.DUError {
+	for _, observer := range g.observers {
+		if err := observer(); err != nil {
+			return err
+		}
+	}
 	return nil
 }

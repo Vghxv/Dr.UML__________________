@@ -1,50 +1,65 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { offBackendEvent, onBackendEvent, ToPoint } from "./utils/wailsBridge";
-
-import {
-    EndAddAssociation,
-    GetCurrentDiagramName,
-    GetDrawData,
-    StartAddAssociation
-} from "../wailsjs/go/umlproject/UMLProject";
-
-import { AssociationProps, CanvasProps, GadgetProps } from "./utils/Props";
-import DrawingCanvas from "./components/Canvas";
+import { AssociationProps, GadgetProps } from "./utils/Props";
 import { GadgetPopup } from "./components/CreateGadgetPopup";
-import Toolbar from "./components/Toolbar";
-import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
 import { useBackendCanvasData } from "./hooks/useBackendCanvasData";
 import { useGadgetUpdater } from "./hooks/useGadgetUpdater";
 import { useAssociationUpdater } from "./hooks/useAssociationUpdater";
 import AssociationPopup from "./components/AssociationPopup";
-import { useCallback } from "react";
+import LoadProjectPage from "./components/LoadProjectPage";
+import DiagramPage from "./components/DiagramPage";
+import DrawingCanvas from "./components/Canvas";
+import ComponentPropertiesPanel from "./components/ComponentPropertiesPanel";
+import TopMenu from "./components/TopMenu";
+import { usePopupState, useAssPopupState } from "./hooks/usePopupState";
+import { useDiagramActions } from "./hooks/useDiagramActions";
+
+interface ProjectData {
+    ProjectName: string;
+    diagrams: string[];
+    isNewEmptyProject?: boolean;
+}
 
 const App: React.FC = () => {
+    const [currentView, setCurrentView] = useState<'load' | 'diagrams' | 'editor'>('load');
+    const [projectData, setProjectData] = useState<ProjectData | null>(null);
     const [diagramName, setDiagramName] = useState<string | null>(null);
-    const [showPopup, setShowPopup] = useState(false);
     const [selectedComponent, setSelectedComponent] = useState<GadgetProps | AssociationProps | null>(null);
     const [isAddingAssociation, setIsAddingAssociation] = useState(false);
-    const [showAssPopup, setShowAssPopup] = useState(false);
-    const [assStartPoint, setAssStartPoint] = useState<{ x: number, y: number } | null>(null);
-    const [assEndPoint, setAssEndPoint] = useState<{ x: number, y: number } | null>(null);
     const [canvasBackgroundColor, setCanvasBackgroundColor] = useState<string>("#C2C2C2");
 
-    const { backendData, reloadBackendData } = useBackendCanvasData();
+    // popup hooks
+    const { showPopup, open: openGadgetPopup, close: closeGadgetPopup } = usePopupState();
+    const { showAssPopup, open: openAssPopup, close: closeAssPopup, assStartPoint, setAssStartPoint, assEndPoint, setAssEndPoint } = useAssPopupState();
 
+    // backend data
+    const { backendData, reloadBackendData } = useBackendCanvasData();
     const { handleUpdateGadgetProperty, handleAddAttributeToGadget } = useGadgetUpdater(
         selectedComponent as GadgetProps | null,
         backendData,
         reloadBackendData
     );
-
     const { handleUpdateAssociationProperty, handleAddAttributeToAssociation } = useAssociationUpdater(
         selectedComponent as AssociationProps | null,
         backendData,
         reloadBackendData
     );
+    // actions
+    const { handleSaveProject, handleSaveDiagram, handleDiagramUndo, handleDiagramRedo, handleDeleteSelectedComponent} = useDiagramActions(reloadBackendData);
 
+    // handler: project/diagram
+    const handleProjectLoaded = (loadedProjectData: ProjectData) => {
+        setProjectData(loadedProjectData);
+        setCurrentView('diagrams');
+    };
+    const handleDiagramSelected = (diagramData: any) => {
+        setCurrentView('editor');
+        reloadBackendData();
+    };
+    const handleBackToDiagrams = () => setCurrentView('diagrams');
     const handleGetDiagramName = async () => {
         try {
+            const { GetCurrentDiagramName } = await import("../wailsjs/go/umlproject/UMLProject");
             const name = await GetCurrentDiagramName();
             setDiagramName(name);
         } catch (error) {
@@ -52,76 +67,94 @@ const App: React.FC = () => {
         }
     };
 
+    // handler: association
     const handleAddAss = () => {
         setIsAddingAssociation(true);
         setAssStartPoint(null);
         setAssEndPoint(null);
-        setShowAssPopup(false);
+        closeAssPopup();
     };
-
     const handleCanvasClick = async (point: { x: number, y: number }) => {
         if (isAddingAssociation) {
             if (!assStartPoint) {
                 setAssStartPoint(point);
             } else if (!assEndPoint) {
                 setAssEndPoint(point);
-                setShowAssPopup(true);
+                openAssPopup();
             }
         }
     };
-
     const handleAssPopupAdd = async (assType: number) => {
         if (assStartPoint && assEndPoint) {
+            const { StartAddAssociation, EndAddAssociation } = await import("../wailsjs/go/umlproject/UMLProject");
             await StartAddAssociation(ToPoint(assStartPoint.x, assStartPoint.y));
             await EndAddAssociation(assType, ToPoint(assEndPoint.x, assEndPoint.y));
             setIsAddingAssociation(false);
             setAssStartPoint(null);
             setAssEndPoint(null);
-            setShowAssPopup(false);
+            closeAssPopup();
             reloadBackendData();
         }
     };
-
     const handleAssPopupClose = () => {
         setIsAddingAssociation(false);
         setAssStartPoint(null);
         setAssEndPoint(null);
-        setShowAssPopup(false);
+        closeAssPopup();
     };
 
+    // handler: selection/canvas
     const handleSelectionChange = useCallback((component: GadgetProps | AssociationProps | null) => {
-        setSelectedComponent(prev => {
-            // Only update if the selection actually changed
-            if (prev !== component) {
-                return component;
-            }
-            return prev;
-        });
+        setSelectedComponent(prev => (prev !== component ? component : prev));
     }, []);
+    const handleCanvasColorChange = (color: string) => setCanvasBackgroundColor(color);
+    
 
-    const handleCanvasColorChange = (color: string) => {
-        setCanvasBackgroundColor(color);
-    };
-
+    // Render
+    if (currentView === 'load') {
+        return <LoadProjectPage onProjectLoaded={handleProjectLoaded} />;
+    }
+    if (currentView === 'diagrams' && projectData) {
+        return (
+            <DiagramPage
+                projectData={projectData}
+                onDiagramSelected={handleDiagramSelected}
+                isNewEmptyProject={projectData.isNewEmptyProject}
+            />
+        );
+    }
+    // Editor view
     return (
         <div className="h-screen mx-auto px-4 bg-neutral-700">
-            <h1 className="text-3xl text-center font-bold text-white mb-4">Dr.UML</h1>
-            <Toolbar
+            <TopMenu
+                projectData={projectData}
+                handleBackToDiagrams={handleBackToDiagrams}
                 onGetDiagramName={handleGetDiagramName}
-                onShowPopup={() => setShowPopup(true)}
+                onShowPopup={openGadgetPopup}
                 onAddAss={handleAddAss}
                 onCanvasColorChange={handleCanvasColorChange}
+                onSaveProject={handleSaveProject}
+                onSaveDiagram={handleSaveDiagram}
                 diagramName={diagramName}
                 canvasBackgroundColor={canvasBackgroundColor}
+                onUndo={handleDiagramUndo}
+                onRedo={handleDiagramRedo}
+                onDeleteSelectedComponent={handleDeleteSelectedComponent}
             />
             {showPopup && (
                 <GadgetPopup
                     isOpen={showPopup}
-                    onCreate={(gadget) => {
-                        console.log("New Gadget Created:", gadget);
-                        setShowPopup(false);
-                    }}
-                    onClose={() => setShowPopup(false)}
+                    onCreate={() => closeGadgetPopup()}
+                    onClose={closeGadgetPopup}
+                />
+            )}
+            {showAssPopup && assStartPoint && assEndPoint && (
+                <AssociationPopup
+                    isOpen={showAssPopup}
+                    startPoint={assStartPoint}
+                    endPoint={assEndPoint}
+                    onAdd={handleAssPopupAdd}
+                    onClose={handleAssPopupClose}
                 />
             )}
             <DrawingCanvas
@@ -132,16 +165,6 @@ const App: React.FC = () => {
                 isAddingAssociation={isAddingAssociation}
                 canvasBackgroundColor={canvasBackgroundColor}
             />
-            {showAssPopup && assStartPoint && assEndPoint && (
-                <AssociationPopup
-                    isOpen={showAssPopup}
-                    startPoint={assStartPoint}
-                    endPoint={assEndPoint}
-                    onAdd={handleAssPopupAdd}
-                    onClose={handleAssPopupClose}
-                />
-            )}
-            {/* TODO generalize updateProperty and addAttributeToXXX */}
             {selectedComponent && (
                 <ComponentPropertiesPanel
                     selectedComponent={selectedComponent}

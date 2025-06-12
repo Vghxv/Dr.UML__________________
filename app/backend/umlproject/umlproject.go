@@ -184,6 +184,17 @@ func (p *UMLProject) SetParentEndComponent(point utils.Point) duerror.DUError {
 	return nil
 }
 
+func (p *UMLProject) SetAssociationType(associationType component.AssociationType) duerror.DUError {
+	if p.currentDiagram == nil {
+		return duerror.NewInvalidArgumentError("No current diagram selected")
+	}
+	if err := p.currentDiagram.SetAssociationType(associationType); err != nil {
+		return err
+	}
+	p.lastModified = time.Now()
+	return nil
+}
+
 // methods
 func (p *UMLProject) Startup(ctx context.Context) {
 	p.ctx = ctx
@@ -557,4 +568,90 @@ func (p *UMLProject) CloseProject() duerror.DUError {
 		p.lastSave = p.lastModified
 	}
 	return nil
+}
+
+// OpenFileDialog opens a native file dialog for selecting project files
+func (p *UMLProject) OpenFileDialog() (string, error) {
+	if p.ctx == nil {
+		return "", fmt.Errorf("application context not available")
+	}
+
+	options := runtime.OpenDialogOptions{
+		Title: "Select Project File",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "UML Project Files (*.puml)",
+				Pattern:     "*.puml",
+			},
+			{
+				DisplayName: "All Files (*.*)",
+				Pattern:     "*.*",
+			},
+		},
+	}
+
+	selectedFile, err := runtime.OpenFileDialog(p.ctx, options)
+	if err != nil {
+		return "", err
+	}
+
+	return selectedFile, nil
+}
+
+// SaveFileDialog opens a native save file dialog for creating new project files
+func (p *UMLProject) SaveFileDialog() (string, error) {
+	if p.ctx == nil {
+		return "", fmt.Errorf("application context not available")
+	}
+
+	options := runtime.SaveDialogOptions{
+		Title: "Create New Project File",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "UML Project Files (*.puml)",
+				Pattern:     "*.puml",
+			},
+			{
+				DisplayName: "All Files (*.*)",
+				Pattern:     "*.*",
+			},
+		},
+		DefaultFilename: "new-project.puml",
+	}
+
+	selectedFile, err := runtime.SaveFileDialog(p.ctx, options)
+	if err != nil {
+		return "", err
+	}
+
+	return selectedFile, nil
+}
+
+// SaveDiagramFileDialog opens a native save file dialog for creating new diagram files
+func (p *UMLProject) SaveDiagramFileDialog() (string, error) {
+	if p.ctx == nil {
+		return "", fmt.Errorf("application context not available")
+	}
+
+	options := runtime.SaveDialogOptions{
+		Title: "Create New Diagram File",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "UML Diagram Files (*.duml)",
+				Pattern:     "*.duml",
+			},
+			{
+				DisplayName: "All Files (*.*)",
+				Pattern:     "*.*",
+			},
+		},
+		DefaultFilename: "new-diagram.duml",
+	}
+
+	selectedFile, err := runtime.SaveFileDialog(p.ctx, options)
+	if err != nil {
+		return "", err
+	}
+
+	return selectedFile, nil
 }
