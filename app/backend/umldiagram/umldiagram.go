@@ -83,7 +83,7 @@ func CreateEmptyUMLDiagram(name string, dt DiagramType) (*UMLDiagram, duerror.DU
 }
 
 func LoadExistUMLDiagram(filename string, file utils.SavedDiagram) (*UMLDiagram, duerror.DUError) {
-	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype)) // Shift right to remove the filetype bit
+	dia, err := CreateEmptyUMLDiagram(filename, DiagramType(file.Filetype))
 	if err != nil {
 		return nil, err
 	}

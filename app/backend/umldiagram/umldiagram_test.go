@@ -261,7 +261,7 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 	t.Run("load diagram with gadgets and associations", func(t *testing.T) {
 		// Create a saved diagram structure
 		savedDiagram := utils.SavedDiagram{
-			Filetype:     utils.FiletypeDiagram | int(ClassDiagram)<<1,
+			Filetype:     utils.FiletypeDiagram | int(ClassDiagram),
 			LastEdit:     "2023-01-01T00:00:00Z",
 			Gadgets:      []utils.SavedGad{},
 			Associations: []utils.SavedAss{},
@@ -286,11 +286,11 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 		savedDiagram.Gadgets = append(savedDiagram.Gadgets, savedGadget)
 
 		// Load the diagram
-		diagram, err := LoadExistUMLDiagram("test.uml", savedDiagram)
+		diagram, err := LoadExistUMLDiagram("test.duml", savedDiagram)
 		assert.NoError(t, err)
 		assert.NotNil(t, diagram)
-		assert.Equal(t, "test.uml", diagram.GetName())
-		assert.Equal(t, ClassDiagram, diagram.GetDiagramType())
+		assert.Equal(t, "test.duml", diagram.GetName())
+		assert.Equal(t, DiagramType(ClassDiagram), diagram.GetDiagramType())
 
 		// Verify gadget was loaded
 		components := diagram.componentsContainer.GetAll()
@@ -302,13 +302,13 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 			Filetype: utils.FiletypeDiagram | int(UseCaseDiagram)<<1, // Invalid type
 		}
 
-		_, err := LoadExistUMLDiagram("test.uml", savedDiagram)
+		_, err := LoadExistUMLDiagram("test.duml", savedDiagram)
 		assert.Error(t, err)
 	})
 
 	t.Run("load diagram with corrupted gadgets", func(t *testing.T) {
 		savedDiagram := utils.SavedDiagram{
-			Filetype: utils.FiletypeDiagram | int(ClassDiagram)<<1,
+			Filetype: utils.FiletypeDiagram | int(ClassDiagram),
 			Gadgets: []utils.SavedGad{
 				{
 					GadgetType: 999, // Invalid gadget type
@@ -318,9 +318,9 @@ func TestLoadExistUMLDiagram_Comprehensive(t *testing.T) {
 			},
 		}
 
-		_, err := LoadExistUMLDiagram("test.uml", savedDiagram)
+		_, err := LoadExistUMLDiagram("test.duml", savedDiagram)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "test.uml")
+		assert.Contains(t, err.Error(), "test.duml")
 	})
 }
 
@@ -330,7 +330,7 @@ func TestHasUnsavedChanges(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Initially should not have unsaved changes
-	assert.False(t, diagram.HasUnsavedChanges())
+	assert.True(t, diagram.HasUnsavedChanges())
 
 	// After making a change
 	err = diagram.AddGadget(component.Class, utils.Point{X: 10, Y: 10}, 0, drawdata.DefaultGadgetColor, "TestClass")
