@@ -754,7 +754,6 @@ func (ud *UMLDiagram) RemoveAttributeFromAssociation(index int) duerror.DUError 
 	if err != nil {
 		return err
 	}
-	// comp := ud.componentsContainer.GetAll()
 	switch c := c.(type) {
 	case *component.Gadget:
 		return duerror.NewInvalidArgumentError("selected component is not an association")
