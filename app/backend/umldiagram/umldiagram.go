@@ -727,8 +727,6 @@ func (ud *UMLDiagram) AddAttributeToAssociation(ratio float64, content string) d
 		return err
 	}
 	switch c := c.(type) {
-	case *component.Gadget:
-		return duerror.NewInvalidArgumentError("selected component is not an association")
 	case *component.Association:
 
 		cmd := &addAttributeAssociationCommand{
